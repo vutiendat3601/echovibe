@@ -1,0 +1,5 @@
+server:
+  port: 6900
+spring:
+  thymeleaf:
+    check-template-location: false
