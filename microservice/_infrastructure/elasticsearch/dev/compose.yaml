@@ -1,0 +1,15 @@
+name: echovibe-elasticsearch
+services:
+  i1:
+    container_name: "echovibe-elasticsearch-i1"
+    image: "elasticsearch:8.17.0"
+    ports:
+      - "9200:9200"
+    networks:
+      - default
+    mem_limit: 1g
+
+networks:
+  default:
+    name: echovibe-elasticsearch-net
+

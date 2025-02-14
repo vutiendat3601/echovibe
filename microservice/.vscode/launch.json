@@ -1,0 +1,24 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "SpringBootAdminServerApplication",
+      "request": "launch",
+      "mainClass": "vn.io.echovibe.springbootadminserver.SpringBootAdminServerApplication",
+      "projectName": "springbootadminserver",
+      "cwd": "${workspaceFolder}/springbootadminserver"
+    },
+    {
+      "type": "java",
+      "name": "ArtistApplication",
+      "request": "launch",
+      "mainClass": "vn.io.echovibe.artist.ArtistApplication",
+      "projectName": "artist",
+      "cwd": "${workspaceFolder}/artist"
+    }
+  ]
+}

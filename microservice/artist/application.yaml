@@ -1,0 +1,16 @@
+spring:
+  boot:
+    admin:
+      client:
+        enabled: false
+        url:
+        - "localhost:6800"
+  docker:
+    compose:
+      enabled: true
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers:
+          - "localhost:9092"
