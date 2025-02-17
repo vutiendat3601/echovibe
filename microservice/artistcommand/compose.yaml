@@ -1,0 +1,18 @@
+services:
+  artist-pg:
+    image: "postgres:17.2-bookworm"
+    environment:
+      - POSTGRES_DB=echovibe_artist
+      - POSTGRES_USER=echovibe_artist
+      - POSTGRES_PASSWORD=echovibe_artist
+    ports:
+      - "16100:5432"
+  artist-mongo:
+    image: "mongo:8.0.4"
+    environment:
+      - "MONGO_INITDB_ROOT_USERNAME=echovibe_artist"
+      - "MONGO_INITDB_ROOT_PASSWORD=echovibe_artist"
+      - "MONGO_INITDB_DATABASE=echovibe_artist"
+    ports:
+      - "26100:27017"
+  

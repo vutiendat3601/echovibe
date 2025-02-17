@@ -1,7 +1,7 @@
 rootProject.name = "echovibe"
 
 include("core")
-include("artist")
+include("artistcommand")
 include("track")
 include("playlist")
 include("product")

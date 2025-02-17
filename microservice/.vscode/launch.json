@@ -6,19 +6,11 @@
   "configurations": [
     {
       "type": "java",
-      "name": "SpringBootAdminServerApplication",
+      "name": "ArtistCommandApplication",
       "request": "launch",
-      "mainClass": "vn.io.echovibe.springbootadminserver.SpringBootAdminServerApplication",
-      "projectName": "springbootadminserver",
-      "cwd": "${workspaceFolder}/springbootadminserver"
-    },
-    {
-      "type": "java",
-      "name": "ArtistApplication",
-      "request": "launch",
-      "mainClass": "vn.io.echovibe.artist.ArtistApplication",
-      "projectName": "artist",
-      "cwd": "${workspaceFolder}/artist"
+      "mainClass": "vn.io.echovibe.artist.command.ArtistCommandApplication",
+      "projectName": "artistcommand",
+      "cwd": "${workspaceFolder}/artistcommand"
     }
   ]
 }

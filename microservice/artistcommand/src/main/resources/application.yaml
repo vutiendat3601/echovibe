@@ -1,0 +1,30 @@
+server:
+  port: 6100
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  info:
+    env:
+      enabled: true
+spring:
+  application:
+    name: artist
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  docker:
+    compose:
+      enabled: false
+  cloud:
+    stream:
+      bindings:
+        createArtistDetails-out-0:
+          destination: createArtistDetails
+springdoc:
+  api-docs:
+    path: /openapi
+  swagger-ui:
+    path: /openapi.html
