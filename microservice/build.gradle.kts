@@ -35,6 +35,7 @@ subprojects {
     }
     dependencies {
       dependency("io.hypersistence:hypersistence-utils-hibernate-63:${rootProject.libs.versions.hypersistenceUtilsHibernate63Version.get()}")
+      dependency("org.springdoc:springdoc-openapi-starter-webmvc-ui:${rootProject.libs.versions.springDocOpenApiVersion.get()}")
     }
   }
 

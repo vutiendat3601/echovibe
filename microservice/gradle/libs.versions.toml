@@ -12,9 +12,11 @@ hypersistenceUtilsHibernate63Version = "3.9.0"
 spotlessVersion = "7.0.2"
 nettyAllVersion = "4.1.117.Final"
 googleJibVersion = "3.4.4"
+springDocOpenApiVersion = "2.8.4"
 
 [libraries]
-hypersistenceUtilsHibernate63 = { group = "io.hypersistence", name="hypersistence-utils-hibernate-63", version.ref="hypersistenceUtilsHibernate63Version" }
+# hypersistenceUtilsHibernate63 = { group = "io.hypersistence", name = "hypersistence-utils-hibernate-63", version.ref = "hypersistenceUtilsHibernate63Version" }
+# springDocOpenAPI = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springDocOpenApiVersion" }
 
 [plugins]
 springBootPlugin = { id = "org.springframework.boot", version.ref = "springBootVersion" }
