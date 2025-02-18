@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import vn.io.echovibe.artist.command.dto.CreateArtistDto;
 import vn.io.echovibe.artist.command.dto.UpdateArtistDto;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
@@ -23,6 +24,7 @@ import vn.io.echovibe.core.dto.ResponseDto;
 
 @Tag(name = "Artist")
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("v1/artists")
 @RestController
 public class ArtistController {

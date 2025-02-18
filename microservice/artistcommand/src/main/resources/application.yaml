@@ -10,11 +10,7 @@ management:
       enabled: true
 spring:
   application:
-    name: artist
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: none
+    name: artistcommand
   docker:
     compose:
       enabled: false
