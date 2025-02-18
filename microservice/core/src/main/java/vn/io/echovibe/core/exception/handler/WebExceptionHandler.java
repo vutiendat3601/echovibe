@@ -3,6 +3,7 @@ package vn.io.echovibe.core.exception.handler;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,8 +14,20 @@ import vn.io.echovibe.core.exception.AggregateNotFoundException;
 import vn.io.echovibe.core.exception.Error;
 import vn.io.echovibe.core.exception.NoneFieldChangedException;
 
+@Slf4j
 @RestControllerAdvice
 public class WebExceptionHandler {
+  @ExceptionHandler(RuntimeException.class)
+  public ResponseEntity<ErrorDto> handleRuntimeException(RuntimeException e) {
+    log.error(e.getMessage(), e);
+    return ResponseEntity.badRequest()
+        .body(
+            new ErrorDto(
+                List.of(),
+                "Internal server error. Please contact to developer team for more information.",
+                ZonedDateTime.now(ZoneOffset.UTC)));
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorDto> handleMethodArgumentNotValidException(
       MethodArgumentNotValidException e) {

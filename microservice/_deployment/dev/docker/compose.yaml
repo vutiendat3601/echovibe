@@ -1,35 +1,45 @@
 name: echovibe
 services:
-  artist-pg-i1:
-    image: "postgres:16.6-alpine3.21"
-    container_name: "artist-pg-i1"
-    hostname: "artist-pg-i1"
+  artistcommand-mongo-i1:
+    image: "mongo:8.0.4"
+    container_name: "echovibe-artistcommand-mongo-i1"
+    hostname: "echovibe-artistcommand-mongo-i1"
     environment:
-      - "POSTGRES_DB=echovibe_artist"
-      - "POSTGRES_USER=echovibe_artist"
-      - "POSTGRES_PASSWORD=echovibe_artist"
+      - "MONGO_INITDB_DATABASE=echovibe_artistcommand"
+      - "MONGO_INITDB_ROOT_USERNAME=echovibe_artistcommand"
+      - "MONGO_INITDB_ROOT_PASSWORD=echovibe_artistcommand"
     ports:
-      - "16100:5432"
+      - "26100:27017"
     networks:
       - "default"
-  artist-i1:
-    image: "vutiendat3601/echovibe-artist:latest"
-    container_name: "echovibe-artist-i1"
-    hostname: "echovibe-artist-i1"
+  artistcommand-i1:
+    image: "vutiendat3601/echovibe-artistcommand:latest"
+    container_name: "echovibe-artistcommand-i1"
+    hostname: "echovibe-artistcommand-i1"
     environment:
-      - "SPRING_DATASOURCE_URL=jdbc:postgresql://artist-pg-i1:5432/echovibe_artist"
-      - "SPRING_DATASOURCE_USERNAME=echovibe_artist"
-      - "SPRING_DATASOURCE_PASSWORD=echovibe_artist"
-      - "SPRING_JPA_HIBERNATE_DDLAUTO=create-drop"
+      - "SPRING_DATA_MONGODB_URI=mongodb://echovibe_artistcommand:echovibe_artistcommand@echovibe-artistcommand-mongo-i1:27017/echovibe_artistcommand?authSource=admin"
+      - "SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS[0]=kafka.echovibe.io.vn:9092"
     ports:
       - "6100:6100"
     networks:
       - "default"
     depends_on:
-      - "artist-pg-i1"
+      - "artistcommand-mongo-i1"
+  # artist-pg-i1:
+  #   image: "postgres:16.6-alpine3.21"
+  #   container_name: "artist-query-pg-i1"
+  #   hostname: "artist-pg-i1"
+  #   environment:
+  #     - "POSTGRES_DB=echovibe_artist"
+  #     - "POSTGRES_USER=echovibe_artist"
+  #     - "POSTGRES_PASSWORD=echovibe_artist"
+  #   ports:
+  #     - "16100:5432"
+  #   networks:
+  #     - "default"
   apigateway-nginx-i1:
     build:
-      context: "../../_infrastructure/apigateway/dev/nginx/"
+      context: "../../../_infrastructure/apigateway/dev/nginx/"
     container_name: "echovibe-apigateway-nginx-i1"
     hostname: "echovibe-apigateway-nginx-i1"
     ports:
@@ -40,7 +50,7 @@ services:
     networks:
       - "default"
     depends_on:
-      - "artist-i1"
+      - "artistcommand-i1"
 networks:
   default:
     name: echovibe-net
