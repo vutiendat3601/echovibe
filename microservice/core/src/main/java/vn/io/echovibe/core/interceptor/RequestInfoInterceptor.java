@@ -23,7 +23,7 @@ public class RequestInfoInterceptor implements HandlerInterceptor {
     final String path = request.getServletPath();
     final String authContext = request.getHeader(AUTH_CONTEXT_HEADER);
     log.info(
-        "Request Info: %s=%s,Path=%s,AuthContext=%s"
+        "Request info: CorrelationId=%s, Path=%s, AuthContext=%s"
             .formatted(CORRELATION_ID_HEADER, correlationId, path, authContext));
     return true;
   }
