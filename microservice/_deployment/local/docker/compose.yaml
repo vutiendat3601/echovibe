@@ -1,0 +1,45 @@
+name: echovibe
+services:
+  artistcommand-mongo-i1:
+    image: "mongo:8.0.4"
+    container_name: "echovibe-artistcommand-mongo-i1"
+    hostname: "echovibe-artistcommand-mongo-i1"
+    environment:
+      - "MONGO_INITDB_DATABASE=echovibe_artistcommand"
+      - "MONGO_INITDB_ROOT_USERNAME=echovibe_artistcommand"
+      - "MONGO_INITDB_ROOT_PASSWORD=echovibe_artistcommand"
+    ports:
+      - "26100:27017"
+    networks:
+      - "default"
+  artistcommand-i1:
+    image: "vutiendat3601/echovibe-artistcommand:latest"
+    container_name: "echovibe-artistcommand-i1"
+    hostname: "echovibe-artistcommand-i1"
+    environment:
+      - "SPRING_DATA_MONGODB_URI=mongodb://echovibe_artistcommand:echovibe_artistcommand@echovibe-artistcommand-mongo-i1:27017/echovibe_artistcommand?authSource=admin"
+      - "SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS[0]=kafka.echovibe.io.vn:9092"
+    ports:
+      - "6100:6100"
+    networks:
+      - "default"
+    depends_on:
+      - "artistcommand-mongo-i1"
+  apigateway-nginx-i1:
+    build:
+      context: "../../../_infrastructure/apigateway/local/nginx/"
+    container_name: "echovibe-apigateway-nginx-i1"
+    hostname: "echovibe-apigateway-nginx-i1"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./log/apigateway-nginx/:/app/log/"
+    networks:
+      - "default"
+    depends_on:
+      - "artistcommand-i1"
+networks:
+  default:
+    name: echovibe-net
+    driver: bridge
