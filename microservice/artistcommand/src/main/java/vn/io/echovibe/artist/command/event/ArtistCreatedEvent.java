@@ -1,6 +1,9 @@
 package vn.io.echovibe.artist.command.event;
 
+import java.util.LinkedList;
+import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,7 +20,15 @@ public class ArtistCreatedEvent extends Event {
 
   private String name;
 
-  private Boolean isPublic;
+  @Builder.Default private Boolean isPublic = false;
 
   private String description;
+
+  @Builder.Default private Boolean isActive = true;
+
+  @Builder.Default private Boolean isPublished = false;
+
+  @Builder.Default private List<String> tags = new LinkedList<>();
+
+  private String ref;
 }

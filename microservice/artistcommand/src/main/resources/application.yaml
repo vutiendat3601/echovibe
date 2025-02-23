@@ -14,13 +14,12 @@ spring:
   docker:
     compose:
       enabled: false
-  cloud:
-    stream:
-      bindings:
-        createArtistDetails-out-0:
-          destination: createArtistDetails
 springdoc:
   api-docs:
     path: /openapi
   swagger-ui:
     path: /openapi.html
+app:
+  web:
+    auth:
+      openIdConnectCertsUrl: https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs

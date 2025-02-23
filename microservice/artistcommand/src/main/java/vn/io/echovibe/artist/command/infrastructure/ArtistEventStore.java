@@ -54,7 +54,7 @@ public class ArtistEventStore implements EventStore {
     final List<EventDocument> eventDocuments = eventStoreRepository.findByAggregateId(aggregateId);
     if (CollectionUtils.isEmpty(eventDocuments)) {
       throw new AggregateNotFoundException(
-          "Incorrect artist id provided: id=%s".formatted(aggregateId));
+          "Artist not found: id=%s".formatted(aggregateId));
     }
     return eventDocuments.stream().map(EventDocument::getEvent).collect(Collectors.toList());
   }

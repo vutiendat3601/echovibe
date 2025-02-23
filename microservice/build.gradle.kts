@@ -36,6 +36,7 @@ subprojects {
     dependencies {
       dependency("io.hypersistence:hypersistence-utils-hibernate-63:${rootProject.libs.versions.hypersistenceUtilsHibernate63Version.get()}")
       dependency("org.springdoc:springdoc-openapi-starter-webmvc-ui:${rootProject.libs.versions.springDocOpenApiVersion.get()}")
+      dependency("com.nimbusds:nimbus-jose-jwt:${rootProject.libs.versions.nimbusJoseJwtVersion.get()}")
     }
   }
 
@@ -68,6 +69,12 @@ subprojects {
 
   tasks.withType<Javadoc>{
     options.encoding = "UTF-8"
+  }
+
+  spotless {
+    java {
+      googleJavaFormat()
+    }
   }
 
   jib {
