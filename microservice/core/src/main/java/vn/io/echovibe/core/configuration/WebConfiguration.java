@@ -10,6 +10,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import vn.io.echovibe.core.interceptor.JwtExtractorInterceptor;
 import vn.io.echovibe.core.interceptor.RequestInfoInterceptor;
 
 @Configuration
@@ -18,6 +19,7 @@ import vn.io.echovibe.core.interceptor.RequestInfoInterceptor;
 public class WebConfiguration implements WebMvcConfigurer {
   private final WebCorsConfiguration corsConfiguration;
   private final RequestInfoInterceptor requestInfoInterceptor;
+  private final JwtExtractorInterceptor jwtExtractorInterceptor;
 
   @Override
   public void addCorsMappings(@NonNull CorsRegistry registry) {
@@ -56,5 +58,6 @@ public class WebConfiguration implements WebMvcConfigurer {
   @Override
   public void addInterceptors(@NonNull InterceptorRegistry registry) {
     registry.addInterceptor(requestInfoInterceptor);
+    registry.addInterceptor(jwtExtractorInterceptor);
   }
 }

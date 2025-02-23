@@ -2,7 +2,6 @@ package vn.io.echovibe.core.dto;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-
 import org.springframework.http.HttpStatus;
 
 public record ResponseDto<T>(T data, HttpStatus status, String message, ZonedDateTime timestamp) {
@@ -10,8 +9,8 @@ public record ResponseDto<T>(T data, HttpStatus status, String message, ZonedDat
     this(data, status, message, ZonedDateTime.now(ZoneOffset.UTC));
   }
 
-  public static ResponseDto<?> ok(String message) {
-    return new ResponseDto<>(null, message, HttpStatus.OK);
+  public static ResponseDto<EmptyObjectDto> ok(String message) {
+    return new ResponseDto<>(new EmptyObjectDto(), message, HttpStatus.OK);
   }
 
   public static ResponseDto<IdDto> ok(String message, String id) {

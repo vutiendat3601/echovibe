@@ -6,6 +6,8 @@ import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import vn.io.echovibe.artist.command.domain.ArtistAggregate;
 import vn.io.echovibe.core.event.Event;
 import vn.io.echovibe.core.event.EventProducer;
@@ -31,7 +33,7 @@ public class ArtistEventSourcingHandler implements EventSourcingHandler<ArtistAg
   public ArtistAggregate findById(String id) {
     final ArtistAggregate artistAggregate = new ArtistAggregate();
     final List<Event> events = eventStore.getEvents(id);
-    if (events != null && !events.isEmpty()) {
+    if (!CollectionUtils.isEmpty(events)) {
       artistAggregate.replayEvents(events);
       events.stream()
           .map(e -> e.getVersion())

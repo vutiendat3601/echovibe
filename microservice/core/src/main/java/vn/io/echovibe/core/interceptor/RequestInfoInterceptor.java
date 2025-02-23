@@ -1,6 +1,5 @@
 package vn.io.echovibe.core.interceptor;
 
-import static vn.io.echovibe.core.constant.Constant.AUTH_CONTEXT_HEADER;
 import static vn.io.echovibe.core.constant.Constant.CORRELATION_ID_HEADER;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,10 +20,7 @@ public class RequestInfoInterceptor implements HandlerInterceptor {
       throws Exception {
     final String correlationId = request.getHeader(CORRELATION_ID_HEADER);
     final String path = request.getServletPath();
-    final String authContext = request.getHeader(AUTH_CONTEXT_HEADER);
-    log.info(
-        "Request info: CorrelationId=%s, Path=%s, AuthContext=%s"
-            .formatted(CORRELATION_ID_HEADER, correlationId, path, authContext));
+    log.info("Request info: correlationId=%s, path=%s".formatted(correlationId, path));
     return true;
   }
 }

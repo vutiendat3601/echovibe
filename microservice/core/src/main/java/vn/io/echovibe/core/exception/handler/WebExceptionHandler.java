@@ -6,10 +6,13 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import vn.io.echovibe.core.dto.ErrorDto;
+import vn.io.echovibe.core.exception.AggregateIllegalStateException;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
 import vn.io.echovibe.core.exception.Error;
 import vn.io.echovibe.core.exception.NoneFieldChangedException;
@@ -17,6 +20,9 @@ import vn.io.echovibe.core.exception.NoneFieldChangedException;
 @Slf4j
 @RestControllerAdvice
 public class WebExceptionHandler {
+  private static final String BAD_REQUEST_ERROR_MESSAGE =
+      "Bad request, please check the API documentation or contact the developer team.";
+
   @ExceptionHandler(RuntimeException.class)
   public ResponseEntity<ErrorDto> handleRuntimeException(RuntimeException e) {
     log.error(e.getMessage(), e);
@@ -36,11 +42,31 @@ public class WebExceptionHandler {
             .map(error -> new Error(error.getDefaultMessage(), error.getObjectName()))
             .toList();
     return ResponseEntity.badRequest()
+        .body(new ErrorDto(errors, BAD_REQUEST_ERROR_MESSAGE, ZonedDateTime.now(ZoneOffset.UTC)));
+  }
+
+  @ExceptionHandler(HandlerMethodValidationException.class)
+  public ResponseEntity<ErrorDto> handHandlerMethodValidationException(
+      HandlerMethodValidationException e) {
+    final List<Error> errors =
+        e.getAllErrors().stream().map(error -> new Error(error.getDefaultMessage(), null)).toList();
+    return ResponseEntity.badRequest()
+        .body(new ErrorDto(errors, BAD_REQUEST_ERROR_MESSAGE, ZonedDateTime.now(ZoneOffset.UTC)));
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ErrorDto> handleHttpMessageNotReadableException(
+      HttpMessageNotReadableException e) {
+    return ResponseEntity.badRequest()
         .body(
-            new ErrorDto(
-                errors,
-                "Bad request, please check the API documentation or contact the developer team.",
-                ZonedDateTime.now(ZoneOffset.UTC)));
+            new ErrorDto(List.of(), BAD_REQUEST_ERROR_MESSAGE, ZonedDateTime.now(ZoneOffset.UTC)));
+  }
+
+  @ExceptionHandler(AggregateIllegalStateException.class)
+  public ResponseEntity<ErrorDto> handleAggregateIllegalStateException(
+      AggregateIllegalStateException e) {
+    return ResponseEntity.badRequest()
+        .body(new ErrorDto(List.of(), e.getMessage(), ZonedDateTime.now(ZoneOffset.UTC)));
   }
 
   @ExceptionHandler(NoneFieldChangedException.class)

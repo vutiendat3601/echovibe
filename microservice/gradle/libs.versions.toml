@@ -13,6 +13,7 @@ spotlessVersion = "7.0.2"
 nettyAllVersion = "4.1.117.Final"
 googleJibVersion = "3.4.4"
 springDocOpenApiVersion = "2.8.4"
+nimbusJoseJwtVersion = "10.0.1"
 
 [libraries]
 # hypersistenceUtilsHibernate63 = { group = "io.hypersistence", name = "hypersistence-utils-hibernate-63", version.ref = "hypersistenceUtilsHibernate63Version" }

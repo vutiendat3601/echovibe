@@ -10,6 +10,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import vn.io.echovibe.artist.command.handler.CommandHandler;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
+import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
+import vn.io.echovibe.artist.command.model.PublishArtistCommand;
 import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.core.command.CommandDispatcher;
 import vn.io.echovibe.core.domain.EventStoreRepository;
@@ -27,6 +29,8 @@ public class ArtistCommandApplication {
   void registerHandlers() {
     commandDispatcher.registerHandler(CreateArtistCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(UpdateArtistCommand.class, commandHandler::handle);
+    commandDispatcher.registerHandler(PublishArtistCommand.class, commandHandler::handle);
+    commandDispatcher.registerHandler(DeleteArtistCommand.class, commandHandler::handle);
   }
 
   public static void main(String[] args) {

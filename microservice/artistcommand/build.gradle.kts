@@ -8,6 +8,7 @@ dependencies {
   implementation("de.codecentric:spring-boot-admin-starter-client")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui")
   implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+  implementation("com.nimbusds:nimbus-jose-jwt")
 
   developmentOnly("org.springframework.boot:spring-boot-docker-compose")
 
