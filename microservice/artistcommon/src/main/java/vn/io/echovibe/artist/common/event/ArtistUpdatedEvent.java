@@ -1,7 +1,6 @@
-package vn.io.echovibe.artist.command.event;
+package vn.io.echovibe.artist.common.event;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,6 +12,10 @@ import vn.io.echovibe.core.event.Event;
 @SuperBuilder
 @Getter
 @Setter
-public class ArtistPublishedEvent extends Event {
-  @Builder.Default private Boolean isPublished = true;
+public class ArtistUpdatedEvent extends Event {
+  private String name;
+
+  private Boolean isPublic;
+
+  private String description;
 }

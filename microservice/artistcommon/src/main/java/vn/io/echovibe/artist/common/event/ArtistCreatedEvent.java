@@ -1,4 +1,4 @@
-package vn.io.echovibe.artist.command.event;
+package vn.io.echovibe.artist.common.event;
 
 import java.util.LinkedList;
 import java.util.List;

@@ -14,7 +14,7 @@ public class ArtistEventProducer implements EventProducer {
   private final StreamBridge streamBridge;
 
   @Override
-  public void send(String topic, Event event) {
+  public void produce(String topic, Event event) {
     log.info("Send event: topic=%s, eventId=%s".formatted(topic, event.getId()));
     streamBridge.send(topic, event);
     log.info("Sent event successfully: topic=%s, eventId=%s".formatted(topic, event.getId()));

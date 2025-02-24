@@ -1,5 +1,3 @@
-package vn.io.echovibe.artist.command.constant;
+package vn.io.echovibe.artist.query.constant;
 
-public interface ArtistConstant {
-  String ARTIST_CREATED_SUCCESS = "Created artist successfully";
-}
+public interface ArtistConstant {}

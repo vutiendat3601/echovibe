@@ -19,7 +19,3 @@ springdoc:
     path: /openapi
   swagger-ui:
     path: /openapi.html
-app:
-  web:
-    auth:
-      openIdConnectCertsUrl: https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs

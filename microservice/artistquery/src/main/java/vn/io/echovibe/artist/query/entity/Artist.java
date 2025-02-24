@@ -1,24 +1,24 @@
-package vn.io.echovibe.artist.entity;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.hibernate.annotations.Type;
+package vn.io.echovibe.artist.query.entity;
 
 import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Type;
 import vn.io.echovibe.core.entity.AuditEntity;
 
-@Builder
+@SuperBuilder
 @Entity
 @Table(name = "artist")
 @Getter
@@ -27,8 +27,12 @@ import vn.io.echovibe.core.entity.AuditEntity;
 @AllArgsConstructor
 public class Artist extends AuditEntity {
   @Id
+  @GeneratedValue(generator = "pg-uuid")
   @Column(name = "id", nullable = false, updatable = false)
   private UUID id;
+
+  @Column(name = "aggregate_id", nullable = false, updatable = false, unique = true)
+  private String aggregateId;
 
   @Column(name = "urn", nullable = false, updatable = false)
   private String urn;
@@ -38,7 +42,15 @@ public class Artist extends AuditEntity {
 
   @Builder.Default
   @Column(name = "is_public", nullable = false)
-  private Boolean isPublic = true;
+  private Boolean isPublic = false;
+
+  @Builder.Default
+  @Column(name = "is_published", nullable = false)
+  private Boolean isPublished = false;
+
+  @Builder.Default
+  @Column(name = "is_active", nullable = false)
+  private Boolean isActive = true;
 
   @Column(name = "description")
   private String description;

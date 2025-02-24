@@ -1,20 +1,14 @@
-package vn.io.echovibe.artist.dao;
+package vn.io.echovibe.artist.query.dao;
 
 import java.util.Optional;
-import java.util.UUID;
 import org.springframework.lang.NonNull;
-import vn.io.echovibe.artist.entity.Artist;
+import vn.io.echovibe.artist.query.entity.Artist;
 
 public interface ArtistDao {
-  boolean existsArtistById(@NonNull UUID id);
-
   @NonNull
-  Optional<Artist> selectArtistById(@NonNull UUID id);
+  Optional<Artist> selectArtistByAggregateIdAndIsActiveTrue(@NonNull String aggregateId);
 
-  @NonNull
-  Optional<Artist> insertArtist(@NonNull Artist artist);
+  void insert(@NonNull Artist artist);
 
-  void updateArtist(@NonNull Artist artist);
-
-  void deleteArtist(@NonNull UUID id);
+  void update(@NonNull Artist artist);
 }
