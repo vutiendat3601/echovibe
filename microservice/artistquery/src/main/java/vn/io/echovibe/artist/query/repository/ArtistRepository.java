@@ -1,7 +1,12 @@
-package vn.io.echovibe.artist.repository;
+package vn.io.echovibe.artist.query.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
-import vn.io.echovibe.artist.command.entity.Artist;
+import org.springframework.lang.NonNull;
+import vn.io.echovibe.artist.query.entity.Artist;
 
-public interface ArtistRepository extends JpaRepository<Artist, UUID> {}
+public interface ArtistRepository extends JpaRepository<Artist, UUID> {
+  @NonNull
+  Optional<Artist> findByAggregateIdAndIsActiveTrue(@NonNull String aggregateId);
+}

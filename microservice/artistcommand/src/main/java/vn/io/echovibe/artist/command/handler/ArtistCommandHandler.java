@@ -18,13 +18,13 @@ public class ArtistCommandHandler implements CommandHandler {
   private final EventSourcingHandler<ArtistAggregate> eventSourcingHandler;
 
   @Override
-  public void handle(CreateArtistCommand createArtistCommand) {
+  public void handle(@NonNull CreateArtistCommand createArtistCommand) {
     final ArtistAggregate artistAggregate = new ArtistAggregate(createArtistCommand);
     eventSourcingHandler.save(artistAggregate);
   }
 
   @Override
-  public void handle(UpdateArtistCommand updateArtistCommand) {
+  public void handle(@NonNull UpdateArtistCommand updateArtistCommand) {
     final ArtistAggregate artistAggregate = findArtistAggregateById(updateArtistCommand.getId());
     artistAggregate.update(
         updateArtistCommand.getName(),
@@ -34,14 +34,14 @@ public class ArtistCommandHandler implements CommandHandler {
   }
 
   @Override
-  public void handle(PublishArtistCommand publishArtistCommand) {
+  public void handle(@NonNull PublishArtistCommand publishArtistCommand) {
     final ArtistAggregate artistAggregate = findArtistAggregateById(publishArtistCommand.getId());
     artistAggregate.publish();
     eventSourcingHandler.save(artistAggregate);
   }
 
   @Override
-  public void handle(DeleteArtistCommand deleteArtistCommand) {
+  public void handle(@NonNull DeleteArtistCommand deleteArtistCommand) {
     final ArtistAggregate artistAggregate = findArtistAggregateById(deleteArtistCommand.getId());
     artistAggregate.delete();
     eventSourcingHandler.save(artistAggregate);

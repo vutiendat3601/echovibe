@@ -1,23 +1,18 @@
-package vn.io.echovibe.artist.command.event;
-
-import java.util.UUID;
+package vn.io.echovibe.artist.common.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.core.event.Event;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Getter
 @Setter
-public class ArtistCreatedEvent implements Event {
-  private String name;
-
-  private Boolean isPublic;
-
-  private String description;
+public class ArtistPublishedEvent extends Event {
+  @Builder.Default private Boolean isPublished = true;
 }

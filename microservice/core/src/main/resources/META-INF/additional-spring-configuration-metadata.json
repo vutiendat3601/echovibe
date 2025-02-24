@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "app.web.auth.open-id-connect-certs-url",
+      "type": "java.lang.String",
+      "description": "A description for 'app.web.auth.open-id-connect-certs-url'"
+    }
+  ]
+}

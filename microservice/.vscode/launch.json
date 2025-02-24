@@ -11,6 +11,14 @@
       "mainClass": "vn.io.echovibe.artist.command.ArtistCommandApplication",
       "projectName": "artistcommand",
       "cwd": "${workspaceFolder}/artistcommand"
+    },
+    {
+      "type": "java",
+      "name": "ArtistQueryApplication",
+      "request": "launch",
+      "mainClass": "vn.io.echovibe.artist.query.ArtistQueryApplication",
+      "projectName": "artistquery",
+      "cwd": "${workspaceFolder}/artistquery"
     }
   ]
 }

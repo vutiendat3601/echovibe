@@ -7,7 +7,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
 import vn.io.echovibe.artist.command.domain.ArtistAggregate;
 import vn.io.echovibe.core.event.Event;
 import vn.io.echovibe.core.event.EventProducer;
@@ -53,7 +52,7 @@ public class ArtistEventSourcingHandler implements EventSourcingHandler<ArtistAg
       }
       final List<Event> events = eventStore.getEvents(aggregateId);
       for (Event event : events) {
-        eventProducer.send(ARTIST_EVENT_TOPIC_PREFIX + event.getClass().getSimpleName(), event);
+        eventProducer.produce(ARTIST_EVENT_TOPIC_PREFIX + event.getClass().getSimpleName(), event);
       }
     }
   }

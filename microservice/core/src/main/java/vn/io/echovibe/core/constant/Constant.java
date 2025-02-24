@@ -7,4 +7,6 @@ public interface Constant {
   String AUTH_JWT_BEARER_PREFIX = "Bearer ";
   String AUTH_JWT_USERNAME_CLAIM = "preferred_username";
   String AUTH_SYSTEM_USERNAME = "system";
+
+  String JPA_AUDIT_DATETIME_PROVIDER_BEAN = "dateTimeProvider";
 }

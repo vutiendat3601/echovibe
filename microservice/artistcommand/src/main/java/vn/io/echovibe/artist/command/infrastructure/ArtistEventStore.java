@@ -44,7 +44,7 @@ public class ArtistEventStore implements EventStore {
       eventDocument = eventStoreRepository.save(eventDocument);
       if (!eventDocument.getId().isEmpty()) {
         final String eventTopic = ARTIST_EVENT_TOPIC_PREFIX + event.getClass().getSimpleName();
-        eventProducer.send(eventTopic, event);
+        eventProducer.produce(eventTopic, event);
       }
     }
   }
@@ -53,8 +53,7 @@ public class ArtistEventStore implements EventStore {
   public List<Event> getEvents(String aggregateId) {
     final List<EventDocument> eventDocuments = eventStoreRepository.findByAggregateId(aggregateId);
     if (CollectionUtils.isEmpty(eventDocuments)) {
-      throw new AggregateNotFoundException(
-          "Artist not found: id=%s".formatted(aggregateId));
+      throw new AggregateNotFoundException("Artist not found: id=%s".formatted(aggregateId));
     }
     return eventDocuments.stream().map(EventDocument::getEvent).collect(Collectors.toList());
   }

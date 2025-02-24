@@ -39,7 +39,9 @@ public final class JwtExtractorInterceptor implements HandlerInterceptor {
 
   public JwtExtractorInterceptor(@NonNull WebAuthConfiguration webAuthConfiguration)
       throws MalformedURLException, IOException, ParseException {
-    final URL jwksUrl = URI.create(webAuthConfiguration.getOpenIdConnectCertsUrl()).toURL();
+    final String openIdConnectCertsUrl = webAuthConfiguration.getOpenIdConnectCertsUrl();
+    log.info("OpenId Connect certsUrl: %s".formatted(openIdConnectCertsUrl));
+    final URL jwksUrl = URI.create(openIdConnectCertsUrl).toURL();
     jwkSet = JWKSet.load(jwksUrl);
     jwsVerifierMap = new HashMap<>();
   }

@@ -1,10 +1,14 @@
 spring:
+  autoconfigure:
+    exclude:
+    - "org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration"
+    - "org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration"
   boot:
     admin:
       client:
         enabled: false
         url:
-        - "localhost:6800"
+          - "localhost:6800"
   docker:
     compose:
       enabled: true
@@ -13,4 +17,8 @@ spring:
       kafka:
         binder:
           brokers:
-          - "kafka.echovibe.io.vn:9092"
+            - "kafka.echovibe.io.vn:9092"
+app:
+  web:
+    auth:
+      openIdConnectCertsUrl: https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs
