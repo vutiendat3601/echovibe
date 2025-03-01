@@ -1,1 +1,1 @@
-rootProject.name = "artist"
+rootProject.name = "artistquery"
