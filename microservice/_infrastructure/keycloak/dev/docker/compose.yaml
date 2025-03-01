@@ -46,7 +46,7 @@ services:
       - "443:443"
     networks:
       - "default"
-    log:
+    volumes:
       - "./nginx-proxy/log/:/app/log/"
 
 networks:
