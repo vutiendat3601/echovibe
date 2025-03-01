@@ -1,0 +1,31 @@
+name: Containerize Spring Boot App and push to Docker Hub
+on:
+  pull_request:
+    branches:
+      - develop
+    types:
+      - closed
+jobs:
+  build:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout microservice codebase
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: liberica
+          java-version: 21
+      - name: Run Gradle spotlessJavaApply to fix Java codebase format
+        working-directory: ./microservice
+        run: ./gradlew spotlessJavaApply
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build Docker image with Gradle Jib plugin
+        working-directory: ./microservice
+        run: ./gradlew jib
