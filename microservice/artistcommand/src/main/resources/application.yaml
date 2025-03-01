@@ -9,6 +9,10 @@ management:
     env:
       enabled: true
 spring:
+  autoconfigure:
+    exclude:
+      - "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
+      - "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration"
   application:
     name: artistcommand
   docker:
