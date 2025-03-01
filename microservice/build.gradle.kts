@@ -100,6 +100,9 @@ subprojects {
 }
 
 tasks {
+  named("jib") {
+    enabled = false
+  }
   bootJar {
     enabled = false
   }
