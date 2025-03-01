@@ -3,11 +3,6 @@ FROM nginx:stable-alpine3.20-perl AS build-stage
 WORKDIR /app/
 
 COPY ./ ./
-
-RUN apk update && apk add openssl
-RUN chmod +x ./generate-tls.sh
-RUN ./generate-tls.sh
-
 FROM nginx:stable-alpine3.20-perl
 
 WORKDIR /app/

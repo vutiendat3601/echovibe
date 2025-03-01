@@ -44,12 +44,10 @@ services:
     ports:
       - "80:80"
       - "443:443"
-    # volumes:
-    #   - "./tls/certificate.crt:/app/tls/certificate.crt"
-    #   - "./tls/private.key:/app/tls/private.key"
-    #   - "./nginx.conf:/etc/nginx/nginx.conf"
     networks:
       - "default"
+    log:
+      - "./nginx-proxy/log/:/app/log/"
 
 networks:
   default:
