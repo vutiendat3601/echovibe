@@ -17,7 +17,7 @@ spring:
       kafka:
         binder:
           brokers:
-          - "kafka.echovibe.io.vn:9092"
+          - "infras.echovibe.io.vn:9092"
 app:
   web:
     auth:
