@@ -3,7 +3,8 @@ services:
     image: "postgres:17.2-bookworm"
     environment:
       - POSTGRES_DB=echovibe_artist
-      - POSTGRES_USER=echovibe
-      - POSTGRES_PASSWORD=echovibe
+      - POSTGRES_USER=echovibe_artist
+      - POSTGRES_PASSWORD=echovibe_artist
     ports:
-      - "16120:5432"
+      - "16100:5432"
+  

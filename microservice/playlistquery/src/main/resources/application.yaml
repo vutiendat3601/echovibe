@@ -1,0 +1,28 @@
+server:
+  port: 6110
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  info:
+    env:
+      enabled: true
+spring:
+  application:
+    name: artistquery
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  docker:
+    compose:
+      enabled: false
+  cloud:
+    function:
+      definition: consumeArtistCreatedEvent
+    stream:
+      bindings:
+        consumeArtistCreatedEvent-in-0:
+          destination: "artist.ArtistCreatedEvent"
+          group: "${spring.application.name}"
