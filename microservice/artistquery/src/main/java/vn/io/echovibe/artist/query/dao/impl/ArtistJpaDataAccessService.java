@@ -38,4 +38,9 @@ public class ArtistJpaDataAccessService implements ArtistDao {
     final Pageable pageable = PageRequest.of(page, size);
     return artistRepository.findByIsActiveTrueOrderByUpdatedAt(pageable);
   }
+
+  @Override
+  public void delete(@NonNull String aggregateId) {
+    artistRepository.deleteByAggregateId(aggregateId);
+  }
 }

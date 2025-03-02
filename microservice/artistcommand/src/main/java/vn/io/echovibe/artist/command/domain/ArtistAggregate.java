@@ -4,6 +4,7 @@ import static vn.io.echovibe.artist.command.constant.ArtistConstant.ARTIST_URN_P
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
@@ -82,7 +83,7 @@ public class ArtistAggregate extends AggregateRoot {
   public void publish() {
     if (Objects.nonNull(isPublished) && isPublished) {
       throw new AggregateIllegalStateException(
-          "Artist has been published before: id=%s".formatted(id));
+          "Artist has already been published: id=%s".formatted(id));
     }
     final ArtistPublishedEvent artistPublishedEvent =
         ArtistPublishedEvent.builder().id(id).isPublished(true).build();
@@ -91,10 +92,12 @@ public class ArtistAggregate extends AggregateRoot {
 
   public void delete() {
     if (!Objects.nonNull(this.isActive) && !this.isActive) {
-      throw new AggregateIllegalStateException("Artist has been deleted before: %s".formatted(id));
+      throw new AggregateIllegalStateException(
+          "Artist has already been deleted: id=%s".formatted(id));
     }
+    final Boolean isSoftDeleted = Optional.ofNullable(isPublished).orElse(false);
     final ArtistDeletedEvent artistDeletedEvent =
-        ArtistDeletedEvent.builder().id(id).isActive(false).build();
+        ArtistDeletedEvent.builder().id(id).isSoftDeleted(isSoftDeleted).isActive(false).build();
     raiseEvent(artistDeletedEvent);
   }
 
