@@ -1,11 +1,10 @@
 package vn.io.echovibe.core.query;
 
-import java.util.List;
 import org.springframework.lang.NonNull;
-import vn.io.echovibe.core.dto.QueryDto;
+import vn.io.echovibe.core.model.QueryResult;
 
 @FunctionalInterface
 public interface QueryHandlerFunction<T extends Query> {
   @NonNull
-  List<QueryDto> handle(@NonNull T query);
+  QueryResult handle(@NonNull T query);
 }

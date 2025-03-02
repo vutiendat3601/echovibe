@@ -39,7 +39,7 @@ import vn.io.echovibe.core.utils.IdentityUtils;
 @Slf4j
 @RequestMapping("v1/artists")
 @RestController
-public class ArtistController {
+public class ArtistCommandController {
   private final CommandDispatcher commandDispatcher;
 
   @Operation(operationId = "Bulk Create Artist")

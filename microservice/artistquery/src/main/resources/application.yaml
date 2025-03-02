@@ -27,3 +27,8 @@ spring:
         consumeArtistCreatedEvent-in-0:
           destination: "artist.ArtistCreatedEvent"
           group: "${spring.application.name}"
+springdoc:
+  api-docs:
+    path: /v1/artists/openapi
+  swagger-ui:
+    path: /v1/artists/openapi.html
