@@ -1,0 +1,16 @@
+{{- define "springbootapp-common.service" -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ .Values.deployment.name }}-svc"
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: {{ .Values.deployment.name }}
+  type: {{ .Values.deployment.service.type }}
+  ports:
+    - name: http
+      protocol: {{ .Values.deployment.service.protocol }}
+      port: {{ .Values.deployment.service.port }}
+      targetPort: {{ .Values.deployment.service.targetPort }}
+{{- end -}}

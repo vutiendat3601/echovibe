@@ -1,0 +1,74 @@
+{{- define "springbootapp-common.deployment" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.deployment.name }}-deploy"
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.deployment.name }}
+spec:
+  replicas: {{ .Values.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deployment.name }}
+    spec:
+      containers:
+      - name: {{ .Values.deployment.name }}
+        image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
+        ports:
+        - containerPort: {{ .Values.deployment.containerPort }}
+          protocol: TCP
+        env:
+        # Spring Boot Application Profile
+          - name: SPRING_PROFILES_ACTIVE
+            valueFrom: 
+              secretKeyRef:
+                name: "{{ .Values.deployment.name }}-secret"
+                key: SPRING_PROFILES_ACTIVE
+        # Validating JWT token
+        {{- if .Values.openidconnect.enabled }}
+          - name: APP_WEB_AUTH_OPENIDCONNECTCERTSURL
+            valueFrom: 
+              secretKeyRef:
+                name: "{{ .Values.deployment.name }}-secret"
+                key: APP_WEB_AUTH_OPENIDCONNECTCERTSURL
+        {{ end -}}
+        # Spring Cloud Stream Kafka
+        {{- if .Values.kafka.enabled }}
+          - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+            valueFrom: 
+              secretKeyRef:
+                name: "{{ .Values.deployment.name }}-secret"
+                key: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
+        {{ end -}}
+        # Spring Data MongoDB
+        {{- if .Values.mongo.enabled }}
+          - name: SPRING_DATA_MONGODB_URI
+            valueFrom: 
+              secretKeyRef:
+                name: "{{ .Values.deployment.name }}-secret"
+                key: SPRING_DATA_MONGODB_URI
+        {{ end -}}
+        # Spring Data Jpa
+        {{- if .Values.datasource.enabled }}
+          - name: SPRING_DATASOURCE_URL
+            valueFrom: 
+              secretKeyRef:
+                name: "{{ .Values.deployment.name }}-secret"
+                key: SPRING_DATASOURCE_URL
+          - name: SPRING_DATASOURCE_USERNAME
+            valueFrom: 
+              secretKeyRef:
+                name: "{{ .Values.deployment.name }}-secret"
+                key: SPRING_DATASOURCE_USERNAME
+          - name: SPRING_DATASOURCE_PASSWORD
+            valueFrom: 
+              secretKeyRef:
+                name: "{{ .Values.deployment.name }}-secret"
+                key: SPRING_DATASOURCE_PASSWORD
+        {{ end -}}
+{{- end -}}

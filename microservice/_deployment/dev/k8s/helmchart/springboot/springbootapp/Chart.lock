@@ -1,0 +1,9 @@
+dependencies:
+- name: springbootapp-common
+  repository: file://../springbootapp-common
+  version: 1.0.0
+- name: artistcommand
+  repository: file://../microservice/artistcommand
+  version: 1.0.0
+digest: sha256:7c40592fe68413b3a7ad17cb136728703e74e0b79d8ece7fc349db6e83b4c997
+generated: "2025-03-02T11:01:30.177836+07:00"

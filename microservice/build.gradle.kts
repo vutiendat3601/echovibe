@@ -79,7 +79,7 @@ subprojects {
 
   jib {
     from {
-      image = "bellsoft/liberica-openjre-alpine:${rootProject.libs.versions.javaVersion.get()}-cds"
+      image = "bellsoft/liberica-openjre-alpine-musl:${rootProject.libs.versions.javaVersion.get()}-cds"
       platforms {
         platform {
           architecture = "amd64"

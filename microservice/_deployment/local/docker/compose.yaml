@@ -18,7 +18,7 @@ services:
     hostname: "echovibe-artistcommand-i1"
     environment:
       - "SPRING_DATA_MONGODB_URI=mongodb://echovibe_artistcommand:echovibe_artistcommand@echovibe-artistcommand-mongo-i1:27017/echovibe_artistcommand?authSource=admin"
-      - "SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS[0]=kafka.echovibe.io.vn:9092"
+      - "SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka.echovibe.io.vn:9092"
     ports:
       - "6100:6100"
     networks:
