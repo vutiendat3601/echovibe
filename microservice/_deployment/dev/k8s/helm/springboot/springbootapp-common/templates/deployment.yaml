@@ -36,7 +36,7 @@ spec:
             secretKeyRef:
               name: "{{ .Values.deployment.name }}-secret"
               key: APP_WEB_AUTH_OPENIDCONNECTCERTSURL
-        {{ end -}}
+        {{ end }}
         # Spring Cloud Stream Kafka
         {{- if .Values.kafka.enabled }}
         - name: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
@@ -44,7 +44,7 @@ spec:
             secretKeyRef:
               name: "{{ .Values.deployment.name }}-secret"
               key: SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS
-        {{ end -}}
+        {{ end }}
         # Spring Data MongoDB
         {{- if .Values.mongo.enabled }}
         - name: SPRING_DATA_MONGODB_URI
@@ -52,7 +52,7 @@ spec:
             secretKeyRef:
               name: "{{ .Values.deployment.name }}-secret"
               key: SPRING_DATA_MONGODB_URI
-        {{ end -}}
+        {{ end }}
         # Spring Data Jpa
         {{- if .Values.datasource.enabled }}
         - name: SPRING_DATASOURCE_URL
@@ -70,5 +70,5 @@ spec:
             secretKeyRef:
               name: "{{ .Values.deployment.name }}-secret"
               key: SPRING_DATASOURCE_PASSWORD
-        {{ end -}}
+        {{ end }}
 {{- end -}}
