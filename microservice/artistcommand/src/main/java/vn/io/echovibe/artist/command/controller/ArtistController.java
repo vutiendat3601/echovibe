@@ -1,9 +1,7 @@
 package vn.io.echovibe.artist.command.controller;
 
-import static vn.io.echovibe.artist.command.constant.ArtistConstant.ARTIST_CREATED_SUCCESS;
-import static vn.io.echovibe.artist.command.constant.ArtistConstant.ARTIST_DELETED_SUCCESS;
 import static vn.io.echovibe.artist.command.constant.ArtistConstant.ARTIST_PUBLISHED_SUCCESS;
-import static vn.io.echovibe.artist.command.constant.ArtistConstant.ARTIST_UPDATED_SUCCESS;
+import static vn.io.echovibe.core.constant.Constant.REQUEST_PROCESSED_SUCCESS;
 import static vn.io.echovibe.core.utils.IdentityUtils.AGGREGATE_ID_LENGTH;
 import static vn.io.echovibe.core.utils.IdentityUtils.AGGREGATE_ID_REGEX;
 
@@ -11,6 +9,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.Length;
@@ -21,15 +21,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vn.io.echovibe.artist.command.dto.CreateArtistDto;
+import vn.io.echovibe.artist.command.dto.DeleteArtistDto;
 import vn.io.echovibe.artist.command.dto.UpdateArtistDto;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
 import vn.io.echovibe.artist.command.model.PublishArtistCommand;
 import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.core.command.CommandDispatcher;
+import vn.io.echovibe.core.dto.BulkDto;
 import vn.io.echovibe.core.dto.EmptyObjectDto;
-import vn.io.echovibe.core.dto.IdDto;
 import vn.io.echovibe.core.dto.ResponseDto;
+import vn.io.echovibe.core.model.BulkResult;
+import vn.io.echovibe.core.utils.IdentityUtils;
 
 @Tag(name = "Artist")
 @RequiredArgsConstructor
@@ -39,36 +42,57 @@ import vn.io.echovibe.core.dto.ResponseDto;
 public class ArtistController {
   private final CommandDispatcher commandDispatcher;
 
-  @Operation(description = "Create Artist")
-  @PostMapping("create")
-  public ResponseEntity<ResponseDto<IdDto>> createArtist(
-      @Valid @RequestBody CreateArtistDto createArtistDto) {
-    final CreateArtistCommand createArtistCommand =
-        CreateArtistCommand.builder()
-            .name(createArtistDto.name())
-            .isPublic(createArtistDto.isPublic())
-            .description(createArtistDto.description())
-            .build();
-    commandDispatcher.send(createArtistCommand);
-    return ResponseEntity.ok(ResponseDto.ok(ARTIST_CREATED_SUCCESS, createArtistCommand.getId()));
+  @Operation(operationId = "Bulk Create Artist")
+  @PostMapping("/bulk-create")
+  public ResponseEntity<ResponseDto<BulkResult>> createArtist(
+      @Valid @RequestBody BulkDto<CreateArtistDto> bulkCreateDto) {
+    final List<CreateArtistCommand> createArtistCommands =
+        bulkCreateDto.items().stream()
+            .map(
+                cad ->
+                    CreateArtistCommand.builder()
+                        .id(IdentityUtils.generateAggregateId())
+                        .name(cad.name())
+                        .isPublic(cad.isPublic())
+                        .description(cad.description())
+                        .build())
+            .collect(Collectors.toList());
+    final BulkResult bulkResult = commandDispatcher.send(createArtistCommands);
+    return ResponseEntity.ok(ResponseDto.ok(REQUEST_PROCESSED_SUCCESS, bulkResult));
   }
 
-  @Operation(description = "Update Artist")
-  @PostMapping("{id}/update")
-  public ResponseEntity<ResponseDto<EmptyObjectDto>> updateArtist(
-      @PathVariable String id, @RequestBody UpdateArtistDto updateArtistDto) {
-    final UpdateArtistCommand updateArtistCommand =
-        UpdateArtistCommand.builder()
-            .id(id)
-            .name(updateArtistDto.name())
-            .isPublic(updateArtistDto.isPublic())
-            .description(updateArtistDto.description())
-            .build();
-    commandDispatcher.send(updateArtistCommand);
-    return ResponseEntity.ok(ResponseDto.ok(ARTIST_UPDATED_SUCCESS));
+  @Operation(operationId = "Bulk Update Artist")
+  @PostMapping("bulk-update")
+  public ResponseEntity<ResponseDto<BulkResult>> updateArtist(
+      @Valid @RequestBody BulkDto<UpdateArtistDto> bulkUpdateDto) {
+    final List<UpdateArtistCommand> updateArtistCommands =
+        bulkUpdateDto.items().stream()
+            .map(
+                uad ->
+                    UpdateArtistCommand.builder()
+                        .id(uad.id())
+                        .name(uad.name())
+                        .isPublic(uad.isPublic())
+                        .description(uad.description())
+                        .build())
+            .collect(Collectors.toList());
+    final BulkResult bulkResult = commandDispatcher.send(updateArtistCommands);
+    return ResponseEntity.ok(ResponseDto.ok(REQUEST_PROCESSED_SUCCESS, bulkResult));
   }
 
-  @Operation(description = "Publish Artist")
+  @Operation(operationId = "Bulk Delete Artist")
+  @PostMapping("bulk-delete")
+  public ResponseEntity<ResponseDto<BulkResult>> deleteArtist(
+      @Valid @RequestBody BulkDto<DeleteArtistDto> bulkDeleteDto) {
+    final List<DeleteArtistCommand> deleteArtistCommands =
+        bulkDeleteDto.items().stream()
+            .map(dad -> DeleteArtistCommand.builder().id(dad.id()).build())
+            .collect(Collectors.toList());
+    final BulkResult bulkResult = commandDispatcher.send(deleteArtistCommands);
+    return ResponseEntity.ok(ResponseDto.ok(REQUEST_PROCESSED_SUCCESS, bulkResult));
+  }
+
+  @Operation(operationId = "Publish Artist")
   @PostMapping("{id}/publish")
   public ResponseEntity<ResponseDto<EmptyObjectDto>> publishArtist(
       @Valid
@@ -84,13 +108,5 @@ public class ArtistController {
     final PublishArtistCommand publishArtistCommand = new PublishArtistCommand(id);
     commandDispatcher.send(publishArtistCommand);
     return ResponseEntity.ok(ResponseDto.ok(ARTIST_PUBLISHED_SUCCESS));
-  }
-
-  @Operation(description = "Delete Artist")
-  @PostMapping("{id}/delete")
-  public ResponseEntity<ResponseDto<EmptyObjectDto>> deleteArtist(@PathVariable String id) {
-    final DeleteArtistCommand deleteArtistCommand = new DeleteArtistCommand(id);
-    commandDispatcher.send(deleteArtistCommand);
-    return ResponseEntity.ok(ResponseDto.ok(ARTIST_DELETED_SUCCESS));
   }
 }

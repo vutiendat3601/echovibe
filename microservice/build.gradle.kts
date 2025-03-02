@@ -10,7 +10,6 @@ plugins {
   alias(libs.plugins.googleJibPlugin)
 }
 
-
 allprojects {
   group = "vn.io.echovibe"
   version = "1.0.0"
