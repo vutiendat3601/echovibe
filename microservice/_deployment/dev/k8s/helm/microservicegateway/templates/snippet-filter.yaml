@@ -1,0 +1,49 @@
+apiVersion: gateway.nginx.org/v1alpha1
+kind: SnippetsFilter
+metadata:
+  name: microservice-snippetsfilter
+  namespace: {{ .Values.global.namespace }}
+spec:
+  snippets: 
+  - context: http.server.location
+    value: |
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-Proto $scheme;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Correlation-ID $request_id;
+
+      # Preflight request (CORS)
+      if ($request_method = 'OPTIONS') {
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' '*';
+        add_header 'Access-Control-Allow-Headers' '*';
+        return 204;
+      }
+---
+apiVersion: gateway.nginx.org/v1alpha1
+kind: SnippetsFilter
+metadata:
+  name: authprocessor-snippetsfilter
+  namespace: {{ .Values.global.namespace }}
+spec:
+  snippets: 
+  - context: http.server
+    value: |
+      location /oauth {
+        internal;
+        proxy_method POST;
+        proxy_pass https://auth-svc.microservice.svc.cluster.local/realms/echovibe/protocol/openid-connect/token;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_body "audience=echovibe&permission_resource_format=uri&permission_resource_matching_uri=true&grant_type=urn:ietf:params:oauth:grant-type:uma-ticket&permission=$request_uri#$request_method";
+      }
+---
+apiVersion: gateway.nginx.org/v1alpha1
+kind: SnippetsFilter
+metadata:
+  name: "authrequest-snippetsfilter"
+  namespace: {{ .Values.global.namespace }}
+spec:
+  snippets: 
+  - context: http.server.location
+    value: auth_request /oauth;

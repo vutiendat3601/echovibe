@@ -1,7 +1,7 @@
 deployment:
   name: artistcommand
   containerPort: 6100
-  replicaCount: 2
+  replicaCount: 1
   image: 
     repository: vutiendat3601/echovibe-artistcommand
     tag: latest

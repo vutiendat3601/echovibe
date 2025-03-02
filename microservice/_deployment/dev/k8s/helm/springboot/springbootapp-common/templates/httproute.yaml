@@ -16,6 +16,23 @@ spec:
         type: PathPrefix
         value: {{ .Values.deployment.service.exposePathPrefix }}
     filters:
+    {{- if .Values.openidconnect.enabled }}
+    - type: ExtensionRef
+      extensionRef:
+        group: gateway.nginx.org
+        kind: SnippetsFilter
+        name: authrequest-snippetsfilter
+    - type: ExtensionRef
+      extensionRef:
+        group: gateway.nginx.org
+        kind: SnippetsFilter
+        name: authprocessor-snippetsfilter
+    {{ end -}}
+    - type: ExtensionRef
+      extensionRef:
+        group: gateway.nginx.org
+        kind: SnippetsFilter
+        name: microservice-snippetsfilter
     - type: URLRewrite
       urlRewrite:
         path:

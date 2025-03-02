@@ -20,6 +20,6 @@ spring:
       enabled: false
 springdoc:
   api-docs:
-    path: /openapi
+    path: /v1/artists/openapi
   swagger-ui:
-    path: /openapi.html
+    path: /v1/artists/openapi.html
