@@ -15,4 +15,6 @@ public interface ArtistDao {
   void insert(@NonNull Artist artist);
 
   void update(@NonNull Artist artist);
+
+  void delete(@NonNull String aggregateId);
 }

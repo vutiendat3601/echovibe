@@ -14,4 +14,6 @@ public interface ArtistRepository extends JpaRepository<Artist, UUID> {
 
   @NonNull
   Page<Artist> findByIsActiveTrueOrderByUpdatedAt(@NonNull Pageable pageable);
+
+  void deleteByAggregateId(@NonNull String aggregateId);
 }
