@@ -12,19 +12,48 @@ services:
       - "26100:27017"
     networks:
       - "default"
-  artistcommand-i1:
-    image: "vutiendat3601/echovibe-artistcommand:latest"
-    container_name: "echovibe-artistcommand-i1"
-    hostname: "echovibe-artistcommand-i1"
+  # artistcommand-i1:
+  #   image: "vutiendat3601/echovibe-artistcommand:latest"
+  #   container_name: "echovibe-artistcommand-i1"
+  #   hostname: "echovibe-artistcommand-i1"
+  #   environment:
+  #     - "SPRING_DATA_MONGODB_URI=mongodb://echovibe_artistcommand:echovibe_artistcommand@echovibe-artistcommand-mongo-i1:27017/echovibe_artistcommand?authSource=admin"
+  #     - "SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=infras.echovibe.io.vn:9092"
+  #     - "APP_WEB_AUTH_OPENIDCONNECTCERTSURL=https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs"
+  #   ports:
+  #     - "6100:6100"
+  #   networks:
+  #     - "default"
+  #   depends_on:
+  #     - "artistcommand-mongo-i1"
+  artistquery-pg-i1:
+    image: "postgres:17.2-bookworm"
+    container_name: "echovibe-artistquery-pg-i1"
+    hostname: "echovibe-artistquery-pg-i1"
     environment:
-      - "SPRING_DATA_MONGODB_URI=mongodb://echovibe_artistcommand:echovibe_artistcommand@echovibe-artistcommand-mongo-i1:27017/echovibe_artistcommand?authSource=admin"
-      - "SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=kafka.echovibe.io.vn:9092"
+      - POSTGRES_DB=echovibe_artistquery
+      - POSTGRES_USER=echovibe_artistquery
+      - POSTGRES_PASSWORD=echovibe_artistquery
     ports:
-      - "6100:6100"
+      - "16110:5432"
     networks:
       - "default"
-    depends_on:
-      - "artistcommand-mongo-i1"
+  # artistquery-i1:
+  #   image: "vutiendat3601/echovibe-artistquery:latest"
+  #   container_name: "echovibe-artistquery-i1"
+  #   hostname: "echovibe-artistquery-i1"
+  #   environment:
+  #     - "SPRING_DATASOURCE_URL=jdbc:postgresql://echovibe-artistquery-pg-i1:5432/echovibe_artistquery"
+  #     - "SPRING_DATASOURCE_USERNAME=echovibe_artistquery"
+  #     - "SPRING_DATASOURCE_PASSWORD=echovibe_artistquery"
+  #     - "SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=infras.echovibe.io.vn:9092"
+  #     - "APP_WEB_AUTH_OPENIDCONNECTCERTSURL=https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs"
+  #   ports:
+  #     - "6110:6110"
+  #   networks:
+  #     - "default"
+  #   depends_on:
+  #     - "artistquery-pg-i1"
   apigateway-nginx-i1:
     build:
       context: "../../../_infrastructure/apigateway/local/nginx/"

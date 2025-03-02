@@ -1,0 +1,28 @@
+deployment:
+  name: artistquery
+  containerPort: 6110
+  replicaCount: 3
+  image: 
+    repository: vutiendat3601/echovibe-artistquery
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 6100
+    protocol: TCP
+    hostname: api.echovibe.io.vn
+    exposePathPrefix: /query/v1/artists
+    replacePrefixMatch: /v1/artists
+openidconnect:
+  enabled: true
+kafka:
+  enabled: true
+mongo:
+  enabled: false
+  uri: 
+datasource:
+  enabled: true
+  url: 
+  username:
+  password:
