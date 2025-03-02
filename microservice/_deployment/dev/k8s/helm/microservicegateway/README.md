@@ -10,7 +10,7 @@
 `$ kubectl kustomize "https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v1.6.1" | kubectl apply -f -`
 
 ### Installing NGINX Fabric Gateway
-`$ helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --create-namespace -n nginx-gateway`
+`$ helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --create-namespace -n nginx-gateway --set nginxGateway.snippetsFilters.enable=true`
 
 ### Installing Resources
 `$ helm install microservicegateway . -n microservice`
