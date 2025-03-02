@@ -27,7 +27,7 @@ spec:
         group: gateway.nginx.org
         kind: SnippetsFilter
         name: authprocessor-snippetsfilter
-    {{ end -}}
+    {{ end }}
     - type: ExtensionRef
       extensionRef:
         group: gateway.nginx.org
