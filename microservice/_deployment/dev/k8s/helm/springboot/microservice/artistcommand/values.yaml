@@ -10,6 +10,9 @@ deployment:
     port: 80
     targetPort: 6100
     protocol: TCP
+    hostname: api.echovibe.io.vn
+    exposePathPrefix: /command/v1/artists
+    replacePrefixMatch: /v1/artists
 openidconnect:
   enabled: true
 kafka:

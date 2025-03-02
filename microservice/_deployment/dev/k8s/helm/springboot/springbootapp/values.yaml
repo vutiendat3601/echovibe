@@ -3,3 +3,4 @@ global:
   kafkaBrokerUrls: http://infras.echovibe.io.vn:9092
   openIdConnectCertsUrl: https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs
   namespace: microservice
+  gatewayName: microservice

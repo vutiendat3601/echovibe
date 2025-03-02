@@ -1,0 +1,18 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: "{{ .Values.clusterIssuer.name }}-clusterissuer"
+  namespace: microserivce
+spec:
+  acme:
+    email: {{ .Values.clusterIssuer.acme.email }}
+    server: {{ .Values.clusterIssuer.acme.server }}
+    privateKeySecretRef:
+      name: "{{ .Values.clusterIssuer.name }}-cert-secret"
+    solvers:
+    - http01:
+        gatewayHTTPRoute:
+          parentRefs:
+          - name: {{ .Values.gatewayName }}
+            namespace: microserivce
+            kind: Gateway
