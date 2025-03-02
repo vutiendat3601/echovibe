@@ -2,6 +2,7 @@ package vn.io.echovibe.artist.query.controller;
 
 import static vn.io.echovibe.core.constant.Constant.REQUEST_PROCESSED_SUCCESS;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,6 +21,7 @@ import vn.io.echovibe.core.query.QueryDispatcher;
 public class ArtistLookupController {
   private final QueryDispatcher queryDispatcher;
 
+  @Operation(operationId = "Get Artist By Id")
   @GetMapping(path = "byId/{id}")
   public ResponseDto<QueryResult> getArtistById(@PathVariable String id) {
     final FindArtistByIdQuery findArtistByIdQuery = FindArtistByIdQuery.builder().id(id).build();
@@ -27,6 +29,7 @@ public class ArtistLookupController {
     return ResponseDto.ok(REQUEST_PROCESSED_SUCCESS, queryResult);
   }
 
+  @Operation(operationId = "Get Artist Page")
   @GetMapping
   public ResponseDto<QueryResult> getArtistPage(
       @RequestParam(defaultValue = "0") Integer page,

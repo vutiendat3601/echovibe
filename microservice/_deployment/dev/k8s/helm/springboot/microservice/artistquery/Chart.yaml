@@ -1,6 +1,6 @@
 apiVersion: v2
-name: artistcommand
-description: Helm chart for artistcommand service
+name: artistquery
+description: Helm chart for artistquery service
 type: application
 version: "1.0.0"
 appVersion: "1.16.0"
