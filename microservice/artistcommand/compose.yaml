@@ -1,0 +1,9 @@
+services:
+  artist-mongo:
+    image: "mongo:8.0.4"
+    environment:
+      - "MONGO_INITDB_ROOT_USERNAME=echovibe_artistcommand"
+      - "MONGO_INITDB_ROOT_PASSWORD=echovibe_artistcommand"
+      - "MONGO_INITDB_DATABASE=echovibe_artistcommand"
+    ports:
+      - "26100:27017"

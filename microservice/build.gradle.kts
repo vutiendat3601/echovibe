@@ -35,6 +35,8 @@ subprojects {
     }
     dependencies {
       dependency("io.hypersistence:hypersistence-utils-hibernate-63:${rootProject.libs.versions.hypersistenceUtilsHibernate63Version.get()}")
+      dependency("org.springdoc:springdoc-openapi-starter-webmvc-ui:${rootProject.libs.versions.springDocOpenApiVersion.get()}")
+      dependency("com.nimbusds:nimbus-jose-jwt:${rootProject.libs.versions.nimbusJoseJwtVersion.get()}")
     }
   }
 
@@ -69,9 +71,15 @@ subprojects {
     options.encoding = "UTF-8"
   }
 
+  spotless {
+    java {
+      googleJavaFormat()
+    }
+  }
+
   jib {
     from {
-      image = "bellsoft/liberica-openjre-alpine:${rootProject.libs.versions.javaVersion.get()}-cds"
+      image = "bellsoft/liberica-openjre-alpine-musl:${rootProject.libs.versions.javaVersion.get()}-cds"
       platforms {
         platform {
           architecture = "amd64"
@@ -92,6 +100,9 @@ subprojects {
 }
 
 tasks {
+  named("jib") {
+    enabled = false
+  }
   bootJar {
     enabled = false
   }

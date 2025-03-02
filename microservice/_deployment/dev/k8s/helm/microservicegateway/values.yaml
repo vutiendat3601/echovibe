@@ -1,0 +1,9 @@
+global:
+  namespace: microservice
+gatewayName: microservice
+gatewayClassName: nginx
+clusterIssuer:
+  name: letsencrypt
+  acme:
+    email: vutien.dat.3601@gmail.com
+    server: https://acme-v02.api.letsencrypt.org/directory

@@ -1,0 +1,25 @@
+server:
+  port: 6100
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  info:
+    env:
+      enabled: true
+spring:
+  autoconfigure:
+    exclude:
+      - "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
+      - "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration"
+  application:
+    name: artistcommand
+  docker:
+    compose:
+      enabled: false
+springdoc:
+  api-docs:
+    path: /v1/artists/openapi
+  swagger-ui:
+    path: /v1/artists/openapi.html

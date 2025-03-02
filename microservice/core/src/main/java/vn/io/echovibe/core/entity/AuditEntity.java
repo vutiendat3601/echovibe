@@ -1,23 +1,30 @@
 package vn.io.echovibe.core.entity;
 
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @MappedSuperclass
 @Getter
 @Setter
+@SuperBuilder
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor
 public abstract class AuditEntity {
-  private String createdBy;
+  protected String createdBy;
 
-  private String updatedBy;
+  protected String updatedBy;
 
-  private ZonedDateTime createdAt;
+  @CreatedDate protected Instant createdAt;
 
-  private ZonedDateTime updatedAt;
+  @LastModifiedDate protected Instant updatedAt;
 }

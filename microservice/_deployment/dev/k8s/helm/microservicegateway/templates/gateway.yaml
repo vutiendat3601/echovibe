@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: "{{ .Values.gatewayName }}-gateway"
+  namespace: {{ .Values.global.namespace }}
+  annotations:
+    cert-manager.io/cluster-issuer: "{{ .Values.clusterIssuer.name }}-clusterissuer"
+spec:
+  gatewayClassName: {{ .Values.gatewayClassName }}
+  listeners:
+  - name: http
+    hostname: "api.echovibe.io.vn"
+    port: 80
+    protocol: HTTP
+  - name: https
+    hostname: "api.echovibe.io.vn"
+    port: 443
+    protocol: HTTPS
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - kind: Secret
+        name: "{{ .Values.clusterIssuer.name }}-cert-secret"
+        namespace: {{ .Values.global.namespace }}

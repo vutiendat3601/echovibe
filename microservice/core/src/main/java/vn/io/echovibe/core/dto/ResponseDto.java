@@ -1,15 +1,19 @@
 package vn.io.echovibe.core.dto;
 
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import org.springframework.http.HttpStatus;
 
-public record ResponseDto<T>(T data, String message, ZonedDateTime timestamp) {
-  private static final Object EMPTY_OBJECT = new Object();
-
-  public ResponseDto(T data, String message) {
-    this(data, message, ZonedDateTime.now());
+public record ResponseDto<T>(T data, HttpStatus status, String message, ZonedDateTime timestamp) {
+  public ResponseDto(T data, String message, HttpStatus status) {
+    this(data, status, message, ZonedDateTime.now(ZoneOffset.UTC));
   }
 
-  public static ResponseDto<?> ok(String message) {
-    return new ResponseDto<>(EMPTY_OBJECT, message);
+  public static ResponseDto<EmptyObjectDto> ok(String message) {
+    return new ResponseDto<>(new EmptyObjectDto(), message, HttpStatus.OK);
+  }
+
+  public static ResponseDto<IdDto> ok(String message, String id) {
+    return new ResponseDto<>(new IdDto(id), message, HttpStatus.OK);
   }
 }
