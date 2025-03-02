@@ -10,6 +10,7 @@ deployment:
   image: 
     repository: repository
     tag: latest
+    pullPolicy: Always
   containerPort: 6100
   replicaCount: 3
   service:
