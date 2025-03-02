@@ -1,0 +1,24 @@
+deployment:
+  name: artistcommand
+  containerPort: 6100
+  replicaCount: 2
+  image: 
+    repository: vutiendat3601/echovibe-artistcommand
+    tag: latest
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 6100
+    protocol: TCP
+openidconnect:
+  enabled: true
+kafka:
+  enabled: true
+mongo:
+  enabled: true
+  uri: mongodb://echovibe_artistcommand:echovibe_artistcommand@infras.echovibe.io.vn:26100/echovibe_artistcommand?authSource=admin
+datasource:
+  enabled: false
+  url:
+  username:
+  password:
