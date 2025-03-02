@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import vn.io.echovibe.core.dto.ErrorDto;
 import vn.io.echovibe.core.exception.AggregateIllegalStateException;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
@@ -31,60 +32,86 @@ public class WebExceptionHandler {
             new ErrorDto(
                 List.of(),
                 "Internal server error. Please contact to developer team for more information.",
-                ZonedDateTime.now(ZoneOffset.UTC)));
+                ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorDto> handleMethodArgumentNotValidException(
       MethodArgumentNotValidException e) {
+    log.error(e.getMessage(), e);
     final List<Error> errors =
         e.getAllErrors().stream()
             .map(error -> new Error(error.getDefaultMessage(), error.getObjectName()))
             .toList();
     return ResponseEntity.badRequest()
-        .body(new ErrorDto(errors, BAD_REQUEST_ERROR_MESSAGE, ZonedDateTime.now(ZoneOffset.UTC)));
+        .body(
+            new ErrorDto(
+                errors, BAD_REQUEST_ERROR_MESSAGE, ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ErrorDto> handleMethodArgumentTypeMismatchException(
+      MethodArgumentTypeMismatchException e) {
+    log.error(e.getMessage(), e);
+    final List<Error> errors = List.of(new Error(e.getMessage(), e.getName()));
+    return ResponseEntity.badRequest()
+        .body(
+            new ErrorDto(
+                errors, BAD_REQUEST_ERROR_MESSAGE, ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
   }
 
   @ExceptionHandler(HandlerMethodValidationException.class)
   public ResponseEntity<ErrorDto> handHandlerMethodValidationException(
       HandlerMethodValidationException e) {
+    log.error(e.getMessage(), e);
     final List<Error> errors =
         e.getAllErrors().stream().map(error -> new Error(error.getDefaultMessage(), null)).toList();
     return ResponseEntity.badRequest()
-        .body(new ErrorDto(errors, BAD_REQUEST_ERROR_MESSAGE, ZonedDateTime.now(ZoneOffset.UTC)));
+        .body(
+            new ErrorDto(
+                errors, BAD_REQUEST_ERROR_MESSAGE, ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<ErrorDto> handleHttpMessageNotReadableException(
       HttpMessageNotReadableException e) {
+    log.error(e.getMessage(), e);
     return ResponseEntity.badRequest()
         .body(
-            new ErrorDto(List.of(), BAD_REQUEST_ERROR_MESSAGE, ZonedDateTime.now(ZoneOffset.UTC)));
+            new ErrorDto(
+                List.of(),
+                BAD_REQUEST_ERROR_MESSAGE,
+                ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
   }
 
   @ExceptionHandler(AggregateIllegalStateException.class)
   public ResponseEntity<ErrorDto> handleAggregateIllegalStateException(
       AggregateIllegalStateException e) {
+    log.error(e.getMessage(), e);
     return ResponseEntity.badRequest()
-        .body(new ErrorDto(List.of(), e.getMessage(), ZonedDateTime.now(ZoneOffset.UTC)));
+        .body(
+            new ErrorDto(List.of(), e.getMessage(), ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
   }
 
   @ExceptionHandler(NoneFieldChangedException.class)
   public ResponseEntity<ErrorDto> handleMethodArgumentNotValidException(
       NoneFieldChangedException e) {
+    log.error(e.getMessage(), e);
     return ResponseEntity.badRequest()
         .body(
             new ErrorDto(
                 List.of(),
                 """
 There are no fields that have been changed in your update request. Please check the API documentation or contact the development team.""",
-                ZonedDateTime.now(ZoneOffset.UTC)));
+                ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
   }
 
   @ExceptionHandler(AggregateNotFoundException.class)
   public ResponseEntity<ErrorDto> handleMethodArgumentNotValidException(
       AggregateNotFoundException e) {
+    log.error(e.getMessage(), e);
     return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        .body(new ErrorDto(List.of(), e.getMessage(), ZonedDateTime.now(ZoneOffset.UTC)));
+        .body(
+            new ErrorDto(List.of(), e.getMessage(), ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
   }
 }

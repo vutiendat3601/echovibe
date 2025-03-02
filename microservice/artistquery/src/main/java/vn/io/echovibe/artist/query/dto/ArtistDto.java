@@ -1,5 +1,6 @@
 package vn.io.echovibe.artist.query.dto;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -35,4 +36,12 @@ public class ArtistDto extends QueryDto {
   @Builder.Default private List<String> tags = new ArrayList<>();
 
   private String ref;
+
+  private String createdBy;
+
+  private String updatedBy;
+
+  private Instant createdAt;
+
+  private Instant updatedAt;
 }

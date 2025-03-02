@@ -1,11 +1,14 @@
 package vn.io.echovibe.artist.query.handler;
 
-import java.util.List;
 import org.springframework.lang.NonNull;
 import vn.io.echovibe.artist.query.model.FindArtistByIdQuery;
-import vn.io.echovibe.core.dto.QueryDto;
+import vn.io.echovibe.artist.query.model.FindArtistPageQuery;
+import vn.io.echovibe.core.model.QueryResult;
 
 public interface QueryHandler {
   @NonNull
-  List<QueryDto> handle(@NonNull FindArtistByIdQuery findArtistByIdQuery);
+  QueryResult handle(@NonNull FindArtistByIdQuery findArtistByIdQuery);
+
+  @NonNull
+  QueryResult handle(@NonNull FindArtistPageQuery findArtistPageQuery);
 }

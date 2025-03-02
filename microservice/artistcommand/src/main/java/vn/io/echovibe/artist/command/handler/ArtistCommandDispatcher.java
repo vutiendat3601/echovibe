@@ -11,8 +11,8 @@ import vn.io.echovibe.core.command.Command;
 import vn.io.echovibe.core.command.CommandDispatcher;
 import vn.io.echovibe.core.command.CommandHandlerFunction;
 import vn.io.echovibe.core.exception.CommandHandlerFunctionNotFound;
-import vn.io.echovibe.core.model.AggregateCommandResult;
 import vn.io.echovibe.core.model.BulkResult;
+import vn.io.echovibe.core.model.CommandResult;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 @Service
@@ -40,7 +40,7 @@ public class ArtistCommandDispatcher implements CommandDispatcher {
 
   @Override
   public BulkResult send(@NonNull List<? extends Command> commands) {
-    final List<AggregateCommandResult> items = new LinkedList<>();
+    final List<CommandResult> items = new LinkedList<>();
     for (Command command : commands) {
       final String id = command.getId();
       final String commandType = command.getClass().getSimpleName();
@@ -48,10 +48,11 @@ public class ArtistCommandDispatcher implements CommandDispatcher {
           "Command '%s' was processed successfully: id=%s".formatted(commandType, command.getId());
       try {
         send(command);
-        items.add(new AggregateCommandResult(id, commandType, true, message));
+        items.add(new CommandResult(id, commandType, true, message));
       } catch (Exception e) {
-        message = "Command '%s' was process unsuccessfully: %s".formatted(commandType, e.getMessage());
-        items.add(new AggregateCommandResult(id, commandType, false, message));
+        message =
+            "Command '%s' was process unsuccessfully: %s".formatted(commandType, e.getMessage());
+        items.add(new CommandResult(id, commandType, false, message));
       }
     }
     return new BulkResult(items);
