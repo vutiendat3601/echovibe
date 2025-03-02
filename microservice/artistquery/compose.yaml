@@ -1,10 +1,10 @@
 services:
-  artist-pg:
+  artistquery-pg-i1:
     image: "postgres:17.2-bookworm"
     environment:
-      - POSTGRES_DB=echovibe_artist
-      - POSTGRES_USER=echovibe_artist
-      - POSTGRES_PASSWORD=echovibe_artist
+      - POSTGRES_DB=echovibe_artistquery
+      - POSTGRES_USER=echovibe_artistquery
+      - POSTGRES_PASSWORD=echovibe_artistquery
     ports:
-      - "16100:5432"
+      - "16110:5432"
   
