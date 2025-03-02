@@ -11,6 +11,7 @@ management:
 spring:
   application:
     name: artistquery
+    version: 1.0.0
   jpa:
     open-in-view: false
     hibernate:
