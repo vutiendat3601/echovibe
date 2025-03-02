@@ -1,7 +1,7 @@
 deployment:
   name: artistquery
   containerPort: 6110
-  replicaCount: 3
+  replicaCount: 1
   image: 
     repository: vutiendat3601/echovibe-artistquery
     tag: latest
@@ -23,6 +23,6 @@ mongo:
   uri: 
 datasource:
   enabled: true
-  url: 
-  username:
-  password:
+  url: jdbc:postgresql://infras.echovibe.io.vn:16110/echovibe_artistquery
+  username: echovibe_artistquery
+  password: echovibe_artistquery
