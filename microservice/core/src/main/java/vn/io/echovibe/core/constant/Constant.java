@@ -9,4 +9,5 @@ public interface Constant {
   String AUTH_SYSTEM_USERNAME = "system";
 
   String JPA_AUDIT_DATETIME_PROVIDER_BEAN = "dateTimeProvider";
+  String REQUEST_PROCESSED_SUCCESS = "Request was processed successfully.";
 }
