@@ -10,6 +10,8 @@ services:
       - "MONGO_INITDB_ROOT_PASSWORD=echovibe_artistcommand"
     ports:
       - "26100:27017"
+    volumes:
+      - "./artistcommand-mongo/:/data/db/"
     networks:
       - "default"
   # artistcommand-i1:
@@ -38,6 +40,8 @@ services:
       - "16110:5432"
     networks:
       - "default"
+    volumes:
+      - "./artistquery-pg-i1/:/var/lib/postgresql/data"
   # artistquery-i1:
   #   image: "vutiendat3601/echovibe-artistquery:latest"
   #   container_name: "echovibe-artistquery-i1"
@@ -54,20 +58,21 @@ services:
   #     - "default"
   #   depends_on:
   #     - "artistquery-pg-i1"
-  apigateway-nginx-i1:
-    build:
-      context: "../../../_infrastructure/apigateway/local/nginx/"
-    container_name: "echovibe-apigateway-nginx-i1"
-    hostname: "echovibe-apigateway-nginx-i1"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - "./log/apigateway-nginx/:/app/log/"
-    networks:
-      - "default"
-    depends_on:
-      - "artistcommand-i1"
+  # apigateway-nginx-i1:
+  #   build:
+  #     context: "../../../_infrastructure/apigateway/local/nginx/"
+  #   container_name: "echovibe-apigateway-nginx-i1"
+  #   hostname: "echovibe-apigateway-nginx-i1"
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - "./log/apigateway-nginx/:/app/log/"
+  #   networks:
+  #     - "default"
+  #   depends_on:
+  #     - "artistcommand-i1"
+  #     - "artistquery-i1"
 networks:
   default:
     name: echovibe-net
