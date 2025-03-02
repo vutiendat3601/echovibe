@@ -20,7 +20,10 @@ public class RequestInfoInterceptor implements HandlerInterceptor {
       throws Exception {
     final String correlationId = request.getHeader(CORRELATION_ID_HEADER);
     final String path = request.getServletPath();
-    log.info("Request info: correlationId=%s, path=%s".formatted(correlationId, path));
+    final String method = request.getMethod();
+    log.info(
+        "Request info: correlationId=%s, method=%s, path=%s"
+            .formatted(correlationId, method, path));
     return true;
   }
 }
