@@ -11,7 +11,7 @@ management:
 spring:
   application:
     name: artistquery
-    version: "${BUILD_VERSION}"
+    version: "${BUILD_VERSION:unknown}"
   jpa:
     open-in-view: false
     hibernate:
