@@ -2,16 +2,20 @@ package vn.io.echovibe.core.exception.handler;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.LinkedList;
 import java.util.List;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import lombok.extern.slf4j.Slf4j;
 import vn.io.echovibe.core.dto.ErrorDto;
 import vn.io.echovibe.core.exception.AggregateIllegalStateException;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
@@ -33,6 +37,14 @@ public class WebExceptionHandler {
                 List.of(),
                 "Internal server error. Please contact to developer team for more information.",
                 ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
+  }
+
+  @ExceptionHandler(MissingServletRequestParameterException.class)
+  public ResponseEntity<ErrorDto> handleMissingServletRequestParameterException(
+      MissingServletRequestParameterException e) {
+    final List<Error> errors = new LinkedList<>();
+    return ResponseEntity.badRequest()
+        .body(new ErrorDto(errors, e.getMessage(), ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
