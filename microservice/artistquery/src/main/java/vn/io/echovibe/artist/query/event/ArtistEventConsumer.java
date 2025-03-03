@@ -6,9 +6,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import vn.io.echovibe.artist.common.event.ArtistCreatedEvent;
 import vn.io.echovibe.artist.common.event.ArtistDeletedEvent;
 import vn.io.echovibe.artist.common.event.ArtistPublishedEvent;
+import vn.io.echovibe.artist.common.event.ArtistUpdatedEvent;
+import vn.io.echovibe.artist.common.event.ArtistVisibilityChangedEvent;
 import vn.io.echovibe.artist.query.dao.ArtistDao;
 import vn.io.echovibe.artist.query.entity.Artist;
 import vn.io.echovibe.core.exception.ResourceNotFoundException;
@@ -29,8 +32,9 @@ public class ArtistEventConsumer {
       final Artist artist =
           Artist.builder()
               .aggregateId(artistCreatedEvent.getId())
-              .urn(artistCreatedEvent.getUrn())
               .name(artistCreatedEvent.getName())
+              .urn(artistCreatedEvent.getUrn())
+              .biography(artistCreatedEvent.getBiography())
               .description(artistCreatedEvent.getDescription())
               .isPublic(artistCreatedEvent.getIsPublic())
               .isActive(artistCreatedEvent.getIsActive())
@@ -46,23 +50,19 @@ public class ArtistEventConsumer {
   }
 
   @Bean
-  Consumer<ArtistPublishedEvent> consumeArtistPublishedEvent() {
-    return (artistPublishedEvent) -> {
-      final String eventType = ArtistPublishedEvent.class.getSimpleName();
-      final String aggregateId = artistPublishedEvent.getId();
+  Consumer<ArtistUpdatedEvent> consumeArtistUpdatedEvent() {
+    return (artistUpdatedEvent) -> {
+      final String eventType = ArtistUpdatedEvent.class.getSimpleName();
+      final String aggregateId = artistUpdatedEvent.getId();
       log.info(
           "Received event successfully: type=%s, aggregateId=%s".formatted(eventType, aggregateId));
-      final Artist artist =
-          artistDao
-              .selectArtistByAggregateIdAndIsActiveTrue(aggregateId)
-              .orElseThrow(
-                  () ->
-                      new ResourceNotFoundException(
-                          "Artist not found: aggregateId=%s".formatted(aggregateId)));
 
-      final Boolean isPublished =
-          Optional.ofNullable(artistPublishedEvent.getIsPublished()).orElse(true);
-      artist.setIsPublished(isPublished);
+      final Artist artist = findArtistAggregateByAggregateId(aggregateId);
+      artist.setName(artistUpdatedEvent.getName());
+      artist.setBiography(artistUpdatedEvent.getBiography());
+      artist.setDescription(artistUpdatedEvent.getDescription());
+      artist.setThumbnailUrl(artistUpdatedEvent.getThumbnailUrl());
+      artist.setBackgroundUrl(artistUpdatedEvent.getBackgroundUrl());
       artistDao.update(artist);
 
       log.info(
@@ -78,14 +78,8 @@ public class ArtistEventConsumer {
       final String aggregateId = artistDeletedEvent.getId();
       log.info(
           "Received event successfully: type=%s, aggregateId=%s".formatted(eventType, aggregateId));
-      final Artist artist =
-          artistDao
-              .selectArtistByAggregateIdAndIsActiveTrue(aggregateId)
-              .orElseThrow(
-                  () ->
-                      new ResourceNotFoundException(
-                          "Artist not found: id=%s".formatted(aggregateId)));
 
+      final Artist artist = findArtistAggregateByAggregateId(aggregateId);
       final Boolean isSoftDeleted =
           Optional.ofNullable(artistDeletedEvent.getIsSoftDeleted()).orElse(true);
       if (isSoftDeleted) {
@@ -99,5 +93,54 @@ public class ArtistEventConsumer {
           "Processed event successfully: type=%s, aggregateId=%s"
               .formatted(eventType, aggregateId));
     };
+  }
+
+  @Bean
+  Consumer<ArtistPublishedEvent> consumeArtistPublishedEvent() {
+    return (artistPublishedEvent) -> {
+      final String eventType = ArtistPublishedEvent.class.getSimpleName();
+      final String aggregateId = artistPublishedEvent.getId();
+      log.info(
+          "Received event successfully: type=%s, aggregateId=%s".formatted(eventType, aggregateId));
+
+      final Artist artist = findArtistAggregateByAggregateId(aggregateId);
+      final Boolean isPublished =
+          Optional.ofNullable(artistPublishedEvent.getIsPublished()).orElse(true);
+      artist.setIsPublished(isPublished);
+      artistDao.update(artist);
+
+      log.info(
+          "Processed event successfully: type=%s, aggregateId=%s"
+              .formatted(eventType, aggregateId));
+    };
+  }
+
+  @Bean
+  Consumer<ArtistVisibilityChangedEvent> consumeArtistVisibilityChangedEvent() {
+    return (artistVisibilityChangedEvent) -> {
+      final String eventType = ArtistVisibilityChangedEvent.class.getSimpleName();
+      final String aggregateId = artistVisibilityChangedEvent.getId();
+      log.info(
+          "Received event successfully: type=%s, aggregateId=%s".formatted(eventType, aggregateId));
+
+      final Artist artist = findArtistAggregateByAggregateId(aggregateId);
+      final Boolean isPublic =
+          Optional.ofNullable(artistVisibilityChangedEvent.getIsPublic()).orElse(false);
+      artist.setIsActive(isPublic);
+      artistDao.update(artist);
+
+      log.info(
+          "Processed event successfully: type=%s, aggregateId=%s"
+              .formatted(eventType, aggregateId));
+    };
+  }
+
+  private Artist findArtistAggregateByAggregateId(@NonNull String aggregateId) {
+    return artistDao
+        .selectArtistByAggregateIdAndIsActiveTrue(aggregateId)
+        .orElseThrow(
+            () ->
+                new ResourceNotFoundException(
+                    "Artist not found: aggregateId=%s".formatted(aggregateId)));
   }
 }

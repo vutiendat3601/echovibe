@@ -20,15 +20,25 @@ public class ArtistCreatedEvent extends Event {
 
   private String name;
 
-  @Builder.Default private Boolean isPublic = false;
+  private String biography;
 
   private String description;
 
+  @Builder.Default private Boolean isPublished = false;
+
+  @Builder.Default private Boolean isPublic = false;
+
   @Builder.Default private Boolean isActive = true;
 
-  @Builder.Default private Boolean isPublished = false;
+   private String thumbnailFileKey;
+
+  private String thumbnailUrl;
+
+  private String backgroundFileKey;
+
+  private String backgroundUrl;
 
   @Builder.Default private List<String> tags = new LinkedList<>();
 
-  private String ref;
+  private String refCode;
 }

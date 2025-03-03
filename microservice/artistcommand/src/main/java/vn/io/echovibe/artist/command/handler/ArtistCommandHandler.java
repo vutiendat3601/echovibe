@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import vn.io.echovibe.artist.command.domain.ArtistAggregate;
+import vn.io.echovibe.artist.command.model.ChangeArtistVisibilityCommand;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
 import vn.io.echovibe.artist.command.model.PublishArtistCommand;
@@ -28,8 +29,10 @@ public class ArtistCommandHandler implements CommandHandler {
     final ArtistAggregate artistAggregate = findArtistAggregateById(updateArtistCommand.getId());
     artistAggregate.update(
         updateArtistCommand.getName(),
+        updateArtistCommand.getBiography(),
         updateArtistCommand.getDescription(),
-        updateArtistCommand.getIsPublic());
+        updateArtistCommand.getThumbnailUrl(),
+        updateArtistCommand.getBackgroundUrl());
     eventSourcingHandler.save(artistAggregate);
   }
 
@@ -47,11 +50,19 @@ public class ArtistCommandHandler implements CommandHandler {
     eventSourcingHandler.save(artistAggregate);
   }
 
+  @Override
+  public void handle(@NonNull ChangeArtistVisibilityCommand changeArtistVisibilityCommand) {
+    final ArtistAggregate artistAggregate =
+        findArtistAggregateById(changeArtistVisibilityCommand.getId());
+    artistAggregate.setIsPublic(changeArtistVisibilityCommand.getIsPublic());
+    eventSourcingHandler.save(artistAggregate);
+  }
+
   private ArtistAggregate findArtistAggregateById(@NonNull String id) {
     final ArtistAggregate artistAggregate = eventSourcingHandler.findById(id);
     final boolean isActive = Optional.ofNullable(artistAggregate.getIsActive()).orElse(true);
     if (!isActive) {
-      throw new AggregateNotFoundException("Artist not found: id=%s".formatted(id));
+      throw new AggregateNotFoundException("Artist not found: aggregateId=%s".formatted(id));
     }
     return artistAggregate;
   }

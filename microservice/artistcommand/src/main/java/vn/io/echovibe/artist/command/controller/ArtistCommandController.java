@@ -1,5 +1,6 @@
 package vn.io.echovibe.artist.command.controller;
 
+import static vn.io.echovibe.artist.command.constant.ArtistConstant.ARTIST_MADE_VISIBILITY_PRIVATE_SUCCESS;
 import static vn.io.echovibe.artist.command.constant.ArtistConstant.ARTIST_PUBLISHED_SUCCESS;
 import static vn.io.echovibe.core.constant.Constant.REQUEST_PROCESSED_SUCCESS;
 import static vn.io.echovibe.core.utils.IdentityUtils.AGGREGATE_ID_LENGTH;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import vn.io.echovibe.artist.command.dto.CreateArtistDto;
 import vn.io.echovibe.artist.command.dto.DeleteArtistDto;
 import vn.io.echovibe.artist.command.dto.UpdateArtistDto;
+import vn.io.echovibe.artist.command.model.ChangeArtistVisibilityCommand;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
 import vn.io.echovibe.artist.command.model.PublishArtistCommand;
@@ -53,8 +55,10 @@ public class ArtistCommandController {
                     CreateArtistCommand.builder()
                         .id(IdentityUtils.generateAggregateId())
                         .name(cad.name())
-                        .isPublic(cad.isPublic())
+                        .biography(cad.biography())
                         .description(cad.description())
+                        .thumbnailUrl(cad.thumbnailUrl())
+                        .backgroundUrl(cad.backgroundUrl())
                         .build())
             .collect(Collectors.toList());
     final BulkResult bulkResult = commandDispatcher.send(createArtistCommands);
@@ -72,8 +76,10 @@ public class ArtistCommandController {
                     UpdateArtistCommand.builder()
                         .id(uad.id())
                         .name(uad.name())
-                        .isPublic(uad.isPublic())
+                        .biography(uad.biography())
                         .description(uad.description())
+                        .thumbnailUrl(uad.thumbnailUrl())
+                        .backgroundUrl(uad.backgroundUrl())
                         .build())
             .collect(Collectors.toList());
     final BulkResult bulkResult = commandDispatcher.send(updateArtistCommands);
@@ -105,8 +111,46 @@ public class ArtistCommandController {
               message = "Artist ID must contain " + AGGREGATE_ID_LENGTH + " characters only.")
           @PathVariable
           String id) {
-    final PublishArtistCommand publishArtistCommand = new PublishArtistCommand(id);
+    final PublishArtistCommand publishArtistCommand = PublishArtistCommand.builder().id(id).build();
     commandDispatcher.send(publishArtistCommand);
     return ResponseEntity.ok(ResponseDto.ok(ARTIST_PUBLISHED_SUCCESS));
+  }
+
+  @Operation(operationId = "Make Artist visibility public")
+  @PostMapping("{id}/visibility/make-public")
+  public ResponseEntity<ResponseDto<EmptyObjectDto>> makeArtistVisibilityPublic(
+      @Valid
+          @Pattern(
+              regexp = AGGREGATE_ID_REGEX,
+              message = "Artist ID must contain [A-Z, a-z, 0-9] only.")
+          @Length(
+              min = AGGREGATE_ID_LENGTH,
+              max = AGGREGATE_ID_LENGTH,
+              message = "Artist ID must contain " + AGGREGATE_ID_LENGTH + " characters only.")
+          @PathVariable
+          String id) {
+    final ChangeArtistVisibilityCommand changeArtistVisibilityCommand =
+        ChangeArtistVisibilityCommand.builder().id(id).isPublic(true).build();
+    commandDispatcher.send(changeArtistVisibilityCommand);
+    return ResponseEntity.ok(ResponseDto.ok(ARTIST_PUBLISHED_SUCCESS));
+  }
+
+  @Operation(operationId = "Make Artist visibility private")
+  @PostMapping("{id}/visibility/make-private")
+  public ResponseEntity<ResponseDto<EmptyObjectDto>> makeArtistVisibilityPrivate(
+      @Valid
+          @Pattern(
+              regexp = AGGREGATE_ID_REGEX,
+              message = "Artist ID must contain [A-Z, a-z, 0-9] only.")
+          @Length(
+              min = AGGREGATE_ID_LENGTH,
+              max = AGGREGATE_ID_LENGTH,
+              message = "Artist ID must contain " + AGGREGATE_ID_LENGTH + " characters only.")
+          @PathVariable
+          String id) {
+    final ChangeArtistVisibilityCommand changeArtistVisibilityCommand =
+        ChangeArtistVisibilityCommand.builder().id(id).isPublic(false).build();
+    commandDispatcher.send(changeArtistVisibilityCommand);
+    return ResponseEntity.ok(ResponseDto.ok(ARTIST_MADE_VISIBILITY_PRIVATE_SUCCESS));
   }
 }

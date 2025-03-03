@@ -12,14 +12,6 @@ import vn.io.echovibe.core.event.Event;
 @SuperBuilder
 @Getter
 @Setter
-public class ArtistUpdatedEvent extends Event {
-  private String name;
-
-  private String biography;
-
-  private String description;
-
-  private String thumbnailUrl;
-
-  private String backgroundUrl;
+public class ArtistVisibilityChangedEvent extends Event {
+  private Boolean isPublic;
 }
