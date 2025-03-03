@@ -15,7 +15,7 @@ spring:
       - "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration"
   application:
     name: artistcommand
-    version: 1.0.0
+    version: "${BUILD_VERSION}"
   docker:
     compose:
       enabled: false
