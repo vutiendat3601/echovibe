@@ -6,9 +6,14 @@ import static vn.io.echovibe.core.constant.Constant.REQUEST_PROCESSED_SUCCESS;
 import static vn.io.echovibe.core.utils.IdentityUtils.AGGREGATE_ID_LENGTH;
 import static vn.io.echovibe.core.utils.IdentityUtils.AGGREGATE_ID_REGEX;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,18 +21,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import vn.io.echovibe.artist.command.dto.ChangeArtistMarketDto;
 import vn.io.echovibe.artist.command.dto.CreateArtistDto;
 import vn.io.echovibe.artist.command.dto.DeleteArtistDto;
 import vn.io.echovibe.artist.command.dto.UpdateArtistDto;
-import vn.io.echovibe.artist.command.model.ChangeArtistMarketCommand;
 import vn.io.echovibe.artist.command.model.ChangeArtistVisibilityCommand;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
@@ -155,26 +151,6 @@ public class ArtistCommandController {
     final ChangeArtistVisibilityCommand changeArtistVisibilityCommand =
         ChangeArtistVisibilityCommand.builder().id(id).isPublic(false).build();
     commandDispatcher.send(changeArtistVisibilityCommand);
-    return ResponseEntity.ok(ResponseDto.ok(ARTIST_MADE_VISIBILITY_PRIVATE_SUCCESS));
-  }
-
-  @Operation(operationId = "Change Arist's market")
-  @PostMapping("{id}/change-market")
-  public ResponseEntity<ResponseDto<EmptyObjectDto>> changeArtistMarket(
-      @Valid
-          @Pattern(
-              regexp = AGGREGATE_ID_REGEX,
-              message = "Artist ID must contain [A-Z, a-z, 0-9] only.")
-          @Length(
-              min = AGGREGATE_ID_LENGTH,
-              max = AGGREGATE_ID_LENGTH,
-              message = "Artist ID must contain " + AGGREGATE_ID_LENGTH + " characters only.")
-          @PathVariable
-          String id,
-      @RequestBody ChangeArtistMarketDto changeArtistMarketDto) {
-    final ChangeArtistMarketCommand changeArtistMarketCommand =
-        ChangeArtistMarketCommand.builder().id(id).market(changeArtistMarketDto.market()).build();
-    commandDispatcher.send(changeArtistMarketCommand);
     return ResponseEntity.ok(ResponseDto.ok(ARTIST_MADE_VISIBILITY_PRIVATE_SUCCESS));
   }
 }

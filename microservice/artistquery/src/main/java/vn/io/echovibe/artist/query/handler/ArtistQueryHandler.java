@@ -11,7 +11,7 @@ import vn.io.echovibe.artist.query.dao.ArtistDao;
 import vn.io.echovibe.artist.query.dto.ArtistDto;
 import vn.io.echovibe.artist.query.mapper.ArtistDtoMapper;
 import vn.io.echovibe.artist.query.model.FindArtistByIdQuery;
-import vn.io.echovibe.artist.query.model.FindArtistByParamQuery;
+import vn.io.echovibe.artist.query.model.FindArtistByIdsQuery;
 import vn.io.echovibe.artist.query.model.FindArtistPageQuery;
 import vn.io.echovibe.core.model.ListQueryResult;
 import vn.io.echovibe.core.model.PageQueryResult;
@@ -53,7 +53,7 @@ public class ArtistQueryHandler implements QueryHandler {
 
   @Override
   @NonNull
-  public QueryResult handle(@NonNull FindArtistByParamQuery findArtistByIdsQuery) {
+  public QueryResult handle(@NonNull FindArtistByIdsQuery findArtistByIdsQuery) {
     final ListQueryResult<ArtistDto> queryResult = new ListQueryResult<>();
     final Map<String, ArtistDto> artistDtos = new HashMap<>();
     final List<String> ids = findArtistByIdsQuery.getIds();

@@ -1,8 +1,6 @@
 package vn.io.echovibe.artist.command.handler;
 
 import org.springframework.lang.NonNull;
-
-import vn.io.echovibe.artist.command.model.ChangeArtistMarketCommand;
 import vn.io.echovibe.artist.command.model.ChangeArtistVisibilityCommand;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
@@ -19,6 +17,4 @@ public interface CommandHandler {
   void handle(@NonNull DeleteArtistCommand deleteArtistCommand);
 
   void handle(@NonNull ChangeArtistVisibilityCommand changeArtistVisibilityCommand);
-
-  void handle(@NonNull ChangeArtistMarketCommand changeArtistMarketCommand);
 }
