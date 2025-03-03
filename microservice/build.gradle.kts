@@ -1,6 +1,7 @@
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.ZoneOffset
+val BUILD_VERSION = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss"))
 
 plugins {
   java
@@ -61,6 +62,13 @@ subprojects {
       extendsFrom(configurations.annotationProcessor.get())
     }
   }
+  tasks {
+    processResources {
+      filesMatching("application.yaml") {
+        expand("BUILD_VERSION" to "${BUILD_VERSION}")
+      }
+    }
+  }
 
   tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
@@ -91,9 +99,13 @@ subprojects {
       }
     }
     to {
-      val BUILD_VERSION = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss"))
       image = "vutiendat3601/echovibe-${project.name}"
       tags = setOf("${BUILD_VERSION}", "latest")
+    }
+    container {
+      environment = mapOf(
+        "BUILD_VERSION" to "${BUILD_VERSION}"
+      )
     }
   }
 }
