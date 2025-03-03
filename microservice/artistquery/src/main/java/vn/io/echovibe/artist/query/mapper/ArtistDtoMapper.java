@@ -14,7 +14,6 @@ public class ArtistDtoMapper implements Function<Artist, ArtistDto> {
         .id(artist.getAggregateId())
         .urn(artist.getUrn())
         .name(artist.getName())
-        .market(artist.getMarket())
         .biography(artist.getBiography())
         .description(artist.getDescription())
         .isPublic(artist.getIsPublic())

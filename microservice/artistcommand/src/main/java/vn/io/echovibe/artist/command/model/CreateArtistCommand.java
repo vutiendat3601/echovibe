@@ -19,8 +19,6 @@ public class CreateArtistCommand extends Command {
 
   private String biography;
 
-  private String market;
-
   private String description;
 
   private String thumbnailUrl;

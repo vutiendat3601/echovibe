@@ -2,7 +2,6 @@ package vn.io.echovibe.artist.common.event;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,8 +19,6 @@ public class ArtistCreatedEvent extends Event {
   private String urn;
 
   private String name;
-
-  private String market;
 
   private String biography;
 
