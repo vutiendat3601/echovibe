@@ -6,6 +6,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "Market",
+      "request": "launch",
+      "mainClass": "vn.io.echovibe.core.enumeration.Market",
+      "projectName": "core"
+    },
+    {
+      "type": "java",
       "name": "ArtistCommandApplication",
       "request": "launch",
       "mainClass": "vn.io.echovibe.artist.command.ArtistCommandApplication",

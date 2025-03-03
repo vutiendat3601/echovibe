@@ -25,6 +25,8 @@ public class ArtistDto extends QueryDto {
 
   private String name;
 
+  private String market;
+
   private String biography;
 
   private String description;

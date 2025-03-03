@@ -1,10 +1,13 @@
 package vn.io.echovibe.artist.command.handler;
 
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
 import vn.io.echovibe.artist.command.domain.ArtistAggregate;
+import vn.io.echovibe.artist.command.model.ChangeArtistMarketCommand;
 import vn.io.echovibe.artist.command.model.ChangeArtistVisibilityCommand;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
@@ -50,6 +53,14 @@ public class ArtistCommandHandler implements CommandHandler {
     final ArtistAggregate artistAggregate =
         findArtistAggregateById(changeArtistVisibilityCommand.getId());
     artistAggregate.setIsPublic(changeArtistVisibilityCommand.getIsPublic());
+    eventSourcingHandler.save(artistAggregate);
+  }
+
+  @Override
+  public void handle(@NonNull ChangeArtistMarketCommand changeArtistMarketCommand) {
+    final ArtistAggregate artistAggregate =
+        findArtistAggregateById(changeArtistMarketCommand.getId());
+    artistAggregate.changeMarket(changeArtistMarketCommand.getMarket());
     eventSourcingHandler.save(artistAggregate);
   }
 

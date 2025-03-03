@@ -9,23 +9,11 @@ import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.core.command.Command;
 
 @SuperBuilder
+@ToString
 @Getter
 @Setter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateArtistCommand extends Command {
-  private String name;
-
-  private String biography;
-
+public class ChangeArtistMarketCommand extends Command {
   private String market;
-
-  private String description;
-
-  private String thumbnailUrl;
-
-  private String backgroundUrl;
-
-  private String refCode;
 }
