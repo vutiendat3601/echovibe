@@ -9,14 +9,17 @@ import jakarta.validation.Payload;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import vn.io.echovibe.core.validator.NullOrNotBlankValidator;
+import vn.io.echovibe.core.validator.IsoCountryCodeValidator;
 
+/***
+ * Skip the validation when the value is null.
+ **/
 @Target({FIELD, PARAMETER})
 @Retention(RUNTIME)
 @Documented
-@Constraint(validatedBy = NullOrNotBlankValidator.class)
-public @interface NullOrNotBlank {
-  String message() default "could be null, but not blank.";
+@Constraint(validatedBy = IsoCountryCodeValidator.class)
+public @interface IsoCountryCode {
+  String message() default "must match ISO 3166-1 Alpha-2 Country Code";
 
   Class<?>[] groups() default {};
 

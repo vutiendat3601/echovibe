@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import vn.io.echovibe.artist.query.handler.QueryHandler;
-import vn.io.echovibe.artist.query.model.FindArtistByIdQuery;
+import vn.io.echovibe.artist.query.model.FindArtistByParamQuery;
 import vn.io.echovibe.artist.query.model.FindArtistPageQuery;
 import vn.io.echovibe.core.query.QueryDispatcher;
 
@@ -28,7 +28,7 @@ public class ArtistQueryApplication {
 
   @EventListener(ApplicationReadyEvent.class)
   void registerHandlers() {
-    queryDispatcher.registerHandler(FindArtistByIdQuery.class, queryHandler::handle);
+    queryDispatcher.registerHandler(FindArtistByParamQuery.class, queryHandler::handle);
     queryDispatcher.registerHandler(FindArtistPageQuery.class, queryHandler::handle);
   }
 

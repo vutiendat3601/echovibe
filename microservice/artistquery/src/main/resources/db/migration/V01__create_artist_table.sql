@@ -2,6 +2,7 @@ CREATE TABLE artist (
   id uuid NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   aggregate_id varchar(16) NOT NULL UNIQUE,
   urn varchar(255) NOT NULL UNIQUE,
+  market varchar(2) NOT NULL,
   "name" varchar(255) NOT NULL,
   biography varchar(250),
   "description" text,

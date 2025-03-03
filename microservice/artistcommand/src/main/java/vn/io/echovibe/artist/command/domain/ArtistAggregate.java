@@ -7,10 +7,12 @@ import java.util.Objects;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.NonNull;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.artist.common.event.ArtistCreatedEvent;
 import vn.io.echovibe.artist.common.event.ArtistDeletedEvent;
+import vn.io.echovibe.artist.common.event.ArtistMarketChangedEvent;
 import vn.io.echovibe.artist.common.event.ArtistPublishedEvent;
 import vn.io.echovibe.artist.common.event.ArtistUpdatedEvent;
 import vn.io.echovibe.artist.common.event.ArtistVisibilityChangedEvent;
@@ -24,6 +26,8 @@ public class ArtistAggregate extends AggregateRoot {
   private String urn;
 
   private String name;
+
+  private String market;
 
   private String biography;
 
@@ -54,6 +58,7 @@ public class ArtistAggregate extends AggregateRoot {
             .id(createArtistCommand.getId())
             .urn(urn)
             .name(createArtistCommand.getName())
+            .market(createArtistCommand.getMarket())
             .biography(createArtistCommand.getBiography())
             .description(createArtistCommand.getDescription())
             .isPublished(false)
@@ -159,10 +164,26 @@ public class ArtistAggregate extends AggregateRoot {
     raiseEvent(artistDeletedEvent);
   }
 
+  public void changeMarket(@NonNull String market) {
+    if (Objects.nonNull(isPublished) && isPublished) {
+      throw new AggregateIllegalStateException(
+          "Artist's market cannot be changed once published: aggregateId=%s".formatted(id));
+    }
+    if (Objects.nonNull(market) && market.equals(this.market)) {
+      throw new AggregateIllegalStateException(
+          "Artist's market remains the same as before.: aggregateId=%s, market=%s"
+              .formatted(id, market));
+    }
+    final ArtistMarketChangedEvent artistMarketChangedEvent =
+        ArtistMarketChangedEvent.builder().id(this.id).market(market).build();
+    raiseEvent(artistMarketChangedEvent);
+  }
+
   void apply(ArtistCreatedEvent artistCreatedEvent) {
     this.id = artistCreatedEvent.getId();
     this.urn = artistCreatedEvent.getUrn();
     this.name = artistCreatedEvent.getName();
+    this.market = artistCreatedEvent.getMarket();
     this.description = artistCreatedEvent.getDescription();
     this.isPublic = artistCreatedEvent.getIsPublic();
     this.isActive = artistCreatedEvent.getIsActive();

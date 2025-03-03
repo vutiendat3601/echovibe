@@ -1,5 +1,8 @@
 package vn.io.echovibe.artist.query.handler;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.lang.NonNull;
@@ -8,6 +11,7 @@ import vn.io.echovibe.artist.query.dao.ArtistDao;
 import vn.io.echovibe.artist.query.dto.ArtistDto;
 import vn.io.echovibe.artist.query.mapper.ArtistDtoMapper;
 import vn.io.echovibe.artist.query.model.FindArtistByIdQuery;
+import vn.io.echovibe.artist.query.model.FindArtistByParamQuery;
 import vn.io.echovibe.artist.query.model.FindArtistPageQuery;
 import vn.io.echovibe.core.model.ListQueryResult;
 import vn.io.echovibe.core.model.PageQueryResult;
@@ -44,6 +48,22 @@ public class ArtistQueryHandler implements QueryHandler {
     queryResult.setSize(artistDtoPage.getSize());
     queryResult.setTotalItems(artistDtoPage.getTotalElements());
     queryResult.setTotalPages(artistDtoPage.getTotalPages());
+    return queryResult;
+  }
+
+  @Override
+  @NonNull
+  public QueryResult handle(@NonNull FindArtistByParamQuery findArtistByIdsQuery) {
+    final ListQueryResult<ArtistDto> queryResult = new ListQueryResult<>();
+    final Map<String, ArtistDto> artistDtos = new HashMap<>();
+    final List<String> ids = findArtistByIdsQuery.getIds();
+    ids.forEach(
+        id -> {
+          artistDtos.putIfAbsent(
+              id,
+              artistDao.selectArtistByAggregateIdAndIsActiveTrue(id).map(artistDtoMapper).get());
+          queryResult.add(artistDtos.get(id));
+        });
     return queryResult;
   }
 }
