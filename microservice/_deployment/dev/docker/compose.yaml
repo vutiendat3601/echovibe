@@ -41,7 +41,7 @@ services:
     networks:
       - "default"
     volumes:
-      - "./artistquery-pg-i1/:/var/lib/postgresql/data"
+      - "./artistquery-pg/:/var/lib/postgresql/data"
   # artistquery-i1:
   #   image: "vutiendat3601/echovibe-artistquery:latest"
   #   container_name: "echovibe-artistquery-i1"
