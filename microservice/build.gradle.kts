@@ -62,14 +62,6 @@ subprojects {
       extendsFrom(configurations.annotationProcessor.get())
     }
   }
-  tasks {
-    processResources {
-      filesMatching("application.yaml") {
-        expand("BUILD_VERSION" to "${BUILD_VERSION}")
-      }
-    }
-  }
-
   tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
   }
