@@ -9,7 +9,7 @@ deployment:
   service:
     type: ClusterIP
     port: 80
-    targetPort: 6100
+    targetPort: 6110
     protocol: TCP
     hostname: api.echovibe.io.vn
     exposePathPrefix: /query/v1/artists

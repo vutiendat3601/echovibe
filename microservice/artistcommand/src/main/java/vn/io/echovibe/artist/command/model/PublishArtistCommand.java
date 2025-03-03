@@ -1,6 +1,5 @@
 package vn.io.echovibe.artist.command.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +12,4 @@ import vn.io.echovibe.core.command.Command;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class PublishArtistCommand extends Command {
-  private String id;
-}
+public class PublishArtistCommand extends Command {}

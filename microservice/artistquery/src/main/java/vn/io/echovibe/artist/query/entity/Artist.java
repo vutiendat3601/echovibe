@@ -34,11 +34,17 @@ public class Artist extends AuditEntity {
   @Column(name = "aggregate_id", nullable = false, updatable = false, unique = true)
   private String aggregateId;
 
-  @Column(name = "urn", nullable = false, updatable = false)
+  @Column(name = "urn", nullable = false, updatable = false, unique = true)
   private String urn;
 
   @Column(name = "name", nullable = false)
   private String name;
+
+  @Column(name = "biography", nullable = false)
+  private String biography;
+
+  @Column(name = "description")
+  private String description;
 
   @Builder.Default
   @Column(name = "is_public", nullable = false)
@@ -52,20 +58,23 @@ public class Artist extends AuditEntity {
   @Column(name = "is_active", nullable = false)
   private Boolean isActive = true;
 
-  @Column(name = "description")
-  private String description;
-
   @Column(name = "thumbnail_file_key")
   private String thumbnailFileKey;
 
+  @Column(name = "thumbnail_url")
+  private String thumbnailUrl;
+
   @Column(name = "background_file_key")
   private String backgroundFileKey;
+
+  @Column(name = "background_url")
+  private String backgroundUrl;
 
   @Builder.Default
   @Column(name = "tags", nullable = false)
   @Type(ListArrayType.class)
   private List<String> tags = new ArrayList<>();
 
-  @Column(name = "ref", updatable = false)
-  private String ref;
+  @Column(name = "ref_code", updatable = false, unique = true)
+  private String refCode;
 }

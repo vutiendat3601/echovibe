@@ -12,6 +12,7 @@ import vn.io.echovibe.artist.common.event.ArtistCreatedEvent;
 import vn.io.echovibe.artist.common.event.ArtistDeletedEvent;
 import vn.io.echovibe.artist.common.event.ArtistPublishedEvent;
 import vn.io.echovibe.artist.common.event.ArtistUpdatedEvent;
+import vn.io.echovibe.artist.common.event.ArtistVisibilityChangedEvent;
 import vn.io.echovibe.core.domain.AggregateRoot;
 import vn.io.echovibe.core.exception.AggregateIllegalStateException;
 import vn.io.echovibe.core.exception.NoneFieldChangedException;
@@ -23,21 +24,27 @@ public class ArtistAggregate extends AggregateRoot {
 
   private String name;
 
-  private Boolean isActive;
-
-  private Boolean isPublic;
+  private String biography;
 
   private String description;
 
   private Boolean isPublished;
 
+  private Boolean isPublic;
+
+  private Boolean isActive;
+
   private String thumbnailFileKey;
+
+  private String thumbnailUrl;
 
   private String backgroundFileKey;
 
+  private String backgroundUrl;
+
   private List<String> tags;
 
-  private String ref;
+  private String refCode;
 
   public ArtistAggregate(CreateArtistCommand createArtistCommand) {
     final String urn = ARTIST_URN_PREFIX + createArtistCommand.getId();
@@ -46,33 +53,76 @@ public class ArtistAggregate extends AggregateRoot {
             .id(createArtistCommand.getId())
             .urn(urn)
             .name(createArtistCommand.getName())
+            .biography(createArtistCommand.getBiography())
             .description(createArtistCommand.getDescription())
-            .isPublic(createArtistCommand.getIsPublic())
+            .isPublished(false)
+            .isPublic(false)
+            .isActive(true)
+            .thumbnailUrl(createArtistCommand.getThumbnailUrl())
+            .backgroundUrl(createArtistCommand.getBackgroundUrl())
             .build();
     raiseEvent(artistCreatedEvent);
   }
 
-  public void update(String name, String description, Boolean isPublic) {
+  public void setIsPublic(Boolean isPublic) {
+    if (Objects.nonNull(isPublic) && isPublic.equals(this.isPublic)) {
+      throw new AggregateIllegalStateException(
+          "Visiblity of artist hasn't changed: aggregateId=%s, isPublic=%s"
+              .formatted(id, isPublic));
+    }
+    final Boolean isPublished = Optional.of(this.isPublished).orElse(false);
+    if (!isPublished) {
+      throw new AggregateIllegalStateException(
+          "To make the artist's visibility public, it is required to be published: aggregateId=%s, isPublic=%s, isPublished=%s"
+              .formatted(id, isPublic, isPublished));
+    }
+    final ArtistVisibilityChangedEvent artistVisibilityChangedEvent =
+        ArtistVisibilityChangedEvent.builder().id(id).isPublic(isPublic).build();
+    raiseEvent(artistVisibilityChangedEvent);
+  }
+
+  public void update(
+      String name,
+      String biography,
+      String description,
+      String thumbnailUrl,
+      String backgroundUrl) {
     boolean hasChange = false;
     final ArtistUpdatedEvent artistUpdatedEvent =
         ArtistUpdatedEvent.builder()
             .id(id)
             .name(this.name)
+            .biography(this.biography)
             .description(this.description)
-            .isPublic(this.isPublic)
+            .thumbnailUrl(thumbnailUrl)
+            .backgroundUrl(backgroundUrl)
             .build();
+    // name
     if (!Objects.isNull(name) && !name.equals(artistUpdatedEvent.getName())) {
       hasChange = true;
       artistUpdatedEvent.setName(name);
     }
+    // biography
+    if (!Objects.isNull(biography) && !biography.equals(artistUpdatedEvent.getBiography())) {
+      hasChange = true;
+      artistUpdatedEvent.setBiography(biography);
+    }
+    // description
     if (!Objects.isNull(description) && !description.equals(artistUpdatedEvent.getDescription())) {
       hasChange = true;
       artistUpdatedEvent.setDescription(description);
     }
-
-    if (!Objects.isNull(isPublic) && !isPublic.equals(artistUpdatedEvent.getIsPublic())) {
+    // thumbnailUrl
+    if (!Objects.isNull(thumbnailUrl)
+        && !thumbnailUrl.equals(artistUpdatedEvent.getThumbnailUrl())) {
       hasChange = true;
-      artistUpdatedEvent.setIsPublic(isPublic);
+      artistUpdatedEvent.setThumbnailUrl(thumbnailUrl);
+    }
+    // backgroundUrl
+    if (!Objects.isNull(backgroundUrl)
+        && !backgroundUrl.equals(artistUpdatedEvent.getBackgroundUrl())) {
+      hasChange = true;
+      artistUpdatedEvent.setBackgroundUrl(backgroundUrl);
     }
     if (!hasChange) {
       throw new NoneFieldChangedException();
@@ -83,7 +133,7 @@ public class ArtistAggregate extends AggregateRoot {
   public void publish() {
     if (Objects.nonNull(isPublished) && isPublished) {
       throw new AggregateIllegalStateException(
-          "Artist has already been published: id=%s".formatted(id));
+          "Artist has already been published: aggregateId=%s".formatted(id));
     }
     final ArtistPublishedEvent artistPublishedEvent =
         ArtistPublishedEvent.builder().id(id).isPublished(true).build();
@@ -93,7 +143,7 @@ public class ArtistAggregate extends AggregateRoot {
   public void delete() {
     if (!Objects.nonNull(this.isActive) && !this.isActive) {
       throw new AggregateIllegalStateException(
-          "Artist has already been deleted: id=%s".formatted(id));
+          "Artist has already been deleted: aggregateId=%s".formatted(id));
     }
     final Boolean isSoftDeleted = Optional.ofNullable(isPublished).orElse(false);
     final ArtistDeletedEvent artistDeletedEvent =
@@ -109,15 +159,17 @@ public class ArtistAggregate extends AggregateRoot {
     this.isPublic = artistCreatedEvent.getIsPublic();
     this.isActive = artistCreatedEvent.getIsActive();
     this.isPublished = artistCreatedEvent.getIsPublished();
-    this.ref = artistCreatedEvent.getRef();
+    this.refCode = artistCreatedEvent.getRefCode();
     this.tags = artistCreatedEvent.getTags();
   }
 
   void apply(ArtistUpdatedEvent artistUpdatedEvent) {
     this.id = artistUpdatedEvent.getId();
     this.name = artistUpdatedEvent.getName();
+    this.biography = artistUpdatedEvent.getBiography();
     this.description = artistUpdatedEvent.getDescription();
-    this.isPublic = artistUpdatedEvent.getIsPublic();
+    this.thumbnailUrl = artistUpdatedEvent.getThumbnailUrl();
+    this.backgroundUrl = artistUpdatedEvent.getBackgroundUrl();
   }
 
   void apply(ArtistPublishedEvent artistPublishedEvent) {
@@ -128,5 +180,10 @@ public class ArtistAggregate extends AggregateRoot {
   void apply(ArtistDeletedEvent artistDeletedEvent) {
     this.id = artistDeletedEvent.getId();
     this.isActive = artistDeletedEvent.getIsActive();
+  }
+
+  void apply(ArtistVisibilityChangedEvent artistVisibilityChangedEvent) {
+    this.id = artistVisibilityChangedEvent.getId();
+    this.isPublic = artistVisibilityChangedEvent.getIsPublic();
   }
 }

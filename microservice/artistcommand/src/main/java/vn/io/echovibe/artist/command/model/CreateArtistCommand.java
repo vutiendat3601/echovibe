@@ -17,7 +17,11 @@ import vn.io.echovibe.core.command.Command;
 public class CreateArtistCommand extends Command {
   private String name;
 
-  private Boolean isPublic;
+  private String biography;
 
   private String description;
+
+  private String thumbnailUrl;
+
+  private String backgroundUrl;
 }

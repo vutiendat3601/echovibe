@@ -25,9 +25,13 @@ public class ArtistDto extends QueryDto {
 
   private String name;
 
-  @Builder.Default private Boolean isPublic = true;
+  private String biography;
 
   private String description;
+
+  @Builder.Default private Boolean isPublic = true;
+
+  @Builder.Default private Boolean isPublished = false;
 
   private String thumbnailUrl;
 
@@ -35,7 +39,7 @@ public class ArtistDto extends QueryDto {
 
   @Builder.Default private List<String> tags = new ArrayList<>();
 
-  private String ref;
+  private String refCode;
 
   private String createdBy;
 

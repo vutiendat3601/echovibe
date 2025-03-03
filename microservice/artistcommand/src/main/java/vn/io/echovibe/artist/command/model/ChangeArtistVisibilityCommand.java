@@ -14,14 +14,6 @@ import vn.io.echovibe.core.command.Command;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateArtistCommand extends Command {
-  private String name;
-
-  private String biography;
-
-  private String description;
-
-  private String thumbnailUrl;
-
-  private String backgroundUrl;
+public class ChangeArtistVisibilityCommand extends Command {
+  private Boolean isPublic;
 }

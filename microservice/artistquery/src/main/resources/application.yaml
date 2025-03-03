@@ -21,11 +21,25 @@ spring:
       enabled: false
   cloud:
     function:
-      definition: consumeArtistCreatedEvent
+      definition: >-
+        consumeArtistCreatedEvent;
+        consumeArtistUpdatedEvent;
+        consumeArtistDeletedEvent;
+        consumeArtistPublishedEvent;
+        consumeArtistVisibilityChangedEvent;
     stream:
       bindings:
         consumeArtistCreatedEvent-in-0:
           destination: "artist.ArtistCreatedEvent"
+          group: "${spring.application.name}"
+        consumeArtistPublishedEvent-in-0:
+          destination: "artist.ArtistPublishedEvent"
+          group: "${spring.application.name}"
+        consumeArtistDeletedEvent-in-0:
+          destination: "artist.ArtistDeletedEvent"
+          group: "${spring.application.name}"
+        consumeArtistVisibilityChangedEvent-in-0:
+          destination: "artist.ArtistVisibilityChangedEvent"
           group: "${spring.application.name}"
 springdoc:
   api-docs:
