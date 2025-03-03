@@ -22,4 +22,6 @@ public class ArtistUpdatedEvent extends Event {
   private String thumbnailUrl;
 
   private String backgroundUrl;
+
+  private String refCode;
 }

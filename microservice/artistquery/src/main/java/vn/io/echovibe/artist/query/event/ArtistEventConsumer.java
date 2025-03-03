@@ -41,6 +41,7 @@ public class ArtistEventConsumer {
               .isPublished(artistCreatedEvent.getIsPublished())
               .createdBy(artistCreatedEvent.getCreatedBy())
               .updatedBy(artistCreatedEvent.getCreatedBy())
+              .refCode(artistCreatedEvent.getRefCode())
               .build();
       artistDao.insert(artist);
       log.info(
@@ -63,6 +64,7 @@ public class ArtistEventConsumer {
       artist.setDescription(artistUpdatedEvent.getDescription());
       artist.setThumbnailUrl(artistUpdatedEvent.getThumbnailUrl());
       artist.setBackgroundUrl(artistUpdatedEvent.getBackgroundUrl());
+      artist.setRefCode(artistUpdatedEvent.getRefCode());
       artistDao.update(artist);
 
       log.info(

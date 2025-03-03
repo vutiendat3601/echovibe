@@ -24,4 +24,6 @@ public class CreateArtistCommand extends Command {
   private String thumbnailUrl;
 
   private String backgroundUrl;
+
+  private String refCode;
 }

@@ -8,6 +8,7 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
+import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.artist.common.event.ArtistCreatedEvent;
 import vn.io.echovibe.artist.common.event.ArtistDeletedEvent;
 import vn.io.echovibe.artist.common.event.ArtistPublishedEvent;
@@ -60,6 +61,7 @@ public class ArtistAggregate extends AggregateRoot {
             .isActive(true)
             .thumbnailUrl(createArtistCommand.getThumbnailUrl())
             .backgroundUrl(createArtistCommand.getBackgroundUrl())
+            .refCode(createArtistCommand.getRefCode())
             .build();
     raiseEvent(artistCreatedEvent);
   }
@@ -81,12 +83,12 @@ public class ArtistAggregate extends AggregateRoot {
     raiseEvent(artistVisibilityChangedEvent);
   }
 
-  public void update(
-      String name,
-      String biography,
-      String description,
-      String thumbnailUrl,
-      String backgroundUrl) {
+  public void update(UpdateArtistCommand updateArtistCommand) {
+    final String name = updateArtistCommand.getName();
+    final String biography = updateArtistCommand.getBiography();
+    final String description = updateArtistCommand.getDescription();
+    final String thumbnailUrl = updateArtistCommand.getThumbnailUrl();
+    final String backgroundUrl = updateArtistCommand.getBackgroundUrl();
     boolean hasChange = false;
     final ArtistUpdatedEvent artistUpdatedEvent =
         ArtistUpdatedEvent.builder()
@@ -94,8 +96,9 @@ public class ArtistAggregate extends AggregateRoot {
             .name(this.name)
             .biography(this.biography)
             .description(this.description)
-            .thumbnailUrl(thumbnailUrl)
-            .backgroundUrl(backgroundUrl)
+            .thumbnailUrl(this.thumbnailUrl)
+            .backgroundUrl(this.backgroundUrl)
+            .refCode(this.refCode)
             .build();
     // name
     if (!Objects.isNull(name) && !name.equals(artistUpdatedEvent.getName())) {
@@ -123,6 +126,11 @@ public class ArtistAggregate extends AggregateRoot {
         && !backgroundUrl.equals(artistUpdatedEvent.getBackgroundUrl())) {
       hasChange = true;
       artistUpdatedEvent.setBackgroundUrl(backgroundUrl);
+    }
+    // refCode
+    if (!Objects.isNull(refCode) && !refCode.equals(artistUpdatedEvent.getRefCode())) {
+      hasChange = true;
+      artistUpdatedEvent.setBackgroundUrl(refCode);
     }
     if (!hasChange) {
       throw new NoneFieldChangedException();
@@ -161,6 +169,7 @@ public class ArtistAggregate extends AggregateRoot {
     this.isPublished = artistCreatedEvent.getIsPublished();
     this.refCode = artistCreatedEvent.getRefCode();
     this.tags = artistCreatedEvent.getTags();
+    this.refCode = artistCreatedEvent.getRefCode();
   }
 
   void apply(ArtistUpdatedEvent artistUpdatedEvent) {
@@ -170,6 +179,7 @@ public class ArtistAggregate extends AggregateRoot {
     this.description = artistUpdatedEvent.getDescription();
     this.thumbnailUrl = artistUpdatedEvent.getThumbnailUrl();
     this.backgroundUrl = artistUpdatedEvent.getBackgroundUrl();
+    this.refCode = artistUpdatedEvent.getRefCode();
   }
 
   void apply(ArtistPublishedEvent artistPublishedEvent) {
