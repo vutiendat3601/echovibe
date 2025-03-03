@@ -45,7 +45,8 @@ public class ArtistCommandDispatcher implements CommandDispatcher {
       final String id = command.getId();
       final String commandType = command.getClass().getSimpleName();
       String message =
-          "Command '%s' was processed successfully: id=%s".formatted(commandType, command.getId());
+          "Command '%s' was processed successfully: aggregateId=%s"
+              .formatted(commandType, command.getId());
       try {
         send(command);
         items.add(new CommandResult(id, commandType, true, message));

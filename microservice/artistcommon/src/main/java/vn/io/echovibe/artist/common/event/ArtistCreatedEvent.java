@@ -30,7 +30,7 @@ public class ArtistCreatedEvent extends Event {
 
   @Builder.Default private Boolean isActive = true;
 
-   private String thumbnailFileKey;
+  private String thumbnailFileKey;
 
   private String thumbnailUrl;
 

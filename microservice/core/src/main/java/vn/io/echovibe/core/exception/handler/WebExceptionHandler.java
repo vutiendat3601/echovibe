@@ -38,7 +38,7 @@ public class WebExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ErrorDto> handleMethodArgumentNotValidException(
       MethodArgumentNotValidException e) {
-    log.error(e.getMessage(), e);
+    log.info(e.getMessage());
     final List<Error> errors =
         e.getAllErrors().stream()
             .map(error -> new Error(error.getDefaultMessage(), error.getObjectName()))
@@ -52,7 +52,7 @@ public class WebExceptionHandler {
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<ErrorDto> handleMethodArgumentTypeMismatchException(
       MethodArgumentTypeMismatchException e) {
-    log.error(e.getMessage(), e);
+    log.info(e.getMessage());
     final List<Error> errors = List.of(new Error(e.getMessage(), e.getName()));
     return ResponseEntity.badRequest()
         .body(
@@ -63,7 +63,7 @@ public class WebExceptionHandler {
   @ExceptionHandler(HandlerMethodValidationException.class)
   public ResponseEntity<ErrorDto> handHandlerMethodValidationException(
       HandlerMethodValidationException e) {
-    log.error(e.getMessage(), e);
+    log.info(e.getMessage());
     final List<Error> errors =
         e.getAllErrors().stream().map(error -> new Error(error.getDefaultMessage(), null)).toList();
     return ResponseEntity.badRequest()
@@ -87,7 +87,7 @@ public class WebExceptionHandler {
   @ExceptionHandler(AggregateIllegalStateException.class)
   public ResponseEntity<ErrorDto> handleAggregateIllegalStateException(
       AggregateIllegalStateException e) {
-    log.error(e.getMessage(), e);
+    log.info(e.getMessage());
     return ResponseEntity.badRequest()
         .body(
             new ErrorDto(List.of(), e.getMessage(), ZonedDateTime.now(ZoneOffset.UTC).toInstant()));

@@ -27,12 +27,7 @@ public class ArtistCommandHandler implements CommandHandler {
   @Override
   public void handle(@NonNull UpdateArtistCommand updateArtistCommand) {
     final ArtistAggregate artistAggregate = findArtistAggregateById(updateArtistCommand.getId());
-    artistAggregate.update(
-        updateArtistCommand.getName(),
-        updateArtistCommand.getBiography(),
-        updateArtistCommand.getDescription(),
-        updateArtistCommand.getThumbnailUrl(),
-        updateArtistCommand.getBackgroundUrl());
+    artistAggregate.update(updateArtistCommand);
     eventSourcingHandler.save(artistAggregate);
   }
 
