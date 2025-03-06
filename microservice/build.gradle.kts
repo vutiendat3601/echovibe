@@ -9,6 +9,7 @@ plugins {
   alias(libs.plugins.springDependencyManagementPlugin)
   alias(libs.plugins.spotlessPlugin)
   alias(libs.plugins.googleJibPlugin)
+  alias(libs.plugins.flywayPlugin)
 }
 
 allprojects {
@@ -26,6 +27,7 @@ subprojects {
   apply(plugin = rootProject.libs.plugins.springDependencyManagementPlugin.get().pluginId)
   apply(plugin = rootProject.libs.plugins.spotlessPlugin.get().pluginId)
   apply(plugin = rootProject.libs.plugins.googleJibPlugin.get().pluginId)
+  apply(plugin = rootProject.libs.plugins.flywayPlugin.get().pluginId)
 
   dependencyManagement {
     imports {
@@ -53,8 +55,8 @@ subprojects {
     toolchain {
       languageVersion = JavaLanguageVersion.of(rootProject.libs.versions.javaVersion.get())
     }
-    sourceCompatibility = JavaVersion.valueOf(rootProject.libs.versions.javaSourceCompatibility.get())
-    targetCompatibility = JavaVersion.valueOf(rootProject.libs.versions.javaTargetCompatibility.get())
+    sourceCompatibility = JavaVersion.valueOf(rootProject.libs.versions.javaSourceCompatibilityVersion.get())
+    targetCompatibility = JavaVersion.valueOf(rootProject.libs.versions.javaTargetCompatibilityVersion.get())
   }
 
   configurations {
@@ -62,12 +64,13 @@ subprojects {
       extendsFrom(configurations.annotationProcessor.get())
     }
   }
-  tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-  }
-
-  tasks.withType<Javadoc>{
-    options.encoding = "UTF-8"
+  tasks {
+    withType<JavaCompile> {
+      options.encoding = "UTF-8"
+    }
+    withType<Javadoc>{
+      options.encoding = "UTF-8"
+    }
   }
 
   spotless {
