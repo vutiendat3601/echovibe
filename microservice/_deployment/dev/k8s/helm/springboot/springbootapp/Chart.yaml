@@ -11,6 +11,6 @@ dependencies:
    - name: artistcommand
      version: "1.0.0"
      repository: file://../microservice/artistcommand
-   - name: artistquery
-     version: "1.0.0"
-     repository: file://../microservice/artistquery
+  #  - name: artistquery
+  #    version: "1.0.0"
+  #    repository: file://../microservice/artistquery

@@ -5,8 +5,5 @@ dependencies:
 - name: artistcommand
   repository: file://../microservice/artistcommand
   version: 1.0.0
-- name: artistquery
-  repository: file://../microservice/artistquery
-  version: 1.0.0
-digest: sha256:d986b83db5548561305482b8ae2e1cb0b5eb26dfc0cdb9a37ca678256f0dc430
-generated: "2025-03-03T02:38:52.162513+07:00"
+digest: sha256:7c40592fe68413b3a7ad17cb136728703e74e0b79d8ece7fc349db6e83b4c997
+generated: "2025-03-08T20:51:51.33417+07:00"
