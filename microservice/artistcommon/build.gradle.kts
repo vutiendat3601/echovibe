@@ -3,8 +3,10 @@ dependencies {
 }
 
 tasks {
-  named("jib") {
-    enabled = false
+  listOf("jib", "jibBuildTar", "jibDockerBuild").forEach {
+    named(it) {
+      enabled = false
+    }
   }
   bootJar {
     enabled = false
