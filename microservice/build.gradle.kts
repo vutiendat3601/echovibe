@@ -53,8 +53,8 @@ subprojects {
     toolchain {
       languageVersion = JavaLanguageVersion.of(rootProject.libs.versions.javaVersion.get())
     }
-    sourceCompatibility = JavaVersion.valueOf(rootProject.libs.versions.javaSourceCompatibility.get())
-    targetCompatibility = JavaVersion.valueOf(rootProject.libs.versions.javaTargetCompatibility.get())
+    sourceCompatibility = JavaVersion.valueOf(rootProject.libs.versions.javaSourceCompatibilityVersion.get())
+    targetCompatibility = JavaVersion.valueOf(rootProject.libs.versions.javaTargetCompatibilityVersion.get())
   }
 
   configurations {
@@ -62,12 +62,13 @@ subprojects {
       extendsFrom(configurations.annotationProcessor.get())
     }
   }
-  tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-  }
-
-  tasks.withType<Javadoc>{
-    options.encoding = "UTF-8"
+  tasks {
+    withType<JavaCompile> {
+      options.encoding = "UTF-8"
+    }
+    withType<Javadoc>{
+      options.encoding = "UTF-8"
+    }
   }
 
   spotless {

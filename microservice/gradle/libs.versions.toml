@@ -2,25 +2,28 @@
 
 [versions]
 javaVersion = "21"
-javaSourceCompatibility = "VERSION_21"
-javaTargetCompatibility = "VERSION_21"
+javaSourceCompatibilityVersion = "VERSION_21"
+javaTargetCompatibilityVersion = "VERSION_21"
 springCloudVersion = "2024.0.0"
-springBootVersion = "3.4.3"
 springBootAdminVersion = "3.4.1"
-springDependencyManagementVersion = "1.1.7"
 hypersistenceUtilsHibernate63Version = "3.9.0"
-spotlessVersion = "7.0.2"
 nettyAllVersion = "4.1.117.Final"
-googleJibVersion = "3.4.4"
 springDocOpenApiVersion = "2.8.4"
 nimbusJoseJwtVersion = "10.0.1"
 
+# Plugin
+springBootPluginVersion = "3.4.3"
+springDependencyManagementPluginVersion = "1.1.7"
+flywayPluginVersion = "11.3.4"
+googleJibPluginVersion = "3.4.4"
+spotlessPluginVersion = "7.0.2"
+
 [libraries]
-# hypersistenceUtilsHibernate63 = { group = "io.hypersistence", name = "hypersistence-utils-hibernate-63", version.ref = "hypersistenceUtilsHibernate63Version" }
-# springDocOpenAPI = { group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springDocOpenApiVersion" }
+# hypersistenceUtilsHibernate63 = {group = "io.hypersistence", name = "hypersistence-utils-hibernate-63", version.ref = "hypersistenceUtilsHibernate63Version"}
+# springDocOpenAPI = {group = "org.springdoc", name = "springdoc-openapi-starter-webmvc-ui", version.ref = "springDocOpenApiVersion"}
 
 [plugins]
-springBootPlugin = { id = "org.springframework.boot", version.ref = "springBootVersion" }
-springDependencyManagementPlugin = { id = "io.spring.dependency-management", version.ref = "springDependencyManagementVersion" }
-spotlessPlugin = { id = "com.diffplug.spotless", version.ref = "spotlessVersion" }
-googleJibPlugin = { id = "com.google.cloud.tools.jib", version.ref = "googleJibVersion"}
+springBootPlugin = {id = "org.springframework.boot", version.ref = "springBootPluginVersion"}
+springDependencyManagementPlugin = {id = "io.spring.dependency-management", version.ref = "springDependencyManagementPluginVersion"}
+spotlessPlugin = {id = "com.diffplug.spotless", version.ref = "spotlessPluginVersion"}
+googleJibPlugin = {id = "com.google.cloud.tools.jib", version.ref = "googleJibPluginVersion"}

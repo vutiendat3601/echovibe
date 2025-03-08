@@ -144,7 +144,22 @@ public class ArtistAggregate extends AggregateRoot {
           "Artist has already been published: aggregateId=%s".formatted(id));
     }
     final ArtistPublishedEvent artistPublishedEvent =
-        ArtistPublishedEvent.builder().id(id).isPublished(true).build();
+        ArtistPublishedEvent.builder()
+            .id(id)
+            .isPublished(true)
+            .urn(urn)
+            .name(name)
+            .biography(biography)
+            .description(description)
+            .isPublic(isPublic)
+            .isActive(true)
+            .thumbnailFileKey(thumbnailFileKey)
+            .thumbnailUrl(thumbnailUrl)
+            .backgroundFileKey(backgroundFileKey)
+            .backgroundUrl(backgroundUrl)
+            .tags(tags)
+            .refCode(refCode)
+            .build();
     raiseEvent(artistPublishedEvent);
   }
 

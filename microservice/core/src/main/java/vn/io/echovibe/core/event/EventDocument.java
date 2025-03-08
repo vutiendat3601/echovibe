@@ -22,7 +22,7 @@ import vn.io.echovibe.core.context.JwtSecurityHolder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(collection = "eventStore")
+@Document(collection = "event_document")
 public class EventDocument {
   @Id private String id;
 
