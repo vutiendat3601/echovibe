@@ -9,7 +9,6 @@ plugins {
   alias(libs.plugins.springDependencyManagementPlugin)
   alias(libs.plugins.spotlessPlugin)
   alias(libs.plugins.googleJibPlugin)
-  alias(libs.plugins.flywayPlugin)
 }
 
 allprojects {
@@ -27,7 +26,6 @@ subprojects {
   apply(plugin = rootProject.libs.plugins.springDependencyManagementPlugin.get().pluginId)
   apply(plugin = rootProject.libs.plugins.spotlessPlugin.get().pluginId)
   apply(plugin = rootProject.libs.plugins.googleJibPlugin.get().pluginId)
-  apply(plugin = rootProject.libs.plugins.flywayPlugin.get().pluginId)
 
   dependencyManagement {
     imports {
