@@ -3,7 +3,7 @@ package vn.io.echovibe.core.utils;
 import java.util.Random;
 
 public interface IdentityUtils {
-  String IDENTITY_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  String IDENTITY_CHARACTERS = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789";
   String AGGREGATE_ID_REGEX = "^[A-Za-z0-9]+$";
   int AGGREGATE_ID_LENGTH = 8;
 
