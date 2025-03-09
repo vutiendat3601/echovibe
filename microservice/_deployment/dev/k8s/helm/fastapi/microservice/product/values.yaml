@@ -23,6 +23,6 @@ database:
   vendor: "postgresql+psycopg"
   username: echovibe_product
   password: echovibe_product
-  host: infras.echovibe.io.vn:9092
-  port: "16200"
+  host: infras.echovibe.io.vn
+  port: 16200
   name: echovibe_product
