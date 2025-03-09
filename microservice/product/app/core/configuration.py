@@ -21,7 +21,7 @@ class Configuration:
         self.database_configuration.vendor = os.getenv("DATABASE_VENDOR",
                                                        "postgresql+psycopg")
         self.database_configuration.host = os.getenv("DATABASE_HOST")
-        self.database_configuration.port = int(os.getenv("DATABASE_PORT"))
+        self.database_configuration.port = int(os.getenv("DATABASE_PORT", "5432"))
         self.database_configuration.username = os.getenv("DATABASE_USERNAME")
         self.database_configuration.password = os.getenv("DATABASE_PASSWORD")
         self.database_configuration.name = os.getenv("DATABASE_NAME")
