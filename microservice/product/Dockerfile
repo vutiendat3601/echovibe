@@ -1,8 +1,10 @@
-FROM python:3.13-bookworm
+FROM python:3.13-slim-bookworm
 
 WORKDIR /app/
 COPY ./ ./
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN apt update
+RUN apt upgrade -y
+RUN pip install -r ./requirements.txt
 
-ENTRYPOINT [ "./start.sh" ]
+ENTRYPOINT [ "/app/entrypoint.sh" ]
