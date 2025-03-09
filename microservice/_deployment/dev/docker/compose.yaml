@@ -72,26 +72,26 @@ services:
       - "default"
     volumes:
       - "./product-pg/:/var/lib/postgresql/data"
-  product-i1:
-    image: "vutiendat3601/echovibe-product:latest"
-    build:
-      context: ../../../product/
-    container_name: "echovibe-product-i1"
-    hostname: "echovibe-product-i1"
-    ports:
-      - "6200:6200"
-    environment:
-      - "APP_HOST=0.0.0.0"
-      - "APP_PORT=6200"
-      - "DATABASE_VENDOR=postgresql+psycopg"
-      - "DATABASE_HOST=localhost"
-      - "DATABASE_PORT=16200"
-      - "DATABASE_USERNAME=echovibe_product"
-      - "DATABASE_PASSWORD=echovibe_product"
-      - "DATABASE_NAME=echovibe_product"
-      - "KAFKA_BROKER_BOOTSTRAP_SERVER_URLS=infras.echovibe.io.vn:9092"
-    networks:
-      - "default"
+  # product-i1:
+  #   image: "vutiendat3601/echovibe-product:latest"
+  #   build:
+  #     context: ../../../product/
+  #   container_name: "echovibe-product-i1"
+  #   hostname: "echovibe-product-i1"
+  #   ports:
+  #     - "6200:6200"
+  #   environment:
+  #     - "APP_HOST=0.0.0.0"
+  #     - "APP_PORT=6200"
+  #     - "DATABASE_VENDOR=postgresql+psycopg"
+  #     - "DATABASE_HOST=localhost"
+  #     - "DATABASE_PORT=16200"
+  #     - "DATABASE_USERNAME=echovibe_product"
+  #     - "DATABASE_PASSWORD=echovibe_product"
+  #     - "DATABASE_NAME=echovibe_product"
+  #     - "KAFKA_BROKER_BOOTSTRAP_SERVER_URLS=infras.echovibe.io.vn:9092"
+  #   networks:
+  #     - "default"
   # apigateway-nginx-i1:
   #   build:
   #     context: "../../../_infrastructure/apigateway/local/nginx/"

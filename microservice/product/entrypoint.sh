@@ -1,4 +1,4 @@
 #!/bin/bash
 
 alembic upgrade head &&
-uvicorn app.main:app --host 0.0.0.0 --port 6200
+uvicorn app.main:app --host ${APP_HOST} --port ${APP_PORT}
