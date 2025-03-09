@@ -14,10 +14,10 @@ spring:
       kafka:
         binder:
           configuration:
-            "[key.serializer]": org.apache.kafka.common.serialization.StringSerializer
-            "[value.serializer]": org.apache.kafka.common.serialization.StringSerializer
-            "[key.deserializer]": org.apache.kafka.common.serialization.StringDeserializer
-            "[value.deserializer]": org.apache.kafka.common.serialization.StringDeserializer
+            "[key.serializer]": org.apache.kafka.common.serialization.ByteArraySerializer
+            "[value.serializer]": org.apache.kafka.common.serialization.ByteArraySerializer
+            "[key.deserializer]": org.apache.kafka.common.serialization.ByteArrayDeserializer
+            "[value.deserializer]": org.apache.kafka.common.serialization.ByteArrayDeserializer
   application:
     name: artistcommand
     version: "${BUILD_VERSION:unknown}"
