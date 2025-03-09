@@ -1,0 +1,28 @@
+deployment:
+  name: product
+  containerPort: 6200
+  replicaCount: 2
+  image: 
+    repository: vutiendat3601/echovibe-product
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 6200
+    protocol: TCP
+    hostname: api.echovibe.io.vn
+    exposePathPrefix: /product/v1
+    replacePrefixMatch: /v1
+kafka:
+  enabled: true
+openidconnect:
+  enabled: false
+database:
+  enabled: true
+  vendor: "postgresql+psycopg"
+  username: echovibe_product
+  password: echovibe_product
+  host: infras.echovibe.io.vn:9092
+  port: "16200"
+  name: echovibe_product

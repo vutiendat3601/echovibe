@@ -1,0 +1,6 @@
+apiVersion: v2
+name: fastapiapp-common
+type: application
+description: Helm libary chart for FastAPI Application
+version: 1.0.0
+appVersion: "1.16.0"
