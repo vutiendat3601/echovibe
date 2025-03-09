@@ -4,11 +4,13 @@
   "java.jdt.ls.java.home": "~/Library/Java/JavaVirtualMachines/corretto-21.0.5/Contents/Home",
   "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable",
   "[python]": {
-    "editor.defaultFormatter": "eeyore.yapf"
+    "editor.defaultFormatter": "eeyore.yapf",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
   },
   "yapf.args": [
     "--style",
-    "./product/pyproject.toml"
+    "./product/.style.yapf"
   ],
   "editor.autoIndent": "none"
 }
