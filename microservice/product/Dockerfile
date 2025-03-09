@@ -5,6 +5,7 @@ COPY ./ ./
 
 RUN apt update
 RUN apt upgrade -y
+RUN apt install libpq-dev -y
 RUN pip install -r ./requirements.txt
 
 ENV APP_HOST=0.0.0.0
