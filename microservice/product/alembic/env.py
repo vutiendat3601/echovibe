@@ -27,7 +27,7 @@ database_envs = {
 if not any(key is None for key in database_envs):
     config.set_main_option(
         "sqlalchemy.url",
-        f'{database_envs["vendor"]}://{database_envs["username"]}:{database_envs["password"]}@{database_envs["host"]}:{database_envs["port"]}/{database_envs["name}"]}'
+        f'{database_envs["vendor"]}://{database_envs["username"]}:{database_envs["password"]}@{database_envs["host"]}:{database_envs["port"]}/{database_envs["name"]}'
     )
 
 # add your model's MetaData object here

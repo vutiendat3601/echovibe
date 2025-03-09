@@ -1,0 +1,76 @@
+{{- define "fastapiapp-common.deployment" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.deployment.name }}-deploy"
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.deployment.name }}
+spec:
+  replicas: {{ .Values.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deployment.name }}
+    spec:
+      containers:
+      - name: {{ .Values.deployment.name }}
+        image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.deployment.containerPort }}
+          protocol: TCP
+        env:
+        # Validating JWT token
+        {{- if .Values.openidconnect.enabled }}
+        - name: APP_WEB_AUTH_OPENIDCONNECTCERTSURL
+          valueFrom: 
+            secretKeyRef:
+              name: "{{ .Values.deployment.name }}-secret"
+              key: APP_WEB_AUTH_OPENIDCONNECTCERTSURL
+        {{ end }}
+        # Kafka
+        {{- if .Values.kafka.enabled }}
+        - name: KAFKA_BROKER_BOOTSTRAP_SERVER_URLS
+          valueFrom: 
+            secretKeyRef:
+              name: "{{ .Values.deployment.name }}-secret"
+              key: KAFKA_BROKER_BOOTSTRAP_SERVER_URLS
+        {{ end }}
+        # Database
+        {{- if .Values.database.enabled }}
+        - name: DATABASE_VENDOR
+          valueFrom: 
+            secretKeyRef:
+              name: "{{ .Values.deployment.name }}-secret"
+              key: DATABASE_VENDOR
+        - name: DATABASE_HOST
+          valueFrom: 
+            secretKeyRef:
+              name: "{{ .Values.deployment.name }}-secret"
+              key: DATABASE_HOST
+        - name: DATABASE_PORT
+          valueFrom: 
+            secretKeyRef:
+              name: "{{ .Values.deployment.name }}-secret"
+              key: DATABASE_PORT
+        - name: DATABASE_USERNAME
+          valueFrom: 
+            secretKeyRef:
+              name: "{{ .Values.deployment.name }}-secret"
+              key: DATABASE_USERNAME
+        - name: DATABASE_PASSWORD
+          valueFrom: 
+            secretKeyRef:
+              name: "{{ .Values.deployment.name }}-secret"
+              key: DATABASE_PASSWORD
+        - name: DATABASE_NAME
+          valueFrom: 
+            secretKeyRef:
+              name: "{{ .Values.deployment.name }}-secret"
+              key: DATABASE_NAME
+        {{ end }}
+{{- end -}}
