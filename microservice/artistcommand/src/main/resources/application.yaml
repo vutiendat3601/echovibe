@@ -20,7 +20,7 @@ spring:
             "[value.deserializer]": org.apache.kafka.common.serialization.ByteArrayDeserializer
   application:
     name: artistcommand
-    version: "${BUILD_VERSION:unknown}"
+    version: "${BUILD_NUMBER:unknown}"
   docker:
     compose:
       enabled: false

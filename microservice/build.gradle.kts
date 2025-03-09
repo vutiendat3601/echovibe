@@ -1,7 +1,7 @@
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.ZoneOffset
-val BUILD_VERSION = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss"))
+val BUILD_NUMBER = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss"))
 
 plugins {
   java
@@ -93,11 +93,11 @@ subprojects {
     }
     to {
       image = "vutiendat3601/echovibe-${project.name}"
-      tags = setOf("${BUILD_VERSION}", "latest")
+      tags = setOf("${BUILD_NUMBER}", "latest")
     }
     container {
       environment = mapOf(
-        "BUILD_VERSION" to "${BUILD_VERSION}"
+        "BUILD_NUMBER" to "${BUILD_NUMBER}"
       )
     }
   }
