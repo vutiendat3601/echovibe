@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import vn.io.echovibe.core.command.Command;
@@ -52,7 +53,8 @@ public class ArtistCommandDispatcher implements CommandDispatcher {
         items.add(new CommandResult(id, commandType, true, message));
       } catch (Exception e) {
         message =
-            "Command '%s' was process unsuccessfully: %s".formatted(commandType, e.getMessage());
+            "Command '%s' was process unsuccessfully: %s"
+                .formatted(commandType, Optional.ofNullable(e.getCause()).orElse(e).getMessage());
         items.add(new CommandResult(id, commandType, false, message));
       }
     }
