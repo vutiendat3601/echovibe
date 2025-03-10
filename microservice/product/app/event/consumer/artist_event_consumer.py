@@ -36,7 +36,6 @@ async def listen_artist_published_event():
             _consume_artist_published_event(artist_published_event)
     finally:
         await artist_published_event_consumer.stop()
-    pass
 
 
 def _consume_artist_published_event(

@@ -1,9 +1,10 @@
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator
+import asyncio
 from fastapi import FastAPI
 from app.util.dependency_util import singleton
 from app.router.router import apiRouter
 from app.core.container import Container
-import asyncio
 from app.event.consumer.artist_event_consumer import listen_artist_published_event
 
 
@@ -13,22 +14,17 @@ class AppInitializer:
     def __init__(self):
 
         @asynccontextmanager
-        async def lifespan(_: FastAPI):
-            self.logger.info("Starting Kafka consumer...")
-            consume_tasks = []
-            consume_task = await asyncio.create_task(
-                listen_artist_published_event())
-            consume_tasks.append(consume_task)
-            try:
-                yield
-            finally:
-                self.logger.info("Shutting down Kafka consumer...")
-                for consume_task in consume_tasks:
-                    consume_task.cancel()
-                    try:
-                        await consume_task
-                    except asyncio.CancelledError:
-                        pass
+        async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
+            self.logger.info("Starting Kafka consumers...")
+            consumer_tasks = []
+            consumer_listeners = [listen_artist_published_event]
+            for consumer_listener in consumer_listeners:
+                consumer_tasks.append(asyncio.create_task(consumer_listener()))
+            yield
+            self.logger.info("Shutting down Kafka consumers...")
+            for consumer_task in consumer_tasks:
+                consumer_task.cancel()
+            self.logger.info("All Kafka consumers stopped.")
 
         self.app = FastAPI(title="Echo Vibe - Product APIs",
                            version="1.0.0",
