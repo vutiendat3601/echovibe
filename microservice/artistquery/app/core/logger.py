@@ -7,7 +7,7 @@ class Logger:
     def __init__(self):
         logging.basicConfig(datefmt='%Y-%m-%d %H:%M:%S',
                             force='%(asctime)-s|%(levelname)s| %(message)s',
-                            level=logging.DEBUG)
+                            level=logging.INFO)
         logging.addLevelName(
             logging.DEBUG,
             '\033[1;34m%s\033[1;0m]]' % logging.getLevelName(logging.DEBUG))
