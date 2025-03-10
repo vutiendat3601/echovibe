@@ -3,7 +3,7 @@ from app.schema.artist_schema import ArtistSchema
 
 
 def map_to_artist_schema(artist: Artist):
-    return ArtistSchema(id=artist.id,
+    return ArtistSchema(id=artist.aggregate_id,
                         urn=artist.urn,
                         name=artist.name,
                         biography=artist.biography,
