@@ -38,9 +38,9 @@ class AppInitializer:
         self.app = FastAPI(title="Echo Vibe - Product APIs",
                            version="1.0.0",
                            lifespan=lifespan)
-        print(f"\n{banner}")
-        print(f"product {configuration.get_build_number()}")
-        print(f"Powered by FastAPI\n")
+        self.logger.info(
+            f"\n{banner}\nproduct {configuration.get_build_number()}\nPowered by FastAPI\n"
+        )
 
         # # Set routes
         self.app.include_router(apiRouter)
