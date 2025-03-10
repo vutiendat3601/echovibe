@@ -15,5 +15,6 @@ import vn.io.echovibe.core.event.Event;
 @Setter
 public class ArtistDeletedEvent extends Event {
   @Builder.Default private Boolean isActive = false;
+
   @Builder.Default private Boolean isSoftDeleted = true;
 }

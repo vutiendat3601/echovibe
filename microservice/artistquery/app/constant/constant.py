@@ -1,0 +1,6 @@
+APP_NAME = "artistquery"
+ARTIST_CREATED_EVENT = "artist.ArtistCreatedEvent"
+ARTIST_PUBLISHED_EVENT = "artist.ArtistPublishedEvent"
+ARTIST_UPDATED_EVENT = "artist.ArtistUpdatedEvent"
+ARTIST_DELETED_EVENT = "artist.ArtistDeletedEvent"
+ARTIST_VISIBILITY_CHANGED_EVENT = "artist.ArtistVisibilityChangedEvent"
