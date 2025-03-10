@@ -8,7 +8,8 @@ from app.service.artist_service import ArtistService
 
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(modules=[
-        "app.router.artist_router", "app.event.consumer.artist_event_consumer"
+        "app.router.artist_router",
+        "app.event.consumer.artist_event_consumer",
     ])
 
     logger = providers.Singleton(Logger)

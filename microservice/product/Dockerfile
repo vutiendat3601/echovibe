@@ -12,4 +12,4 @@ ENV APP_HOST=0.0.0.0
 ENV APP_PORT=6200
 EXPOSE 6200
 
-ENTRYPOINT [ "/app/entrypoint.sh" ]
+ENTRYPOINT ["/app/entrypoint.sh"]
