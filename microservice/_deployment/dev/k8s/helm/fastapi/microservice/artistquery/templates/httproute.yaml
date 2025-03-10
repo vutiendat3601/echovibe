@@ -1,0 +1,1 @@
+{{- template "fastapiapp-common.httproute" . -}}

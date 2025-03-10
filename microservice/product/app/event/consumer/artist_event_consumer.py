@@ -17,16 +17,20 @@ artist_repository: ArtistRepository = Provide[Container.artist_repository]
 
 logger: Logger = Provide[Container.logger]
 
+kafka_consumer_properties = {
+    "bootstrap_servers": kafka_broker_bootstrap_server_urls,
+    "group_id": APP_NAME,
+    "key_deserializer": lambda k: json.loads(k.decode()) if k else None,
+    "value_deserializer": lambda v: json.loads(v.decode()) if v else None
+}
 
+
+# Consumer Listeners ###########################################################
 async def listen_artist_published_event():
     artist_published_event_consumer = AIOKafkaConsumer(
-        f"{ARTIST_PUBLISHED_EVENT}",
-        bootstrap_servers=kafka_broker_bootstrap_server_urls,
-        group_id=APP_NAME,
-        key_deserializer=lambda k: json.loads(k.decode()) if k else None,
-        value_deserializer=lambda v: json.loads(v.decode()) if v else None,
-    )
+        ARTIST_PUBLISHED_EVENT, **kafka_consumer_properties)
     await artist_published_event_consumer.start()
+    logger.info(f"Listening: topic={ARTIST_PUBLISHED_EVENT}")
     try:
         async for message in artist_published_event_consumer:
             artist_published_event = ArtistPublishedEvent(**message.value)
@@ -36,6 +40,9 @@ async def listen_artist_published_event():
             _consume_artist_published_event(artist_published_event)
     finally:
         await artist_published_event_consumer.stop()
+
+
+# Consumer Functions ###########################################################
 
 
 def _consume_artist_published_event(

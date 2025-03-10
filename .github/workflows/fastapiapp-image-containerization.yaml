@@ -18,7 +18,10 @@ jobs:
           registry: docker.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build Docker image
+      - name: Build artistquery image
+        working-directory: ./microservice/artistquery
+        run: ./publish.sh
+      - name: Build product image
         working-directory: ./microservice/product
         run: ./publish.sh
       
