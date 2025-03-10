@@ -17,11 +17,13 @@ class Configuration:
     database_configuration: DatabaseConfiguration
 
     def __init__(self) -> None:
+        self.build_number = os.getenv("BUILD_NUMBER", "unknown")
         self.database_configuration = DatabaseConfiguration()
         self.database_configuration.vendor = os.getenv("DATABASE_VENDOR",
                                                        "postgresql+psycopg")
         self.database_configuration.host = os.getenv("DATABASE_HOST")
-        self.database_configuration.port = int(os.getenv("DATABASE_PORT", "5432"))
+        self.database_configuration.port = int(
+            os.getenv("DATABASE_PORT", "5432"))
         self.database_configuration.username = os.getenv("DATABASE_USERNAME")
         self.database_configuration.password = os.getenv("DATABASE_PASSWORD")
         self.database_configuration.name = os.getenv("DATABASE_NAME")
@@ -33,6 +35,9 @@ class Configuration:
 
     def get_kafka_broker_bootstrap_server_urls(self) -> str:
         return self.kafka_broker_bootstrap_server_urls
+
+    def get_build_number(self) -> str:
+        return self.build_number
 
 
 configuration = Configuration()
