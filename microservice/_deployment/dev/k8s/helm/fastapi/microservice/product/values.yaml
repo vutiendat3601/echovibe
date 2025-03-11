@@ -1,7 +1,7 @@
 deployment:
   name: product
   containerPort: 6200
-  replicaCount: 2
+  replicaCount: 1
   image: 
     repository: vutiendat3601/echovibe-product
     tag: latest

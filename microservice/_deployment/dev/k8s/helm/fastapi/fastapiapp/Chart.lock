@@ -2,8 +2,11 @@ dependencies:
 - name: fastapiapp-common
   repository: file://../fastapiapp-common
   version: 1.0.0
+- name: artistquery
+  repository: file://../microservice/artistquery
+  version: 1.0.0
 - name: product
   repository: file://../microservice/product
   version: 1.0.0
-digest: sha256:722e6a22c0be0986cce0c9171487f2e5ad49e3cf4694e57cd14c554f01e64b8e
-generated: "2025-03-09T13:19:09.575515+07:00"
+digest: sha256:b884b87f73482db83f220ad4e5847e2debe203e54457b62aafedf797ae155697
+generated: "2025-03-10T17:58:52.949068+07:00"

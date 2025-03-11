@@ -1,14 +1,14 @@
+from dependency_injector.wiring import Provide
+from aiokafka import AIOKafkaConsumer
+import json
+from app.core.logger import Logger
+from datetime import datetime, timezone
 from app.constant.constant import ARTIST_CREATED_EVENT, ARTIST_PUBLISHED_EVENT, ARTIST_UPDATED_EVENT, ARTIST_DELETED_EVENT, ARTIST_VISIBILITY_CHANGED_EVENT, APP_NAME
 from app.core.configuration import configuration
 from app.repository.artist_repository import ArtistRepository
 from app.core.container import Container
 from app.event.schema.artist_event_schema import ArtistCreatedEvent, ArtistPublishedEvent, ArtistUpdatedEvent, ArtistDeletedEvent, ArtistVisibilityChangedEvent
 from app.model.artist import Artist
-from dependency_injector.wiring import Provide
-from aiokafka import AIOKafkaConsumer
-import json
-from app.core.logger import Logger
-from datetime import datetime, timezone
 
 kafka_broker_bootstrap_server_urls = configuration.get_kafka_broker_bootstrap_server_urls(
 )
@@ -90,6 +90,32 @@ async def listen_artist_deleted_event():
         await artist_deleted_event_consumer.stop()
 
 
+async def listen_artist_visibility_changed_event():
+    artist_visibility_changed_event_consumer = AIOKafkaConsumer(
+        ARTIST_VISIBILITY_CHANGED_EVENT, **kafka_consumer_properties)
+    await artist_visibility_changed_event_consumer.start()
+    logger.info(f"Listening: topic={ARTIST_VISIBILITY_CHANGED_EVENT}")
+    try:
+        async for message in artist_visibility_changed_event_consumer:
+            artist_visibility_changed_event = ArtistVisibilityChangedEvent(
+                **message.value)
+            logger.info(
+                f"Received ArtistVisibilityChangedEvent: id={artist_visibility_changed_event.id}, version={artist_visibility_changed_event.version}"
+            )
+            _consume_artist_visibility_changed_event(
+                artist_visibility_changed_event)
+    finally:
+        await artist_visibility_changed_event_consumer.stop()
+
+
+def get_artist_event_listeners() -> list[callable]:
+    return [
+        listen_artist_created_event, listen_artist_published_event,
+        listen_artist_updated_event, listen_artist_deleted_event,
+        listen_artist_visibility_changed_event
+    ]
+
+
 # Consumer Functions ###########################################################
 def _consume_artist_created_event(artist_created_event: ArtistCreatedEvent):
     created_at = datetime.now(timezone.utc)
@@ -146,3 +172,12 @@ def _consume_artist_deleted_event(artist_deleted_event: ArtistDeletedEvent):
             artist_repository.save_artist(artist)
     else:
         artist_repository.delete_artist(artist_deleted_event.id)
+
+
+def _consume_artist_visibility_changed_event(
+        artist_visibility_changed_event: ArtistVisibilityChangedEvent):
+    artist = artist_repository.find_by_aggregate_id(
+        artist_visibility_changed_event.id)
+    if artist is not None:
+        artist.is_public = artist_visibility_changed_event.is_public
+        artist_repository.save_artist(artist)
