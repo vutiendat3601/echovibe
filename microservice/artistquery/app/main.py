@@ -3,19 +3,15 @@ from typing import AsyncGenerator
 from pathlib import Path
 import asyncio
 from fastapi import FastAPI
+from typing import Callable
 from app.util.dependency_util import singleton
 from app.router.router import apiRouter
 from app.core.container import Container
-from app.event.consumer.artist_event_consumer import listen_artist_created_event, listen_artist_published_event, listen_artist_updated_event, listen_artist_deleted_event
 from app.core.configuration import configuration
 from app.constant.constant import APP_NAME
+from app.event.consumer.artist_event_consumer import get_artist_event_listeners
 
 banner = Path("banner.txt").read_text()
-
-CONSUMER_LISTENERS = [
-    listen_artist_created_event, listen_artist_published_event,
-    listen_artist_updated_event, listen_artist_deleted_event
-]
 
 
 @singleton
@@ -27,7 +23,8 @@ class AppInitializer:
         async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
             self.logger.info("Starting Kafka consumers...")
             consumer_tasks = []
-            for consumer_listener in CONSUMER_LISTENERS:
+            consumer_listeners: list[Callable] = get_artist_event_listeners()
+            for consumer_listener in consumer_listeners:
                 consumer_tasks.append(asyncio.create_task(consumer_listener()))
             yield
             self.logger.info("Shutting down Kafka consumers...")

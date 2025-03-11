@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from app.util.dependency_util import singleton
 from app.router.router import apiRouter
 from app.core.container import Container
-from app.event.consumer.artist_event_consumer import listen_artist_published_event
+from app.event.consumer.artist_event_consumer import get_artist_event_listeners
 from app.core.configuration import configuration
 from app.constant.constant import APP_NAME
 
@@ -22,7 +22,7 @@ class AppInitializer:
         async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
             self.logger.info("Starting Kafka consumers...")
             consumer_tasks = []
-            consumer_listeners = [listen_artist_published_event]
+            consumer_listeners: list[callable] = get_artist_event_listeners()
             for consumer_listener in consumer_listeners:
                 consumer_tasks.append(asyncio.create_task(consumer_listener()))
             yield

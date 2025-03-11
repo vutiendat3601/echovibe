@@ -14,7 +14,9 @@ class DatabaseConfiguration:
 
 
 class Configuration:
+    build_number = None
     database_configuration: DatabaseConfiguration
+    kafka_broker_bootstrap_server_urls = None
 
     def __init__(self) -> None:
         self.build_number = os.getenv("BUILD_NUMBER", "unknown")
@@ -30,14 +32,14 @@ class Configuration:
         self.kafka_broker_bootstrap_server_urls = os.getenv(
             "KAFKA_BROKER_BOOTSTRAP_SERVER_URLS")
 
+    def get_build_number(self) -> str:
+        return self.build_number
+
     def get_database_uri(self) -> str:
         return f"{self.database_configuration.vendor}://{self.database_configuration.username}:{self.database_configuration.password}@{self.database_configuration.host}:{self.database_configuration.port}/{self.database_configuration.name}"
 
     def get_kafka_broker_bootstrap_server_urls(self) -> str:
         return self.kafka_broker_bootstrap_server_urls
-
-    def get_build_number(self) -> str:
-        return self.build_number
 
 
 configuration = Configuration()

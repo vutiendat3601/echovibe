@@ -1,7 +1,7 @@
 deployment:
   name: artistquery
   containerPort: 6110
-  replicaCount: 2
+  replicaCount: 1
   image: 
     repository: vutiendat3601/echovibe-artistquery
     tag: latest
