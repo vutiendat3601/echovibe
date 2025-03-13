@@ -63,7 +63,7 @@ services:
         - "MONGO_INITDB_ROOT_USERNAME=echovibe_trackcommand"
         - "MONGO_INITDB_ROOT_PASSWORD=echovibe_trackcommand"
       ports:
-        - "26110:27017"
+        - "26120:27017"
       volumes:
         - "./trackcommand-mongo/:/data/db/"
       networks:
@@ -77,7 +77,7 @@ services:
       - "SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=infras.echovibe.io.vn:9092"
       - "APP_WEB_AUTH_OPENIDCONNECTCERTSURL=https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs"
     ports:
-      - "6110:6110"
+      - "6120:6120"
     networks:
       - "default"
     depends_on:
