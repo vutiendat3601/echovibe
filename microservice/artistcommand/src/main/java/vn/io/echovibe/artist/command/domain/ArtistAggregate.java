@@ -68,7 +68,7 @@ public class ArtistAggregate extends AggregateRoot {
 
   public void setIsPublic(Boolean isPublic) {
     if (Objects.nonNull(isPublic) && isPublic.equals(this.isPublic)) {
-      throw new AggregateIllegalStateException(
+      throw new NoneFieldChangedException(
           "Visiblity of artist hasn't changed: aggregateId=%s, isPublic=%s"
               .formatted(id, isPublic));
     }

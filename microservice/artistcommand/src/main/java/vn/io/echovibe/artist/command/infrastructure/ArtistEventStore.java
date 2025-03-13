@@ -1,6 +1,6 @@
 package vn.io.echovibe.artist.command.infrastructure;
 
-import static vn.io.echovibe.artist.command.constant.ArtistConstant.ARTIST_EVENT_TOPIC_PREFIX;
+import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_EVENT_TOPIC_PREFIX;
 
 import java.util.List;
 import java.util.stream.Collectors;
