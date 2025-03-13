@@ -54,6 +54,68 @@ services:
       - "default"
     depends_on:
       - "artistquery-pg-i1"
+  trackcommand-mongo-i1:
+      image: "mongo:8.0.4"
+      container_name: "echovibe-trackcommand-mongo-i1"
+      hostname: "echovibe-trackcommand-mongo-i1"
+      environment:
+        - "MONGO_INITDB_DATABASE=echovibe_trackcommand"
+        - "MONGO_INITDB_ROOT_USERNAME=echovibe_trackcommand"
+        - "MONGO_INITDB_ROOT_PASSWORD=echovibe_trackcommand"
+      ports:
+        - "26110:27017"
+      volumes:
+        - "./trackcommand-mongo/:/data/db/"
+      networks:
+        - "default"
+  trackcommand-i1:
+    image: "vutiendat3601/echovibe-trackcommand:latest"
+    container_name: "echovibe-trackcommand-i1"
+    hostname: "echovibe-trackcommand-i1"
+    environment:
+      - "SPRING_DATA_MONGODB_URI=mongodb://echovibe_trackcommand:echovibe_trackcommand@echovibe-trackcommand-mongo-i1:27017/echovibe_trackcommand?authSource=admin"
+      - "SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS=infras.echovibe.io.vn:9092"
+      - "APP_WEB_AUTH_OPENIDCONNECTCERTSURL=https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs"
+    ports:
+      - "6110:6110"
+    networks:
+      - "default"
+    depends_on:
+      - "trackcommand-mongo-i1"
+  product-pg-i1:
+    image: "postgres:17.2-bookworm"
+    container_name: "echovibe-product-pg-i1"
+    hostname: "echovibe-product-pg-i1"
+    environment:
+      - POSTGRES_DB=echovibe_product
+      - POSTGRES_USER=echovibe_product
+      - POSTGRES_PASSWORD=echovibe_product
+    ports:
+      - "16200:5432"
+    networks:
+      - "default"
+    volumes:
+      - "./product-pg/:/var/lib/postgresql/data"
+  product-i1:
+    image: "vutiendat3601/echovibe-product:latest"
+    build:
+      context: ../../../product/
+    container_name: "echovibe-product-i1"
+    hostname: "echovibe-product-i1"
+    ports:
+      - "6200:6200"
+    environment:
+      - "APP_HOST=0.0.0.0"
+      - "APP_PORT=6200"
+      - "DATABASE_VENDOR=postgresql+psycopg"
+      - "DATABASE_HOST=localhost"
+      - "DATABASE_PORT=16200"
+      - "DATABASE_USERNAME=echovibe_product"
+      - "DATABASE_PASSWORD=echovibe_product"
+      - "DATABASE_NAME=echovibe_product"
+      - "KAFKA_BROKER_BOOTSTRAP_SERVER_URLS=infras.echovibe.io.vn:9092"
+    networks:
+      - "default"
   apigateway-nginx-i1:
     build:
       context: "../../../_infrastructure/apigateway/local/nginx/"

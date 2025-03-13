@@ -60,20 +60,20 @@ services:
   #     - "default"
   #   depends_on:
   #     - "artistquery-pg-i1"
-    trackcommand-mongo-i1:
-      image: "mongo:8.0.4"
-      container_name: "echovibe-trackcommand-mongo-i1"
-      hostname: "echovibe-trackcommand-mongo-i1"
-      environment:
-        - "MONGO_INITDB_DATABASE=echovibe_trackcommand"
-        - "MONGO_INITDB_ROOT_USERNAME=echovibe_trackcommand"
-        - "MONGO_INITDB_ROOT_PASSWORD=echovibe_trackcommand"
-      ports:
-        - "26110:27017"
-      volumes:
-        - "./trackcommand-mongo/:/data/db/"
-      networks:
-        - "default"
+  trackcommand-mongo-i1:
+    image: "mongo:8.0.4"
+    container_name: "echovibe-trackcommand-mongo-i1"
+    hostname: "echovibe-trackcommand-mongo-i1"
+    environment:
+      - "MONGO_INITDB_DATABASE=echovibe_trackcommand"
+      - "MONGO_INITDB_ROOT_USERNAME=echovibe_trackcommand"
+      - "MONGO_INITDB_ROOT_PASSWORD=echovibe_trackcommand"
+    ports:
+      - "26110:27017"
+    volumes:
+      - "./trackcommand-mongo/:/data/db/"
+    networks:
+      - "default"
     # trackcommand-i1:
     #   image: "vutiendat3601/echovibe-trackcommand:latest"
     #   container_name: "echovibe-trackcommand-i1"
