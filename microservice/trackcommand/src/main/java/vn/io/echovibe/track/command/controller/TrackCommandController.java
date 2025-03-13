@@ -52,14 +52,13 @@ public class TrackCommandController {
     final List<CreateTrackCommand> createTrackCommands =
         bulkCreateDto.items().stream()
             .map(
-                cad ->
+                ctd ->
                     CreateTrackCommand.builder()
                         .id(IdentityUtils.generateAggregateId())
-                        .name(cad.name())
-                        .biography(cad.biography())
-                        .description(cad.description())
-                        .thumbnailUrl(cad.thumbnailUrl())
-                        .backgroundUrl(cad.backgroundUrl())
+                        .name(ctd.name())
+                        .description(ctd.description())
+                        .thumbnailUrl(ctd.thumbnailUrl())
+                        .artistIds(ctd.artistIds())
                         .build())
             .collect(Collectors.toList());
     final BulkResult bulkResult = commandDispatcher.send(createTrackCommands);
