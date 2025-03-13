@@ -1,0 +1,6 @@
+dependencies:
+- name: springbootapp-common
+  repository: file://../../springbootapp-common
+  version: 1.0.0
+digest: sha256:5297936ccc6e072755b84126945354f6d20cf81f4c1be627458ebbb4ecb2eaba
+generated: "2025-03-02T10:29:24.699449+07:00"
