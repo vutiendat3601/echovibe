@@ -1,27 +1,29 @@
-package vn.io.echovibe.artist.command.handler;
+package vn.io.echovibe.track.command.handler;
 
-import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_EVENT_TOPIC_PREFIX;
+import static vn.io.echovibe.track.common.constant.TrackConstant.TRACK_EVENT_TOPIC_PREFIX;
 
 import java.util.Comparator;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import vn.io.echovibe.artist.command.domain.ArtistAggregate;
+
+import lombok.RequiredArgsConstructor;
 import vn.io.echovibe.core.event.Event;
 import vn.io.echovibe.core.event.EventProducer;
 import vn.io.echovibe.core.event.EventSourcingHandler;
 import vn.io.echovibe.core.event.EventStore;
+import vn.io.echovibe.track.command.domain.TrackAggregate;
 
 @RequiredArgsConstructor
 @Service
-public class ArtistEventSourcingHandler implements EventSourcingHandler<ArtistAggregate> {
+public class TrackEventSourcingHandler implements EventSourcingHandler<TrackAggregate> {
   private final EventProducer eventProducer;
 
   private final EventStore eventStore;
 
   @Override
-  public void save(ArtistAggregate artistAggregate) {
+  public void save(TrackAggregate artistAggregate) {
     eventStore.saveEvents(
         artistAggregate.getId(),
         artistAggregate.getUncommittedChanges(),
@@ -29,8 +31,8 @@ public class ArtistEventSourcingHandler implements EventSourcingHandler<ArtistAg
   }
 
   @Override
-  public ArtistAggregate findById(String id) {
-    final ArtistAggregate artistAggregate = new ArtistAggregate();
+  public TrackAggregate findById(String id) {
+    final TrackAggregate artistAggregate = new TrackAggregate();
     final List<Event> events = eventStore.getEvents(id);
     if (!CollectionUtils.isEmpty(events)) {
       artistAggregate.replayEvents(events);
@@ -46,13 +48,13 @@ public class ArtistEventSourcingHandler implements EventSourcingHandler<ArtistAg
   public void republishEvents() {
     final List<String> aggregateIds = eventStore.getAggregateIds();
     for (String aggregateId : aggregateIds) {
-      final ArtistAggregate artistAggregate = findById(aggregateId);
+      final TrackAggregate artistAggregate = findById(aggregateId);
       if (!artistAggregate.getIsActive()) {
         continue;
       }
       final List<Event> events = eventStore.getEvents(aggregateId);
       for (Event event : events) {
-        eventProducer.produce(ARTIST_EVENT_TOPIC_PREFIX + event.getClass().getSimpleName(), event);
+        eventProducer.produce(TRACK_EVENT_TOPIC_PREFIX + event.getClass().getSimpleName(), event);
       }
     }
   }

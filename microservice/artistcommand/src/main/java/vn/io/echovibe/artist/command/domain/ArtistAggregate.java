@@ -1,6 +1,6 @@
 package vn.io.echovibe.artist.command.domain;
 
-import static vn.io.echovibe.artist.command.constant.ArtistConstant.ARTIST_URN_PREFIX;
+import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_URN_PREFIX;
 
 import java.util.List;
 import java.util.Objects;
@@ -68,7 +68,7 @@ public class ArtistAggregate extends AggregateRoot {
 
   public void setIsPublic(Boolean isPublic) {
     if (Objects.nonNull(isPublic) && isPublic.equals(this.isPublic)) {
-      throw new AggregateIllegalStateException(
+      throw new NoneFieldChangedException(
           "Visiblity of artist hasn't changed: aggregateId=%s, isPublic=%s"
               .formatted(id, isPublic));
     }
@@ -130,7 +130,7 @@ public class ArtistAggregate extends AggregateRoot {
     // refCode
     if (!Objects.isNull(refCode) && !refCode.equals(artistUpdatedEvent.getRefCode())) {
       hasChange = true;
-      artistUpdatedEvent.setBackgroundUrl(refCode);
+      artistUpdatedEvent.setRefCode(refCode);
     }
     if (!hasChange) {
       throw new NoneFieldChangedException();

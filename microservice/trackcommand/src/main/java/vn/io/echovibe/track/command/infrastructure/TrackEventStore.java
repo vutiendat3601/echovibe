@@ -1,23 +1,23 @@
-package vn.io.echovibe.artist.command.infrastructure;
+package vn.io.echovibe.track.command.infrastructure;
 
-import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_EVENT_TOPIC_PREFIX;
+import static vn.io.echovibe.track.common.constant.TrackConstant.TRACK_EVENT_TOPIC_PREFIX;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import vn.io.echovibe.artist.command.domain.ArtistAggregate;
 import vn.io.echovibe.core.domain.EventStoreRepository;
 import vn.io.echovibe.core.event.Event;
 import vn.io.echovibe.core.event.EventDocument;
 import vn.io.echovibe.core.event.EventProducer;
 import vn.io.echovibe.core.event.EventStore;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
+import vn.io.echovibe.track.command.domain.TrackAggregate;
 
 @RequiredArgsConstructor
 @Service
-public class ArtistEventStore implements EventStore {
+public class TrackEventStore implements EventStore {
   private final EventProducer eventProducer;
 
   private final EventStoreRepository eventStoreRepository;
@@ -36,14 +36,14 @@ public class ArtistEventStore implements EventStore {
       EventDocument eventDocument =
           EventDocument.builder()
               .aggregateId(aggregateId)
-              .aggregateType(ArtistAggregate.class.getTypeName())
+              .aggregateType(TrackAggregate.class.getTypeName())
               .version(version)
               .eventType(event.getClass().getTypeName())
               .event(event)
               .build();
       eventDocument = eventStoreRepository.save(eventDocument);
       if (!eventDocument.getId().isEmpty()) {
-        final String eventTopic = ARTIST_EVENT_TOPIC_PREFIX + event.getClass().getSimpleName();
+        final String eventTopic = TRACK_EVENT_TOPIC_PREFIX + event.getClass().getSimpleName();
         eventProducer.produce(eventTopic, event);
       }
     }
@@ -53,7 +53,7 @@ public class ArtistEventStore implements EventStore {
   public List<Event> getEvents(String aggregateId) {
     final List<EventDocument> eventDocuments = eventStoreRepository.findByAggregateId(aggregateId);
     if (CollectionUtils.isEmpty(eventDocuments)) {
-      throw new AggregateNotFoundException("Artist not found: id=%s".formatted(aggregateId));
+      throw new AggregateNotFoundException("Track not found: id=%s".formatted(aggregateId));
     }
     return eventDocuments.stream().map(EventDocument::getEvent).collect(Collectors.toList());
   }

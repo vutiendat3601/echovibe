@@ -1,0 +1,31 @@
+server:
+  port: 6120
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  info:
+    env:
+      enabled: true
+spring:
+  cloud:
+    stream:
+      kafka:
+        binder:
+          configuration:
+            "[key.serializer]": org.apache.kafka.common.serialization.ByteArraySerializer
+            "[value.serializer]": org.apache.kafka.common.serialization.ByteArraySerializer
+            "[key.deserializer]": org.apache.kafka.common.serialization.ByteArrayDeserializer
+            "[value.deserializer]": org.apache.kafka.common.serialization.ByteArrayDeserializer
+  application:
+    name: trackcommand
+    version: "${BUILD_NUMBER:unknown}"
+  docker:
+    compose:
+      enabled: false
+springdoc:
+  api-docs:
+    path: /v1/tracks/openapi
+  swagger-ui:
+    path: /v1/tracks/openapi.html

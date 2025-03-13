@@ -1,7 +1,8 @@
 package vn.io.echovibe.artist.command.controller;
 
-import static vn.io.echovibe.artist.command.constant.ArtistConstant.ARTIST_MADE_VISIBILITY_PRIVATE_SUCCESS;
-import static vn.io.echovibe.artist.command.constant.ArtistConstant.ARTIST_PUBLISHED_SUCCESS;
+import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_MADE_VISIBILITY_PRIVATE_SUCCESS;
+import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_MADE_VISIBILITY_PUBLIC_SUCCESS;
+import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_PUBLISHED_SUCCESS;
 import static vn.io.echovibe.core.constant.Constant.REQUEST_PROCESSED_SUCCESS;
 import static vn.io.echovibe.core.utils.IdentityUtils.AGGREGATE_ID_LENGTH;
 import static vn.io.echovibe.core.utils.IdentityUtils.AGGREGATE_ID_REGEX;
@@ -132,7 +133,7 @@ public class ArtistCommandController {
     final ChangeArtistVisibilityCommand changeArtistVisibilityCommand =
         ChangeArtistVisibilityCommand.builder().id(id).isPublic(true).build();
     commandDispatcher.send(changeArtistVisibilityCommand);
-    return ResponseEntity.ok(ResponseDto.ok(ARTIST_PUBLISHED_SUCCESS));
+    return ResponseEntity.ok(ResponseDto.ok(ARTIST_MADE_VISIBILITY_PUBLIC_SUCCESS));
   }
 
   @Operation(operationId = "Make Artist visibility private")
