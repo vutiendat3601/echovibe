@@ -6,3 +6,8 @@
 `APP_WEB_CORS_ALLOWEDHEADERS`: List of String\
 `APP_WEB_CORS_ALLOWCREDENTIALS`: Boolean\
 `APP_WEB_CORS_MAXAGE`: Long
+
+## ** Application port
+artistcommand: 6100
+artistquery: 6110
+trackcommand: 6120
