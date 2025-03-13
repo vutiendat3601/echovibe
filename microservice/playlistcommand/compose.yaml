@@ -1,9 +1,0 @@
-services:
-  artist-pg:
-    image: "postgres:17.2-bookworm"
-    environment:
-      - POSTGRES_DB=echovibe_artist
-      - POSTGRES_USER=echovibe
-      - POSTGRES_PASSWORD=echovibe
-    ports:
-      - "16120:5432"

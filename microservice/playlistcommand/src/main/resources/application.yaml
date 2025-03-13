@@ -1,5 +1,0 @@
-server:
-  port: 6120
-spring:
-  application:
-    name: playlist
