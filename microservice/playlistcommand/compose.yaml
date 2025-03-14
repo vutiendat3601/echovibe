@@ -1,9 +1,9 @@
 services:
-  artist-pg:
-    image: "postgres:17.2-bookworm"
+  playlistcommand-mongo-i1:
+    image: "mongo:8.0.4"
     environment:
-      - POSTGRES_DB=echovibe_artist
-      - POSTGRES_USER=echovibe
-      - POSTGRES_PASSWORD=echovibe
+      - "MONGO_INITDB_ROOT_USERNAME=echovibe_playlistcommand"
+      - "MONGO_INITDB_ROOT_PASSWORD=echovibe_playlistcommand"
+      - "MONGO_INITDB_DATABASE=echovibe_playlistcommand"
     ports:
-      - "16120:5432"
+      - "26140:27017"

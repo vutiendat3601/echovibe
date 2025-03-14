@@ -15,14 +15,12 @@ import vn.io.echovibe.core.event.Event;
 @SuperBuilder
 @Getter
 @Setter
-public class PlaylistCreatedEvent extends Event {
+public class PlaylistReleasedEvent extends Event {
   private String urn;
 
   private String name;
 
-  private String description;
-
-  @Builder.Default private Boolean isReleased = false;
+  @Builder.Default private Boolean isPublished = false;
 
   @Builder.Default private Boolean isPublic = false;
 
@@ -33,8 +31,6 @@ public class PlaylistCreatedEvent extends Event {
   private String thumbnailUrl;
 
   @Builder.Default private List<String> tags = new LinkedList<>();
-
-  @Builder.Default private List<String> artistIds = new LinkedList<>();
 
   private String refCode;
 }

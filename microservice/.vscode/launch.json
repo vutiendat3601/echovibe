@@ -40,5 +40,13 @@
       "projectName": "trackcommand",
       "cwd": "${workspaceFolder}/trackcommand"
     },
+    {
+      "type": "java",
+      "name": "PlaylistCommandApplication",
+      "request": "launch",
+      "mainClass": "vn.io.echovibe.playlist.command.PlaylistCommandApplication",
+      "projectName": "playlistcommand",
+      "cwd": "${workspaceFolder}/playlistcommand"
+    }
   ]
 }

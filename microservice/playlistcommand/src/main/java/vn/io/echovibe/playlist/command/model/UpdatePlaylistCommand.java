@@ -1,21 +1,21 @@
-package vn.io.echovibe.playlist.common.event;
+package vn.io.echovibe.playlist.command.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import vn.io.echovibe.core.event.Event;
+import vn.io.echovibe.core.command.Command;
 
-@NoArgsConstructor
-@AllArgsConstructor
 @SuperBuilder
+@ToString
 @Getter
 @Setter
-public class PlaylistUpdatedEvent extends Event {
+@NoArgsConstructor
+@AllArgsConstructor
+public class UpdatePlaylistCommand extends Command {
   private String name;
 
   private String thumbnailUrl;
-
-  private String refCode;
 }
