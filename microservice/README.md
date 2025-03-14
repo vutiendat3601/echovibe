@@ -11,3 +11,4 @@
 artistcommand: 6100
 artistquery: 6110
 trackcommand: 6120
+playlistcommand: 6140

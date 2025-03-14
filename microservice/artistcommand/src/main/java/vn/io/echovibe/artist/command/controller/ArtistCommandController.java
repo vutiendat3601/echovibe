@@ -7,14 +7,9 @@ import static vn.io.echovibe.core.constant.Constant.REQUEST_PROCESSED_SUCCESS;
 import static vn.io.echovibe.core.utils.IdentityUtils.AGGREGATE_ID_LENGTH;
 import static vn.io.echovibe.core.utils.IdentityUtils.AGGREGATE_ID_REGEX;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.hibernate.validator.constraints.Length;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +17,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import vn.io.echovibe.artist.command.dto.CreateArtistDto;
 import vn.io.echovibe.artist.command.dto.DeleteArtistDto;
 import vn.io.echovibe.artist.command.dto.UpdateArtistDto;
@@ -46,7 +48,7 @@ public class ArtistCommandController {
   private final CommandDispatcher commandDispatcher;
 
   @Operation(operationId = "Bulk Create Artist")
-  @PostMapping("/bulk-create")
+  @PostMapping("bulk-create")
   public ResponseEntity<ResponseDto<BulkResult>> createArtist(
       @Valid @RequestBody BulkDto<CreateArtistDto> bulkCreateDto) {
     final List<CreateArtistCommand> createArtistCommands =
