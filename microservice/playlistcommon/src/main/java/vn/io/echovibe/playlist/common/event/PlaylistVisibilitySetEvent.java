@@ -12,10 +12,6 @@ import vn.io.echovibe.core.event.Event;
 @SuperBuilder
 @Getter
 @Setter
-public class PlaylistUpdatedEvent extends Event {
-  private String name;
-
-  private String thumbnailUrl;
-
-  private String refCode;
+public class PlaylistVisibilitySetEvent extends Event {
+  private Boolean isPublic;
 }

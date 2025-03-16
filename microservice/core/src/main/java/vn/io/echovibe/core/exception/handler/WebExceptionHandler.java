@@ -15,10 +15,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import vn.io.echovibe.core.dto.ErrorDto;
-import vn.io.echovibe.core.exception.AggregateIllegalStateException;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
+import vn.io.echovibe.core.exception.BusinessRuleViolationException;
 import vn.io.echovibe.core.exception.Error;
-import vn.io.echovibe.core.exception.NoneFieldChangedException;
 
 @Slf4j
 @RestControllerAdvice
@@ -51,7 +50,7 @@ public class WebExceptionHandler {
     log.info(e.getMessage());
     final List<Error> errors =
         e.getAllErrors().stream()
-            .map(error -> new Error(error.getDefaultMessage(), error.getObjectName()))
+            .map(error -> new Error(null, error.getDefaultMessage(), error.getObjectName()))
             .toList();
     return ResponseEntity.badRequest()
         .body(
@@ -63,7 +62,7 @@ public class WebExceptionHandler {
   public ResponseEntity<ErrorDto> handleMethodArgumentTypeMismatchException(
       MethodArgumentTypeMismatchException e) {
     log.info(e.getMessage());
-    final List<Error> errors = List.of(new Error(e.getMessage(), e.getName()));
+    final List<Error> errors = List.of(new Error(null, e.getMessage(), e.getName()));
     return ResponseEntity.badRequest()
         .body(
             new ErrorDto(
@@ -75,7 +74,9 @@ public class WebExceptionHandler {
       HandlerMethodValidationException e) {
     log.info(e.getMessage());
     final List<Error> errors =
-        e.getAllErrors().stream().map(error -> new Error(error.getDefaultMessage(), null)).toList();
+        e.getAllErrors().stream()
+            .map(error -> new Error(null, error.getDefaultMessage(), null))
+            .toList();
     return ResponseEntity.badRequest()
         .body(
             new ErrorDto(
@@ -94,23 +95,14 @@ public class WebExceptionHandler {
                 ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
   }
 
-  @ExceptionHandler(AggregateIllegalStateException.class)
-  public ResponseEntity<ErrorDto> handleAggregateIllegalStateException(
-      AggregateIllegalStateException e) {
-    log.info(e.getMessage());
-    return ResponseEntity.badRequest()
-        .body(
-            new ErrorDto(List.of(), e.getMessage(), ZonedDateTime.now(ZoneOffset.UTC).toInstant()));
-  }
-
-  @ExceptionHandler(NoneFieldChangedException.class)
+  @ExceptionHandler(BusinessRuleViolationException.class)
   public ResponseEntity<ErrorDto> handleMethodArgumentNotValidException(
-      NoneFieldChangedException e) {
+      BusinessRuleViolationException e) {
     log.error(e.getMessage(), e);
     return ResponseEntity.badRequest()
         .body(
             new ErrorDto(
-                List.of(),
+                List.of(new Error(e.getBusinessRule(), e.getMessage(), null)),
                 """
 There are no fields that have been changed in your update request. Please check the API documentation or contact the development team.""",
                 ZonedDateTime.now(ZoneOffset.UTC).toInstant()));

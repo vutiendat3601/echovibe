@@ -15,7 +15,7 @@ import vn.io.echovibe.track.command.model.ChangeTrackVisibilityCommand;
 import vn.io.echovibe.track.command.model.CreateTrackCommand;
 import vn.io.echovibe.track.command.model.DeleteTrackCommand;
 import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
-import vn.io.echovibe.track.command.model.UpdateTrackCommand;
+import vn.io.echovibe.track.command.model.UpdateTrackDetailCommand;
 
 @ComponentScan("vn.io.echovibe")
 @EnableMongoRepositories(basePackageClasses = EventStoreRepository.class)
@@ -29,7 +29,7 @@ public class TrackCommandApplication {
   @EventListener(ApplicationReadyEvent.class)
   void registerHandlers() {
     commandDispatcher.registerHandler(CreateTrackCommand.class, commandHandler::handle);
-    commandDispatcher.registerHandler(UpdateTrackCommand.class, commandHandler::handle);
+    commandDispatcher.registerHandler(UpdateTrackDetailCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(DeleteTrackCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(ReleaseTrackCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(ChangeTrackVisibilityCommand.class, commandHandler::handle);

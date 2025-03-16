@@ -4,11 +4,9 @@ import static vn.io.echovibe.track.common.constant.TrackConstant.TRACK_EVENT_TOP
 
 import java.util.Comparator;
 import java.util.List;
-
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import lombok.RequiredArgsConstructor;
 import vn.io.echovibe.core.event.Event;
 import vn.io.echovibe.core.event.EventProducer;
 import vn.io.echovibe.core.event.EventSourcingHandler;

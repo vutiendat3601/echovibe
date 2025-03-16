@@ -1,5 +1,7 @@
 package vn.io.echovibe.playlist.command.domain;
 
+import static vn.io.echovibe.core.constant.BusinessRuleConstant.BR_01;
+import static vn.io.echovibe.playlist.common.constant.PlaylistBusinessRuleConstant.PLAYLIST_BR_01;
 import static vn.io.echovibe.playlist.common.constant.PlaylistConstant.PLAYLIST_URN_PREFIX;
 
 import java.util.List;
@@ -8,24 +10,22 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import vn.io.echovibe.core.domain.AggregateRoot;
-import vn.io.echovibe.core.exception.AggregateIllegalStateException;
-import vn.io.echovibe.core.exception.NoneFieldChangedException;
+import vn.io.echovibe.core.exception.BusinessRuleViolationException;
 import vn.io.echovibe.playlist.command.model.CreatePlaylistCommand;
-import vn.io.echovibe.playlist.command.model.UpdatePlaylistCommand;
+import vn.io.echovibe.playlist.command.model.UpdatePlaylistDetailCommand;
 import vn.io.echovibe.playlist.common.event.PlaylistCreatedEvent;
 import vn.io.echovibe.playlist.common.event.PlaylistDeletedEvent;
+import vn.io.echovibe.playlist.common.event.PlaylistDetailUpdatedEvent;
 import vn.io.echovibe.playlist.common.event.PlaylistReleasedEvent;
-import vn.io.echovibe.playlist.common.event.PlaylistUpdatedEvent;
-import vn.io.echovibe.playlist.common.event.PlaylistVisibilityChangedEvent;
+import vn.io.echovibe.playlist.common.event.PlaylistVisibilitySetEvent;
+import vn.io.echovibe.playlist.common.model.PlaylistDetail;
 
 @Getter
 @NoArgsConstructor
 public class PlaylistAggregate extends AggregateRoot {
   private String urn;
 
-  private String name;
-
-  private String description;
+  private PlaylistDetail detail;
 
   private Boolean isReleased;
 
@@ -33,15 +33,7 @@ public class PlaylistAggregate extends AggregateRoot {
 
   private Boolean isActive;
 
-  private String thumbnailFileKey;
-
-  private String thumbnailUrl;
-
-  private List<String> artistIds;
-
   private List<String> tags;
-
-  private String refCode;
 
   public PlaylistAggregate(CreatePlaylistCommand createPlaylistCommand) {
     final String urn = PLAYLIST_URN_PREFIX + createPlaylistCommand.getId();
@@ -49,122 +41,117 @@ public class PlaylistAggregate extends AggregateRoot {
         PlaylistCreatedEvent.builder()
             .id(createPlaylistCommand.getId())
             .urn(urn)
-            .name(createPlaylistCommand.getName())
-            .description(createPlaylistCommand.getDescription())
+            .detail(createPlaylistCommand.getDetail())
             .isReleased(false)
             .isPublic(false)
             .isActive(true)
-            .thumbnailUrl(createPlaylistCommand.getThumbnailUrl())
-            .artistIds(createPlaylistCommand.getArtistIds())
-            .refCode(createPlaylistCommand.getRefCode())
             .build();
     raiseEvent(playlistCreatedEvent);
   }
 
   public void setIsPublic(Boolean isPublic) {
     if (Objects.nonNull(isPublic) && isPublic.equals(this.isPublic)) {
-      throw new NoneFieldChangedException(
-          "Playlist's visiblity of hasn't changed: aggregateId=%s, isPublic=%s"
+      throw new BusinessRuleViolationException(
+          BR_01,
+          "Playlist's visiblity has no changes: aggregateId=%s, isPublic=%s"
               .formatted(id, isPublic));
     }
-    final Boolean isReleased = Optional.of(this.isReleased).orElse(false);
-    if (!isReleased) {
-      throw new AggregateIllegalStateException(
-          "To make the track's visibility public, it is required to be released: aggregateId=%s, isPublic=%s, isReleased=%s"
-              .formatted(id, isPublic, isReleased));
-    }
-    final PlaylistVisibilityChangedEvent playlistVisibilityChangedEvent =
-        PlaylistVisibilityChangedEvent.builder().id(id).isPublic(isPublic).build();
+    final PlaylistVisibilitySetEvent playlistVisibilityChangedEvent =
+        PlaylistVisibilitySetEvent.builder().id(id).isPublic(isPublic).build();
     raiseEvent(playlistVisibilityChangedEvent);
   }
 
-  public void update(UpdatePlaylistCommand updatePlaylistCommand) {
-    final String name = updatePlaylistCommand.getName();
-    final String thumbnailUrl = updatePlaylistCommand.getThumbnailUrl();
+  public void update(UpdatePlaylistDetailCommand updatePlaylistDetailCommand) {
+    final PlaylistDetail updateDetail = updatePlaylistDetailCommand.getDetail();
+
     boolean hasChange = false;
-    final PlaylistUpdatedEvent playlistUpdatedEvent =
-        PlaylistUpdatedEvent.builder()
-            .id(id)
-            .name(this.name)
-            .thumbnailUrl(this.thumbnailUrl)
-            .refCode(this.refCode)
+    final PlaylistDetail updatedDetail =
+        PlaylistDetail.builder()
+            .name(this.detail.getName())
+            .description(this.detail.getDescription())
+            .thumbnailFileKey(this.detail.getThumbnailFileKey())
+            .thumbnailUrl(this.detail.getThumbnailUrl())
+            .refCode(this.detail.getRefCode())
             .build();
+
     // name
-    if (!Objects.isNull(name) && !name.equals(playlistUpdatedEvent.getName())) {
+    if (!Objects.equals(updateDetail.getName(), updatedDetail.getName())) {
       hasChange = true;
-      playlistUpdatedEvent.setName(name);
+      updatedDetail.setName(updateDetail.getName());
+    }
+    // description
+    if (!Objects.equals(updateDetail.getDescription(), updatedDetail.getDescription())) {
+      hasChange = true;
+      updatedDetail.setName(updateDetail.getDescription());
     }
     // thumbnailUrl
-    if (!Objects.isNull(thumbnailUrl)
-        && !thumbnailUrl.equals(playlistUpdatedEvent.getThumbnailUrl())) {
+    if (!Objects.equals(updateDetail.getThumbnailUrl(), updatedDetail.getThumbnailUrl())) {
       hasChange = true;
-      playlistUpdatedEvent.setThumbnailUrl(thumbnailUrl);
+      updateDetail.setThumbnailUrl(updateDetail.getThumbnailUrl());
     }
     // refCode
-    if (!Objects.isNull(refCode) && !refCode.equals(playlistUpdatedEvent.getRefCode())) {
+    if (!Objects.equals(updateDetail.getRefCode(), updatedDetail.getRefCode())) {
       hasChange = true;
-      playlistUpdatedEvent.setRefCode(refCode);
+      updateDetail.setRefCode(updateDetail.getRefCode());
     }
+
     if (!hasChange) {
-      throw new NoneFieldChangedException();
+      throw new BusinessRuleViolationException(
+          BR_01,
+          "Playlist's detail has no changes: aggregateId=%s"
+              .formatted(updatePlaylistDetailCommand.getId()));
     }
-    raiseEvent(playlistUpdatedEvent);
+
+    final PlaylistDetailUpdatedEvent playlistDetailUpdatedEvent =
+        PlaylistDetailUpdatedEvent.builder().id(id).detail(updatedDetail).build();
+    raiseEvent(playlistDetailUpdatedEvent);
   }
 
   public void release() {
     if (Objects.nonNull(isReleased) && isReleased) {
-      throw new AggregateIllegalStateException(
-          "Track has already been released: aggregateId=%s".formatted(id));
+      throw new BusinessRuleViolationException(
+          PLAYLIST_BR_01, "Playlist has already been released: aggregateId=%s".formatted(id));
     }
     final PlaylistReleasedEvent trackReleasedEvent =
         PlaylistReleasedEvent.builder()
             .id(id)
-            .isPublished(true)
             .urn(urn)
-            .name(name)
+            .detail(detail)
             .isPublic(isPublic)
-            .isActive(true)
-            .thumbnailFileKey(thumbnailFileKey)
-            .thumbnailUrl(thumbnailUrl)
+            .isReleased(true)
             .tags(tags)
-            .refCode(refCode)
             .build();
     raiseEvent(trackReleasedEvent);
   }
 
   public void delete() {
-    if (!Objects.nonNull(this.isActive) && !this.isActive) {
-      throw new AggregateIllegalStateException(
-          "Track has already been deleted: aggregateId=%s".formatted(id));
-    }
     final Boolean isSoftDeleted = Optional.ofNullable(isReleased).orElse(false);
     final PlaylistDeletedEvent trackDeletedEvent =
         PlaylistDeletedEvent.builder().id(id).isSoftDeleted(isSoftDeleted).isActive(false).build();
     raiseEvent(trackDeletedEvent);
   }
 
+  // ### PlaylistAggregate event apply functions ###############################
+
   void apply(PlaylistCreatedEvent playlistCreatedEvent) {
     this.id = playlistCreatedEvent.getId();
     this.urn = playlistCreatedEvent.getUrn();
-    this.name = playlistCreatedEvent.getName();
+    this.detail = playlistCreatedEvent.getDetail();
     this.isPublic = playlistCreatedEvent.getIsPublic();
     this.isActive = playlistCreatedEvent.getIsActive();
     this.isReleased = playlistCreatedEvent.getIsReleased();
-    this.refCode = playlistCreatedEvent.getRefCode();
     this.tags = playlistCreatedEvent.getTags();
-    this.refCode = playlistCreatedEvent.getRefCode();
   }
 
-  void apply(PlaylistUpdatedEvent playlistUpdatedEvent) {
-    this.id = playlistUpdatedEvent.getId();
-    this.name = playlistUpdatedEvent.getName();
-    this.thumbnailUrl = playlistUpdatedEvent.getThumbnailUrl();
-    this.refCode = playlistUpdatedEvent.getRefCode();
+  void apply(PlaylistDetailUpdatedEvent playlistDetailUpdatedEvent) {
+    this.id = playlistDetailUpdatedEvent.getId();
+    this.detail = playlistDetailUpdatedEvent.getDetail();
   }
 
   void apply(PlaylistReleasedEvent playlistReleasedEvent) {
     this.id = playlistReleasedEvent.getId();
-    this.isReleased = playlistReleasedEvent.getIsPublished();
+    this.detail = playlistReleasedEvent.getDetail();
+    this.isReleased = playlistReleasedEvent.getIsReleased();
   }
 
   void apply(PlaylistDeletedEvent playlistDeletedEvent) {
@@ -172,7 +159,7 @@ public class PlaylistAggregate extends AggregateRoot {
     this.isActive = playlistDeletedEvent.getIsActive();
   }
 
-  void apply(PlaylistVisibilityChangedEvent playlistVisibilityChangedEvent) {
+  void apply(PlaylistVisibilitySetEvent playlistVisibilityChangedEvent) {
     this.id = playlistVisibilityChangedEvent.getId();
     this.isPublic = playlistVisibilityChangedEvent.getIsPublic();
   }

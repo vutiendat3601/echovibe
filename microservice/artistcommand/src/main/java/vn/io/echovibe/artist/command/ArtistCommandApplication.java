@@ -9,11 +9,11 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import vn.io.echovibe.artist.command.handler.CommandHandler;
-import vn.io.echovibe.artist.command.model.ChangeArtistVisibilityCommand;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
-import vn.io.echovibe.artist.command.model.PublishArtistCommand;
-import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
+import vn.io.echovibe.artist.command.model.ReleaseArtistCommand;
+import vn.io.echovibe.artist.command.model.SetArtistVisibilityCommand;
+import vn.io.echovibe.artist.command.model.UpdateArtistProfileCommand;
 import vn.io.echovibe.core.command.CommandDispatcher;
 import vn.io.echovibe.core.domain.EventStoreRepository;
 
@@ -29,10 +29,10 @@ public class ArtistCommandApplication {
   @EventListener(ApplicationReadyEvent.class)
   void registerHandlers() {
     commandDispatcher.registerHandler(CreateArtistCommand.class, commandHandler::handle);
-    commandDispatcher.registerHandler(UpdateArtistCommand.class, commandHandler::handle);
+    commandDispatcher.registerHandler(UpdateArtistProfileCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(DeleteArtistCommand.class, commandHandler::handle);
-    commandDispatcher.registerHandler(PublishArtistCommand.class, commandHandler::handle);
-    commandDispatcher.registerHandler(ChangeArtistVisibilityCommand.class, commandHandler::handle);
+    commandDispatcher.registerHandler(ReleaseArtistCommand.class, commandHandler::handle);
+    commandDispatcher.registerHandler(SetArtistVisibilityCommand.class, commandHandler::handle);
   }
 
   public static void main(String[] args) {

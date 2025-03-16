@@ -1,6 +1,5 @@
-package vn.io.echovibe.playlist.command.model;
+package vn.io.echovibe.artist.command.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +12,4 @@ import vn.io.echovibe.core.command.Command;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-public class ChangePlaylistVisibilityCommand extends Command {
-  private Boolean isPublic;
-}
+public class ReleaseArtistCommand extends Command {}

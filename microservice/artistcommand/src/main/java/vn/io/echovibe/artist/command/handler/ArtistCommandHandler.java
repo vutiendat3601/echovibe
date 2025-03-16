@@ -5,11 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import vn.io.echovibe.artist.command.domain.ArtistAggregate;
-import vn.io.echovibe.artist.command.model.ChangeArtistVisibilityCommand;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
-import vn.io.echovibe.artist.command.model.PublishArtistCommand;
-import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
+import vn.io.echovibe.artist.command.model.ReleaseArtistCommand;
+import vn.io.echovibe.artist.command.model.SetArtistVisibilityCommand;
+import vn.io.echovibe.artist.command.model.UpdateArtistProfileCommand;
 import vn.io.echovibe.core.event.EventSourcingHandler;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
 
@@ -25,16 +25,16 @@ public class ArtistCommandHandler implements CommandHandler {
   }
 
   @Override
-  public void handle(@NonNull UpdateArtistCommand updateArtistCommand) {
+  public void handle(@NonNull UpdateArtistProfileCommand updateArtistCommand) {
     final ArtistAggregate artistAggregate = findArtistAggregateById(updateArtistCommand.getId());
     artistAggregate.update(updateArtistCommand);
     eventSourcingHandler.save(artistAggregate);
   }
 
   @Override
-  public void handle(@NonNull PublishArtistCommand publishArtistCommand) {
-    final ArtistAggregate artistAggregate = findArtistAggregateById(publishArtistCommand.getId());
-    artistAggregate.publish();
+  public void handle(@NonNull ReleaseArtistCommand releaseArtistCommand) {
+    final ArtistAggregate artistAggregate = findArtistAggregateById(releaseArtistCommand.getId());
+    artistAggregate.release();
     eventSourcingHandler.save(artistAggregate);
   }
 
@@ -46,7 +46,7 @@ public class ArtistCommandHandler implements CommandHandler {
   }
 
   @Override
-  public void handle(@NonNull ChangeArtistVisibilityCommand changeArtistVisibilityCommand) {
+  public void handle(@NonNull SetArtistVisibilityCommand changeArtistVisibilityCommand) {
     final ArtistAggregate artistAggregate =
         findArtistAggregateById(changeArtistVisibilityCommand.getId());
     artistAggregate.setIsPublic(changeArtistVisibilityCommand.getIsPublic());

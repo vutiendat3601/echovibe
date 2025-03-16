@@ -1,6 +1,8 @@
 package vn.io.echovibe.artist.command.domain;
 
+import static vn.io.echovibe.artist.common.constant.ArtistBussinessRuleConstant.ARTIST_BR_01;
 import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_URN_PREFIX;
+import static vn.io.echovibe.core.constant.BusinessRuleConstant.BR_01;
 
 import java.util.List;
 import java.util.Objects;
@@ -8,44 +10,30 @@ import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
-import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
+import vn.io.echovibe.artist.command.model.UpdateArtistProfileCommand;
 import vn.io.echovibe.artist.common.event.ArtistCreatedEvent;
 import vn.io.echovibe.artist.common.event.ArtistDeletedEvent;
-import vn.io.echovibe.artist.common.event.ArtistPublishedEvent;
-import vn.io.echovibe.artist.common.event.ArtistUpdatedEvent;
-import vn.io.echovibe.artist.common.event.ArtistVisibilityChangedEvent;
+import vn.io.echovibe.artist.common.event.ArtistProfileUpdatedEvent;
+import vn.io.echovibe.artist.common.event.ArtistReleasedEvent;
+import vn.io.echovibe.artist.common.event.ArtistVisibilitySetEvent;
+import vn.io.echovibe.artist.common.model.ArtistProfile;
 import vn.io.echovibe.core.domain.AggregateRoot;
-import vn.io.echovibe.core.exception.AggregateIllegalStateException;
-import vn.io.echovibe.core.exception.NoneFieldChangedException;
+import vn.io.echovibe.core.exception.BusinessRuleViolationException;
 
 @Getter
 @NoArgsConstructor
 public class ArtistAggregate extends AggregateRoot {
   private String urn;
 
-  private String name;
+  private ArtistProfile profile;
 
-  private String biography;
-
-  private String description;
-
-  private Boolean isPublished;
+  private Boolean isReleased;
 
   private Boolean isPublic;
 
   private Boolean isActive;
 
-  private String thumbnailFileKey;
-
-  private String thumbnailUrl;
-
-  private String backgroundFileKey;
-
-  private String backgroundUrl;
-
   private List<String> tags;
-
-  private String refCode;
 
   public ArtistAggregate(CreateArtistCommand createArtistCommand) {
     final String urn = ARTIST_URN_PREFIX + createArtistCommand.getId();
@@ -53,153 +41,123 @@ public class ArtistAggregate extends AggregateRoot {
         ArtistCreatedEvent.builder()
             .id(createArtistCommand.getId())
             .urn(urn)
-            .name(createArtistCommand.getName())
-            .biography(createArtistCommand.getBiography())
-            .description(createArtistCommand.getDescription())
-            .isPublished(false)
+            .profile(createArtistCommand.getProfile())
+            .isReleased(false)
             .isPublic(false)
             .isActive(true)
-            .thumbnailUrl(createArtistCommand.getThumbnailUrl())
-            .backgroundUrl(createArtistCommand.getBackgroundUrl())
-            .refCode(createArtistCommand.getRefCode())
             .build();
     raiseEvent(artistCreatedEvent);
   }
 
-  public void setIsPublic(Boolean isPublic) {
-    if (Objects.nonNull(isPublic) && isPublic.equals(this.isPublic)) {
-      throw new NoneFieldChangedException(
-          "Visiblity of artist hasn't changed: aggregateId=%s, isPublic=%s"
-              .formatted(id, isPublic));
-    }
-    final Boolean isPublished = Optional.of(this.isPublished).orElse(false);
-    if (!isPublished) {
-      throw new AggregateIllegalStateException(
-          "To make the artist's visibility public, it is required to be published: aggregateId=%s, isPublic=%s, isPublished=%s"
-              .formatted(id, isPublic, isPublished));
-    }
-    final ArtistVisibilityChangedEvent artistVisibilityChangedEvent =
-        ArtistVisibilityChangedEvent.builder().id(id).isPublic(isPublic).build();
-    raiseEvent(artistVisibilityChangedEvent);
-  }
+  public void update(UpdateArtistProfileCommand updateArtistProfileCommand) {
+    final ArtistProfile updateProfile = updateArtistProfileCommand.getProfile();
 
-  public void update(UpdateArtistCommand updateArtistCommand) {
-    final String name = updateArtistCommand.getName();
-    final String biography = updateArtistCommand.getBiography();
-    final String description = updateArtistCommand.getDescription();
-    final String thumbnailUrl = updateArtistCommand.getThumbnailUrl();
-    final String backgroundUrl = updateArtistCommand.getBackgroundUrl();
     boolean hasChange = false;
-    final ArtistUpdatedEvent artistUpdatedEvent =
-        ArtistUpdatedEvent.builder()
-            .id(id)
-            .name(this.name)
-            .biography(this.biography)
-            .description(this.description)
-            .thumbnailUrl(this.thumbnailUrl)
-            .backgroundUrl(this.backgroundUrl)
-            .refCode(this.refCode)
+    final ArtistProfile updatedProfile =
+        ArtistProfile.builder()
+            .name(this.profile.getName())
+            .biography(this.profile.getBiography())
+            .description(this.profile.getDescription())
+            .thumbnailFileKey(this.profile.getThumbnailFileKey())
+            .thumbnailUrl(this.profile.getThumbnailUrl())
+            .backgroundFileKey(this.profile.getBackgroundFileKey())
+            .backgroundUrl(this.profile.getBackgroundUrl())
             .build();
+
     // name
-    if (!Objects.isNull(name) && !name.equals(artistUpdatedEvent.getName())) {
+    if (!Objects.equals(updateProfile.getName(), updatedProfile.getName())) {
       hasChange = true;
-      artistUpdatedEvent.setName(name);
+      updatedProfile.setName(updateProfile.getName());
     }
     // biography
-    if (!Objects.isNull(biography) && !biography.equals(artistUpdatedEvent.getBiography())) {
+    if (!Objects.equals(updateProfile.getBiography(), updatedProfile.getBiography())) {
       hasChange = true;
-      artistUpdatedEvent.setBiography(biography);
+      updatedProfile.setBiography(updateProfile.getBiography());
     }
     // description
-    if (!Objects.isNull(description) && !description.equals(artistUpdatedEvent.getDescription())) {
+    if (!Objects.equals(updateProfile.getDescription(), updatedProfile.getDescription())) {
       hasChange = true;
-      artistUpdatedEvent.setDescription(description);
+      updatedProfile.setDescription(updateProfile.getDescription());
     }
     // thumbnailUrl
-    if (!Objects.isNull(thumbnailUrl)
-        && !thumbnailUrl.equals(artistUpdatedEvent.getThumbnailUrl())) {
+    if (!Objects.equals(updateProfile.getThumbnailUrl(), updatedProfile.getThumbnailUrl())) {
       hasChange = true;
-      artistUpdatedEvent.setThumbnailUrl(thumbnailUrl);
+      updatedProfile.setThumbnailUrl(updateProfile.getThumbnailUrl());
     }
     // backgroundUrl
-    if (!Objects.isNull(backgroundUrl)
-        && !backgroundUrl.equals(artistUpdatedEvent.getBackgroundUrl())) {
+    if (!Objects.equals(updateProfile.getBackgroundUrl(), updatedProfile.getBackgroundUrl())) {
       hasChange = true;
-      artistUpdatedEvent.setBackgroundUrl(backgroundUrl);
-    }
-    // refCode
-    if (!Objects.isNull(refCode) && !refCode.equals(artistUpdatedEvent.getRefCode())) {
-      hasChange = true;
-      artistUpdatedEvent.setRefCode(refCode);
+      updatedProfile.setBackgroundUrl(updateProfile.getBackgroundUrl());
     }
     if (!hasChange) {
-      throw new NoneFieldChangedException();
+      throw new BusinessRuleViolationException(
+          BR_01,
+          "Artist's profile has no changes: aggregateId=%s"
+              .formatted(updateArtistProfileCommand.getId()));
     }
-    raiseEvent(artistUpdatedEvent);
+    final ArtistProfileUpdatedEvent artistProfileUpdatedEvent =
+        ArtistProfileUpdatedEvent.builder().id(id).profile(updatedProfile).build();
+    raiseEvent(artistProfileUpdatedEvent);
   }
 
-  public void publish() {
-    if (Objects.nonNull(isPublished) && isPublished) {
-      throw new AggregateIllegalStateException(
-          "Artist has already been published: aggregateId=%s".formatted(id));
+  public void release() {
+    if (Objects.nonNull(isReleased) && isReleased) {
+      throw new BusinessRuleViolationException(
+          ARTIST_BR_01, "Artist has already been released: aggregateId=%s".formatted(id));
     }
-    final ArtistPublishedEvent artistPublishedEvent =
-        ArtistPublishedEvent.builder()
+    final ArtistReleasedEvent artistReleasedEvent =
+        ArtistReleasedEvent.builder()
             .id(id)
-            .isPublished(true)
             .urn(urn)
-            .name(name)
-            .biography(biography)
-            .description(description)
+            .profile(profile)
+            .isReleased(true)
             .isPublic(isPublic)
-            .isActive(true)
-            .thumbnailFileKey(thumbnailFileKey)
-            .thumbnailUrl(thumbnailUrl)
-            .backgroundFileKey(backgroundFileKey)
-            .backgroundUrl(backgroundUrl)
             .tags(tags)
-            .refCode(refCode)
             .build();
-    raiseEvent(artistPublishedEvent);
+    raiseEvent(artistReleasedEvent);
   }
 
   public void delete() {
-    if (!Objects.nonNull(this.isActive) && !this.isActive) {
-      throw new AggregateIllegalStateException(
-          "Artist has already been deleted: aggregateId=%s".formatted(id));
-    }
-    final Boolean isSoftDeleted = Optional.ofNullable(isPublished).orElse(false);
+    final Boolean isSoftDeleted = Optional.ofNullable(isReleased).orElse(false);
     final ArtistDeletedEvent artistDeletedEvent =
         ArtistDeletedEvent.builder().id(id).isSoftDeleted(isSoftDeleted).isActive(false).build();
     raiseEvent(artistDeletedEvent);
   }
 
+  public void setIsPublic(Boolean isPublic) {
+    if (Objects.nonNull(isPublic) && isPublic.equals(this.isPublic)) {
+      throw new BusinessRuleViolationException(
+          BR_01,
+          "Artist's visiblity has no changes: aggregateId=%s, isPublic=%s".formatted(id, isPublic));
+    }
+    final ArtistVisibilitySetEvent artistVisibilityChangedEvent =
+        ArtistVisibilitySetEvent.builder().id(id).isPublic(isPublic).build();
+    raiseEvent(artistVisibilityChangedEvent);
+  }
+
+  // ### ArtistAggregate event apply functions #################################
+
   void apply(ArtistCreatedEvent artistCreatedEvent) {
     this.id = artistCreatedEvent.getId();
     this.urn = artistCreatedEvent.getUrn();
-    this.name = artistCreatedEvent.getName();
-    this.description = artistCreatedEvent.getDescription();
+    this.profile = artistCreatedEvent.getProfile();
     this.isPublic = artistCreatedEvent.getIsPublic();
     this.isActive = artistCreatedEvent.getIsActive();
-    this.isPublished = artistCreatedEvent.getIsPublished();
-    this.refCode = artistCreatedEvent.getRefCode();
+    this.isReleased = artistCreatedEvent.getIsReleased();
     this.tags = artistCreatedEvent.getTags();
-    this.refCode = artistCreatedEvent.getRefCode();
   }
 
-  void apply(ArtistUpdatedEvent artistUpdatedEvent) {
-    this.id = artistUpdatedEvent.getId();
-    this.name = artistUpdatedEvent.getName();
-    this.biography = artistUpdatedEvent.getBiography();
-    this.description = artistUpdatedEvent.getDescription();
-    this.thumbnailUrl = artistUpdatedEvent.getThumbnailUrl();
-    this.backgroundUrl = artistUpdatedEvent.getBackgroundUrl();
-    this.refCode = artistUpdatedEvent.getRefCode();
+  void apply(ArtistProfileUpdatedEvent artistProfileUpdatedEvent) {
+    this.id = artistProfileUpdatedEvent.getId();
+    this.profile = artistProfileUpdatedEvent.getProfile();
   }
 
-  void apply(ArtistPublishedEvent artistPublishedEvent) {
-    this.id = artistPublishedEvent.getId();
-    this.isPublished = artistPublishedEvent.getIsPublished();
+  void apply(ArtistReleasedEvent artistReleasedEvent) {
+    this.id = artistReleasedEvent.getId();
+    this.urn = artistReleasedEvent.getUrn();
+    this.profile = artistReleasedEvent.getProfile();
+    this.isReleased = artistReleasedEvent.getIsReleased();
+    this.isPublic = artistReleasedEvent.getIsPublic();
   }
 
   void apply(ArtistDeletedEvent artistDeletedEvent) {
@@ -207,7 +165,7 @@ public class ArtistAggregate extends AggregateRoot {
     this.isActive = artistDeletedEvent.getIsActive();
   }
 
-  void apply(ArtistVisibilityChangedEvent artistVisibilityChangedEvent) {
+  void apply(ArtistVisibilitySetEvent artistVisibilityChangedEvent) {
     this.id = artistVisibilityChangedEvent.getId();
     this.isPublic = artistVisibilityChangedEvent.getIsPublic();
   }

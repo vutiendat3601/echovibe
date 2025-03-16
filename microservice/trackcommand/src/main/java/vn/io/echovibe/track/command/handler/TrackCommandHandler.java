@@ -11,7 +11,7 @@ import vn.io.echovibe.track.command.model.ChangeTrackVisibilityCommand;
 import vn.io.echovibe.track.command.model.CreateTrackCommand;
 import vn.io.echovibe.track.command.model.DeleteTrackCommand;
 import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
-import vn.io.echovibe.track.command.model.UpdateTrackCommand;
+import vn.io.echovibe.track.command.model.UpdateTrackDetailCommand;
 
 @RequiredArgsConstructor
 @Service
@@ -25,7 +25,7 @@ public class TrackCommandHandler implements CommandHandler {
   }
 
   @Override
-  public void handle(@NonNull UpdateTrackCommand updateTrackCommand) {
+  public void handle(@NonNull UpdateTrackDetailCommand updateTrackCommand) {
     final TrackAggregate trackAggregate = findTrackAggregateById(updateTrackCommand.getId());
     trackAggregate.update(updateTrackCommand);
     eventSourcingHandler.save(trackAggregate);
