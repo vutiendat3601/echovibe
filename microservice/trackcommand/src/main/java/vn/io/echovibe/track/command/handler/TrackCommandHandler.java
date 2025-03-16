@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import vn.io.echovibe.core.event.EventSourcingHandler;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
 import vn.io.echovibe.track.command.domain.TrackAggregate;
-import vn.io.echovibe.track.command.model.ChangeTrackVisibilityCommand;
 import vn.io.echovibe.track.command.model.CreateTrackCommand;
 import vn.io.echovibe.track.command.model.DeleteTrackCommand;
 import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
+import vn.io.echovibe.track.command.model.SetTrackVisibilityCommand;
 import vn.io.echovibe.track.command.model.UpdateTrackDetailCommand;
 
 @RequiredArgsConstructor
@@ -46,10 +46,9 @@ public class TrackCommandHandler implements CommandHandler {
   }
 
   @Override
-  public void handle(@NonNull ChangeTrackVisibilityCommand changeTrackVisibilityCommand) {
-    final TrackAggregate trackAggregate =
-        findTrackAggregateById(changeTrackVisibilityCommand.getId());
-    trackAggregate.setIsPublic(changeTrackVisibilityCommand.getIsPublic());
+  public void handle(@NonNull SetTrackVisibilityCommand setTrackVisibilityCommand) {
+    final TrackAggregate trackAggregate = findTrackAggregateById(setTrackVisibilityCommand.getId());
+    trackAggregate.setIsPublic(setTrackVisibilityCommand.getIsPublic());
     eventSourcingHandler.save(trackAggregate);
   }
 

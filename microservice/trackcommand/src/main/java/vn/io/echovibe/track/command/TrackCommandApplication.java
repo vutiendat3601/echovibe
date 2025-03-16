@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import vn.io.echovibe.core.command.CommandDispatcher;
 import vn.io.echovibe.core.domain.EventStoreRepository;
 import vn.io.echovibe.track.command.handler.CommandHandler;
-import vn.io.echovibe.track.command.model.ChangeTrackVisibilityCommand;
+import vn.io.echovibe.track.command.model.SetTrackVisibilityCommand;
 import vn.io.echovibe.track.command.model.CreateTrackCommand;
 import vn.io.echovibe.track.command.model.DeleteTrackCommand;
 import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
@@ -32,7 +32,7 @@ public class TrackCommandApplication {
     commandDispatcher.registerHandler(UpdateTrackDetailCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(DeleteTrackCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(ReleaseTrackCommand.class, commandHandler::handle);
-    commandDispatcher.registerHandler(ChangeTrackVisibilityCommand.class, commandHandler::handle);
+    commandDispatcher.registerHandler(SetTrackVisibilityCommand.class, commandHandler::handle);
   }
 
   public static void main(String[] args) {
