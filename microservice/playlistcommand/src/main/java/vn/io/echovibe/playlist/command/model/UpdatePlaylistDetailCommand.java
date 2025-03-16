@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.core.command.Command;
+import vn.io.echovibe.playlist.common.model.PlaylistDetail;
 
 @SuperBuilder
 @ToString
@@ -14,8 +15,6 @@ import vn.io.echovibe.core.command.Command;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdatePlaylistCommand extends Command {
-  private String name;
-
-  private String thumbnailUrl;
+public class UpdatePlaylistDetailCommand extends Command {
+  private PlaylistDetail detail;
 }

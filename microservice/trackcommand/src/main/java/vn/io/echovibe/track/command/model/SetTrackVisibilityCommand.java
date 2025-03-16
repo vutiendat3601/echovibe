@@ -1,4 +1,4 @@
-package vn.io.echovibe.artist.command.model;
+package vn.io.echovibe.track.command.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,14 +14,6 @@ import vn.io.echovibe.core.command.Command;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateArtistCommand extends Command {
-  private String name;
-
-  private String biography;
-
-  private String description;
-
-  private String thumbnailUrl;
-
-  private String backgroundUrl;
+public class SetTrackVisibilityCommand extends Command {
+  private Boolean isPublic;
 }

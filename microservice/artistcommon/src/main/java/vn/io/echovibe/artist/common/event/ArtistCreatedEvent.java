@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import vn.io.echovibe.artist.common.model.ArtistProfile;
 import vn.io.echovibe.core.event.Event;
 
 @NoArgsConstructor
@@ -18,25 +19,13 @@ import vn.io.echovibe.core.event.Event;
 public class ArtistCreatedEvent extends Event {
   private String urn;
 
-  private String name;
+  private ArtistProfile profile;
 
-  private String biography;
-
-  private String description;
-
-  @Builder.Default private Boolean isPublished = false;
+  @Builder.Default private Boolean isReleased = false;
 
   @Builder.Default private Boolean isPublic = false;
 
   @Builder.Default private Boolean isActive = true;
-
-  private String thumbnailFileKey;
-
-  private String thumbnailUrl;
-
-  private String backgroundFileKey;
-
-  private String backgroundUrl;
 
   @Builder.Default private List<String> tags = new LinkedList<>();
 

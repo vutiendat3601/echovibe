@@ -1,4 +1,4 @@
-package vn.io.echovibe.playlist.common.event;
+package vn.io.echovibe.track.common.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,6 +12,6 @@ import vn.io.echovibe.core.event.Event;
 @SuperBuilder
 @Getter
 @Setter
-public class PlaylistVisibilityChangedEvent extends Event {
+public class TrackVisibilitySetEvent extends Event {
   private Boolean isPublic;
 }

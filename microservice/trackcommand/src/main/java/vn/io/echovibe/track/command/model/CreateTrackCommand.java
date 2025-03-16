@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.core.command.Command;
+import vn.io.echovibe.track.common.model.TrackDetail;
 
 @SuperBuilder
 @Getter
@@ -16,13 +17,7 @@ import vn.io.echovibe.core.command.Command;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateTrackCommand extends Command {
-  private String name;
-
-  private String description;
-
-  private String thumbnailUrl;
+  private TrackDetail detail;
 
   private List<String> artistIds;
-
-  private String refCode;
 }

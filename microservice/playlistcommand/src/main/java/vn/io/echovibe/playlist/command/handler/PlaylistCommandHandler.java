@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import vn.io.echovibe.core.event.EventSourcingHandler;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
 import vn.io.echovibe.playlist.command.domain.PlaylistAggregate;
-import vn.io.echovibe.playlist.command.model.ChangePlaylistVisibilityCommand;
+import vn.io.echovibe.playlist.command.model.SetPlaylistVisibilityCommand;
 import vn.io.echovibe.playlist.command.model.CreatePlaylistCommand;
 import vn.io.echovibe.playlist.command.model.DeletePlaylistCommand;
 import vn.io.echovibe.playlist.command.model.ReleasePlaylistCommand;
-import vn.io.echovibe.playlist.command.model.UpdatePlaylistCommand;
+import vn.io.echovibe.playlist.command.model.UpdatePlaylistDetailCommand;
 
 @RequiredArgsConstructor
 @Service
@@ -25,7 +25,7 @@ public class PlaylistCommandHandler implements CommandHandler {
   }
 
   @Override
-  public void handle(@NonNull UpdatePlaylistCommand updatePlaylistCommand) {
+  public void handle(@NonNull UpdatePlaylistDetailCommand updatePlaylistCommand) {
     final PlaylistAggregate trackAggregate =
         findPlaylistAggregateById(updatePlaylistCommand.getId());
     trackAggregate.update(updatePlaylistCommand);
@@ -49,7 +49,7 @@ public class PlaylistCommandHandler implements CommandHandler {
   }
 
   @Override
-  public void handle(@NonNull ChangePlaylistVisibilityCommand changePlaylistVisibilityCommand) {
+  public void handle(@NonNull SetPlaylistVisibilityCommand changePlaylistVisibilityCommand) {
     final PlaylistAggregate trackAggregate =
         findPlaylistAggregateById(changePlaylistVisibilityCommand.getId());
     trackAggregate.setIsPublic(changePlaylistVisibilityCommand.getIsPublic());

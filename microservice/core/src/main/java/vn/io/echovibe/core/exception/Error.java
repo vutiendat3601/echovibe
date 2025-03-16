@@ -1,3 +1,5 @@
 package vn.io.echovibe.core.exception;
 
-public record Error(String message, String object) {}
+import vn.io.echovibe.core.model.BusinessRule;
+
+public record Error(BusinessRule businessRule, String message, String object) {}

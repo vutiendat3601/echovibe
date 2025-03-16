@@ -1,4 +1,4 @@
-package vn.io.echovibe.track.common.event;
+package vn.io.echovibe.artist.common.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,10 +12,6 @@ import vn.io.echovibe.core.event.Event;
 @SuperBuilder
 @Getter
 @Setter
-public class TrackUpdatedEvent extends Event {
-  private String name;
-
-  private String thumbnailUrl;
-
-  private String refCode;
+public class ArtistVisibilitySetEvent extends Event {
+  private Boolean isPublic;
 }

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import vn.io.echovibe.artist.common.model.ArtistProfile;
 import vn.io.echovibe.core.command.Command;
 
 @SuperBuilder
@@ -15,15 +16,5 @@ import vn.io.echovibe.core.command.Command;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateArtistCommand extends Command {
-  private String name;
-
-  private String biography;
-
-  private String description;
-
-  private String thumbnailUrl;
-
-  private String backgroundUrl;
-
-  private String refCode;
+  private ArtistProfile profile;
 }
