@@ -7,10 +7,10 @@ import org.springframework.stereotype.Service;
 import vn.io.echovibe.core.event.EventSourcingHandler;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
 import vn.io.echovibe.playlist.command.domain.PlaylistAggregate;
-import vn.io.echovibe.playlist.command.model.SetPlaylistVisibilityCommand;
 import vn.io.echovibe.playlist.command.model.CreatePlaylistCommand;
 import vn.io.echovibe.playlist.command.model.DeletePlaylistCommand;
 import vn.io.echovibe.playlist.command.model.ReleasePlaylistCommand;
+import vn.io.echovibe.playlist.command.model.SetPlaylistVisibilityCommand;
 import vn.io.echovibe.playlist.command.model.UpdatePlaylistDetailCommand;
 
 @RequiredArgsConstructor
