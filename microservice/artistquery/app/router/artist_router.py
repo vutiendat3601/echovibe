@@ -7,6 +7,7 @@ from app.schema import artist_schema
 from app.service.artist_service import ArtistService
 from app.core.container import Container
 from app.schema.schema import ResponseSchema, ok
+from app.constant.constant import AGGREGATE_ID_LIST_REGEX
 
 from http import HTTPStatus
 
@@ -17,7 +18,7 @@ artist_service: ArtistService = Provide[Container.artist_service]
 
 @artist_router.get(
     "", response_model=ResponseSchema[list[artist_schema.ArtistSchema]])
-def get_artist_by_ids(ids: Annotated[list[str], Query()]):
-    artist_schemas = artist_service.get_artist_by_aggregate_ids(ids)
+def get_artist_by_ids(ids: str = Query(..., regex=AGGREGATE_ID_LIST_REGEX)):
+    artist_schemas = artist_service.get_artist_by_aggregate_ids(ids.split(","))
     response = ok(data=artist_schemas)
     return JSONResponse(content=jsonable_encoder(response))

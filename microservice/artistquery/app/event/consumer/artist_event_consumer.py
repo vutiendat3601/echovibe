@@ -3,7 +3,8 @@ from aiokafka import AIOKafkaConsumer
 import json
 from app.core.logger import Logger
 from datetime import datetime, timezone
-from app.constant.constant import ARTIST_CREATED_EVENT, ARTIST_RELEASED_EVENT, ARTIST_UPDATED_EVENT, ARTIST_DELETED_EVENT, ARTIST_VISIBILITY_SET_EVENT, APP_NAME
+from app.constant.artist_constant import ARTIST_CREATED_EVENT, ARTIST_RELEASED_EVENT, ARTIST_UPDATED_EVENT, ARTIST_DELETED_EVENT, ARTIST_VISIBILITY_SET_EVENT
+from app.constant.constant import APP_NAME
 from app.core.configuration import configuration
 from app.repository.artist_repository import ArtistRepository
 from app.core.container import Container
