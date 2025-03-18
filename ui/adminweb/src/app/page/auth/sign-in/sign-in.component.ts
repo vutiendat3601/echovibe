@@ -1,7 +1,5 @@
-import { AuthService } from '../../../service/auth.service';
-import { OAuthService } from 'angular-oauth2-oidc';
 import { Component, OnInit } from '@angular/core';
-import { filter } from 'rxjs';
+import { AuthService } from '../../../service/auth.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -11,6 +9,7 @@ import { filter } from 'rxjs';
 })
 export class SignInComponent implements OnInit {
   constructor(private readonly authService: AuthService) {}
+
   ngOnInit(): void {
     this.authService.signIn();
   }

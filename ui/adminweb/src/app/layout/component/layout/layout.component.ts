@@ -1,4 +1,5 @@
-import { Component, Renderer2, ViewChild } from '@angular/core';
+import { ArtistService } from './../../../service/artist.service';
+import { Component, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
@@ -6,6 +7,8 @@ import { TopBarComponent } from '../top-bar/top-bar.component';
 import { SideBarComponent } from '../side-bar/side-bar.component';
 import { FooterComponent } from '../footer/footer.component';
 import { LayoutService } from '../../service/layout.service';
+import { BulkDto } from '../../../dto/bulk-dto';
+import { CreateArtistDto } from '../../../dto/artist-dto';
 
 @Component({
   selector: 'app-layout',
@@ -13,7 +16,7 @@ import { LayoutService } from '../../service/layout.service';
   imports: [CommonModule, TopBarComponent, SideBarComponent, RouterModule, FooterComponent],
   templateUrl: './layout.component.html'
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit {
   overlayMenuOpenSubscription: Subscription;
 
   menuOutsideClickListener: any;
@@ -25,7 +28,8 @@ export class LayoutComponent {
   constructor(
     public layoutService: LayoutService,
     public renderer: Renderer2,
-    public router: Router
+    public router: Router,
+    private readonly artistService: ArtistService
   ) {
     this.overlayMenuOpenSubscription = this.layoutService.overlayOpen$.subscribe(() => {
       if (!this.menuOutsideClickListener) {
@@ -44,6 +48,25 @@ export class LayoutComponent {
     this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
       this.hideMenu();
     });
+  }
+
+  ngOnInit(): void {
+    this.artistService
+      .createArtist({
+        items: [
+          {
+            profile: {
+              name: 'Sơn Tùng M-TP',
+              biography: '1995-07-02',
+              description: 'Ca sĩ Sơn Tùng M-TP',
+              thumbnailUrl: null,
+              backgroundUrl: null,
+              refCode: 'null'
+            }
+          }
+        ]
+      } as BulkDto<CreateArtistDto>)
+      .subscribe((resp) => console.log(resp));
   }
 
   isOutsideClicked(event: MouseEvent) {

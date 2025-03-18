@@ -9,7 +9,7 @@ import { filter } from 'rxjs';
 export class AuthService {
   constructor(private readonly oauthService: OAuthService) {
     this.oauthService.configure(authorizationCodePkceFlowConfig);
-    this.oauthService.loadDiscoveryDocumentAndLogin();
+    this.oauthService.loadDiscoveryDocument();
     this.oauthService.events.pipe(filter((event) => event.type === 'token_received')).subscribe((_) => this.oauthService.loadUserProfile());
   }
 
@@ -17,27 +17,57 @@ export class AuthService {
     this.oauthService.initCodeFlow();
   }
 
+  signOut(): void {
+    this.oauthService.logOut();
+  }
+
   refreshToken(): void {
     this.oauthService.refreshToken();
+  }
+
+  get authorities(): string[] {
+    return [];
   }
 
   get isAuthenticated(): boolean {
     return this.oauthService.hasValidAccessToken();
   }
 
-  get userName(): string | null {
-    const claims = this.oauthService.getIdentityClaims();
-    if (!claims) {
-      return null;
+  get username(): string | null {
+    if (this.isAuthenticated) {
+      const claims = this.oauthService.getIdentityClaims();
+      return claims && claims['preferred_username'];
     }
-    return claims['given_name'];
+    return null;
   }
 
-  get idToken(): string {
-    return this.oauthService.getIdToken();
+  get email(): string | null {
+    if (this.isAuthenticated) {
+      const claims = this.oauthService.getIdentityClaims();
+      return claims && claims['email'];
+    }
+    return null;
   }
 
-  get accessToken(): string {
-    return this.oauthService.getAccessToken();
+  get profilePicture(): string | null {
+    if (this.isAuthenticated) {
+      const claims = this.oauthService.getIdentityClaims();
+      return claims && claims['profile_pic'];
+    }
+    return null;
+  }
+
+  get idToken(): string | null {
+    if (this.isAuthenticated) {
+      return this.oauthService.getIdToken();
+    }
+    return null;
+  }
+
+  get accessToken(): string | null {
+    if (this.isAuthenticated) {
+      return this.oauthService.getAccessToken();
+    }
+    return null;
   }
 }

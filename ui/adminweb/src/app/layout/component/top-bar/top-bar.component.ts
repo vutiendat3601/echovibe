@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
 import { ConfiguratorComponent } from '../configurator/configurator.component';
 import { LayoutService } from '../../service/layout.service';
+import { AuthService } from '../../../service/auth.service';
 
 @Component({
   selector: 'app-top-bar',
@@ -15,12 +16,14 @@ import { LayoutService } from '../../service/layout.service';
 export class TopBarComponent {
   items!: MenuItem[];
 
-  constructor(public layoutService: LayoutService) {}
+  constructor(
+    public readonly layoutService: LayoutService,
+    public readonly authService: AuthService
+  ) {}
 
   toggleDarkMode(): void {
     this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));
   }
 
-  redirectToProfileUrl(): void {
-  }
+  redirectToProfileUrl(): void {}
 }

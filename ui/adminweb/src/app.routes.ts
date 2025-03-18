@@ -3,7 +3,7 @@ import { LayoutComponent } from './app/layout/component/layout/layout.component'
 import { NotFoundComponent } from './app/page/not-found/not-found.component';
 import { Landing } from './app/demo/landing/landing';
 
-export const appRoutes: Routes = [
+export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,

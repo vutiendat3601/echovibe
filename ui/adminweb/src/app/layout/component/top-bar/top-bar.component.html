@@ -39,10 +39,10 @@
     </div>
 
     <button class="layout-top-bar-menu-button layout-top-bar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
-      <img class="rounded-full" src="https://i.scdn.co/image/ab67757000003b8239a802f4a548b1229a528700" alt="username" />
+      <img class="rounded-full" [src]="authService.profilePicture" alt="profilePicture" />
     </button>
 
-    <div class="layout-top-bar-menu hidden">
+    <div class="layout-top-bar-menu">
       <div class="layout-top-bar-menu-content">
         <button type="button" class="layout-top-bar-action">
           <i class="pi pi-user"></i>
