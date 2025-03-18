@@ -12,7 +12,8 @@
       "cwd": "${workspaceFolder}/artistquery",
       "args": ["app.main:app", "--reload", "--port=6110"],
       "jinja": true,
-      "envFile": "${workspaceFolder}/artistquery/.env"
+      "envFile": "${workspaceFolder}/artistquery/.env",
+      "justMyCode": false
     },
     {
       "name": "product",

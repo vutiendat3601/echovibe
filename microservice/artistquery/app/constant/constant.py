@@ -1,6 +1,2 @@
 APP_NAME = "artistquery"
-ARTIST_CREATED_EVENT = "artist.ArtistCreatedEvent"
-ARTIST_RELEASED_EVENT = "artist.ArtistReleasedEvent"
-ARTIST_UPDATED_EVENT = "artist.ArtistProfileUpdatedEvent"
-ARTIST_DELETED_EVENT = "artist.ArtistDeletedEvent"
-ARTIST_VISIBILITY_SET_EVENT = "artist.ArtistVisibilitySetEvent"
+AGGREGATE_ID_LIST_REGEX = r"^[a-zA-Z0-9]+(,[a-zA-Z0-9]+)*$"
