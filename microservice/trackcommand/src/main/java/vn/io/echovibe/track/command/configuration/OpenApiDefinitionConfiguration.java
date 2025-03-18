@@ -10,9 +10,9 @@ import io.swagger.v3.oas.annotations.servers.Server;
     },
     info =
         @Info(
-            title = "Echovibe - Track Command APIs",
+            title = "Echo Vibe - Track Command APIs",
             version = "1.0",
             description =
-                "Echovibe - Track Command APIs contains APIs which create or change data related to"
+                "Echo Vibe - Track Command APIs contains APIs which create or change data related to"
                     + " artist."))
 public class OpenApiDefinitionConfiguration {}

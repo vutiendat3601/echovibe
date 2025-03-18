@@ -10,9 +10,9 @@ import io.swagger.v3.oas.annotations.servers.Server;
     },
     info =
         @Info(
-            title = "Echovibe - Playlist Command APIs",
+            title = "Echo Vibe - Playlist Command APIs",
             version = "1.0",
             description =
-                "Echovibe - Playlist Command APIs contains APIs which create or change data related"
-                    + " to artist."))
+                "Echo Vibe - Playlist Command APIs contains APIs which create or change data"
+                    + " related to artist."))
 public class OpenApiDefinitionConfiguration {}
