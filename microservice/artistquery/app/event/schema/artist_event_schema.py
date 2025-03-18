@@ -1,94 +1,37 @@
-from pydantic import Field
+from pydantic import BaseModel, Field
 from app.event.schema.event_schema import EventSchema
+from app.schema.artist_schema import ArtistProfileSchema
 
 
 class ArtistCreatedEvent(EventSchema):
     urn: str
-
-    name: str
-
-    biography: str | None = Field(default=None, alias="biography")
-
-    description: str | None = Field(default=None, alias="description")
-
-    is_published: bool = Field(default=False, alias="isPublished")
-
+    profile: ArtistProfileSchema
+    is_released: bool = Field(default=False, alias="isReleased")
     is_public: bool = Field(default=False, alias="isPublic")
-
     is_active: bool = Field(default=True, alias="isActive")
 
-    thumbnail_file_key: str | None = Field(default=None,
-                                           alias="thumbnailFileKey")
 
-    thumbnail_url: str | None = Field(default=None, alias="thumbnailUrl")
-
-    background_file_key: str | None = Field(default=None,
-                                            alias="backgroundFileKey")
-
-    background_url: str | None = Field(default=None, alias="backgroundUrl")
-
-    tags: list[str] = Field(default=[])
-
-    ref_code: str | None = Field(default=None, alias="refCode")
-
-    class Config:
-        populate_by_name = True
-        extra = "allow"
-
-
-class ArtistPublishedEvent(EventSchema):
+class ArtistReleasedEvent(EventSchema):
     urn: str
-
-    name: str
-
-    biography: str | None = Field(default=None, alias="biography")
-
-    description: str | None = Field(default=None, alias="description")
-
-    is_published: bool = Field(default=False, alias="isPublished")
-
+    profile: ArtistProfileSchema
+    is_released: bool = Field(default=False, alias="isReleased")
     is_public: bool = Field(default=False, alias="isPublic")
-
     is_active: bool = Field(default=True, alias="isActive")
-
-    thumbnail_file_key: str | None = Field(default=None,
-                                           alias="thumbnailFileKey")
-
-    thumbnail_url: str | None = Field(default=None, alias="thumbnailUrl")
-
-    background_file_key: str | None = Field(default=None,
-                                            alias="backgroundFileKey")
-
-    background_url: str | None = Field(default=None, alias="backgroundUrl")
-
     tags: list[str] = Field(default=[])
-
-    ref_code: str | None = Field(default=None, alias="refCode")
 
     class Config:
         populate_by_name = True
         extra = "allow"
 
 
-class ArtistUpdatedEvent(EventSchema):
-    name: str
-
-    biography: str | None = Field(default=None, alias="biography")
-
-    description: str | None = Field(default=None, alias="description")
-
-    thumbnail_url: str | None = Field(default=None, alias="thumbnailUrl")
-
-    background_url: str | None = Field(default=None, alias="backgroundUrl")
-
-    ref_code: str | None = Field(default=None, alias="refCode")
+class ArtistProfileUpdatedEvent(EventSchema):
+    profile: ArtistProfileSchema
 
 
 class ArtistDeletedEvent(EventSchema):
     is_active: bool = Field(default=True, alias="isActive")
-
     is_soft_deleted: bool = Field(alias="isSoftDeleted")
 
 
-class ArtistVisibilityChangedEvent(EventSchema):
+class ArtistVisibilitySetEvent(EventSchema):
     is_public: bool = Field(alias="isPublic")
