@@ -13,6 +13,6 @@ spec:
     - http01:
         gatewayHTTPRoute:
           parentRefs:
-          - name: {{ .Values.gatewayName }}
+          - name: "{{ .Values.gatewayName }}-gateway"
             namespace: {{ .Values.global.namespace }}
             kind: Gateway
