@@ -11,10 +11,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import vn.io.echovibe.core.command.CommandDispatcher;
 import vn.io.echovibe.core.domain.EventStoreRepository;
 import vn.io.echovibe.playlist.command.handler.CommandHandler;
-import vn.io.echovibe.playlist.command.model.SetPlaylistVisibilityCommand;
 import vn.io.echovibe.playlist.command.model.CreatePlaylistCommand;
 import vn.io.echovibe.playlist.command.model.DeletePlaylistCommand;
 import vn.io.echovibe.playlist.command.model.ReleasePlaylistCommand;
+import vn.io.echovibe.playlist.command.model.SetPlaylistVisibilityCommand;
 import vn.io.echovibe.playlist.command.model.UpdatePlaylistDetailCommand;
 
 @ComponentScan("vn.io.echovibe")
@@ -32,8 +32,7 @@ public class PlaylistCommandApplication {
     commandDispatcher.registerHandler(UpdatePlaylistDetailCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(DeletePlaylistCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(ReleasePlaylistCommand.class, commandHandler::handle);
-    commandDispatcher.registerHandler(
-        SetPlaylistVisibilityCommand.class, commandHandler::handle);
+    commandDispatcher.registerHandler(SetPlaylistVisibilityCommand.class, commandHandler::handle);
   }
 
   public static void main(String[] args) {
