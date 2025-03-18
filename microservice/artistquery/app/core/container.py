@@ -18,7 +18,9 @@ class Container(containers.DeclarativeContainer):
 
     # Repository
     artist_repository = providers.Factory(
-        ArtistRepository, session_factory=database.provided.session)
+        ArtistRepository,
+        logger=logger,
+        session_factory=database.provided.session)
 
     # Service
     artist_service = providers.Factory(ArtistService,

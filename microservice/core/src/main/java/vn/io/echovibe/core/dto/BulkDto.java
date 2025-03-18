@@ -1,7 +1,8 @@
 package vn.io.echovibe.core.dto;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 
-public record BulkDto<T>(@Valid @NotEmpty List<T> items) {}
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+
+public record BulkDto<T>(@NotEmpty List<@Valid T> items) {}

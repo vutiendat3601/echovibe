@@ -1,14 +1,11 @@
-from app.model.artist import Artist
-from app.schema.artist_schema import ArtistSchema
+from app.model.artist import Artist, ArtistProfile
+from app.schema.artist_schema import ArtistSchema, ArtistProfileSchema
 
 
 def map_to_artist_schema(artist: Artist):
+    profile: ArtistProfileSchema = ArtistProfileSchema(**artist.profile.model_dump())
     return ArtistSchema(id=artist.aggregate_id,
                         urn=artist.urn,
-                        name=artist.name,
-                        biography=artist.biography,
-                        description=artist.description,
+                        profile=profile,
                         is_public=artist.is_public,
-                        thumbnail_url=artist.thumbnail_url,
-                        background_url=artist.background_url,
                         tags=artist.tags)
