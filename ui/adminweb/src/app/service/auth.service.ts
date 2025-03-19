@@ -1,16 +1,35 @@
 import { Injectable } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { authorizationCodePkceFlowConfig } from '../../auth.config';
-import { filter } from 'rxjs';
+import { UserProfile } from '../model/user-profile';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  constructor(private readonly oauthService: OAuthService) {
+  private isInitialized: boolean = false;
+  private readonly userProfileSubject: Subject<UserProfile> = new BehaviorSubject<UserProfile>({});
+
+  constructor(private readonly oauthService: OAuthService) {}
+
+  initialize(): void {
+    if (this.isInitialized) {
+      return;
+    }
     this.oauthService.configure(authorizationCodePkceFlowConfig);
-    this.oauthService.loadDiscoveryDocument();
-    this.oauthService.events.pipe(filter((event) => event.type === 'token_received')).subscribe((_) => this.oauthService.loadUserProfile());
+    this.oauthService.loadDiscoveryDocumentAndTryLogin().then((isLoggedIn) => {
+      if (isLoggedIn) {
+        this.oauthService.refreshToken();
+      }
+    });
+    this.oauthService.setupAutomaticSilentRefresh();
+    this.oauthService.events.forEach((event) => {
+      if (['token_received', 'token_refreshed'].includes(event.type)) {
+        this.oauthService.loadUserProfile().then((userProfile) => this.userProfileSubject.next(userProfile));
+      }
+    });
+    this.isInitialized = true;
   }
 
   signIn(): void {
@@ -18,14 +37,14 @@ export class AuthService {
   }
 
   signOut(): void {
-    this.oauthService.logOut();
+    this.oauthService.revokeTokenAndLogout();
   }
 
   refreshToken(): void {
     this.oauthService.refreshToken();
   }
 
-  get authorities(): string[] {
+  get roles(): string[] {
     return [];
   }
 
@@ -33,41 +52,7 @@ export class AuthService {
     return this.oauthService.hasValidAccessToken();
   }
 
-  get username(): string | null {
-    if (this.isAuthenticated) {
-      const claims = this.oauthService.getIdentityClaims();
-      return claims && claims['preferred_username'];
-    }
-    return null;
-  }
-
-  get email(): string | null {
-    if (this.isAuthenticated) {
-      const claims = this.oauthService.getIdentityClaims();
-      return claims && claims['email'];
-    }
-    return null;
-  }
-
-  get profilePicture(): string | null {
-    if (this.isAuthenticated) {
-      const claims = this.oauthService.getIdentityClaims();
-      return claims && claims['profile_pic'];
-    }
-    return null;
-  }
-
-  get idToken(): string | null {
-    if (this.isAuthenticated) {
-      return this.oauthService.getIdToken();
-    }
-    return null;
-  }
-
-  get accessToken(): string | null {
-    if (this.isAuthenticated) {
-      return this.oauthService.getAccessToken();
-    }
-    return null;
+  userProfile(): Observable<UserProfile> {
+    return this.userProfileSubject;
   }
 }

@@ -39,14 +39,18 @@
     </div>
 
     <button class="layout-top-bar-menu-button layout-top-bar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
-      <img class="rounded-full" [src]="authService.profilePicture" alt="profilePicture" />
+      <img class="user-picture rounded-full" [src]="this.userProfile.info?.picture" [alt]="this.userProfile.info?.name" />
     </button>
 
     <div class="layout-top-bar-menu">
       <div class="layout-top-bar-menu-content">
-        <button type="button" class="layout-top-bar-action">
+        <a type="button" class="layout-top-bar-action" [href]="this.userProfile.info?.iss + '/account'">
           <i class="pi pi-user"></i>
           <span>Profile</span>
+        </a>
+        <button type="button" class="layout-top-bar-action" (click)="signOut()">
+          <i class="pi pi-user"></i>
+          <span>Sign out</span>
         </button>
       </div>
     </div>

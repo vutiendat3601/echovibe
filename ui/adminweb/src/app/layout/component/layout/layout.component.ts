@@ -9,6 +9,7 @@ import { FooterComponent } from '../footer/footer.component';
 import { LayoutService } from '../../service/layout.service';
 import { BulkDto } from '../../../dto/bulk-dto';
 import { CreateArtistDto } from '../../../dto/artist-dto';
+import { AuthService } from '../../../service/auth.service';
 
 @Component({
   selector: 'app-layout',
@@ -50,24 +51,7 @@ export class LayoutComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.artistService
-      .createArtist({
-        items: [
-          {
-            profile: {
-              name: 'Sơn Tùng M-TP',
-              biography: '1995-07-02',
-              description: 'Ca sĩ Sơn Tùng M-TP',
-              thumbnailUrl: null,
-              backgroundUrl: null,
-              refCode: 'null'
-            }
-          }
-        ]
-      } as BulkDto<CreateArtistDto>)
-      .subscribe((resp) => console.log(resp));
-  }
+  ngOnInit(): void {}
 
   isOutsideClicked(event: MouseEvent) {
     const sideBarEl = document.querySelector('.layout-side-bar');

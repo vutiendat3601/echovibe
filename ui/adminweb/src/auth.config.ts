@@ -1,4 +1,4 @@
-import { AuthConfig } from 'angular-oauth2-oidc';
+import { AuthConfig, OAuthModuleConfig } from 'angular-oauth2-oidc';
 import { environment } from './environment/environment';
 
 export const authorizationCodePkceFlowConfig: AuthConfig = {
@@ -19,6 +19,15 @@ export const authorizationCodePkceFlowConfig: AuthConfig = {
   // The first four are defined by OIDC.
   // Important: Request offline_access to get a refresh token
   // The api scope is a usecase specific one
+  useSilentRefresh: true,
   scope: 'openid profile email offline_access',
   showDebugInformation: true
+};
+
+export const oauthModuleConfig: OAuthModuleConfig = {
+  resourceServer: {
+    // allowedUrls: [environment.artistCommandBaseUrl, environment.artistQueryBaseUrl],
+    allowedUrls: ['https://api.echovibe.io.vn'],
+    sendAccessToken: true
+  }
 };
