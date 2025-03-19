@@ -88,12 +88,18 @@
 
   .layout-top-bar-menu-content {
     display: flex;
+    flex-direction: column;
     gap: 1rem;
   }
 
   .layout-config-menu {
     display: flex;
     gap: 1rem;
+  }
+
+  .user-picture {
+    width: 2.5rem;
+    height: 2.5rem;
   }
 }
 
@@ -129,10 +135,6 @@
       min-width: 15rem;
       border: 1px solid var(--surface-border);
 
-      .layout-top-bar-menu-content {
-        gap: 0.5rem;
-      }
-
       .layout-top-bar-action {
         display: flex;
         width: 100%;
@@ -151,10 +153,6 @@
           display: block;
         }
       }
-    }
-
-    .layout-top-bar-menu-content {
-      flex-direction: column;
     }
   }
 }
