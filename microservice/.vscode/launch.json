@@ -31,7 +31,11 @@
       "request": "launch",
       "mainClass": "vn.io.echovibe.artist.command.ArtistCommandApplication",
       "projectName": "artistcommand",
-      "cwd": "${workspaceFolder}/artistcommand"
+      "cwd": "${workspaceFolder}/artistcommand",
+      "env": {
+        "APP_WEB_CLIENT_ARTISTQUERY_BASEURL": "http://localhost:6110",
+        "APP_WEB_CLIENT_ARTISTQUERY_ENABLED": "true"
+      }
     },
     {
       "type": "java",
