@@ -15,7 +15,7 @@ nimbusJoseJwtVersion = "10.0.1"
 springBootPluginVersion = "3.4.3"
 springDependencyManagementPluginVersion = "1.1.7"
 flywayPluginVersion = "11.3.4"
-googleJibPluginVersion = "3.4.4"
+googleJibPluginVersion = "3.4.5"
 spotlessPluginVersion = "7.0.2"
 
 [libraries]
