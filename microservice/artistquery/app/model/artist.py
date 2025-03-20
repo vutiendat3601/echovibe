@@ -1,7 +1,7 @@
 from sqlmodel import SQLModel, Field, Column, Relationship
 from typing import Optional
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy import TEXT
 
@@ -20,8 +20,8 @@ class Artist(SQLModel, table=True):
                                          foreign_key="artist_profile.id")
     profile: Optional["ArtistProfile"] = Relationship(back_populates="artist")
     event_timestamp: datetime = Field(None)
-    created_at: datetime = Field(None)
-    updated_at: datetime = Field(None)
+    created_at: datetime = Field(default=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default=datetime.now(timezone.utc))
     created_by: str | None = Field(None)
     updated_by: str | None = Field(None)
 
@@ -38,7 +38,7 @@ class ArtistProfile(SQLModel, table=True):
     background_url: str | None = None
     artist: Optional["Artist"] = Relationship(back_populates="profile")
     event_timestamp: datetime = Field(None)
-    created_at: datetime = Field(None)
-    updated_at: datetime = Field(None)
+    created_at: datetime = Field(default=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default=datetime.now(timezone.utc))
     created_by: str | None = Field(None)
     updated_by: str | None = Field(None)
