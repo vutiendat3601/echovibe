@@ -39,7 +39,7 @@ class AppInitializer:
 
         self.app = FastAPI(title="Echo Vibe - Artist Query APIs",
                            version="1.0.0",
-                           lifespan=lifespan)
+                           lifespan=lifespan, docs_url="/v1/artists/openapi")
         self.logger.info(
             f"\n{banner}\n{APP_NAME} {configuration.get_build_number()}\nPowered by FastAPI\n"
         )
