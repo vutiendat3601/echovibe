@@ -4,11 +4,10 @@ import static vn.io.echovibe.core.constant.Constant.URL_REGEX;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import vn.io.echovibe.core.annotation.NullOrNotBlank;
 
 public record CreateTrackDetailDto(
     @NotBlank(message = "The field 'name' must not be null or blank.") String name,
     String description,
     @Pattern(regexp = URL_REGEX, message = "The field 'thumbnailUrl' must be a valid URL format")
         String thumbnailUrl,
-    @NullOrNotBlank(message = "The field 'refCode' must not be blank.") String refCode) {}
+    String refCode) {}

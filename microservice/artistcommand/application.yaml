@@ -8,7 +8,7 @@ spring:
       client:
         enabled: false
         url:
-        - "localhost:6800"
+          - "localhost:6800"
   docker:
     compose:
       enabled: true
@@ -17,8 +17,12 @@ spring:
       kafka:
         binder:
           brokers:
-          - "infras.echovibe.io.vn:9092"
+            - "infras.echovibe.io.vn:9092"
 app:
   web:
     auth:
       openIdConnectCertsUrl: https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs
+    client:
+      artistquery:
+        baseUrl: http://localhost:6110
+        enabled: true

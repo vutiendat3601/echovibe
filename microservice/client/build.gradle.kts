@@ -1,4 +1,8 @@
 dependencies {
+  implementation(project(":web"))
+  implementation(project(":artistcommon"))
+  compileOnly("org.springframework.cloud:spring-cloud-starter-openfeign")
+  compileOnly("org.springframework.boot:spring-boot-starter-web")
 }
 
 tasks {
