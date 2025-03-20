@@ -19,6 +19,8 @@ import vn.io.echovibe.core.event.Event;
 public class ArtistCreatedEvent extends Event {
   private String urn;
 
+  private String refCode;
+
   private ArtistProfile profile;
 
   @Builder.Default private Boolean isReleased = false;
@@ -28,6 +30,4 @@ public class ArtistCreatedEvent extends Event {
   @Builder.Default private Boolean isActive = true;
 
   @Builder.Default private List<String> tags = new LinkedList<>();
-
-  private String refCode;
 }

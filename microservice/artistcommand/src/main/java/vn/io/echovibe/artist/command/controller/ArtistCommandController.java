@@ -51,6 +51,7 @@ public class ArtistCommandController {
                   final CreateArtistProfileDto createArtistProfileDto = cad.profile();
                   return CreateArtistCommand.builder()
                       .id(IdentityUtils.generateAggregateId())
+                      .refCode(cad.refCode())
                       .profile(
                           ArtistProfile.builder()
                               .name(createArtistProfileDto.name())
@@ -58,7 +59,6 @@ public class ArtistCommandController {
                               .description(createArtistProfileDto.description())
                               .thumbnailUrl(createArtistProfileDto.thumbnailUrl())
                               .backgroundUrl(createArtistProfileDto.backgroundUrl())
-                              .refCode(createArtistProfileDto.refCode())
                               .build())
                       .build();
                 })
@@ -84,7 +84,6 @@ public class ArtistCommandController {
                               .description(uad.description())
                               .thumbnailUrl(uad.thumbnailUrl())
                               .backgroundUrl(uad.backgroundUrl())
-                              .refCode(uad.refCode())
                               .build())
                       .build();
                 })

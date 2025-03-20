@@ -17,4 +17,6 @@ import vn.io.echovibe.core.command.Command;
 @AllArgsConstructor
 public class CreateArtistCommand extends Command {
   private ArtistProfile profile;
+
+  private String refCode;
 }

@@ -11,6 +11,7 @@ class Artist(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     aggregate_id: str = Field(..., max_length=16, unique=True)
     urn: str = Field(..., max_length=255, unique=True)
+    ref_code: str | None = Field(None, max_length=100, unique=True)
     is_public: bool = Field(default=False)
     is_released: bool = Field(default=False)
     is_active: bool = Field(default=True)
@@ -35,7 +36,6 @@ class ArtistProfile(SQLModel, table=True):
     thumbnail_url: str | None = None
     background_file_key: str | None = None
     background_url: str | None = None
-    ref_code: str | None = Field(None, max_length=100, unique=True)
     artist: Optional["Artist"] = Relationship(back_populates="profile")
     event_timestamp: datetime = Field(None)
     created_at: datetime = Field(None)

@@ -11,7 +11,6 @@ class ArtistProfileSchema(BaseModel):
     background_file_key: str | None = Field(default=None,
                                             alias="backgroundFileKey")
     background_url: str | None = Field(default=None, alias="backgroundUrl")
-    ref_code: str | None = Field(default=None, alias="refCode")
 
 
 class ArtistSchema(BaseModel):

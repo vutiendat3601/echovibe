@@ -123,14 +123,14 @@ def get_artist_event_listeners() -> list[callable]:
 
 def _consume_artist_created_event(artist_created_event: ArtistCreatedEvent):
     created_at = datetime.now(timezone.utc)
-    artist_profile_props = {
+    artist_profile_attributes = {
         **artist_created_event.profile.model_dump(), "id": None,
         "event_timestamp": artist_created_event.timestamp,
         "created_at": created_at,
         "updated_at": created_at,
         "updated_by": artist_created_event.created_by
     }
-    artist_profile = ArtistProfile(**artist_profile_props)
+    artist_profile = ArtistProfile(**artist_profile_attributes)
     artist_props = {
         **artist_created_event.model_dump(), "id": None,
         "profile": artist_profile,
@@ -162,7 +162,6 @@ def _consume_artist_released_event(artist_released_event: ArtistReleasedEvent):
         artist.background_file_key = artist_released_event.background_file_key
         artist.background_url = artist_released_event.background_url
         artist.tags = artist_released_event.tags
-        artist.ref_code = artist_released_event.ref_code
         artist.updated_at = datetime.now(timezone.utc)
         artist_repository.save_artist(artist)
     logger.info(
@@ -180,7 +179,6 @@ def _consume_artist_profile_updated_event(
         artist.description = artist_profile_updated_event.description
         artist.thumbnail_url = artist_profile_updated_event.thumbnail_url
         artist.background_url = artist_profile_updated_event.background_url
-        artist.ref_code = artist_profile_updated_event.ref_code
         artist_repository.save_artist(artist)
     logger.info(
         f"Processed ArtistProfileUpdatedEvent: id={artist_profile_updated_event.id}, version={artist_profile_updated_event.version}"
