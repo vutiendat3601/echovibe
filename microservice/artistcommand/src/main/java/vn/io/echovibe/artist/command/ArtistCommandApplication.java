@@ -15,6 +15,7 @@ import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
 import vn.io.echovibe.artist.command.model.ReleaseArtistCommand;
 import vn.io.echovibe.artist.command.model.SetArtistVisibilityCommand;
 import vn.io.echovibe.artist.command.model.UpdateArtistProfileCommand;
+import vn.io.echovibe.client.rest.ArtistQueryClient;
 import vn.io.echovibe.core.command.CommandDispatcher;
 import vn.io.echovibe.core.domain.EventStoreRepository;
 
@@ -22,7 +23,7 @@ import vn.io.echovibe.core.domain.EventStoreRepository;
 @EnableMongoRepositories(basePackageClasses = EventStoreRepository.class)
 @EnableTransactionManagement
 @RequiredArgsConstructor
-@EnableFeignClients("vn.io.echovibe")
+@EnableFeignClients(clients = {ArtistQueryClient.class})
 @SpringBootApplication
 public class ArtistCommandApplication {
   private final CommandDispatcher commandDispatcher;
