@@ -66,8 +66,11 @@ subprojects {
     withType<JavaCompile> {
       options.encoding = "UTF-8"
     }
-    withType<Javadoc>{
+    withType<Javadoc> {
       options.encoding = "UTF-8"
+    }
+    named("build") {
+      dependsOn("spotlessApply")
     }
   }
 
