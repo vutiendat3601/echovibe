@@ -1,6 +1,5 @@
 package vn.io.echovibe.artist.common.constant;
 
-
 public interface ArtistConstant {
   String ARTIST_CREATED_SUCCESS = "Created Artist successfully.";
   String ARTIST_UPDATED_SUCCESS = "Updated Artist successfully.";
