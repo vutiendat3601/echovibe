@@ -16,6 +16,7 @@ class ArtistProfileSchema(BaseModel):
 class ArtistSchema(BaseModel):
     id: str = Field()
     urn: str = Field()
+    ref_code: str | None = Field(default=None)
     profile: ArtistProfileSchema | None = Field(default=None)
     is_public: bool = Field(serialization_alias="isPublic")
     tags: list[str] = Field(default=[], serialization_alias="tags")
