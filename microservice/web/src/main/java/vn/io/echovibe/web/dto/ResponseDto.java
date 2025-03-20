@@ -1,4 +1,4 @@
-package vn.io.echovibe.core.dto;
+package vn.io.echovibe.web.dto;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;

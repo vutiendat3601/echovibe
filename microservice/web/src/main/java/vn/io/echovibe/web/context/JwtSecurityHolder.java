@@ -1,6 +1,6 @@
-package vn.io.echovibe.core.context;
+package vn.io.echovibe.web.context;
 
-import static vn.io.echovibe.core.constant.Constant.AUTH_JWT_USERNAME_CLAIM;
+import static vn.io.echovibe.web.constant.WebConstant.AUTH_JWT_USERNAME_CLAIM;
 
 import com.nimbusds.jwt.JWT;
 import java.text.ParseException;
@@ -24,7 +24,7 @@ public class JwtSecurityHolder {
     return jwtHolder.get();
   }
 
-  public static String getJwtSubject() {
+  public static String getSubject() {
     final JWT jwt = jwtHolder.get();
     if (Objects.nonNull(jwt)) {
       try {
@@ -36,7 +36,7 @@ public class JwtSecurityHolder {
     return null;
   }
 
-  public static String getJwtUsername() {
+  public static String getUsername() {
     final JWT jwt = jwtHolder.get();
     if (Objects.nonNull(jwt)) {
       try {

@@ -15,10 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vn.io.echovibe.core.command.CommandDispatcher;
-import vn.io.echovibe.core.dto.BulkDto;
-import vn.io.echovibe.core.dto.ResponseDto;
 import vn.io.echovibe.core.model.BulkResult;
-import vn.io.echovibe.core.utils.IdentityUtils;
+import vn.io.echovibe.core.util.IdentityUtils;
 import vn.io.echovibe.track.command.dto.CreateTrackDetailDto;
 import vn.io.echovibe.track.command.dto.CreateTrackDto;
 import vn.io.echovibe.track.command.dto.DeleteTrackDto;
@@ -31,6 +29,8 @@ import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
 import vn.io.echovibe.track.command.model.SetTrackVisibilityCommand;
 import vn.io.echovibe.track.command.model.UpdateTrackDetailCommand;
 import vn.io.echovibe.track.common.model.TrackDetail;
+import vn.io.echovibe.web.dto.BulkDto;
+import vn.io.echovibe.web.dto.ResponseDto;
 
 @Tag(name = "Track")
 @RequiredArgsConstructor

@@ -1,8 +1,10 @@
 package vn.io.echovibe.artist.command.infrastructure;
 
 import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_EVENT_TOPIC_PREFIX;
+import static vn.io.echovibe.core.constant.Constant.AUTH_SYSTEM_USERNAME;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import vn.io.echovibe.core.event.EventDocument;
 import vn.io.echovibe.core.event.EventProducer;
 import vn.io.echovibe.core.event.EventStore;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
+import vn.io.echovibe.web.context.JwtSecurityHolder;
 
 @RequiredArgsConstructor
 @Service
@@ -33,6 +36,8 @@ public class ArtistEventStore implements EventStore {
     for (Event event : events) {
       version++;
       event.setVersion(version);
+      event.setCreatedBy(
+          Optional.ofNullable(JwtSecurityHolder.getSubject()).orElse(AUTH_SYSTEM_USERNAME));
       EventDocument eventDocument =
           EventDocument.builder()
               .aggregateId(aggregateId)
@@ -40,6 +45,7 @@ public class ArtistEventStore implements EventStore {
               .version(version)
               .eventType(event.getClass().getTypeName())
               .event(event)
+              .createdBy(event.getCreatedBy())
               .build();
       eventDocument = eventStoreRepository.save(eventDocument);
       if (!eventDocument.getId().isEmpty()) {

@@ -1,5 +1,6 @@
 dependencies {
   implementation(project(":core"))
+  implementation(project(":web"))
   implementation(project(":playlistcommon"))
   implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
   implementation("org.springframework.boot:spring-boot-starter-validation")

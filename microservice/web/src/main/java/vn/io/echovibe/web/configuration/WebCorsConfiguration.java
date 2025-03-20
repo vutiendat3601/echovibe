@@ -1,4 +1,4 @@
-package vn.io.echovibe.core.configuration;
+package vn.io.echovibe.web.configuration;
 
 import java.util.List;
 import lombok.Getter;

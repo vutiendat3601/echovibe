@@ -1,6 +1,6 @@
-package vn.io.echovibe.core.interceptor;
+package vn.io.echovibe.web.interceptor;
 
-import static vn.io.echovibe.core.constant.Constant.CORRELATION_ID_HEADER;
+import static vn.io.echovibe.web.constant.WebConstant.CORRELATION_ID_HEADER;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

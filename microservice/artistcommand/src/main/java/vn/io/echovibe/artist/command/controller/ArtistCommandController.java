@@ -27,10 +27,10 @@ import vn.io.echovibe.artist.command.model.SetArtistVisibilityCommand;
 import vn.io.echovibe.artist.command.model.UpdateArtistProfileCommand;
 import vn.io.echovibe.artist.common.model.ArtistProfile;
 import vn.io.echovibe.core.command.CommandDispatcher;
-import vn.io.echovibe.core.dto.BulkDto;
-import vn.io.echovibe.core.dto.ResponseDto;
 import vn.io.echovibe.core.model.BulkResult;
-import vn.io.echovibe.core.utils.IdentityUtils;
+import vn.io.echovibe.core.util.IdentityUtils;
+import vn.io.echovibe.web.dto.BulkDto;
+import vn.io.echovibe.web.dto.ResponseDto;
 
 @Tag(name = "Artist")
 @RequiredArgsConstructor

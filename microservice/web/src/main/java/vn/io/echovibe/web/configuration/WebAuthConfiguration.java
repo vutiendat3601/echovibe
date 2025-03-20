@@ -1,4 +1,4 @@
-package vn.io.echovibe.core.configuration;
+package vn.io.echovibe.web.configuration;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

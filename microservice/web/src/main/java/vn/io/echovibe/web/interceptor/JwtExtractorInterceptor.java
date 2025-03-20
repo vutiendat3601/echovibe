@@ -1,6 +1,6 @@
-package vn.io.echovibe.core.interceptor;
+package vn.io.echovibe.web.interceptor;
 
-import static vn.io.echovibe.core.constant.Constant.AUTH_JWT_BEARER_PREFIX;
+import static vn.io.echovibe.web.constant.WebConstant.AUTH_JWT_BEARER_PREFIX;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
@@ -27,9 +27,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import vn.io.echovibe.core.configuration.WebAuthConfiguration;
-import vn.io.echovibe.core.context.JwtSecurityHolder;
-import vn.io.echovibe.core.exception.WebAuthenticationException;
+import vn.io.echovibe.web.configuration.WebAuthConfiguration;
+import vn.io.echovibe.web.context.JwtSecurityHolder;
+import vn.io.echovibe.web.exception.WebAuthenticationException;
 
 @Slf4j
 @Component
