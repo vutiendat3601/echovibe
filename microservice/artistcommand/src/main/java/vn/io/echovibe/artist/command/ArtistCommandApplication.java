@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
@@ -21,6 +22,7 @@ import vn.io.echovibe.core.domain.EventStoreRepository;
 @EnableMongoRepositories(basePackageClasses = EventStoreRepository.class)
 @EnableTransactionManagement
 @RequiredArgsConstructor
+@EnableFeignClients("vn.io.echovibe")
 @SpringBootApplication
 public class ArtistCommandApplication {
   private final CommandDispatcher commandDispatcher;
