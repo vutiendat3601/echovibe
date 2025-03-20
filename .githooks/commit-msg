@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+git secrets --commit_msg_hook -- "$@"
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+if ! [[ "$COMMIT_MSG" =~ ^ecv-[0-9]+:\ .{5,} ]]; then
+  echo "Invalid commit message format!"
+  echo "Correct format: ecv-<number>: Commit description"
+  echo "Example: ecv-123: Fix login issue"
+  exit 1
+fi
