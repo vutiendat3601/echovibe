@@ -36,7 +36,8 @@ def upgrade() -> None:
         sa.Column("created_by", sa.String(length=255), nullable=True),
         sa.Column("updated_by", sa.String(length=255), nullable=True),
         sa.PrimaryKeyConstraint("id"), sa.UniqueConstraint("aggregate_id"),
-        sa.UniqueConstraint("urn"), sa.UniqueConstraint("profile_id"))
+        sa.UniqueConstraint("urn"), sa.UniqueConstraint("ref_code"),
+        sa.UniqueConstraint("profile_id"))
 
     op.create_table(
         "artist_profile", sa.Column("id", sa.UUID(), nullable=False),
@@ -53,8 +54,7 @@ def upgrade() -> None:
         sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False),
         sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False),
         sa.Column("created_by", sa.String(length=255), nullable=True),
-        sa.Column("updated_by", sa.String(length=255), nullable=True),
-        sa.PrimaryKeyConstraint("id"), sa.UniqueConstraint("ref_code"))
+        sa.Column("updated_by", sa.String(length=255), nullable=True))
     op.create_foreign_key(constraint_name="fk_artist_profile_id_artist_profile",
                           source_table="artist",
                           referent_table="artist_profile",
