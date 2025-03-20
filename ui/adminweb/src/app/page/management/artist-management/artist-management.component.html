@@ -1,0 +1,92 @@
+<!-- <p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <p-button
+      label="New"
+      icon="pi pi-plus"
+      severity="secondary"
+      class="mr-2"
+      (onClick)="openNew()"
+    />
+    <p-button
+      severity="secondary"
+      label="Delete"
+      icon="pi pi-trash"
+      outlined
+      (onClick)="deleteSelectedArtists()"
+      [disabled]="!selectedArtists || !selectedArtists.length"
+    />
+  </ng-template>
+
+  <ng-template #end>
+    <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCsv()" />
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dt
+  [value]="artists()"
+  [rows]="10"
+  [columns]="columns"
+  [paginator]="true"
+  [globalFilterFields]="['name', 'createdBy', 'updatedBy']"
+  [tableStyle]="{ 'min-width': '75rem' }"
+  [(selection)]="selectedArtists"
+  [rowHover]="true"
+  dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+  [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[10, 20, 30]"
+>
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0">Manage Artists</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          (input)="onGlobalFilter(dt, $event)"
+          placeholder="Search..."
+        />
+      </p-iconfield>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <th><p-tableHeaderCheckbox /></th>
+      <th>ID</th>
+      <th pSortableColumn="name" style="min-width: 12rem">Name<p-sortIcon field="name" /></th>
+      <th style="min-width: 10rem">Profile picture</th>
+      <th pSortableColumn="price" style="min-width: 16rem">Description</th>
+      <th pSortableColumn="createdBy" style="min-width: 8rem">Created by</th>
+      <th pSortableColumn="updatedBy" style="min-width: 8rem">Updated by</th>
+      <th pSortableColumn="createdAt" style="min-width: 8rem">Created at</th>
+      <th pSortableColumn="updatedAt" style="min-width: 8rem">Updated at</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-artist>
+    <tr>
+      <td style="width: 3rem">
+        <p-tableCheckbox [value]="artist" />
+      </td>
+      <td style="min-width: 12rem">{{ artist.id }}</td>
+      <td style="min-width: 16rem">{{ artist.name }}</td>
+      <td>
+        <img
+          [src]="'https://i.scdn.co/image/ab67616d00001e02fc307e330d771ad864a28130'"
+          [alt]="artist.name"
+          style="width: 64px"
+          class="rounded"
+        />
+      </td>
+      <td>{{ artist.description }}</td>
+      <td>{{ artist.createdBy }}</td>
+      <td>{{ artist.updatedBy }}</td>
+      <td>
+        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" />
+        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" />
+      </td>
+    </tr>
+  </ng-template>
+</p-table> -->
+<h1>This is Artist Management page</h1>

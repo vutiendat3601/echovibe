@@ -1,0 +1,38 @@
+{{- define "fastapiapp-common.deployment" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.deployment.name }}-deploy"
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.deployment.name }}
+spec:
+  replicas: {{ .Values.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deployment.name }}
+    spec:
+      volumes:
+      - name: "{{ .Values.deployment.name }}-secretvolume"
+        secret:
+          secretName: "{{ .Values.deployment.name }}-secret"
+          items:
+          - key: ".env"
+            path: ".env"
+      containers:
+      - name: {{ .Values.deployment.name }}
+        image: "{{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}"
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.deployment.containerPort }}
+          protocol: TCP
+        volumeMounts:
+        - name: "{{ .Values.deployment.name }}-secretvolume"
+          mountPath: "/app/.env"
+          subPath: ".env"
+          readOnly: true
+{{- end -}}

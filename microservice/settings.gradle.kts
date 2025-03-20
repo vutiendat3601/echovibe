@@ -1,11 +1,11 @@
 rootProject.name = "echovibe"
 
 include(":core")
-include(":artistcommand")
+include(":web")
+include(":client")
 include(":artistcommon")
-include(":artistquery")
-// include(":track")
-// include(":playlistcommand")
-// include(":playlistcommon")
-// include(":playlistquery")
-// include(":springbootadminserver")
+include(":artistcommand")
+include(":trackcommon")
+include(":trackcommand")
+include(":playlistcommon")
+include(":playlistcommand")

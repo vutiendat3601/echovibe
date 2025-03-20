@@ -1,9 +1,9 @@
 package vn.io.echovibe.artist.command.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 public record CreateArtistDto(
-    @NotBlank(message = "The 'name' field is required and must not be blank.") String name,
-    @NotNull(message = "The field 'isPublic' must not be null.") Boolean isPublic,
-    String description) {}
+    String refCode,
+    @Valid @NotNull(message = "The field 'profile' must not be null.")
+        CreateArtistProfileDto profile) {}

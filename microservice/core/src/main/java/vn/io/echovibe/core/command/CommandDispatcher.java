@@ -1,9 +1,7 @@
 package vn.io.echovibe.core.command;
 
 import java.util.List;
-
 import org.springframework.lang.NonNull;
-
 import vn.io.echovibe.core.model.BulkResult;
 
 public interface CommandDispatcher {

@@ -5,6 +5,7 @@ deployment:
   image: 
     repository: vutiendat3601/echovibe-artistcommand
     tag: latest
+    pullPolicy: Always
   service:
     type: ClusterIP
     port: 80

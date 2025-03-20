@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.core.event.Event;
+import vn.io.echovibe.playlist.common.model.PlaylistDetail;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,17 +19,13 @@ import vn.io.echovibe.core.event.Event;
 public class PlaylistCreatedEvent extends Event {
   private String urn;
 
-  private String name;
+  private PlaylistDetail detail;
+
+  @Builder.Default private Boolean isReleased = false;
 
   @Builder.Default private Boolean isPublic = false;
 
-  private String description;
-
   @Builder.Default private Boolean isActive = true;
 
-  @Builder.Default private Boolean isPublished = false;
-
   @Builder.Default private List<String> tags = new LinkedList<>();
-
-  private String ref;
 }

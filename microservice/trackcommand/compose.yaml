@@ -1,0 +1,9 @@
+services:
+  trackcommand-mongo-i1:
+    image: "mongo:8.0.4"
+    environment:
+      - "MONGO_INITDB_ROOT_USERNAME=echovibe_trackcommand"
+      - "MONGO_INITDB_ROOT_PASSWORD=echovibe_trackcommand"
+      - "MONGO_INITDB_DATABASE=echovibe_trackcommand"
+    ports:
+      - "26120:27017"

@@ -1,6 +1,6 @@
 package vn.io.echovibe.artist.command.handler;
 
-import static vn.io.echovibe.artist.command.constant.ArtistConstant.ARTIST_EVENT_TOPIC_PREFIX;
+import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_EVENT_TOPIC_PREFIX;
 
 import java.util.Comparator;
 import java.util.List;

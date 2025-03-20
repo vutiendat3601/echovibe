@@ -1,0 +1,10 @@
+name: "echovibe"
+services:
+  product-pg-i1:
+    image: "postgres:17.2-bookworm"
+    environment:
+      - POSTGRES_DB=echovibe_product
+      - POSTGRES_USER=echovibe_product
+      - POSTGRES_PASSWORD=echovibe_product
+    ports:
+      - "16200:5432"

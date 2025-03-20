@@ -1,15 +1,15 @@
 global:
   namespace: microservice
-  springProfilesActive: default
-  kafkaBrokerUrls: http://infras.echovibe.io.vn:9092
-  openIdConnectCertsUrl: https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs
-  namespace: microservice
   gatewayName: microservice
+  kafkaBrokerUrls: infras.echovibe.io.vn:9092
+  openIdConnectCertsUrl: https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs
+  springProfilesActive: default
 deployment:
   name: springbootapp
   image: 
     repository: repository
     tag: latest
+    pullPolicy: Always
   containerPort: 6100
   replicaCount: 3
   service:

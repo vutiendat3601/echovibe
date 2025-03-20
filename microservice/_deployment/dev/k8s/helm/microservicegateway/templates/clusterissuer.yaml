@@ -2,7 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: "{{ .Values.clusterIssuer.name }}-clusterissuer"
-  namespace: microserivce
+  namespace: {{ .Values.global.namespace }}
 spec:
   acme:
     email: {{ .Values.clusterIssuer.acme.email }}
@@ -13,6 +13,6 @@ spec:
     - http01:
         gatewayHTTPRoute:
           parentRefs:
-          - name: {{ .Values.gatewayName }}
-            namespace: microserivce
+          - name: "{{ .Values.gatewayName }}-gateway"
+            namespace: {{ .Values.global.namespace }}
             kind: Gateway

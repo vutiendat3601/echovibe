@@ -1,6 +1,7 @@
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.ZoneOffset
+val BUILD_NUMBER = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss"))
 
 plugins {
   java
@@ -52,8 +53,8 @@ subprojects {
     toolchain {
       languageVersion = JavaLanguageVersion.of(rootProject.libs.versions.javaVersion.get())
     }
-    sourceCompatibility = JavaVersion.valueOf(rootProject.libs.versions.javaSourceCompatibility.get())
-    targetCompatibility = JavaVersion.valueOf(rootProject.libs.versions.javaTargetCompatibility.get())
+    sourceCompatibility = JavaVersion.valueOf(rootProject.libs.versions.javaSourceCompatibilityVersion.get())
+    targetCompatibility = JavaVersion.valueOf(rootProject.libs.versions.javaTargetCompatibilityVersion.get())
   }
 
   configurations {
@@ -61,13 +62,13 @@ subprojects {
       extendsFrom(configurations.annotationProcessor.get())
     }
   }
-
-  tasks.withType<JavaCompile> {
-    options.encoding = "UTF-8"
-  }
-
-  tasks.withType<Javadoc>{
-    options.encoding = "UTF-8"
+  tasks {
+    withType<JavaCompile> {
+      options.encoding = "UTF-8"
+    }
+    withType<Javadoc>{
+      options.encoding = "UTF-8"
+    }
   }
 
   spotless {
@@ -91,9 +92,13 @@ subprojects {
       }
     }
     to {
-      val BUILD_VERSION = ZonedDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss"))
       image = "vutiendat3601/echovibe-${project.name}"
-      tags = setOf("${BUILD_VERSION}", "latest")
+      tags = setOf("${BUILD_NUMBER}", "latest")
+    }
+    container {
+      environment = mapOf(
+        "BUILD_NUMBER" to "${BUILD_NUMBER}"
+      )
     }
   }
 }

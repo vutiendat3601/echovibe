@@ -1,0 +1,33 @@
+global:
+  namespace: microservice
+  gatewayName: microservice
+  kafkaBrokerUrls: infras.echovibe.io.vn:9092
+  openIdConnectCertsUrl: https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs
+deployment:
+  name: springbootapp
+  image: 
+    repository: repository
+    tag: latest
+    pullPolicy: Always
+  containerPort: 6100
+  replicaCount: 3
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+    hostname: api.echovibe.io.vn
+    exposePathPrefix: /command/v1/artists
+    replacePrefixMatch: /v1/artists
+kafka:
+  enabled: false
+openidconnect:
+  enabled: false
+database:
+  enabled: false
+  vendor: 
+  username:
+  password:
+  host: 
+  port:
+  name:

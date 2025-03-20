@@ -7,8 +7,9 @@ import org.springframework.stereotype.Service;
 import vn.io.echovibe.artist.command.domain.ArtistAggregate;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
-import vn.io.echovibe.artist.command.model.PublishArtistCommand;
-import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
+import vn.io.echovibe.artist.command.model.ReleaseArtistCommand;
+import vn.io.echovibe.artist.command.model.SetArtistVisibilityCommand;
+import vn.io.echovibe.artist.command.model.UpdateArtistProfileCommand;
 import vn.io.echovibe.core.event.EventSourcingHandler;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
 
@@ -24,19 +25,16 @@ public class ArtistCommandHandler implements CommandHandler {
   }
 
   @Override
-  public void handle(@NonNull UpdateArtistCommand updateArtistCommand) {
+  public void handle(@NonNull UpdateArtistProfileCommand updateArtistCommand) {
     final ArtistAggregate artistAggregate = findArtistAggregateById(updateArtistCommand.getId());
-    artistAggregate.update(
-        updateArtistCommand.getName(),
-        updateArtistCommand.getDescription(),
-        updateArtistCommand.getIsPublic());
+    artistAggregate.update(updateArtistCommand);
     eventSourcingHandler.save(artistAggregate);
   }
 
   @Override
-  public void handle(@NonNull PublishArtistCommand publishArtistCommand) {
-    final ArtistAggregate artistAggregate = findArtistAggregateById(publishArtistCommand.getId());
-    artistAggregate.publish();
+  public void handle(@NonNull ReleaseArtistCommand releaseArtistCommand) {
+    final ArtistAggregate artistAggregate = findArtistAggregateById(releaseArtistCommand.getId());
+    artistAggregate.release();
     eventSourcingHandler.save(artistAggregate);
   }
 
@@ -47,11 +45,19 @@ public class ArtistCommandHandler implements CommandHandler {
     eventSourcingHandler.save(artistAggregate);
   }
 
+  @Override
+  public void handle(@NonNull SetArtistVisibilityCommand changeArtistVisibilityCommand) {
+    final ArtistAggregate artistAggregate =
+        findArtistAggregateById(changeArtistVisibilityCommand.getId());
+    artistAggregate.setIsPublic(changeArtistVisibilityCommand.getIsPublic());
+    eventSourcingHandler.save(artistAggregate);
+  }
+
   private ArtistAggregate findArtistAggregateById(@NonNull String id) {
     final ArtistAggregate artistAggregate = eventSourcingHandler.findById(id);
     final boolean isActive = Optional.ofNullable(artistAggregate.getIsActive()).orElse(true);
     if (!isActive) {
-      throw new AggregateNotFoundException("Artist not found: id=%s".formatted(id));
+      throw new AggregateNotFoundException("Artist not found: aggregateId=%s".formatted(id));
     }
     return artistAggregate;
   }

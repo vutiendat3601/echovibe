@@ -13,4 +13,4 @@
 `$ helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric --create-namespace -n nginx-gateway --set nginxGateway.snippetsFilters.enable=true`
 
 ### Installing Resources
-`$ helm install microservicegateway . -n microservice`
+`$ helm install microservicegateway . -n microservice --create-namespace`

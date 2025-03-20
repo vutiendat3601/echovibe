@@ -10,4 +10,8 @@ public interface Constant {
 
   String JPA_AUDIT_DATETIME_PROVIDER_BEAN = "dateTimeProvider";
   String REQUEST_PROCESSED_SUCCESS = "Request was processed successfully.";
+
+  String URL_REGEX =
+      "(https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|www\\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\\.[^\\s]{2,}|https?:\\/\\/(?:www\\.|(?!www))[a-zA-Z0-9]+\\.[^\\s]{2,}|www\\.[a-zA-Z0-9]+\\.[^\\s]{2,})";
+  String NOT_BLANK_STRING_REGEX = "^(?!\\s*$).+";
 }

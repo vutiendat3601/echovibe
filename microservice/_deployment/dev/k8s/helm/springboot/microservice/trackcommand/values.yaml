@@ -1,0 +1,28 @@
+deployment:
+  name: trackcommand
+  containerPort: 6120
+  replicaCount: 1
+  image: 
+    repository: vutiendat3601/echovibe-trackcommand
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 6120
+    protocol: TCP
+    hostname: api.echovibe.io.vn
+    exposePathPrefix: /command/v1/tracks
+    replacePrefixMatch: /v1/tracks
+openidconnect:
+  enabled: true
+kafka:
+  enabled: true
+mongo:
+  enabled: true
+  uri: mongodb://echovibe_trackcommand:echovibe_trackcommand@infras.echovibe.io.vn:26120/echovibe_trackcommand?authSource=admin
+datasource:
+  enabled: false
+  url:
+  username:
+  password:

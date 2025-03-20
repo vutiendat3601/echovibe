@@ -9,12 +9,18 @@ management:
     env:
       enabled: true
 spring:
-  autoconfigure:
-    exclude:
-      - "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration"
-      - "org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration"
+  cloud:
+    stream:
+      kafka:
+        binder:
+          configuration:
+            "[key.serializer]": org.apache.kafka.common.serialization.ByteArraySerializer
+            "[value.serializer]": org.apache.kafka.common.serialization.ByteArraySerializer
+            "[key.deserializer]": org.apache.kafka.common.serialization.ByteArrayDeserializer
+            "[value.deserializer]": org.apache.kafka.common.serialization.ByteArrayDeserializer
   application:
     name: artistcommand
+    version: "${BUILD_NUMBER:unknown}"
   docker:
     compose:
       enabled: false

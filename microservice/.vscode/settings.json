@@ -4,16 +4,13 @@
   "java.jdt.ls.java.home": "~/Library/Java/JavaVirtualMachines/corretto-21.0.5/Contents/Home",
   "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable",
   "[python]": {
-    "editor.defaultFormatter": "ms-python.autopep8",
-    "editor.insertSpaces": true,
-    "editor.tabSize": 2,
+    "editor.defaultFormatter": "eeyore.yapf",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
   },
-  // "autopep8.path": [
-  //   "/opt/anaconda3/envs/echovibe/bin/autopep8"
-  // ],
-  // "autopep8.args": [
-  //   "--config",
-  //   "pyproject.toml"
-  // ],
+  "yapf.args": [
+    "--style",
+    "./product/.style.yapf"
+  ],
   "editor.autoIndent": "none"
 }
