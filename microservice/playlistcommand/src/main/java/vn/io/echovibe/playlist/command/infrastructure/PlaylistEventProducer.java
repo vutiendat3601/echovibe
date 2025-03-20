@@ -17,12 +17,12 @@ public class PlaylistEventProducer implements EventProducer {
   @Override
   public void produce(String topic, Event event) {
     log.info(
-        "Send event: topic=%s, eventId=%s, eventVersion=%d"
-            .formatted(topic, event.getId(), event.getVersion()));
+        "Send event: topic=%s, eventId=%s, eventVersion=%d, createdBy=%s"
+            .formatted(topic, event.getId(), event.getVersion(), event.getCreatedBy()));
     streamBridge.send(topic, event, MediaType.APPLICATION_JSON);
     log.info(
-        "Sent event successfully: topic=%s, eventId=%s, eventVersion=%d"
-            .formatted(topic, event.getId(), event.getVersion()),
+        "Sent event successfully: topic=%s, eventId=%s, eventVersion=%d, createdBy=%s"
+            .formatted(topic, event.getId(), event.getVersion(), event.getCreatedBy()),
         event.getVersion());
   }
 }

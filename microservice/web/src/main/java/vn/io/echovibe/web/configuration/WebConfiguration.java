@@ -1,4 +1,4 @@
-package vn.io.echovibe.core.configuration;
+package vn.io.echovibe.web.configuration;
 
 import java.util.Arrays;
 import java.util.List;
@@ -10,8 +10,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import vn.io.echovibe.core.interceptor.JwtExtractorInterceptor;
-import vn.io.echovibe.core.interceptor.RequestInfoInterceptor;
+import vn.io.echovibe.web.interceptor.JwtExtractorInterceptor;
+import vn.io.echovibe.web.interceptor.RequestInfoInterceptor;
 
 @Configuration
 @Slf4j

@@ -5,7 +5,6 @@ import static vn.io.echovibe.core.constant.Constant.AUTH_SYSTEM_USERNAME;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +13,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import vn.io.echovibe.core.context.JwtSecurityHolder;
 
 @Setter
 @Getter
@@ -26,9 +24,7 @@ import vn.io.echovibe.core.context.JwtSecurityHolder;
 public class EventDocument {
   @Id private String id;
 
-  @Builder.Default
-  protected String createdBy =
-      Optional.ofNullable(JwtSecurityHolder.getJwtUsername()).orElse(AUTH_SYSTEM_USERNAME);
+  @Builder.Default protected String createdBy = AUTH_SYSTEM_USERNAME;
 
   @Builder.Default private Instant timestamp = ZonedDateTime.now(ZoneOffset.UTC).toInstant();
 

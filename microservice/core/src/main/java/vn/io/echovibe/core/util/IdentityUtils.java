@@ -1,4 +1,4 @@
-package vn.io.echovibe.core.utils;
+package vn.io.echovibe.core.util;
 
 import java.util.Random;
 

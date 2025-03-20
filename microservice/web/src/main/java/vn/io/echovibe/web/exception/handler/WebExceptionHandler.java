@@ -1,4 +1,4 @@
-package vn.io.echovibe.core.exception.handler;
+package vn.io.echovibe.web.exception.handler;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import vn.io.echovibe.core.dto.ErrorDto;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
 import vn.io.echovibe.core.exception.BusinessRuleViolationException;
 import vn.io.echovibe.core.exception.Error;
+import vn.io.echovibe.web.dto.ErrorDto;
 
 @Slf4j
 @RestControllerAdvice
