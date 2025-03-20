@@ -1,0 +1,8 @@
+.gitignore
+.dockerignore
+.style.yapf
+Dockerfile
+compose.yaml
+README.md
+start.sh
+.env.template
