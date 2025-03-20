@@ -7,7 +7,7 @@ from app.constant.constant import ARTIST_PUBLISHED_EVENT, APP_NAME
 from app.core.configuration import configuration
 from app.repository.artist_repository import ArtistRepository
 from app.core.container import Container
-from app.event.schema.artist_event_schema import ArtistPublishedEvent
+from app.event.schema.artist_event_schema import ArtistReleasedEvent
 from app.model.artist import Artist
 
 kafka_broker_bootstrap_server_urls = configuration.get_kafka_broker_bootstrap_server_urls(
@@ -33,7 +33,7 @@ async def listen_artist_published_event():
     logger.info(f"Listening: topic={ARTIST_PUBLISHED_EVENT}")
     try:
         async for message in artist_published_event_consumer:
-            artist_published_event = ArtistPublishedEvent(**message.value)
+            artist_published_event = ArtistReleasedEvent(**message.value)
             logger.info(
                 f"Received ArtistPublishedEvent: id={artist_published_event.id}, version={artist_published_event.version}"
             )
@@ -50,7 +50,7 @@ def get_artist_event_listeners() -> list[callable]:
 
 
 def _consume_artist_published_event(
-        artist_published_event: ArtistPublishedEvent):
+        artist_published_event: ArtistReleasedEvent):
     created_at = datetime.now(timezone.utc)
     artist_props = {
         **artist_published_event.model_dump(), "id": None,

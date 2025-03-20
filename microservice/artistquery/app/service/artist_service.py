@@ -24,3 +24,8 @@ class ArtistService:
         artists = self.artist_repository.find_by_aggregate_ids(aggregate_ids)
         artist_schemas = [map_to_artist_schema(artist) for artist in artists]
         return artist_schemas
+
+    def get_artist_by_ref_codes(self, ref_codes: list[str]):
+        artists = self.artist_repository.find_by_ref_codes(ref_codes)
+        artist_schemas = [map_to_artist_schema(artist) for artist in artists]
+        return artist_schemas

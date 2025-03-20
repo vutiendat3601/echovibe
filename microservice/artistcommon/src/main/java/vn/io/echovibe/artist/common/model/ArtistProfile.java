@@ -25,6 +25,4 @@ public class ArtistProfile {
   private String backgroundFileKey;
 
   private String backgroundUrl;
-
-  private String refCode;
 }

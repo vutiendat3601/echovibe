@@ -25,6 +25,8 @@ import vn.io.echovibe.core.exception.BusinessRuleViolationException;
 public class ArtistAggregate extends AggregateRoot {
   private String urn;
 
+  private String refCode;
+
   private ArtistProfile profile;
 
   private Boolean isReleased;
@@ -41,6 +43,7 @@ public class ArtistAggregate extends AggregateRoot {
         ArtistCreatedEvent.builder()
             .id(createArtistCommand.getId())
             .urn(urn)
+            .refCode(createArtistCommand.getRefCode())
             .profile(createArtistCommand.getProfile())
             .isReleased(false)
             .isPublic(false)

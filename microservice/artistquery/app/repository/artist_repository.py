@@ -31,6 +31,13 @@ class ArtistRepository(AbstractArtistRepository):
             artists = session.exec(statement).all()
             return artists
 
+    def find_by_ref_codes(self, ref_codes: list[str]):
+        with self.session_factory() as session:
+            statement = (select(Artist).options(selectinload(
+                Artist.profile)).where(Artist.ref_code.in_(ref_codes)))
+            artists = session.exec(statement).all()
+            return artists
+
     def save_artist(self, artist: Artist) -> Artist:
         try:
             with self.session_factory() as session:
