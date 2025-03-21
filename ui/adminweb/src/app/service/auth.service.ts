@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, filter, Observable, Subject } from 'rxjs';
 import { authorizationCodePkceFlowConfig } from '../../auth.config';
 import { UserProfile } from '../model/user-profile';
 
@@ -8,28 +8,21 @@ import { UserProfile } from '../model/user-profile';
   providedIn: 'root'
 })
 export class AuthService {
-  private isInitialized: boolean = false;
   private readonly userProfileSubject: Subject<UserProfile> = new BehaviorSubject<UserProfile>({});
 
-  constructor(private readonly oauthService: OAuthService) {}
+  constructor(private readonly oauthService: OAuthService) {
+    this.initialize();
+  }
 
-  initialize(): void {
-    if (this.isInitialized) {
-      return;
-    }
+  private initialize(): void {
     this.oauthService.configure(authorizationCodePkceFlowConfig);
-    this.oauthService.loadDiscoveryDocumentAndTryLogin().then((isLoggedIn) => {
-      if (isLoggedIn) {
-        this.oauthService.refreshToken();
-      }
-    });
     this.oauthService.setupAutomaticSilentRefresh();
-    this.oauthService.events.forEach((event) => {
-      if (['token_received', 'token_refreshed'].includes(event.type)) {
-        this.oauthService.loadUserProfile().then((userProfile) => this.userProfileSubject.next(userProfile));
-      }
-    });
-    this.isInitialized = true;
+    this.oauthService.loadDiscoveryDocumentAndLogin().then((hasReceivedTokens) => hasReceivedTokens && this.loadUserProfile());
+    this.oauthService.events.pipe(filter((event) => ['token_received', 'token_refreshed'].includes(event.type))).subscribe((_) => this.loadUserProfile());
+  }
+
+  private loadUserProfile() {
+    this.oauthService.loadUserProfile().then((userProfile) => this.userProfileSubject.next(userProfile));
   }
 
   signIn(): void {

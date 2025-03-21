@@ -1,6 +1,6 @@
 @use 'mixins' as *;
 
-.layout-top-bar {
+.layout-topbar {
   position: fixed;
   height: 4rem;
   z-index: 997;
@@ -13,13 +13,37 @@
   display: flex;
   align-items: center;
 
-  .layout-top-bar-logo-container {
+  .layout-topbar-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0;
+    transition: transform var(--element-transition-duration);
+
+    &:hover {
+      transform: scale(1.05);
+    }
+
+    &:focus-visible {
+      @include focused();
+    }
+
+    ::ng-deep .p-avatar {
+      width: 2.5rem;
+      height: 2.5rem;
+    }
+  }
+
+  .layout-topbar-logo-container {
     width: 20rem;
     display: flex;
     align-items: center;
   }
 
-  .layout-top-bar-logo {
+  .layout-topbar-logo {
     display: inline-flex;
     align-items: center;
     font-size: 1.5rem;
@@ -37,7 +61,7 @@
     }
   }
 
-  .layout-top-bar-action {
+  .layout-topbar-action {
     display: inline-flex;
     justify-content: center;
     align-items: center;
@@ -66,7 +90,7 @@
       display: none;
     }
 
-    &.layout-top-bar-action-highlight {
+    &.layout-topbar-action-highlight {
       background-color: var(--primary-color);
       color: var(--primary-contrast-color);
     }
@@ -76,19 +100,18 @@
     margin-right: 0.5rem;
   }
 
-  .layout-top-bar-menu-button {
+  .layout-topbar-menu-button {
     display: none;
   }
 
-  .layout-top-bar-actions {
+  .layout-topbar-actions {
     margin-left: auto;
     display: flex;
     gap: 1rem;
   }
 
-  .layout-top-bar-menu-content {
+  .layout-topbar-menu-content {
     display: flex;
-    flex-direction: column;
     gap: 1rem;
   }
 
@@ -97,17 +120,55 @@
     gap: 1rem;
   }
 
-  .user-picture {
-    width: 2.5rem;
-    height: 2.5rem;
+  .layout-topbar-menu {
+    position: absolute;
+    background-color: var(--surface-overlay);
+    transform-origin: top;
+    box-shadow:
+      0px 3px 5px rgba(0, 0, 0, 0.02),
+      0px 0px 2px rgba(0, 0, 0, 0.05),
+      0px 1px 4px rgba(0, 0, 0, 0.08);
+    border-radius: var(--content-border-radius);
+    padding: 1rem;
+    right: 2rem;
+    top: 4rem;
+    min-width: 15rem;
+    border: 1px solid var(--surface-border);
+
+    .layout-topbar-menu-content {
+      gap: 0.5rem;
+    }
+
+    .layout-topbar-action {
+      display: flex;
+      width: 100%;
+      height: auto;
+      justify-content: flex-start;
+      border-radius: var(--content-border-radius);
+      padding: 0.5rem 1rem;
+
+      i {
+        font-size: 1rem;
+        margin-right: 0.5rem;
+      }
+
+      span {
+        font-weight: medium;
+        display: block;
+      }
+    }
+  }
+
+  .layout-topbar-menu-content {
+    flex-direction: column;
   }
 }
 
 @media (max-width: 991px) {
-  .layout-top-bar {
+  .layout-topbar {
     padding: 0 2rem;
 
-    .layout-top-bar-logo-container {
+    .layout-topbar-logo-container {
       width: auto;
     }
 
@@ -116,11 +177,11 @@
       margin-right: 0.5rem;
     }
 
-    .layout-top-bar-menu-button {
+    .layout-topbar-menu-button {
       display: inline-flex;
     }
 
-    .layout-top-bar-menu {
+    .layout-topbar-menu {
       position: absolute;
       background-color: var(--surface-overlay);
       transform-origin: top;
@@ -135,7 +196,11 @@
       min-width: 15rem;
       border: 1px solid var(--surface-border);
 
-      .layout-top-bar-action {
+      .layout-topbar-menu-content {
+        gap: 0.5rem;
+      }
+
+      .layout-topbar-action {
         display: flex;
         width: 100%;
         height: auto;
@@ -153,6 +218,10 @@
           display: block;
         }
       }
+    }
+
+    .layout-topbar-menu-content {
+      flex-direction: column;
     }
   }
 }
