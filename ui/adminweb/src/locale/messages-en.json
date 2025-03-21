@@ -1,0 +1,12 @@
+{
+  "locale": "en",
+  "translations": {
+    "APP_NAME": "Echo Vibe - Admin",
+    "MENU_ITEM_LABEL_MANAGEMENT": "Management",
+    "MENU_ITEM_LABEL_ARTIST": "Artist",
+    "MENU_ITEM_LABEL_TRACK": "Track",
+    "MENU_ITEM_LABEL_PLAYLIST": "Playlist",
+    "MENU_ITEM_LABEL_SYSTEM": "System",
+    "MENU_ITEM_LABEL_RECOMMENDATION": "Recommendation"
+  }
+}
