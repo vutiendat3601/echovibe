@@ -26,3 +26,7 @@ datasource:
   url:
   username:
   password:
+client:
+  artistquery:
+    enabled: false
+    baseUrl: https://api.echovibe.io.vn/query
