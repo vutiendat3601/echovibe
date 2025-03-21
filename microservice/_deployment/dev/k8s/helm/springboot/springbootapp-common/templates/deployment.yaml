@@ -72,4 +72,15 @@ spec:
               name: "{{ .Values.deployment.name }}-secret"
               key: SPRING_DATASOURCE_PASSWORD
         {{ end }}
+        # ArtistQuery client
+        - name: APP_WEB_CLIENT_ARTISTQUERY_ENABLED
+          valueFrom: 
+            secretKeyRef:
+              name: "{{ .Values.deployment.name }}-secret"
+              key: APP_WEB_CLIENT_ARTISTQUERY_ENABLED
+        - name: APP_WEB_CLIENT_ARTISTQUERY_BASEURL
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.deployment.name }}-secret"
+              key: APP_WEB_CLIENT_ARTISTQUERY_BASEURL
 {{- end -}}

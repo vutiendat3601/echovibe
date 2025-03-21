@@ -7,4 +7,6 @@ public interface ArtistBussinessRuleConstant {
       new BusinessRule(
           "BR-ARTIST-01",
           "The artist cannot be released again once it has been successfully released.");
+  BusinessRule ARTIST_BR_02 =
+      new BusinessRule("BR-ARTIST-02", "Each artist has a unique reference code.");
 }
