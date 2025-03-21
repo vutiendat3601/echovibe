@@ -14,7 +14,10 @@ export class ArtistManagerRoleGuard implements CanActivate {
   canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): MaybeAsync<GuardResult> {
     if (this.authService.isAuthenticated) {
       const authorities = this.authService.roles;
-      return authorities.includes('artistmanager');
+      // set mock roles
+      authorities.push('admin');
+
+      return authorities.includes('admin');
     }
     this.router.navigate(['/auth/access-denied']);
     return false;

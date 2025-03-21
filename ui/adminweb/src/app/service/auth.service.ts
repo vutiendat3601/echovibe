@@ -18,7 +18,7 @@ export class AuthService {
       return;
     }
     this.oauthService.configure(authorizationCodePkceFlowConfig);
-    this.oauthService.loadDiscoveryDocumentAndTryLogin().then((isLoggedIn) => {
+    this.oauthService.loadDiscoveryDocumentAndLogin().then((isLoggedIn) => {
       if (isLoggedIn) {
         this.oauthService.refreshToken();
       }
