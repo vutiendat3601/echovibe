@@ -17,10 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import vn.io.echovibe.core.command.CommandDispatcher;
-import vn.io.echovibe.core.dto.BulkDto;
-import vn.io.echovibe.core.dto.ResponseDto;
 import vn.io.echovibe.core.model.BulkResult;
-import vn.io.echovibe.core.utils.IdentityUtils;
+import vn.io.echovibe.core.util.IdentityUtils;
 import vn.io.echovibe.playlist.command.dto.CreatePlaylistDetailDto;
 import vn.io.echovibe.playlist.command.dto.CreatePlaylistDto;
 import vn.io.echovibe.playlist.command.dto.DeletePlaylistDto;
@@ -33,6 +31,8 @@ import vn.io.echovibe.playlist.command.model.ReleasePlaylistCommand;
 import vn.io.echovibe.playlist.command.model.SetPlaylistVisibilityCommand;
 import vn.io.echovibe.playlist.command.model.UpdatePlaylistDetailCommand;
 import vn.io.echovibe.playlist.common.model.PlaylistDetail;
+import vn.io.echovibe.web.dto.BulkDto;
+import vn.io.echovibe.web.dto.ResponseDto;
 
 @Tag(name = "Playlist")
 @RequiredArgsConstructor

@@ -11,12 +11,12 @@ class ArtistProfileSchema(BaseModel):
     background_file_key: str | None = Field(default=None,
                                             alias="backgroundFileKey")
     background_url: str | None = Field(default=None, alias="backgroundUrl")
-    ref_code: str | None = Field(default=None, alias="refCode")
 
 
 class ArtistSchema(BaseModel):
     id: str = Field()
     urn: str = Field()
+    ref_code: str | None = Field(default=None)
     profile: ArtistProfileSchema | None = Field(default=None)
     is_public: bool = Field(serialization_alias="isPublic")
     tags: list[str] = Field(default=[], serialization_alias="tags")

@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.io.echovibe.core.utils.IdentityUtils;
+import vn.io.echovibe.core.util.IdentityUtils;
 
 @SuperBuilder
 @Getter
