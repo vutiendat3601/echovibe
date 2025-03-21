@@ -16,16 +16,16 @@ export class MenuComponent {
   ngOnInit() {
     this.model = [
       {
-        label: 'Management',
+        label: $localize`:@@MENU_ITEM_LABEL_MANAGEMENT:Management`,
         items: [
-          { label: 'Artist', icon: 'pi pi-users', routerLink: ['/management/artist'] },
-          { label: 'Track', icon: 'pi pi-tiktok', routerLink: ['/management/track'] },
-          { label: 'Playlist', icon: 'pi pi-list', routerLink: ['/management/playlist'] }
+          { label: $localize`:@@MENU_ITEM_LABEL_ARTIST:Artist`, icon: 'pi pi-users', routerLink: ['/management/artist'] },
+          { label: $localize`:@@MENU_ITEM_LABEL_TRACK:Track`, icon: 'pi pi-tiktok', routerLink: ['/management/track'] },
+          { label: $localize`:@@MENU_ITEM_LABEL_PLAYLIST:Playlist`, icon: 'pi pi-list', routerLink: ['/management/playlist'] }
         ]
       },
       {
-        label: 'System',
-        items: [{ label: 'Recommendation', icon: 'pi pi-wave-pulse', routerLink: ['/system/recommendation'] }]
+        label: $localize`:@@MENU_ITEM_LABEL_SYSTEM:System`,
+        items: [{ label: $localize`:@@MENU_ITEM_LABEL_RECOMMENDATION:Recommendation`, icon: 'pi pi-wave-pulse', routerLink: ['/system/recommendation'] }]
       }
     ];
   }
