@@ -27,7 +27,7 @@ export class TopBarComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.authService.userProfile().subscribe((userProfile) => (this.userProfile = userProfile));
+    this.authService.userProfile().subscribe((userProfile) => ((this.userProfile = userProfile), console.log(userProfile)));
   }
 
   toggleDarkMode(): void {
