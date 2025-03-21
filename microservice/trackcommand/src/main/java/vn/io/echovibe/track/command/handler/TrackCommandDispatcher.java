@@ -1,5 +1,7 @@
 package vn.io.echovibe.track.command.handler;
 
+import static vn.io.echovibe.track.command.constant.TrackCommandConstant.HIDE_ID_WHEN_ERROR_COMMANDS;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +13,9 @@ import org.springframework.stereotype.Service;
 import vn.io.echovibe.core.command.Command;
 import vn.io.echovibe.core.command.CommandDispatcher;
 import vn.io.echovibe.core.command.CommandHandlerFunction;
+import vn.io.echovibe.core.exception.BusinessRuleViolationException;
 import vn.io.echovibe.core.exception.CommandHandlerFunctionNotFound;
+import vn.io.echovibe.core.exception.Error;
 import vn.io.echovibe.core.model.BulkResult;
 import vn.io.echovibe.core.model.CommandResult;
 
@@ -48,16 +52,43 @@ public class TrackCommandDispatcher implements CommandDispatcher {
       String message =
           "Command '%s' was processed successfully: aggregateId=%s"
               .formatted(commandType, command.getId());
+      final CommandResult commandResult =
+          CommandResult.builder()
+              .id(id)
+              .command(commandType)
+              .isSuccessful(true)
+              .message(message)
+              .build();
       try {
         send(command);
-        items.add(new CommandResult(id, commandType, true, message));
+      } catch (BusinessRuleViolationException e) {
+        message =
+            "Command '%s' was processed unsuccessfully: %s"
+                .formatted(commandType, Optional.ofNullable(e.getCause()).orElse(e).getMessage());
+        final List<Error> errors = List.of(new Error(e.getBusinessRule(), e.getMessage(), null));
+        commandResult.setErrors(errors);
+        commandResult.setMessage(message);
+        commandResult.setIsSuccessful(false);
       } catch (Exception e) {
         message =
-            "Command '%s' was process unsuccessfully: %s"
+            "Command '%s' was processed unsuccessfully: %s"
                 .formatted(commandType, Optional.ofNullable(e.getCause()).orElse(e).getMessage());
-        items.add(new CommandResult(id, commandType, false, message));
+        commandResult.setErrors(List.of());
+        commandResult.setMessage(message);
+        commandResult.setIsSuccessful(false);
       }
+      processCommandResult(commandResult);
+      items.add(commandResult);
     }
     return new BulkResult(items);
+  }
+
+  private void processCommandResult(CommandResult commandResult) {
+    if (commandResult.getIsSuccessful()) {
+      return;
+    }
+    if (HIDE_ID_WHEN_ERROR_COMMANDS.contains(commandResult.getCommand())) {
+      commandResult.setId(null);
+    }
   }
 }

@@ -3,7 +3,14 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "echovibe-ui-admin-ng": {
+    "echovibe-adminweb": {
+      "i18n": {
+        "sourceLocale": "en-US",
+        "locales": {
+          "en": "src/locale/messages-en.json",
+          "vi": "src/locale/messages-vi.json"
+        }
+      },
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -17,12 +24,13 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/echovibe-ui-admin-ng",
+            "outputPath": "dist/echovibe-adminweb",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "polyfills": ["zone.js"],
+            "polyfills": ["zone.js", "@angular/localize/init"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
+            "localize": true,
             "assets": [
               {
                 "glob": "**/*",
@@ -33,6 +41,12 @@
             "scripts": []
           },
           "configurations": {
+            "en": {
+              "localize": ["en"]
+            },
+            "vi": {
+              "localize": ["vi"]
+            },
             "production": {
               "budgets": [
                 {
@@ -66,21 +80,27 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "echovibe-ui-admin-ng:build:production"
+              "buildTarget": "echovibe-adminweb:build:production"
             },
             "development": {
-              "buildTarget": "echovibe-ui-admin-ng:build:development"
-            }
+              "buildTarget": "echovibe-adminweb:build:development"
+            },
+            "en": { "buildTarget": "echovibe-adminweb:build:development,en" },
+            "vi": { "buildTarget": "echovibe-adminweb:build:development,vi" }
           },
           "defaultConfiguration": "development"
         },
         "extract-i18n": {
-          "builder": "@angular-devkit/build-angular:extract-i18n"
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "outputPath": "src/locale",
+            "format": "json"
+          }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": ["zone.js", "zone.js/testing"],
+            "polyfills": ["zone.js", "zone.js/testing", "@angular/localize/init"],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [

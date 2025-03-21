@@ -1,9 +1,9 @@
-<div class="layout-top-bar">
-  <div class="layout-top-bar-logo-container">
-    <button class="layout-menu-button layout-top-bar-action" (click)="layoutService.onMenuToggle()">
+<div class="layout-topbar">
+  <div class="layout-topbar-logo-container">
+    <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
       <i class="pi pi-bars"></i>
     </button>
-    <a class="layout-top-bar-logo" routerLink="/">
+    <a class="layout-topbar-logo" routerLink="/">
       <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           fill-rule="evenodd"
@@ -21,36 +21,38 @@
           />
         </g>
       </svg>
-      <span>Echo Vibe - Admin</span>
+      <span i18n="@@APP_NAME">Echo Vibe - Admin</span>
     </a>
   </div>
 
-  <div class="layout-top-bar-actions">
+  <div class="layout-topbar-actions">
     <div class="layout-config-menu">
-      <button type="button" class="layout-top-bar-action" (click)="toggleDarkMode()">
+      <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
         <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
       </button>
       <div class="relative">
-        <button class="layout-top-bar-action layout-top-bar-action-highlight" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
+        <button class="layout-topbar-action layout-topbar-action-highlight" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
           <i class="pi pi-palette"></i>
         </button>
         <app-configurator />
       </div>
     </div>
 
-    <button class="layout-top-bar-menu-button layout-top-bar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
-      <img class="user-picture rounded-full" [src]="this.userProfile.info?.picture" [alt]="this.userProfile.info?.name" />
+    <!-- Avatar that's always visible and triggers the menu -->
+    <button class="layout-topbar-avatar" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
+      <p-avatar *ngIf="this.userProfile.info?.picture" [image]="this.userProfile.info?.picture" shape="circle"></p-avatar>
+      <p-avatar *ngIf="!this.userProfile.info?.picture" icon="pi pi-user" styleClass="avatar-icon-fallback" shape="circle"></p-avatar>
     </button>
 
-    <div class="layout-top-bar-menu">
-      <div class="layout-top-bar-menu-content">
-        <a type="button" class="layout-top-bar-action" [href]="this.userProfile.info?.iss + '/account'">
+    <div class="layout-topbar-menu hidden">
+      <div class="layout-topbar-menu-content">
+        <a type="button" class="layout-topbar-action" [href]="this.userProfile.info?.iss + '/account'">
           <i class="pi pi-user"></i>
           <span>Profile</span>
         </a>
-        <button type="button" class="layout-top-bar-action" (click)="signOut()">
-          <i class="pi pi-user"></i>
-          <span>Sign out</span>
+        <button type="button" class="layout-topbar-action" (click)="signOut()">
+          <i class="pi pi-sign-out"></i>
+          <span>Logout</span>
         </button>
       </div>
     </div>

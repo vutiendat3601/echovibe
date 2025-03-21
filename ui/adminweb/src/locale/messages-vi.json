@@ -1,0 +1,12 @@
+{
+  "locale": "vi",
+  "translations": {
+    "APP_NAME": "Echo Vibe - Quản trị",
+    "MENU_ITEM_LABEL_MANAGEMENT": "Quản lý sản phẩm",
+    "MENU_ITEM_LABEL_ARTIST": "Ca sĩ",
+    "MENU_ITEM_LABEL_TRACK": "Bài hát",
+    "MENU_ITEM_LABEL_PLAYLIST": "Danh sách phát",
+    "MENU_ITEM_LABEL_SYSTEM": "Hệ thống",
+    "MENU_ITEM_LABEL_RECOMMENDATION": "Đề xuất"
+  }
+}

@@ -8,11 +8,12 @@ import { ArtistService } from '../../../service/artist.service';
 import { AuthService } from '../../../service/auth.service';
 import { LayoutService } from '../../service/layout.service';
 import { ConfiguratorComponent } from '../configurator/configurator.component';
+import { AvatarModule } from 'primeng/avatar';
 
 @Component({
   selector: 'app-top-bar',
   standalone: true,
-  imports: [RouterModule, CommonModule, StyleClassModule, ConfiguratorComponent],
+  imports: [RouterModule, CommonModule, StyleClassModule, ConfiguratorComponent, AvatarModule],
   templateUrl: './top-bar.component.html'
 })
 export class TopBarComponent implements OnInit {
@@ -26,7 +27,7 @@ export class TopBarComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.authService.userProfile().subscribe((userProfile) => (this.userProfile = userProfile));
+    this.authService.userProfile().subscribe((userProfile) => ((this.userProfile = userProfile), console.log(userProfile)));
   }
 
   toggleDarkMode(): void {
