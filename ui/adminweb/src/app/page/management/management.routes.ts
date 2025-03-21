@@ -1,15 +1,14 @@
 import { Routes } from '@angular/router';
-import { ArtistManagementComponent } from './artist-management/artist-management.component';
-import { TrackManagementComponent } from './track-management/track-management.component';
-import { PlaylistManagementComponent } from './playlist-management/playlist-management.component';
 import { RecommendationSystemComponent } from '../system/recommendation-system/recommendation-system.component';
-import { ArtistManagerRoleGuard } from '../../guard/artist-manager-role-guard.guard';
+import { ArtistManagementComponent } from './artist-management/artist-management.component';
+import { PlaylistManagementComponent } from './playlist-management/playlist-management.component';
+import { TrackManagementComponent } from './track-management/track-management.component';
 
 export default [
   {
     path: 'artist',
-    component: ArtistManagementComponent,
-    canActivate: [ArtistManagerRoleGuard]
+    component: ArtistManagementComponent
+    // canActivate: [ArtistManagerRoleGuard]
   },
   {
     path: 'track',
