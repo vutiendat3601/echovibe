@@ -14,7 +14,7 @@ import { AuthService } from '../../../service/auth.service';
 export class AccessDeniedComponent {
   constructor(private readonly authService: AuthService) {}
 
-  signIn(): void {
-    this.authService.signIn();
+  signOut(): void {
+    this.authService.signOut();
   }
 }
