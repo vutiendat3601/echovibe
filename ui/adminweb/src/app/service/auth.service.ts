@@ -1,3 +1,4 @@
+import { ResourceAccessClaim } from './../model/resource-access';
 import { Injectable } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { BehaviorSubject, filter, Observable, Subject } from 'rxjs';
@@ -37,8 +38,13 @@ export class AuthService {
     this.oauthService.refreshToken();
   }
 
-  get roles(): string[] {
-    return [];
+  get resourceAccess(): ResourceAccessClaim {
+    const claims: Record<string, any> = this.oauthService.getIdentityClaims();
+    let resourceAccess: ResourceAccessClaim = {};
+    if (claims) {
+      resourceAccess = claims['resource_access'] as ResourceAccessClaim;
+    }
+    return resourceAccess;
   }
 
   get isAuthenticated(): boolean {

@@ -1,11 +1,15 @@
+import { EMPTY_RESOURCE_ACCESS } from './../model/resource-access';
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivate, GuardResult, MaybeAsync, Router, RouterStateSnapshot } from '@angular/router';
 import { ROLE_ADMIN } from '../constant/constant';
 import { AuthService } from '../service/auth.service';
+import { ResourceAccessClaim } from '../model/resource-access';
 @Injectable({
   providedIn: 'root'
 })
 export class AdminRoleGuard implements CanActivate {
+  readonly ADMIN_ROLES = [ROLE_ADMIN];
+
   constructor(
     private readonly authService: AuthService,
     private readonly router: Router
@@ -13,9 +17,8 @@ export class AdminRoleGuard implements CanActivate {
 
   canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): MaybeAsync<GuardResult> {
     if (this.authService.isAuthenticated) {
-      const roles: string[] = this.authService.roles;
-      roles.push(ROLE_ADMIN); // TODO: mock, need to remove
-      if (roles.includes(ROLE_ADMIN)) {
+      const resourceAccess: ResourceAccessClaim = this.authService.resourceAccess;
+      if ((resourceAccess['echovibe'] || EMPTY_RESOURCE_ACCESS).roles.some((role) => this.ADMIN_ROLES.includes(role))) {
         return true;
       }
     }
