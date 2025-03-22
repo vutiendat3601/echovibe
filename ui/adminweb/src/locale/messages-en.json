@@ -7,6 +7,8 @@
     "MENU_ITEM_LABEL_TRACK": "Track",
     "MENU_ITEM_LABEL_PLAYLIST": "Playlist",
     "MENU_ITEM_LABEL_SYSTEM": "System",
-    "MENU_ITEM_LABEL_RECOMMENDATION": "Recommendation"
+    "MENU_ITEM_LABEL_RECOMMENDATION": "Recommendation",
+    "MENU_ITEM_LABEL_USER_PROFILE": "Profile",
+    "AUTH_SIGN_OUT": "Sign out"
   }
 }

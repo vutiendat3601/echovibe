@@ -1,8 +1,8 @@
+import { Artist } from './../../../dto/artist-dto';
 import { Component, OnInit, signal, ViewChild } from '@angular/core';
 import { ArtistService } from '../../../service/artist.service';
 import { Table, TableModule } from 'primeng/table';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { Product, ProductService } from '../../../demo/service/product.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -20,6 +20,10 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { EditorModule } from 'primeng/editor';
+import { ARTIST_NATIONALITIES } from '../../../constant/constant';
+import { HttpClient } from '@angular/common/http';
+import { UrlValidator } from '../../../validator/url.validator';
 
 interface Column {
   field: string;
@@ -52,47 +56,51 @@ interface ExportColumn {
     TagModule,
     InputIconModule,
     IconFieldModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    EditorModule
   ],
   templateUrl: './artist-management.component.html',
   styleUrl: './artist-management.component.scss',
-  providers: [MessageService, ProductService, ConfirmationService]
+  providers: [MessageService, ArtistService, ConfirmationService, UrlValidator]
 })
 export class ArtistManagementComponent implements OnInit {
   productDialog: boolean = false;
-
-  products = signal<Product[]>([]);
-
-  product!: Product;
-
-  selectedProducts!: Product[] | null;
-
+  products = signal<Artist[]>([]);
+  product!: Artist;
+  selectedProducts!: Artist[] | null;
   submitted: boolean = false;
-
   statuses!: any[];
-
   @ViewChild('dt') dt!: Table;
-
   exportColumns!: ExportColumn[];
-
   cols!: Column[];
 
+  isUpdate: boolean = false;
+
+  countries: any[] | undefined;
+  selectedCountry: string | undefined;
+
+  thumbnailUrlValid: boolean = false;
+  backgroundUrlValid: boolean = false;
+
   constructor(
-    private productService: ProductService,
+    private artistService: ArtistService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private http: HttpClient,
+    private urlValidator: UrlValidator
   ) {}
+
+  ngOnInit() {
+    this.loadDemoData();
+    this.countries = ARTIST_NATIONALITIES;
+  }
 
   exportCSV() {
     this.dt.exportCSV();
   }
 
-  ngOnInit() {
-    this.loadDemoData();
-  }
-
   loadDemoData() {
-    this.productService.getProducts().then((data) => {
+    this.artistService.getProducts().then((data) => {
       this.products.set(data);
     });
 
@@ -103,11 +111,12 @@ export class ArtistManagementComponent implements OnInit {
     ];
 
     this.cols = [
-      { field: 'code', header: 'Code', customExportHeader: 'Product Code' },
-      { field: 'name', header: 'Name' },
-      { field: 'image', header: 'Image' },
-      { field: 'price', header: 'Price' },
-      { field: 'category', header: 'Category' }
+      { field: 'ref_code', header: 'Reference Code' },
+      { field: 'profile.name', header: 'Name' },
+      { field: 'profile.biography', header: 'Biography' },
+      { field: 'profile.description', header: 'Description' },
+      { field: 'profile.thumbnailUrl', header: 'Thumbnail' },
+      { field: 'profile.backgroundUrl', header: 'Background' }
     ];
 
     this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
@@ -118,14 +127,31 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   openNew() {
-    this.product = {};
+    this.product = {
+      id: '',
+      urn: '',
+      ref_code: '',
+      profile: {
+        name: '',
+        biography: '',
+        description: '',
+        thumbnailUrl: '',
+        backgroundUrl: '',
+        thumbnailFileKey: null,
+        backgroundFileKey: null
+      },
+      isPublic: false,
+      tags: []
+    };
     this.submitted = false;
     this.productDialog = true;
+    this.isUpdate = false;
   }
 
-  editProduct(product: Product) {
-    this.product = { ...product };
+  editProduct(product: Artist) {
+    this.product = structuredClone(product);
     this.productDialog = true;
+    this.isUpdate = true;
   }
 
   deleteSelectedProducts() {
@@ -136,12 +162,7 @@ export class ArtistManagementComponent implements OnInit {
       accept: () => {
         this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
         this.selectedProducts = null;
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Successful',
-          detail: 'Products Deleted',
-          life: 3000
-        });
+        this.showMessage('success', 'Successful', 'Products Deleted');
       }
     });
   }
@@ -149,22 +170,33 @@ export class ArtistManagementComponent implements OnInit {
   hideDialog() {
     this.productDialog = false;
     this.submitted = false;
+    this.isUpdate = false;
   }
 
-  deleteProduct(product: Product) {
+  deleteProduct(product: Artist) {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete ' + product.name + '?',
+      message: 'Are you sure you want to delete ' + product.profile.name + '?',
       header: 'Confirm',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.products.set(this.products().filter((val) => val.id !== product.id));
-        this.product = {};
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Successful',
-          detail: 'Product Deleted',
-          life: 3000
-        });
+        this.product = {
+          id: '',
+          urn: '',
+          ref_code: '',
+          profile: {
+            name: '',
+            biography: '',
+            description: '',
+            thumbnailUrl: '',
+            backgroundUrl: '',
+            thumbnailFileKey: null,
+            backgroundFileKey: null
+          },
+          isPublic: false,
+          tags: []
+        };
+        this.showMessage('success', 'Successful', 'Product Deleted');
       }
     });
   }
@@ -191,45 +223,93 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   getSeverity(status: string) {
-    switch (status) {
-      case 'INSTOCK':
-        return 'success';
-      case 'LOWSTOCK':
-        return 'warn';
-      case 'OUTOFSTOCK':
-        return 'danger';
-      default:
-        return 'info';
+    if (status) {
+      return 'success';
     }
+    return 'danger';
   }
 
-  saveProduct() {
+  async saveProduct() {
     this.submitted = true;
+
+    // Validate required fields
+    if (!this.product.profile.name?.trim() || !this.product.profile.biography?.trim() || !this.product.profile.description?.trim() || !this.product.profile.thumbnailUrl?.trim() || !this.product.profile.backgroundUrl?.trim()) {
+      return;
+    }
+
+    // Check if URLs exist
+    this.urlValidator.checkUrlImage(this.product.profile.thumbnailUrl).subscribe(isValid => {
+      this.thumbnailUrlValid = isValid;
+    });
+    this.urlValidator.checkUrlImage(this.product.profile.backgroundUrl).subscribe(isValid => {
+      this.backgroundUrlValid = isValid;
+    });
+    if (!this.thumbnailUrlValid || !this.backgroundUrlValid) {
+      this.showMessage('error', 'URL Not Found', 'One or both URLs do not exist.');
+      return;
+    }
+
     let _products = this.products();
-    if (this.product.name?.trim()) {
+    if (this.product.profile.name?.trim()) {
       if (this.product.id) {
-        _products[this.findIndexById(this.product.id)] = this.product;
-        this.products.set([..._products]);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Successful',
-          detail: 'Product Updated',
-          life: 3000
-        });
+        console.log('update existing artist');
+        // Update existing artist
+        const index = this.findIndexById(this.product.id);
+        if (index !== -1) {
+          _products[index] = this.product;
+          this.products.set([..._products]);
+          this.showMessage('success', 'Successful', 'Product Updated');
+        }
       } else {
+        console.log('create new artist');
         this.product.id = this.createId();
-        this.product.image = 'product-placeholder.svg';
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Successful',
-          detail: 'Product Created',
-          life: 3000
-        });
+        this.product.ref_code = 'PD' + Date.now().toLocaleString();
+        this.product.profile.thumbnailUrl = this.product.profile.thumbnailUrl;
+        this.product.profile.backgroundUrl = this.product.profile.backgroundUrl;
+        this.product.profile.biography = this.product.profile.biography;
+        this.product.profile.description = this.product.profile.description;
+        this.product.profile.name = this.product.profile.name;
+
+        this.showMessage('success', 'Successful', 'Product Created');
+
         this.products.set([..._products, this.product]);
       }
 
       this.productDialog = false;
-      this.product = {};
+      this.product = {
+        id: '',
+        urn: '',
+        ref_code: '',
+        profile: {
+          name: '',
+          biography: '',
+          description: '',
+          thumbnailUrl: '',
+          backgroundUrl: '',
+          thumbnailFileKey: null,
+          backgroundFileKey: null
+        },
+        isPublic: false,
+        tags: []
+      };
     }
+  }
+
+  checkUrls(): void {
+    if (this.product.profile.thumbnailUrl) {
+      this.urlValidator.checkUrl(this.product.profile.thumbnailUrl).subscribe(isValid => {
+        this.thumbnailUrlValid = isValid;
+      });
+    }
+
+    if (this.product.profile.backgroundUrl) {
+      this.urlValidator.checkUrl(this.product.profile.backgroundUrl).subscribe(isValid => {
+        this.backgroundUrlValid = isValid;
+      });
+    }
+  }
+
+  showMessage(type: string, summary: string, detail: string) {
+    this.messageService.add({ severity: type, summary: summary, detail: detail, key: 'br', life: 3000 });
   }
 }

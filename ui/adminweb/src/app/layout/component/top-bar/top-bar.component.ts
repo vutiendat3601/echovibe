@@ -10,6 +10,10 @@ import { LayoutService } from '../../service/layout.service';
 import { ConfiguratorComponent } from '../configurator/configurator.component';
 import { AvatarModule } from 'primeng/avatar';
 
+interface TopBarActionMenuItem {
+  [key: string]: MenuItem;
+}
+
 @Component({
   selector: 'app-top-bar',
   standalone: true,
@@ -19,7 +23,7 @@ import { AvatarModule } from 'primeng/avatar';
 export class TopBarComponent implements OnInit {
   items!: MenuItem[];
   userProfile: UserProfile = {};
-
+  actionMenuItems: TopBarActionMenuItem = { profile: { label: $localize`:@@MENU_ITEM_LABEL_USER_PROFILE:Profile` } };
   constructor(
     public readonly layoutService: LayoutService,
     public readonly authService: AuthService,
