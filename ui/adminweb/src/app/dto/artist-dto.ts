@@ -24,3 +24,20 @@ export interface ArtistDto {
   isPublic: boolean;
   tags: string[];
 }
+
+export interface Artist {
+  id: string;
+  urn: string;
+  ref_code: string;
+  profile: {
+    name: string;
+    biography: string;
+    description: string;
+    thumbnailFileKey: string | null;
+    thumbnailUrl: string | null;
+    backgroundFileKey: string | null;
+    backgroundUrl: string | null;
+  };
+  isPublic: boolean;
+  tags: string[];
+}
