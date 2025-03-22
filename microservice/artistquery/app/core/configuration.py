@@ -17,6 +17,7 @@ class Configuration:
     build_number = None
     database_configuration: DatabaseConfiguration
     kafka_broker_bootstrap_server_urls = None
+    cors_origins: list[str] = []
 
     def __init__(self) -> None:
         self.build_number = os.getenv("BUILD_NUMBER", "unknown")
@@ -31,6 +32,8 @@ class Configuration:
         self.database_configuration.name = os.getenv("DATABASE_NAME")
         self.kafka_broker_bootstrap_server_urls = os.getenv(
             "KAFKA_BROKER_BOOTSTRAP_SERVER_URLS")
+        self.cors_origins = os.getenv("APP_WEB_CORS_ALLOWEDORIGINPATTERNS",
+                                      default="").split(",")
 
     def get_build_number(self) -> str:
         return self.build_number
@@ -40,6 +43,9 @@ class Configuration:
 
     def get_kafka_broker_bootstrap_server_urls(self) -> str:
         return self.kafka_broker_bootstrap_server_urls
+
+    def get_cors_origins(self) -> list[str]:
+        return self.cors_origins
 
 
 configuration = Configuration()

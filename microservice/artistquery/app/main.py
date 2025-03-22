@@ -4,6 +4,7 @@ from pathlib import Path
 import asyncio
 from fastapi import FastAPI
 from typing import Callable
+from fastapi.middleware.cors import CORSMiddleware
 from app.util.dependency_util import singleton
 from app.router.router import apiRouter
 from app.core.container import Container
@@ -12,6 +13,9 @@ from app.constant.constant import APP_NAME
 from app.event.consumer.artist_event_consumer import get_artist_event_listeners
 
 banner = Path("banner.txt").read_text()
+
+# TODO: Need to change dynamically
+origins = ["*"]
 
 
 @singleton
@@ -41,6 +45,13 @@ class AppInitializer:
                            version="1.0.0",
                            lifespan=lifespan,
                            openapi_url="/v1/artists/openapi")
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=configuration.get_cors_origins(),
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
         self.logger.info(
             f"\n{banner}\n{APP_NAME} {configuration.get_build_number()}\nPowered by FastAPI\n"
         )
