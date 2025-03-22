@@ -8,9 +8,9 @@ import org.hibernate.validator.constraints.Length;
 
 public record CreateArtistProfileDto(
     @NotBlank(message = "The field 'name' must not be null or blank.") String name,
-    @Length(max = 255, message = "The field 'biography' must not exceed 255 characters.")
-        String biography,
-    String description,
+    @Length(max = 250, message = "The field 'description' must not exceed 250 characters.")
+        String description,
+    String biography,
     String nationalityIsoCode,
     @Pattern(regexp = URL_REGEX, message = "The field 'thumbnailUrl' must be a valid URL format")
         String thumbnailUrl,
