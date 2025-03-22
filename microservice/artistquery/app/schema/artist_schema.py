@@ -7,12 +7,16 @@ class ArtistProfileSchema(BaseModel):
     description: str | None = Field(default=None, alias="description")
     nationality_iso_code: str | None = Field(default=None,
                                              alias="nationalityIsoCode")
-    thumbnail_file_key: str | None = Field(default=None,
-                                           alias="thumbnailFileKey")
+    # thumbnail_file_key: str | None = Field(default=None,
+    #                                        alias="thumbnailFileKey")
     thumbnail_url: str | None = Field(default=None, alias="thumbnailUrl")
-    background_file_key: str | None = Field(default=None,
-                                            alias="backgroundFileKey")
+    # background_file_key: str | None = Field(default=None,
+    #                                         alias="backgroundFileKey")
     background_url: str | None = Field(default=None, alias="backgroundUrl")
+
+    class Config:
+        populate_by_name = True
+        extra = "allow"
 
 
 class ArtistSchema(BaseModel):
@@ -22,3 +26,7 @@ class ArtistSchema(BaseModel):
     profile: ArtistProfileSchema | None = Field(default=None)
     is_public: bool = Field(serialization_alias="isPublic")
     tags: list[str] = Field(default=[], serialization_alias="tags")
+
+    class Config:
+        populate_by_name = True
+        extra = "allow"
