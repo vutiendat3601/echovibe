@@ -5,7 +5,9 @@ import static vn.io.echovibe.core.constant.Constant.REQUEST_PROCESSED_SUCCESS;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +54,8 @@ public class ArtistCommandController {
                   return CreateArtistCommand.builder()
                       .id(IdentityUtils.generateAggregateId())
                       .refCode(cad.refCode())
+                      .isVerified(Optional.of(cad.isVerified()).orElse(false))
+                      .tags(Optional.of(cad.tags()).orElse(new LinkedList<>()))
                       .profile(
                           ArtistProfile.builder()
                               .name(createArtistProfileDto.name())

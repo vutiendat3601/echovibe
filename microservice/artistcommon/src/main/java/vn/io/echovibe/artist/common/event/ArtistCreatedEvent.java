@@ -30,4 +30,6 @@ public class ArtistCreatedEvent extends Event {
   @Builder.Default private Boolean isActive = true;
 
   @Builder.Default private List<String> tags = new LinkedList<>();
+
+  @Builder.Default private Boolean isVerified = false;
 }

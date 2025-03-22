@@ -11,6 +11,7 @@ public record CreateArtistProfileDto(
     @Length(max = 255, message = "The field 'biography' must not exceed 255 characters.")
         String biography,
     String description,
+    String nationalityIsoCode,
     @Pattern(regexp = URL_REGEX, message = "The field 'thumbnailUrl' must be a valid URL format")
         String thumbnailUrl,
     @Pattern(regexp = URL_REGEX, message = "The field 'backgroundUrl' must be a valid URL format")

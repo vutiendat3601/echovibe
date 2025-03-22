@@ -1,5 +1,6 @@
 package vn.io.echovibe.artist.command.model;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,4 +20,8 @@ public class CreateArtistCommand extends Command {
   private ArtistProfile profile;
 
   private String refCode;
+
+  private Boolean isVerified;
+
+  private List<String> tags;
 }

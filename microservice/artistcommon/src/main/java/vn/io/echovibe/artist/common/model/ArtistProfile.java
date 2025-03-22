@@ -18,6 +18,8 @@ public class ArtistProfile {
 
   private String description;
 
+  private String nationalityIsoCode;
+
   private String thumbnailFileKey;
 
   private String thumbnailUrl;

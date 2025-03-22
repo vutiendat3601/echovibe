@@ -24,6 +24,8 @@ public abstract class Event {
 
   protected int version;
 
+  protected String type;
+
   @Builder.Default protected String createdBy = AUTH_SYSTEM_USERNAME;
 
   @Builder.Default protected Instant timestamp = ZonedDateTime.now(ZoneOffset.UTC).toInstant();
