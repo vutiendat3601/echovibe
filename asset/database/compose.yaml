@@ -1,6 +1,7 @@
-name: "echovibe"
+name: "echovibe-pg"
 services:
   echovibe-pg-i1:
+    container_name: "echovibe-pg-i1"
     image: "postgres:17.2-bookworm"
     environment:
       # - POSTGRES_DB=echovibe
