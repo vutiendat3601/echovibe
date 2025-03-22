@@ -10,6 +10,7 @@ class ArtistCreatedEvent(EventSchema):
     is_released: bool = Field(default=False, alias="isReleased")
     is_public: bool = Field(default=False, alias="isPublic")
     is_active: bool = Field(default=True, alias="isActive")
+    is_verified: bool = Field(default=True, alias="isVerified")
 
     class Config:
         populate_by_name = True

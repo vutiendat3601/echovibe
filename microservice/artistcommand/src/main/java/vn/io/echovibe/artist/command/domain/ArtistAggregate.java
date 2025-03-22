@@ -35,6 +35,8 @@ public class ArtistAggregate extends AggregateRoot {
 
   private Boolean isActive;
 
+  private Boolean isVerified;
+
   private List<String> tags;
 
   public ArtistAggregate(CreateArtistCommand createArtistCommand) {
@@ -42,12 +44,15 @@ public class ArtistAggregate extends AggregateRoot {
     final ArtistCreatedEvent artistCreatedEvent =
         ArtistCreatedEvent.builder()
             .id(createArtistCommand.getId())
+            .type(ArtistCreatedEvent.class.getSimpleName())
             .urn(urn)
             .refCode(createArtistCommand.getRefCode())
             .profile(createArtistCommand.getProfile())
             .isReleased(false)
             .isPublic(false)
             .isActive(true)
+            .isVerified(createArtistCommand.getIsVerified())
+            .tags(createArtistCommand.getTags())
             .build();
     raiseEvent(artistCreatedEvent);
   }
@@ -99,7 +104,11 @@ public class ArtistAggregate extends AggregateRoot {
               .formatted(updateArtistProfileCommand.getId()));
     }
     final ArtistProfileUpdatedEvent artistProfileUpdatedEvent =
-        ArtistProfileUpdatedEvent.builder().id(id).profile(updatedProfile).build();
+        ArtistProfileUpdatedEvent.builder()
+            .type(ArtistProfileUpdatedEvent.class.getSimpleName())
+            .id(id)
+            .profile(updatedProfile)
+            .build();
     raiseEvent(artistProfileUpdatedEvent);
   }
 
@@ -110,6 +119,7 @@ public class ArtistAggregate extends AggregateRoot {
     }
     final ArtistReleasedEvent artistReleasedEvent =
         ArtistReleasedEvent.builder()
+            .type(ArtistReleasedEvent.class.getSimpleName())
             .id(id)
             .urn(urn)
             .profile(profile)
@@ -123,7 +133,12 @@ public class ArtistAggregate extends AggregateRoot {
   public void delete() {
     final Boolean isSoftDeleted = Optional.ofNullable(isReleased).orElse(false);
     final ArtistDeletedEvent artistDeletedEvent =
-        ArtistDeletedEvent.builder().id(id).isSoftDeleted(isSoftDeleted).isActive(false).build();
+        ArtistDeletedEvent.builder()
+            .type(ArtistDeletedEvent.class.getSimpleName())
+            .id(id)
+            .isSoftDeleted(isSoftDeleted)
+            .isActive(false)
+            .build();
     raiseEvent(artistDeletedEvent);
   }
 
@@ -134,7 +149,11 @@ public class ArtistAggregate extends AggregateRoot {
           "Artist's visiblity has no changes: aggregateId=%s, isPublic=%s".formatted(id, isPublic));
     }
     final ArtistVisibilitySetEvent artistVisibilityChangedEvent =
-        ArtistVisibilitySetEvent.builder().id(id).isPublic(isPublic).build();
+        ArtistVisibilitySetEvent.builder()
+            .type(ArtistVisibilitySetEvent.class.getSimpleName())
+            .id(id)
+            .isPublic(isPublic)
+            .build();
     raiseEvent(artistVisibilityChangedEvent);
   }
 
@@ -146,6 +165,7 @@ public class ArtistAggregate extends AggregateRoot {
     this.profile = artistCreatedEvent.getProfile();
     this.isPublic = artistCreatedEvent.getIsPublic();
     this.isActive = artistCreatedEvent.getIsActive();
+    this.isVerified = artistCreatedEvent.getIsVerified();
     this.isReleased = artistCreatedEvent.getIsReleased();
     this.tags = artistCreatedEvent.getTags();
   }

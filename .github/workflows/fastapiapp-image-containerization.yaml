@@ -20,8 +20,8 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build artistquery image
         working-directory: ./microservice/artistquery
-        run: ./publish.sh
+        run: ./release.sh
       - name: Build product image
         working-directory: ./microservice/product
-        run: ./publish.sh
+        run: ./release.sh
       
