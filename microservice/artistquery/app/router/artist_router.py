@@ -9,8 +9,6 @@ from app.core.container import Container
 from app.schema.schema import ResponseSchema, ok
 from app.constant.constant import AGGREGATE_ID_LIST_REGEX
 
-from http import HTTPStatus
-
 artist_router = APIRouter(prefix="/v1/artists", tags=["Artist"])
 
 artist_service: ArtistService = Provide[Container.artist_service]

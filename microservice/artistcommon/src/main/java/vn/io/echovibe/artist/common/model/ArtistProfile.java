@@ -14,9 +14,9 @@ import lombok.Setter;
 public class ArtistProfile {
   private String name;
 
-  private String biography;
-
   private String description;
+
+  private String biography;
 
   private String nationalityIsoCode;
 

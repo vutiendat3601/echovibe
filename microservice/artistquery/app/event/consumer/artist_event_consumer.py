@@ -132,6 +132,7 @@ def _consume_artist_created_event(artist_created_event: ArtistCreatedEvent):
         "event_timestamp": artist_created_event.timestamp,
         "created_at": created_at,
         "updated_at": created_at,
+        "created_by": artist_created_event.created_by,
         "updated_by": artist_created_event.created_by
     }
     artist_profile = ArtistProfile(**artist_profile_attributes)
@@ -146,6 +147,7 @@ def _consume_artist_created_event(artist_created_event: ArtistCreatedEvent):
         "event_timestamp": artist_created_event.timestamp,
         "created_at": created_at,
         "updated_at": created_at,
+        "created_by": artist_created_event.created_by,
         "updated_by": artist_created_event.created_by
     }
     artist = Artist(**artist_props)
@@ -160,6 +162,7 @@ def _consume_artist_created_event(artist_created_event: ArtistCreatedEvent):
                         event_timestamp=artist_created_event.timestamp,
                         created_at=created_at,
                         updated_at=created_at,
+                        created_by=artist_created_event.created_by,
                         updated_by=artist_created_event.created_by))
     if artist_created_event.profile.background_url is not None:
         artist.images.append(
@@ -172,6 +175,7 @@ def _consume_artist_created_event(artist_created_event: ArtistCreatedEvent):
                         event_timestamp=artist_created_event.timestamp,
                         created_at=created_at,
                         updated_at=created_at,
+                        created_by=artist_created_event.created_by,
                         updated_by=artist_created_event.created_by))
     artist_repository.save_artist(artist)
     logger.info(
@@ -180,6 +184,7 @@ def _consume_artist_created_event(artist_created_event: ArtistCreatedEvent):
 
 
 def _consume_artist_released_event(artist_released_event: ArtistReleasedEvent):
+    updated_at = datetime.now(timezone.utc)
     artist = artist_repository.find_by_aggregate_id(artist_released_event.id)
     if artist is not None:
         if artist.profile is None:
@@ -199,7 +204,7 @@ def _consume_artist_released_event(artist_released_event: ArtistReleasedEvent):
         artist.event_type = artist_released_event.type
         artist.event_version = artist_released_event.version
         artist.event_timestamp = artist_released_event.timestamp
-        artist.updated_at = datetime.now(timezone.utc)
+        artist.updated_at = updated_at
         artist_repository.save_artist(artist)
     logger.info(
         f"Processed ArtistReleasedEvent: id={artist_released_event.id}, version={artist_released_event.version}"
@@ -208,6 +213,7 @@ def _consume_artist_released_event(artist_released_event: ArtistReleasedEvent):
 
 def _consume_artist_profile_updated_event(
         artist_profile_updated_event: ArtistProfileUpdatedEvent):
+    updated_at = datetime.now(timezone.utc)
     artist = artist_repository.find_by_aggregate_id(
         artist_profile_updated_event.id)
     if artist is not None:
@@ -221,6 +227,7 @@ def _consume_artist_profile_updated_event(
         artist.event_type = artist_profile_updated_event.type
         artist.event_timestamp = artist_profile_updated_event.timestamp
         artist.event_version = artist_profile_updated_event.version
+        artist.updated_at = updated_at
         artist_repository.save_artist(artist)
     logger.info(
         f"Processed ArtistProfileUpdatedEvent: id={artist_profile_updated_event.id}, version={artist_profile_updated_event.version}"
@@ -228,6 +235,7 @@ def _consume_artist_profile_updated_event(
 
 
 def _consume_artist_deleted_event(artist_deleted_event: ArtistDeletedEvent):
+    updated_at = datetime.now(timezone.utc)
     if artist_deleted_event.is_soft_deleted:
         artist = artist_repository.find_by_aggregate_id(artist_deleted_event.id)
         if artist is not None:
@@ -235,6 +243,7 @@ def _consume_artist_deleted_event(artist_deleted_event: ArtistDeletedEvent):
             artist.event_type = artist_deleted_event.type
             artist.event_version = artist_deleted_event.version
             artist.event_timestamp = artist_deleted_event.timestamp
+            artist.updated_at = updated_at
             artist_repository.save_artist(artist)
     else:
         artist_repository.delete_artist(artist_deleted_event.id)
@@ -245,6 +254,7 @@ def _consume_artist_deleted_event(artist_deleted_event: ArtistDeletedEvent):
 
 def _consume_artist_visibility_changed_event(
         artist_visibility_set_event: ArtistVisibilitySetEvent):
+    updated_at = datetime.now(timezone.utc)
     artist = artist_repository.find_by_aggregate_id(
         artist_visibility_set_event.id)
     if artist is not None:
@@ -252,6 +262,7 @@ def _consume_artist_visibility_changed_event(
         artist.event_timestamp = artist_visibility_set_event.timestamp
         artist.event_type = artist_visibility_set_event.type
         artist.event_version = artist_visibility_set_event.version
+        artist.updated_at = updated_at
         artist_repository.save_artist(artist)
     logger.info(
         f"Processed ArtistVisibilitySetEvent: id={artist_visibility_set_event.id}, version={artist_visibility_set_event.version}"

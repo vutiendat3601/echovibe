@@ -37,13 +37,13 @@ class ArtistProfile(SQLModel, table=True):
     aggregate_id: str = Field(..., max_length=16, unique=True)
     artist_ref_code: str | None = Field(..., max_length=100, unique=True)
     name: str = Field(..., max_length=255)
-    biography: str | None = Field(None, max_length=250)
-    description: str | None = None
-    nationality_iso_code: str | None = None
-    thumbnail_file_key: str | None = None
-    thumbnail_url: str | None = None
-    background_file_key: str | None = None
-    background_url: str | None = None
+    description: str | None = Field(None, max_length=250)
+    biography: str | None = Field(None)
+    nationality_iso_code: str | None = Field(None)
+    thumbnail_file_key: str | None = Field(None)
+    thumbnail_url: str | None = Field(None)
+    background_file_key: str | None = Field(None)
+    background_url: str | None = Field(None)
     artist: Optional["Artist"] = Relationship(back_populates="profile")
     is_active: bool = Field(default=True)
     event_type: str | None = Field(None)

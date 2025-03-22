@@ -59,6 +59,7 @@ public class ArtistCommandController {
                       .profile(
                           ArtistProfile.builder()
                               .name(createArtistProfileDto.name())
+                              .nationalityIsoCode(createArtistProfileDto.nationalityIsoCode())
                               .biography(createArtistProfileDto.biography())
                               .description(createArtistProfileDto.description())
                               .thumbnailUrl(createArtistProfileDto.thumbnailUrl())
