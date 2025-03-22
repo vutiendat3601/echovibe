@@ -7,6 +7,8 @@
     "MENU_ITEM_LABEL_TRACK": "Bài hát",
     "MENU_ITEM_LABEL_PLAYLIST": "Danh sách phát",
     "MENU_ITEM_LABEL_SYSTEM": "Hệ thống",
-    "MENU_ITEM_LABEL_RECOMMENDATION": "Đề xuất"
+    "MENU_ITEM_LABEL_RECOMMENDATION": "Đề xuất",
+    "MENU_ITEM_LABEL_USER_PROFILE": "Hồ sơ",
+    "AUTH_SIGN_OUT": "Đăng xuất"
   }
 }

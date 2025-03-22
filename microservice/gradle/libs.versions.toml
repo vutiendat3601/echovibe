@@ -12,7 +12,7 @@ springDocOpenApiVersion = "2.8.4"
 nimbusJoseJwtVersion = "10.0.1"
 
 # Plugin
-springBootPluginVersion = "3.4.3"
+springBootPluginVersion = "3.4.4"
 springDependencyManagementPluginVersion = "1.1.7"
 flywayPluginVersion = "11.3.4"
 googleJibPluginVersion = "3.4.5"

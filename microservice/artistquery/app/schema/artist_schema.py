@@ -5,6 +5,8 @@ class ArtistProfileSchema(BaseModel):
     name: str
     biography: str | None = Field(default=None, alias="biography")
     description: str | None = Field(default=None, alias="description")
+    nationality_iso_code: str | None = Field(default=None,
+                                             alias="nationalityIsoCode")
     thumbnail_file_key: str | None = Field(default=None,
                                            alias="thumbnailFileKey")
     thumbnail_url: str | None = Field(default=None, alias="thumbnailUrl")
