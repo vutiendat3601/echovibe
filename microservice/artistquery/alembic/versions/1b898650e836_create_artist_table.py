@@ -63,7 +63,7 @@ def upgrade() -> None:
                   unique=True),
         sa.Column("artist_ref_code", sa.String(length=255), nullable=True),
         sa.Column("name", sa.Text(), nullable=False),
-        sa.Column("description", sa.Text(length=255), nullable=True),
+        sa.Column("description", sa.String(length=255), nullable=True),
         sa.Column("biography", sa.Text(), nullable=True),
         sa.Column("nationality_iso_code", sa.Text(), nullable=True),
         sa.Column("thumbnail_file_key", sa.Text(), nullable=True),
