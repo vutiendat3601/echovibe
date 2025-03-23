@@ -1,6 +1,9 @@
+import { Error } from './error';
+
 export interface CommandResult {
-  id: string;
-  command: string;
-  isSuccessful: string;
+  id: string | null;
+  command: string | null;
+  errors: Error[];
+  isSuccessful: boolean;
   message: string;
 }

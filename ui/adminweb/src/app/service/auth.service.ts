@@ -17,7 +17,7 @@ export class AuthService {
 
   private initialize(): void {
     this.oauthService.configure(authorizationCodePkceFlowConfig);
-    this.oauthService.setupAutomaticSilentRefresh();
+    // this.oauthService.setupAutomaticSilentRefresh(); This command keep fetching Auth Server every a few ms
     this.oauthService.loadDiscoveryDocumentAndLogin().then((hasReceivedTokens) => hasReceivedTokens && this.loadUserProfile());
     this.oauthService.events.pipe(filter((event) => ['token_received', 'token_refreshed'].includes(event.type))).subscribe((_) => this.loadUserProfile());
   }

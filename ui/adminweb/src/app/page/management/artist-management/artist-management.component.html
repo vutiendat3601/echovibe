@@ -1,209 +1,405 @@
+<!-- Toolbar -->
 <p-toolbar styleClass="mb-6">
   <ng-template #start>
-    <p-button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" (onClick)="openNew()" />
-    <p-button severity="secondary" label="Delete" icon="pi pi-trash" outlined (onClick)="deleteSelectedProducts()" [disabled]="!selectedProducts || !selectedProducts.length" />
+    <p-button
+      i18n-label="@@BUTTON_LABEL_CREATE"
+      label="Create"
+      icon="pi pi-plus"
+      severity="secondary"
+      class="mr-2"
+      (onClick)="handleNewArtist()"
+    />
+    <p-button
+      severity="secondary"
+      i18n-label="@@BUTTON_LABEL_DELETE"
+      label="Delete"
+      icon="pi pi-trash"
+      outlined
+      (onClick)="deleteSelectedArtists()"
+      [disabled]="!selectedArtistDtos.length"
+    />
   </ng-template>
 
   <ng-template #end>
-    <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCSV()" />
+    <p-button
+      label="Export"
+      icon="pi pi-upload"
+      severity="secondary"
+      (onClick)="exportCsv()"
+      [disabled]="!selectedArtistDtos.length"
+    />
   </ng-template>
 </p-toolbar>
 
+<!-- List of Artists -->
 <p-table
   #dt
-  [value]="products()"
-  [rows]="10"
-  [columns]="cols"
+  [value]="artistDtos()"
+  [rows]="5"
+  [columns]="columns"
   [paginator]="true"
-  [globalFilterFields]="['name', 'product.profile.name', 'profile.biography', 'tag']"
+  [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
   [tableStyle]="{ 'min-width': '75rem' }"
-  [(selection)]="selectedProducts"
+  [(selection)]="selectedArtistDtos"
   [rowHover]="true"
   dataKey="id"
   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
   [showCurrentPageReport]="true"
-  [rowsPerPageOptions]="[10, 20, 30]"
+  [rowsPerPageOptions]="[5, 10, 50, 100]"
 >
   <ng-template #caption>
     <div class="flex items-center justify-between">
-      <h5 class="m-0">Manage Artist</h5>
+      <h5 class="m-0" i18n="@@PAGE_LABEL_MANAGE_ARTIST">Manage Artists</h5>
       <p-iconfield>
         <p-inputicon styleClass="pi pi-search" />
-        <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+        <input
+          pInputText
+          type="text"
+          (input)="onGlobalFilter(dt, $event)"
+          i18n-placeholder="@@INPUT_PLACEHOLDER_SEARCH"
+          placeholder="Search ..."
+        />
       </p-iconfield>
     </div>
   </ng-template>
   <ng-template #header>
     <tr>
-      <th style="width: 3rem">
+      <!-- Checkbox -->
+      <th style="width: 4rem">
         <p-tableHeaderCheckbox />
       </th>
-      <th style="min-width: 16rem">ID</th>
-      <th pSortableColumn="ref_code" style="min-width: 16rem">
-        Reference Code
-        <p-sortIcon field="ref_code" />
-      </th>
-      <th pSortableColumn="profile.name" style="min-width: 16rem">
+
+      <!-- ID -->
+      <th style="min-width: 12rem">ID</th>
+
+      <!-- Thumbnail -->
+      <th style="min-width: 8rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_THUMBNAIL">Thumbnail</th>
+
+      <!-- Name -->
+      <th pSortableColumn="name" style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NAME">
         Name
-        <p-sortIcon field="profile.name" />
+        <p-sortIcon field="name" />
       </th>
-      <th pSortableColumn="profile.biography" style="min-width: 16rem">
-        Biography
-        <p-sortIcon field="profile.biography" />
+
+      <!-- Nationality -->
+      <th i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NATIONALITY" pSortableColumn="nationalityIsoCode" style="min-width: 16rem">
+        Nationality
+        <p-sortIcon field="nationalityIsoCode" />
       </th>
-      <th pSortableColumn="profile.description" style="min-width: 16rem">
-        Description
-        <p-sortIcon field="profile.description" />
+
+      <!-- Public -->
+      <th pSortableColumn="inventoryStatus" style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_PUBLIC">
+        Public
+        <p-sortIcon field="inventoryStatus" />
       </th>
-      <th>Thumbnail</th>
-      <th>Background</th>
-      <th pSortableColumn="isPublic" style="min-width: 12rem">
-        Visibility
-        <p-sortIcon field="isPublic" />
-      </th>
-      <th pSortableColumn="tags" style="min-width: 12rem">Tags</th>
-      <th style="min-width: 12rem"></th>
+
+      <!-- Reference code -->
+      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_REFERENCE_CODE">Reference code</th>
+
+      <!-- Description -->
+      <th style="min-width: 20rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_DESCRIPTION">Description</th>
+
+      <!-- Biography -->
+      <th style="min-width: 32rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_BIOGRAPHY">Biography</th>
+
+      <!-- Background -->
+      <th style="min-width: 20rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_BACKGROUND">Background</th>
+
+      <!-- Action Buttons -->
+      <th style="min-width: 8rem"></th>
     </tr>
   </ng-template>
-  <ng-template #body let-product>
+  <ng-template #body let-artistDto>
     <tr>
-      <td style="width: 3rem">
-        <p-tableCheckbox [value]="product" />
+      <!-- Checkbox -->
+      <td style="width: 4rem">
+        <p-tableCheckbox [value]="artistDto" />
       </td>
-      <td style="min-width: 12rem">{{ product.id }}</td>
-      <td style="min-width: 12rem">{{ product.ref_code }}</td>
-      <td style="min-width: 16rem">{{ product.profile.name }}</td>
-      <td style="min-width: 16rem">{{ product.profile.biography }}</td>
-      <td style="min-width: 16rem">{{ product.profile.description }}</td>
-      <td>
-        <img [src]="product.profile.thumbnailUrl" [alt]="product.profile.name" style="width: 64px" class="rounded" />
+
+      <!-- ID -->
+      <td style="min-width: 12rem">{{ artistDto.id }}</td>
+
+      <!-- Thumbnail -->
+      <td style="min-width: 8rem">
+        <p-image
+          [preview]="true"
+          class="rounded"
+          imageClass="rounded object-cover w-20 h-20"
+          [src]="artistDto.profile.thumbnailUrl"
+          [alt]="artistDto.profile.name + '\'s thumbnail'"
+        />
       </td>
-      <td>
-        <img [src]="product.profile.backgroundUrl" [alt]="product.profile.name" style="width: 64px" class="rounded" />
+
+      <!-- Name -->
+      <td style="min-width: 16rem">{{ artistDto.profile.name }}</td>
+
+      <!-- Nationality -->
+      <td style="min-width: 16rem">
+        <span [class]="'fi fi-' + artistDto.profile.nationalityIsoCode.toLowerCase()"></span>
+        <span class="ml-2"> {{ artistDto.profile.nationalityIsoCode | artistNationalityName }}</span>
       </td>
-      <td>
-        <p-tag [value]="product.isPublic" [severity]="getSeverity(product.isPublic)" />
+
+      <!-- Public -->
+      <td style="min-width: 12rem">
+        <p-tag
+          [value]="artistDto.isPublic ? IS_PUBLIC_TRUE : IS_PUBLIC_FALSE"
+          [severity]="artistDto.isPublic ? 'success' : 'danger'"
+        />
       </td>
-      <td style="min-width: 12rem">Music, Production, Test</td>
+
+      <!-- Reference code -->
+      <td style="min-width: 12rem">
+        {{ artistDto.refCode }}
+      </td>
+
+      <!-- Description -->
+      <td style="min-width: 20rem">{{ artistDto.profile.description }}</td>
+
+      <!-- Biography -->
+      <td style="min-width: 32rem">{{ artistDto.profile.biography }}</td>
+
+      <!-- Background -->
+      <td style="min-width: 20rem">
+        <p-image
+          [preview]="true"
+          styleClass="rounded object-cover h-20"
+          class="rounded"
+          [src]="artistDto.profile.backgroundUrl"
+          [alt]="artistDto.profile.name + '\'s background.'"
+        />
+      </td>
+
+      <!-- Action -->
       <td>
-        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" (click)="editProduct(product)" />
-        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" (click)="deleteProduct(product)" />
+        <!-- Edit -->
+        <p-button
+          icon="pi pi-pencil"
+          class="mr-2"
+          [rounded]="true"
+          [outlined]="true"
+          (click)="handleEditArtist(artistDto)"
+        />
+
+        <!-- Delete -->
+        <p-button
+          icon="pi pi-trash"
+          severity="danger"
+          [rounded]="true"
+          [outlined]="true"
+          (click)="handleDeleteArtist(artistDto)"
+        />
       </td>
     </tr>
   </ng-template>
+  <!-- <p-confirm-popup key="btn-delete-at-row"/> -->
 </p-table>
 
-<p-dialog [(visible)]="productDialog" [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [style]="{ width: '80vw' }" [header]="isUpdate ? 'Update Artist Details' : 'Create New Artist'" [modal]="true">
-  <ng-template pTemplate="content">
-    <div class="flex flex-col gap-6">
-      <img [src]="product.profile.thumbnailUrl" [alt]="product.profile.name" class="block m-auto pb-4 max-w-full h-48 object-contain" *ngIf="product.profile?.thumbnailUrl" />
+<p-dialog
+  [(visible)]="isDialogShowed"
+  [style]="{ width: 'clamp(400px, 90vw, 800px)' }"
+  i18n-header="@@DIALOG_LABEL_ARTIST_DETAIL"
+  header="Artist details"
+  [modal]="true"
+>
+  <ng-template #content>
+    <form [formGroup]="createArtistFormGroup">
+      <!-- Profile details -->
+      <p-panel i18n-header="@@FORM_SECTION_ARTIST_PROFILE_DETAIL" header="Profile details">
+        <div class="flex items-center-start gap-4">
+          <div class="w-64 h-64">
+            <!-- Thumbnail -->
+            <p-image
+              [src]="
+                renderableImageUrls.includes(thumbnailUrlFormControl.value)
+                  ? thumbnailUrlFormControl.value
+                  : 'asset/image/default-artist-image.jpg'
+              "
+              imageClass="block m-auto w-full h-full object-cover rounded"
+              [preview]="true"
+            />
+          </div>
+          <div class="flex-1">
+            <div>
+              <!-- Name -->
+              <p-floatlabel variant="on" class="w-full">
+                <input id="name" ng-invalid ng-dirty pInputText formControlName="nameFormControl" class="w-full" />
+                <label i18n="@@FORM_LABEL_ARTIST_NAME" for="name">Name</label>
+              </p-floatlabel>
+              @if (nameFormControl.invalid && nameFormControl.dirty) {
+                <small id="name-help" class="inline-block px-2">
+                  Name is required, the length does not exceed 250 characters.
+                </small>
+              } @else {
+                <small id="name-help" class="inline-block px-2"></small>
+              }
+            </div>
 
-      <div class="flex flex-wrap gap-2 w-full">
-        <label for="thumbnailUrl" class="block font-bold mb-3">
-          Thumbnail URL
-          @if (thumbnailUrlValid) {
-            <a [href]="product.profile.thumbnailUrl" target="_blank">
-              <i class="pi pi-external-link"></i>
-            </a>
-          }
-        </label>
-        <input type="text" pInputText id="thumbnailUrl" [(ngModel)]="product.profile.thumbnailUrl" (ngModelChange)="checkUrls()" fluid />
-        <p class="text-red-500 h-4 text-xs">
-          @if (submitted && !product.profile.thumbnailUrl) {
-            Thumbnail URL is required.
-          }
-        </p>
-      </div>
-
-      <div class="flex flex-col md:flex-row gap-6">
-        <div class="flex flex-wrap gap-2 w-full">
-          <label for="name" class="block font-bold mb-3">Name <span class="text-red-500">*</span></label>
-          <input type="text" pInputText id="name" [(ngModel)]="product.profile.name" required autofocus fluid />
-          <p class="text-red-500 h-4 text-xs">
-            @if (submitted && !product.profile.name) {
-              Name is required.
-            }
-          </p>
-        </div>
-        <div class="flex flex-wrap gap-2 w-full">
-          <label for="name" class="block font-bold mb-3">Nationality</label>
-          <!-- select -->
-          <p-select [options]="countries" [(ngModel)]="selectedCountry" optionLabel="name" placeholder="Select a country" class="w-full">
-            <ng-template #selectedItem let-selectedOption>
-              <div class="flex items-center gap-2" *ngIf="selectedOption">
-                @if (selectedOption.code !== 'NULL') {
-                  <span [class]="'fi fi-' + selectedOption.code.toLowerCase()"></span>
+            <div class="flex justify-between mt-2 w-full">
+              <!-- Nationality -->
+              <div class="flex-1">
+                <p-floatlabel variant="on">
+                  <p-select
+                    id="nationality"
+                    formControlName="nationalityIsoCodeFormControl"
+                    [options]="artistNationalities"
+                    optionValue="code"
+                    optionLabel="name"
+                    placeholder=""
+                    class="w-full"
+                    showClear
+                  >
+                    <ng-template #selectedItem let-selectedNationality>
+                      <span [class]="'fi fi-' + selectedNationality.code.toLowerCase()"></span>
+                      <span class="ml-2"> {{ selectedNationality.name }}</span>
+                    </ng-template>
+                    <ng-template let-nationality #item>
+                      <span [class]="'fi fi-' + nationality.code.toLowerCase()"></span>
+                      <span class="ml-2"> {{ nationality.name }}</span>
+                    </ng-template>
+                  </p-select>
+                  <label i18n="@@FORM_LABEL_ARTIST_NATIONALITY" for="nationality">Nationality</label>
+                </p-floatlabel>
+                @if (nationalityIsoCodeFormControl.invalid && nationalityIsoCodeFormControl.dirty) {
+                  <small id="nationality-help" class="inline-block px-2"></small>
+                } @else {
+                  <small id="nationality-help" class="inline-block px-2"></small>
                 }
-                <div>{{ selectedOption.name }}</div>
               </div>
-            </ng-template>
-            <ng-template let-country #item>
-              <div class="flex items-center gap-2">
-                @if (country.code !== 'NULL') {
-                  <span [class]="'fi fi-' + country.code.toLowerCase()"></span>
+
+              <!-- Reference code -->
+              <div class="ml-2 flex-1">
+                <p-floatlabel variant="on">
+                  <input
+                    id="refCode"
+                    ng-invalid
+                    ng-dirty
+                    pInputText
+                    formControlName="refCodeFormControl"
+                    class="w-full"
+                  />
+                  <label i18n="@@FORM_LABEL_ARTIST_REF_CODE" for="refCode">Reference code</label>
+                </p-floatlabel>
+                @if (refCodeFormControl.invalid && (refCodeFormControl.dirty || refCodeFormControl.touched)) {
+                  <small id="refCode-help" class="inline-block px-2">
+                    Reference code is optional, the length does not exceed 100 characters.
+                  </small>
+                } @else {
+                  <small id="refCode-help" class="inline-block px-2"></small>
                 }
-                <div>{{ country.name }}</div>
               </div>
-            </ng-template>
-          </p-select>
-          <p class="text-red-500 h-4 text-xs">
-            @if (submitted && !product.isPublic) {
-              Visibility is required.
-            }
-          </p>
+            </div>
+
+            <div class="mt-2">
+              <!-- Description -->
+              <p-floatlabel variant="on" class="w-full">
+                <textarea
+                  id="description"
+                  pTextarea
+                  rows="3"
+                  ng-invalid
+                  ng-dirty
+                  pInputText
+                  formControlName="descriptionFormControl"
+                  class="w-full"
+                ></textarea>
+                <label i18n="@@FORM_LABEL_ARTIST_DESCRIPTION" for="description">Description</label>
+              </p-floatlabel>
+              @if (descriptionFormControl.invalid && descriptionFormControl.dirty) {
+                <small id="description-help" class="inline-block px-2">
+                  Description is optional, the length does not exceed 250 characters.
+                </small>
+              } @else {
+                <small id="description-help" class="inline-block px-2"></small>
+              }
+            </div>
+
+            <!-- Thumbnail URL -->
+            <div class="mt-2">
+              <p-floatlabel variant="on" class="w-full">
+                <input
+                  id="thumbnailUrl"
+                  ng-invalid
+                  ng-dirty
+                  pInputText
+                  formControlName="thumbnailUrlFormControl"
+                  class="w-full"
+                />
+                <label i18n="@@FORM_LABEL_ARTIST_THUMBNAIL_URL" for="thumbnailUrl">Thumbnail link</label>
+              </p-floatlabel>
+              @if (
+                thumbnailUrlFormControl.invalid && (thumbnailUrlFormControl.dirty || thumbnailUrlFormControl.touched)
+              ) {
+                <small id="thumbnailUrl-help" class="inline-block px-2"
+                  >Please enter the correct URL link format.</small
+                >
+              } @else {
+                <small id="thumbnailUrl-help" class="inline-block px-2"></small>
+              }
+            </div>
+          </div>
         </div>
-      </div>
+      </p-panel>
 
-      <div class="flex flex-wrap gap-2 w-full">
-        <label for="biography" class="block font-bold mb-3">Biography</label>
-        <textarea id="biography" pTextarea [(ngModel)]="product.profile.biography" required rows="3" cols="20" fluid></textarea>
-        <p class="text-red-500 h-4 text-xs">
-          @if (submitted && !product.profile.biography) {
-            Biography is required.
-          }
-        </p>
-      </div>
-      <div class="flex flex-wrap gap-2 w-full">
-        <label for="description" class="block font-bold mb-3">Description</label>
-        <!-- <textarea id="description" pTextarea [(ngModel)]="product.profile.description" required rows="3" cols="20" fluid></textarea> -->
-        <p-editor class="w-full" [(ngModel)]="product.profile.description" [style]="{ height: '150px' }" />
-        <p class="text-red-500 h-4 text-xs">
-          @if (submitted && !product.profile.description) {
-            Description is required.
-          }
-        </p>
-      </div>
+      <!-- Biography -->
+      <p-editor
+        id="biography"
+        formControlName="biographyFormControl"
+        i18n-placeholder="@@FORM_LABEL_ARTIST_BIOGRAPHY"
+        placeholder="Biography"
+        styleClass="mt-4"
+      />
 
-      <div class="flex flex-wrap gap-2 w-full">
-        <label for="backgroundUrl" class="block font-bold mb-3">
-          Background URL
-          @if (backgroundUrlValid) {
-            <a [href]="product.profile.backgroundUrl" target="_blank">
-              <i class="pi pi-external-link"></i>
-            </a>
+      <p-panel styleClass="mt-4" i18n-header="@@FORM_SECTION_ARTIST_BACKGROUND" header="Background">
+        <!-- Background -->
+        <div>
+          <p-image
+            styleClass="w-ful"
+            [src]="
+              renderableImageUrls.includes(thumbnailUrlFormControl.value)
+                ? backgroundUrlFormControl.value
+                : 'asset/image/default-artist-image.jpg'
+            "
+            imageClass="block m-auto w-full h-full object-cover rounded"
+            [preview]="true"
+          />
+        </div>
+        <!-- Backround URL -->
+        <div class="mt-2">
+          <p-floatlabel variant="on" class="w-full">
+            <input
+              id="backgroundUrl"
+              ng-invalid
+              ng-dirty
+              pInputText
+              formControlName="backgroundUrlFormControl"
+              class="w-full"
+            />
+            <label i18n="@@FORM_LABEL_ARTIST_BACKGROUND_URL" for="backgroundUrl">Backround link</label>
+          </p-floatlabel>
+          @if (
+            backgroundUrlFormControl.invalid && (backgroundUrlFormControl.dirty || backgroundUrlFormControl.touched)
+          ) {
+            <small id="backgroundUrl-help" class="inline-block px-2">Please enter the correct URL link format.</small>
+          } @else {
+            <small id="backgroundUrl-help" class="inline-block px-2"></small>
           }
-        </label>
-        <input type="text" pInputText id="backgroundUrl" [(ngModel)]="product.profile.backgroundUrl" (ngModelChange)="checkUrls()" fluid />
-        <p class="text-red-500 h-4 text-xs">
-          @if (submitted && !product.profile.backgroundUrl) {
-            Background URL is required.
-          }
-        </p>
-        <img [src]="product.profile.backgroundUrl" [alt]="product.profile.name" class="block m-auto pb-4 max-w-full h-48 object-contain" *ngIf="product.profile?.backgroundUrl" />
-      </div>
-
-      <div *ngIf="isUpdate">
-        <label for="refCode" class="block font-bold mb-3">Reference Code</label>
-        <input type="text" pInputText id="refCode" [(ngModel)]="product.ref_code" fluid />
-        <small class="text-red-500" *ngIf="submitted && !product.ref_code">Reference Code is required.</small>
-      </div>
+        </div>
+      </p-panel>
+    </form>
+  </ng-template>
+  <ng-template #footer>
+    <div class="mt-4">
+      <p-button i18n-label="@@BUTTON_LABEL_SAVE" label="Save" icon="pi pi-check" (click)="handleSaveArtist()" />
+      <p-button
+        i18n-label="@@BUTTON_LABEL_CANCEL"
+        label="Cancel"
+        icon="pi pi-times"
+        text
+        (click)="hideArtistDialog()"
+      />
     </div>
   </ng-template>
-
-  <ng-template pTemplate="footer">
-    <p-button label="Cancel" icon="pi pi-times" text (click)="hideDialog()" />
-    <p-button label="Save" icon="pi pi-check" (click)="saveProduct()" />
-  </ng-template>
 </p-dialog>
-<p-toast position="top-center" key="br" />
-<p-confirmdialog [style]="{ width: '450px' }" />
+
+<p-confirmdialog [style]="{ width: 'clamp(320px, 60vw, 540px)' }" />
+<p-toast position="top-right" />
