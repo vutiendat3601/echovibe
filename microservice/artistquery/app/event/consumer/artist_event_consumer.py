@@ -185,7 +185,7 @@ def _consume_artist_created_event(artist_created_event: ArtistCreatedEvent):
 
 def _consume_artist_released_event(artist_released_event: ArtistReleasedEvent):
     updated_at = datetime.now(timezone.utc)
-    artist = artist_repository.find_by_aggregate_id(artist_released_event.id)
+    artist = artist_repository.find_by_aggregate_id_and_is_active_true(artist_released_event.id)
     if artist is not None:
         if artist.profile is None:
             artist.profile = ArtistProfile()
@@ -214,7 +214,7 @@ def _consume_artist_released_event(artist_released_event: ArtistReleasedEvent):
 def _consume_artist_profile_updated_event(
         artist_profile_updated_event: ArtistProfileUpdatedEvent):
     updated_at = datetime.now(timezone.utc)
-    artist = artist_repository.find_by_aggregate_id(
+    artist = artist_repository.find_by_aggregate_id_and_is_active_true(
         artist_profile_updated_event.id)
     if artist is not None:
         if artist.profile is None:
@@ -237,7 +237,7 @@ def _consume_artist_profile_updated_event(
 def _consume_artist_deleted_event(artist_deleted_event: ArtistDeletedEvent):
     updated_at = datetime.now(timezone.utc)
     if artist_deleted_event.is_soft_deleted:
-        artist = artist_repository.find_by_aggregate_id(artist_deleted_event.id)
+        artist = artist_repository.find_by_aggregate_id_and_is_active_true(artist_deleted_event.id)
         if artist is not None:
             artist.is_active = artist_deleted_event.is_active
             artist.event_type = artist_deleted_event.type
@@ -255,7 +255,7 @@ def _consume_artist_deleted_event(artist_deleted_event: ArtistDeletedEvent):
 def _consume_artist_visibility_changed_event(
         artist_visibility_set_event: ArtistVisibilitySetEvent):
     updated_at = datetime.now(timezone.utc)
-    artist = artist_repository.find_by_aggregate_id(
+    artist = artist_repository.find_by_aggregate_id_and_is_active_true(
         artist_visibility_set_event.id)
     if artist is not None:
         artist.is_public = artist_visibility_set_event.is_public
