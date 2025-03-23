@@ -45,15 +45,27 @@ class AppInitializer:
                            version="1.0.0",
                            lifespan=lifespan,
                            openapi_url="/v1/artists/openapi")
-        self.app.add_middleware(
-            CORSMiddleware,
-            allow_origins=configuration.get_cors_origins(),
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
+        allow_origins: list[
+            str] = configuration.get_web_cors_alllowed_origin_patterns(),
+        allow_methods: list[str] = configuration.get_web_cors_allowed_methods(),
+        allow_headers = configuration.get_web_cors_allow_headers(),
+        allow_credentials = configuration.get_web_cors_allow_credentials(),
+        max_age = configuration.get_web_cors_maxage()
+        self.app.add_middleware(CORSMiddleware,
+                                allow_origins=allow_origins[0],
+                                allow_methods=allow_methods[0],
+                                allow_headers=allow_headers[0],
+                                allow_credentials=allow_credentials[0],
+                                max_age=max_age)
+        self.logger.info(f"""
+{banner}
+{APP_NAME} {configuration.get_build_number()}
+Powered by FastAPI
+""")
+        print(allow_credentials)
+        self.logger.info(allow_credentials)
         self.logger.info(
-            f"\n{banner}\n{APP_NAME} {configuration.get_build_number()}\nPowered by FastAPI\n"
+            f"Cross-origin resource sharing (CORS) configuration: allowedOriginPatterns={allow_origins[0]}, allowedMethods={allow_methods[0]}, allowedHeaders={allow_headers[0]}, allowCredentials={allow_credentials[0]}, maxAge={max_age}"
         )
 
         # # Set routes

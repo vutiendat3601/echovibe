@@ -3,6 +3,12 @@ global:
   gatewayName: microservice
   kafkaBrokerUrls: infras.echovibe.io.vn:9092
   openIdConnectCertsUrl: https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs
+  cors:
+    allowedOriginPatterns: "*"
+    allowedMethods: "*"
+    allowedHeaders: "*"
+    allowCredentials: "True"
+    maxAge: 60000
 deployment:
   name: springbootapp
   image: 
