@@ -17,24 +17,29 @@ class ArtistRepository(AbstractArtistRepository):
         self.logger = logger
         self.session_factory = session_factory
 
-    def find_by_aggregate_id(self, aggregate_id: str) -> Artist:
+    def find_by_aggregate_id_and_is_active_true(self,
+                                                aggregate_id: str) -> Artist:
         with self.session_factory() as session:
             statement = (select(Artist).options(selectinload(
-                Artist.profile)).where(Artist.aggregate_id == aggregate_id))
+                Artist.profile)).filter(Artist.is_active == True,
+                                        Artist.aggregate_id == aggregate_id))
             artist = session.exec(statement).first()
             return artist
 
-    def find_by_aggregate_ids(self, aggregate_ids: list[str]):
+    def find_by_aggregate_ids_and_is_active_true(self,
+                                                 aggregate_ids: list[str]):
         with self.session_factory() as session:
             statement = (select(Artist).options(selectinload(
-                Artist.profile)).where(Artist.aggregate_id.in_(aggregate_ids)))
+                Artist.profile)).filter(Artist.is_active == True,
+                                        Artist.aggregate_id.in_(aggregate_ids)))
             artists = session.exec(statement).all()
             return artists
 
-    def find_by_ref_codes(self, ref_codes: list[str]):
+    def find_by_ref_codes_and_is_active_true(self, ref_codes: list[str]):
         with self.session_factory() as session:
             statement = (select(Artist).options(selectinload(
-                Artist.profile)).where(Artist.ref_code.in_(ref_codes)))
+                Artist.profile)).filter(Artist.is_active == True,
+                                        Artist.ref_code.in_(ref_codes)))
             artists = session.exec(statement).all()
             return artists
 
