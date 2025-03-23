@@ -8,5 +8,5 @@ global:
     allowedOriginPatterns: "*"
     allowedMethods: "*"
     allowedHeaders: "*"
-    allowCredentials: True
+    allowCredentials: "True"
     maxAge: 60000
