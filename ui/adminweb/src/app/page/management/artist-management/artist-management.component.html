@@ -15,8 +15,8 @@
       label="Delete"
       icon="pi pi-trash"
       outlined
-      (onClick)="deleteSelectedArtists()"
-      [disabled]="!selectedArtistDtos.length"
+      (onClick)="handleDeleteSelectedArtists()"
+      [disabled]="!selectedArtists.length"
     />
   </ng-template>
 
@@ -25,8 +25,8 @@
       label="Export"
       icon="pi pi-upload"
       severity="secondary"
-      (onClick)="exportCsv()"
-      [disabled]="!selectedArtistDtos.length"
+      (onClick)="handleExportCsv()"
+      [disabled]="!selectedArtists.length"
     />
   </ng-template>
 </p-toolbar>
@@ -34,13 +34,13 @@
 <!-- List of Artists -->
 <p-table
   #dt
-  [value]="artistDtos()"
+  [value]="artists()"
   [rows]="5"
   [columns]="columns"
   [paginator]="true"
   [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
   [tableStyle]="{ 'min-width': '75rem' }"
-  [(selection)]="selectedArtistDtos"
+  [(selection)]="selectedArtists"
   [rowHover]="true"
   dataKey="id"
   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
@@ -55,7 +55,7 @@
         <input
           pInputText
           type="text"
-          (input)="onGlobalFilter(dt, $event)"
+          (input)="handleGlobalFilter(dt, $event)"
           i18n-placeholder="@@INPUT_PLACEHOLDER_SEARCH"
           placeholder="Search ..."
         />
@@ -109,15 +109,15 @@
       <th style="min-width: 8rem"></th>
     </tr>
   </ng-template>
-  <ng-template #body let-artistDto>
+  <ng-template #body let-artist>
     <tr>
       <!-- Checkbox -->
       <td style="width: 4rem">
-        <p-tableCheckbox [value]="artistDto" />
+        <p-tableCheckbox [value]="artist" />
       </td>
 
       <!-- ID -->
-      <td style="min-width: 12rem">{{ artistDto.id }}</td>
+      <td style="min-width: 12rem">{{ artist.id }}</td>
 
       <!-- Thumbnail -->
       <td style="min-width: 8rem">
@@ -125,38 +125,38 @@
           [preview]="true"
           class="rounded"
           imageClass="rounded object-cover w-20 h-20"
-          [src]="artistDto.profile.thumbnailUrl"
-          [alt]="artistDto.profile.name + '\'s thumbnail'"
+          [src]="artist.profile.thumbnailUrl"
+          [alt]="artist.profile.name + '\'s thumbnail'"
         />
       </td>
 
       <!-- Name -->
-      <td style="min-width: 16rem">{{ artistDto.profile.name }}</td>
+      <td style="min-width: 16rem">{{ artist.profile.name }}</td>
 
       <!-- Nationality -->
       <td style="min-width: 16rem">
-        <span [class]="'fi fi-' + artistDto.profile.nationalityIsoCode.toLowerCase()"></span>
-        <span class="ml-2"> {{ artistDto.profile.nationalityIsoCode | artistNationalityName }}</span>
+        <span [class]="'fi fi-' + artist.profile.nationalityIsoCode.toLowerCase()"></span>
+        <span class="ml-2"> {{ artist.profile.nationalityIsoCode | artistNationalityName }}</span>
       </td>
 
       <!-- Public -->
       <td style="min-width: 12rem">
         <p-tag
-          [value]="artistDto.isPublic ? IS_PUBLIC_TRUE : IS_PUBLIC_FALSE"
-          [severity]="artistDto.isPublic ? 'success' : 'danger'"
+          [value]="artist.isPublic ? IS_PUBLIC_TRUE : IS_PUBLIC_FALSE"
+          [severity]="artist.isPublic ? 'success' : 'danger'"
         />
       </td>
 
       <!-- Reference code -->
       <td style="min-width: 12rem">
-        {{ artistDto.refCode }}
+        {{ artist.refCode }}
       </td>
 
       <!-- Description -->
-      <td style="min-width: 20rem">{{ artistDto.profile.description }}</td>
+      <td style="min-width: 20rem">{{ artist.profile.description }}</td>
 
       <!-- Biography -->
-      <td style="min-width: 32rem">{{ artistDto.profile.biography }}</td>
+      <td style="min-width: 32rem" [innerHTML]="artist.profile.biography | safeHtmlPipe"></td>
 
       <!-- Background -->
       <td style="min-width: 20rem">
@@ -164,8 +164,8 @@
           [preview]="true"
           styleClass="rounded object-cover h-20"
           class="rounded"
-          [src]="artistDto.profile.backgroundUrl"
-          [alt]="artistDto.profile.name + '\'s background.'"
+          [src]="artist.profile.backgroundUrl"
+          [alt]="artist.profile.name + '\'s background.'"
         />
       </td>
 
@@ -177,7 +177,7 @@
           class="mr-2"
           [rounded]="true"
           [outlined]="true"
-          (click)="handleEditArtist(artistDto)"
+          (click)="handleEditArtist(artist)"
         />
 
         <!-- Delete -->
@@ -186,7 +186,7 @@
           severity="danger"
           [rounded]="true"
           [outlined]="true"
-          (click)="handleDeleteArtist(artistDto)"
+          (click)="handleDeleteArtist(artist)"
         />
       </td>
     </tr>
@@ -194,15 +194,15 @@
   <!-- <p-confirm-popup key="btn-delete-at-row"/> -->
 </p-table>
 
-<p-dialog
-  [(visible)]="isDialogShowed"
-  [style]="{ width: 'clamp(400px, 90vw, 800px)' }"
-  i18n-header="@@DIALOG_LABEL_ARTIST_DETAIL"
-  header="Artist details"
-  [modal]="true"
->
-  <ng-template #content>
-    <form [formGroup]="createArtistFormGroup">
+<form [formGroup]="artistFormGroup" (ngSubmit)="handleSaveArtist()">
+  <p-dialog
+    [(visible)]="isDialogShowed"
+    [style]="{ width: 'clamp(400px, 90vw, 800px)' }"
+    i18n-header="@@DIALOG_LABEL_ARTIST_DETAIL"
+    header="Artist details"
+    [modal]="true"
+  >
+    <ng-template #content>
       <!-- Profile details -->
       <p-panel i18n-header="@@FORM_SECTION_ARTIST_PROFILE_DETAIL" header="Profile details">
         <div class="flex items-center-start gap-4">
@@ -385,21 +385,27 @@
           }
         </div>
       </p-panel>
-    </form>
-  </ng-template>
-  <ng-template #footer>
-    <div class="mt-4">
-      <p-button i18n-label="@@BUTTON_LABEL_SAVE" label="Save" icon="pi pi-check" (click)="handleSaveArtist()" />
-      <p-button
-        i18n-label="@@BUTTON_LABEL_CANCEL"
-        label="Cancel"
-        icon="pi pi-times"
-        text
-        (click)="hideArtistDialog()"
-      />
-    </div>
-  </ng-template>
-</p-dialog>
+    </ng-template>
+    <ng-template #footer>
+      <div>
+        <p-button
+          type="submit"
+          [disabled]="!artistFormGroup.valid"
+          i18n-label="@@BUTTON_LABEL_SAVE"
+          label="Save"
+          icon="pi pi-check"
+        />
+        <p-button
+          i18n-label="@@BUTTON_LABEL_CANCEL"
+          label="Cancel"
+          icon="pi pi-times"
+          text
+          (click)="handleHideArtistDialog()"
+        />
+      </div>
+    </ng-template>
+  </p-dialog>
+</form>
 
 <p-confirmdialog [style]="{ width: 'clamp(320px, 60vw, 540px)' }" />
 <p-toast position="top-right" />

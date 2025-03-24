@@ -1,4 +1,4 @@
-import { BusinessRule } from './business-rule';
+import { BusinessRule } from '../model/business-rule';
 
 export interface Error {
   businessRule: BusinessRule | null;

@@ -19,13 +19,13 @@ export interface CreateArtistDto {
 export interface DeleteArtistDto {
   id: string;
 }
-
 export interface ArtistDto {
   id: string;
   urn: string;
   refCode: string;
   profile: ArtistProfile;
   isPublic: boolean;
+  isReleased: boolean;
   tags: string[];
 }
 

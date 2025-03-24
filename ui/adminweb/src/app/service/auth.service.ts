@@ -17,9 +17,28 @@ export class AuthService {
 
   private initialize(): void {
     this.oauthService.configure(authorizationCodePkceFlowConfig);
-    // this.oauthService.setupAutomaticSilentRefresh(); This command keep fetching Auth Server every a few ms
-    this.oauthService.loadDiscoveryDocumentAndLogin().then((hasReceivedTokens) => hasReceivedTokens && this.loadUserProfile());
-    this.oauthService.events.pipe(filter((event) => ['token_received', 'token_refreshed'].includes(event.type))).subscribe((_) => this.loadUserProfile());
+    this.oauthService
+      .loadDiscoveryDocumentAndLogin()
+      .then((hasTokens) => hasTokens && setTimeout(() => this.loadUserProfile(), 1000));
+    // this.oauthService.setupAutomaticSilentRefresh(); // This command keep fetching Auth Server every a few ms
+    this.oauthService.events
+      .pipe(filter((event) => ['token_received', 'token_refreshed'].includes(event.type)))
+      .subscribe((_) => this.loadUserProfile());
+    this.oauthService.events
+      .pipe(
+        filter((event) =>
+          [
+            'user_profile_load_error',
+            'token_error',
+            'code_error',
+            'token_refresh_error',
+            'silent_refresh_error',
+            'token_expires',
+            'session_error'
+          ].includes(event.type)
+        )
+      )
+      .subscribe((_) => this.oauthService.initCodeFlow());
   }
 
   private loadUserProfile() {

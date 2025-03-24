@@ -17,20 +17,21 @@ export class DefaultOAuthInterceptor implements HttpInterceptor {
   }
 
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    let url = req.url.toLowerCase();
+    if (req.url) {
+      const url = req.url.toLowerCase();
+      if (!this.oauthModuleConfig) return next.handle(req);
+      if (!this.oauthModuleConfig.resourceServer) return next.handle(req);
+      if (!this.oauthModuleConfig.resourceServer.allowedUrls) return next.handle(req);
+      if (!this.checkUrl(url)) return next.handle(req);
 
-    if (!this.oauthModuleConfig) return next.handle(req);
-    if (!this.oauthModuleConfig.resourceServer) return next.handle(req);
-    if (!this.oauthModuleConfig.resourceServer.allowedUrls) return next.handle(req);
-    if (!this.checkUrl(url)) return next.handle(req);
+      let sendAccessToken = this.oauthModuleConfig.resourceServer.sendAccessToken;
 
-    let sendAccessToken = this.oauthModuleConfig.resourceServer.sendAccessToken;
-
-    if (sendAccessToken) {
-      const accessToken = this.oauthStorage.getItem('access_token');
-      const authorizationHeaderValue = `Bearer ${accessToken}`;
-      const headers = req.headers.set('Authorization', authorizationHeaderValue);
-      req = req.clone({ headers });
+      if (sendAccessToken) {
+        const accessToken = this.oauthStorage.getItem('access_token');
+        const authorizationHeaderValue = `Bearer ${accessToken}`;
+        const headers = req.headers.set('Authorization', authorizationHeaderValue);
+        req = req.clone({ headers });
+      }
     }
     return next.handle(req).pipe(catchError((error) => this.errorHandler.handleError(error)));
   }

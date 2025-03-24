@@ -1,23 +1,32 @@
-import { Injectable } from '@angular/core';
-import { environment } from '../../environment/environment';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { environment } from '../../environment/environment';
 import { ArtistDto, CreateArtistDto, DeleteArtistDto } from '../dto/artist-dto';
-import { ResponseDto } from '../dto/response-dto';
-import { BulkResult } from '../model/bulk-result';
 import { BulkDto } from '../dto/bulk-dto';
+import { BulkResult } from '../model/bulk-result';
+import { ResponseDto } from './../dto/response-dto';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ArtistService {
+  private readonly artistCreatedIdSubject = new BehaviorSubject<string | null>(null);
+
   constructor(private readonly http: HttpClient) {}
 
+  artistCreatedId(): Observable<string | null> {
+    return this.artistCreatedIdSubject;
+  }
+
   bulkCreateArtist(bulkCreateArtistDtos: BulkDto<CreateArtistDto>): Observable<ResponseDto<BulkResult>> {
-    return this.http.post<ResponseDto<BulkResult>>(
-      `${environment.artistCommandBaseUrl}/bulk-create`,
-      bulkCreateArtistDtos
-    );
+    return this.http
+      .post<ResponseDto<BulkResult>>(`${environment.artistCommandBaseUrl}/bulk-create`, bulkCreateArtistDtos)
+      .pipe(
+        tap((respDto) =>
+          respDto.data.items.filter(({ id }) => id).forEach(({ id }) => this.artistCreatedIdSubject.next(id))
+        )
+      );
   }
 
   bulkDeleteArtist(bulkDeleteArtistDtos: BulkDto<DeleteArtistDto>): Observable<ResponseDto<BulkResult>> {

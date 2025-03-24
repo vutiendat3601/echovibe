@@ -1,4 +1,4 @@
-import { Error } from './error';
+import { Error } from '../exception/error';
 
 export interface CommandResult {
   id: string | null;

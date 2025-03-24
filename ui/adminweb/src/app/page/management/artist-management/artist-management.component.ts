@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DomSanitizer } from '@angular/platform-browser';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { DialogModule } from 'primeng/dialog';
 import { EditorModule } from 'primeng/editor';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -24,16 +26,18 @@ import { TagModule } from 'primeng/tag';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
+import { BehaviorSubject, map, tap } from 'rxjs';
 import { ArtistNationality, URL_REGEX } from '../../../constant/constant';
 import { ResponseDto } from '../../../dto/response-dto';
+import { Artist } from '../../../model/artist';
+import { CommandResult } from '../../../model/command-result';
 import { ArtistNationalityPipe } from '../../../pipe/artist-nationality.pipe';
 import { ArtistService } from '../../../service/artist.service';
 import { UrlValidator } from '../../../validator/url.validator';
-import { ArtistDto, CreateArtistDto } from './../../../dto/artist-dto';
-import { BehaviorSubject, filter } from 'rxjs';
-import { BulkDto } from '../../../dto/bulk-dto';
-import { CommandResult } from '../../../model/command-result';
-import { ConfirmPopupModule } from 'primeng/confirmpopup';
+import { ArtistDto, CreateArtistDto, DeleteArtistDto } from './../../../dto/artist-dto';
+import { ExceptionHandler, Message } from './../../../exception/exception-handler';
+import { ArtistMapper } from '../../../mapper/artist-mapper';
+import { SafeHtmlPipe } from '../../../pipe/safe-html.pipe';
 
 type ActionType = 'new' | 'edit';
 
@@ -77,7 +81,8 @@ interface ExportColumn {
     FloatLabelModule,
     PanelModule,
     ToastModule,
-    ConfirmPopupModule
+    ConfirmPopupModule,
+    SafeHtmlPipe
   ],
   templateUrl: './artist-management.component.html',
   styleUrl: './artist-management.component.scss',
@@ -86,8 +91,7 @@ interface ExportColumn {
 export class ArtistManagementComponent implements OnInit {
   readonly IS_PUBLIC_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES:Yes`;
   readonly IS_PUBLIC_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO:No`;
-  private readonly newIds: Set<string> = new Set();
-  private readonly newIdSubject = new BehaviorSubject<string | null>(null);
+  private readonly newArtistIds: Set<string> = new Set();
   readonly nameFormControl: FormControl = new FormControl<string>('', [Validators.required, Validators.maxLength(250)]);
   readonly descriptionFormControl: FormControl = new FormControl<string>('');
   readonly biographyFormControl: FormControl = new FormControl<string>('');
@@ -97,7 +101,7 @@ export class ArtistManagementComponent implements OnInit {
   readonly isVerifiedFormControl: FormControl = new FormControl<boolean>(false);
   readonly tagsFormControl: FormControl = new FormControl<string[]>([]);
   readonly refCodeFormControl: FormControl = new FormControl<string | null>(null);
-  readonly createArtistFormGroup: FormGroup = new FormGroup({
+  readonly artistFormGroup: FormGroup = new FormGroup({
     nameFormControl: this.nameFormControl,
     descriptionFormControl: this.descriptionFormControl,
     biographyFormControl: this.biographyFormControl,
@@ -113,8 +117,8 @@ export class ArtistManagementComponent implements OnInit {
     name: `${ArtistNationality[key as keyof typeof ArtistNationality]}`
   }));
   readonly renderableImageUrls: string[] = [];
-  readonly selectedArtistDtos: ArtistDto[] = [];
-  readonly artistDtos: WritableSignal<ArtistDto[]> = signal<ArtistDto[]>([]);
+  readonly selectedArtists: Artist[] = [];
+  readonly artists: WritableSignal<Artist[]> = signal<Artist[]>([]);
   private fetchNewArtistIntervalId: number = -1;
   private editArtistId: string | null = null;
   isDialogFormSubmitted: boolean = false;
@@ -126,70 +130,55 @@ export class ArtistManagementComponent implements OnInit {
     private readonly messageService: MessageService,
     private readonly confirmationService: ConfirmationService,
     private readonly artistService: ArtistService,
-    private readonly http: HttpClient
+    private readonly http: HttpClient,
+    private readonly artistMapper: ArtistMapper,
+    private readonly exceptionHandler: ExceptionHandler
   ) {}
 
   ngOnInit(): void {
-    this.newIdSubject.subscribe((newId) => {
-      if (newId) {
-        this.newIds.add(newId);
-        if (this.newIds.size && this.fetchNewArtistIntervalId >= 0) {
-          this.fetchNewArtistIntervalId = window.setTimeout(() => {
-            this.artistService.getArtistByIds([...this.newIds]).subscribe((respDto) => {
-              const newArtistDtos: ArtistDto[] = respDto.data;
-              const newArtistDtosMap = new Map(newArtistDtos.map((newArtistDto) => [newArtistDto.id, newArtistDto]));
-              newArtistDtos.forEach(
-                (newArtistDto) => this.newIds.has(newArtistDto.id) && this.newIds.delete(newArtistDto.id)
-              );
-              if (!this.newIds.size) {
-                window.clearInterval(this.fetchNewArtistIntervalId);
-                this.fetchNewArtistIntervalId = -1;
-              }
-              this.artistDtos.update((artistDtos) => {
-                const updatedArtistDtos: ArtistDto[] = artistDtos.map(
-                  (artistDto) => newArtistDtosMap.get(artistDto.id) || artistDto
-                );
-                return updatedArtistDtos;
-              });
-            });
-          }, 1000);
-        }
-      }
-    });
-    this.thumbnailUrlFormControl.valueChanges.subscribe(
-      (value: string) => !this.thumbnailUrlFormControl.errors && this.processImagePreview(value)
-    );
-    this.backgroundUrlFormControl.valueChanges.subscribe(
-      (value: string) => !this.backgroundUrlFormControl.errors && this.processImagePreview(value)
-    );
-    this.artistService.getMockArtists().subscribe((respDto: ResponseDto<ArtistDto[]>) => {
-      this.artistDtos.set(respDto.data);
-    });
+    this.listenAndProcessArtistCreated();
+    this.listenAndProcessFormControlValueChange();
+    this.loadData();
   }
 
-  hideArtistDialog(): void {
+  handleHideArtistDialog(): void {
     this.isDialogShowed = false;
     this.isDialogFormSubmitted = false;
   }
 
-  deleteSelectedArtists(): void {}
+  handleDeleteSelectedArtists(): void {}
 
-  exportCsv(): void {}
+  handleExportCsv(): void {}
 
-  onGlobalFilter(table: Table, event: Event) {
+  handleGlobalFilter(table: Table, event: Event) {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 
   handleNewArtist(): void {
     this.editArtistId = null;
+    this.refCodeFormControl.enable();
+    if (this.isDialogFormSubmitted) {
+      this.nameFormControl.reset();
+      this.descriptionFormControl.reset();
+      this.nameFormControl.reset();
+      this.descriptionFormControl.reset();
+      this.biographyFormControl.reset();
+      this.thumbnailUrlFormControl.reset();
+      this.backgroundUrlFormControl.reset();
+      this.nationalityIsoCodeFormControl.reset();
+      this.isVerifiedFormControl.reset();
+      this.tagsFormControl.reset();
+      this.refCodeFormControl.reset();
+    }
     this.openArtistDialog('new');
   }
 
-  handleEditArtist({
-    id,
-    profile: { name, description, biography, thumbnailUrl, backgroundUrl, nationalityIsoCode },
-    refCode
-  }: ArtistDto): void {
+  handleEditArtist(artist: Artist): void {
+    const {
+      id,
+      profile: { name, description, biography, thumbnailUrl, backgroundUrl, nationalityIsoCode },
+      refCode
+    } = artist;
     this.nameFormControl.setValue(name);
     this.descriptionFormControl.setValue(description);
     this.biographyFormControl.setValue(biography);
@@ -197,40 +186,43 @@ export class ArtistManagementComponent implements OnInit {
     this.nationalityIsoCodeFormControl.setValue(nationalityIsoCode);
     this.thumbnailUrlFormControl.setValue(thumbnailUrl);
     this.refCodeFormControl.setValue(refCode);
+    artist.isReleased && this.refCodeFormControl.disable();
     this.editArtistId = id;
     this.openArtistDialog('edit');
   }
 
   handleSaveArtist(): void {
     if (this.action === 'new') {
-      this.createArtist();
+      const createArtistDto: CreateArtistDto = {
+        profile: {
+          name: this.nameFormControl.value,
+          description: this.descriptionFormControl.value,
+          biography: this.biographyFormControl.value,
+          nationalityIsoCode: this.nationalityIsoCodeFormControl.value || null,
+          thumbnailUrl: this.thumbnailUrlFormControl.value || null,
+          backgroundUrl: this.backgroundUrlFormControl.value || null
+        },
+        refCode: this.refCodeFormControl.value,
+        isVerified: false,
+        tags: []
+      };
+      this.createArtist(createArtistDto);
     } else if (this.action === 'edit') {
     }
   }
 
-  handleDeleteArtist({ id }: ArtistDto): void {
+  handleDeleteArtist({ id }: Artist): void {
     this.confirmationService.confirm({
       message: $localize`:@@CONFIRM_MESSAGE_ARTIST_DELETE:Are you sure you want to delete the selected products?`,
-      header: 'Confirm',
+      header: $localize`:@@DIALOG_LABEL_CONFIRM_DELETE:Confirm delete`,
       icon: 'pi pi-exclamation-triangle',
-      // key: 'btn-delete-at-row',
-      accept: () => {
-        this.artistService.bulkDeleteArtist({ items: [{ id }] }).subscribe((respDto) => {
-          this.messageService.add({
-            severity: 'success',
-            summary: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
-            detail: $localize`:@@MESSAGE_ARTIST_DETELE_SUCCESSFUL:Artist was deleted successfully.`,
-            life: 3000
-          });
-        });
-      }
+      accept: () => this.deleteArtist({ id })
     });
   }
 
   private openArtistDialog(action: ActionType): void {
     if (this.action == action) {
       this.isDialogShowed = true;
-      return;
     } else {
       this.action = action;
       this.isDialogFormSubmitted = false;
@@ -238,51 +230,93 @@ export class ArtistManagementComponent implements OnInit {
     }
   }
 
-  private createArtist(): void {
-    this.artistService
-      .bulkCreateArtist({
-        items: [
-          {
-            profile: {
-              name: this.nameFormControl.value,
-              description: this.descriptionFormControl.value,
-              biography: this.biographyFormControl.value,
-              nationalityIsoCode: this.nationalityIsoCodeFormControl.value || null,
-              thumbnailUrl: this.thumbnailUrlFormControl.value.trim() || null,
-              backgroundUrl: this.backgroundUrlFormControl.value.trim() || null
-            },
-            refCode: this.refCodeFormControl.value,
-            isVerified: false,
-            tags: []
-          }
-        ]
-      })
-      .subscribe((respDto) => {
-        const { id, isSuccessful, errors }: CommandResult = respDto.data.items[0];
-        if (isSuccessful) {
-          id && this.newIds.add(id);
-        } else {
-          const businessRule = errors[0].businessRule;
-          businessRule &&
-            this.messageService.add({
-              summary: businessRule.code,
-              detail: businessRule.content,
-              severity: 'error'
-              // summary: 'string';
-              // detail?: string;
-              // id?: any;
-              // key?: string;
-              // life?: number;
-              // sticky?: boolean;
-              // closable?: boolean;
-              // data?: any;
-              // icon?: string;
-              // contentStyleClass?: string;
-              // styleClass?: string;
-              // closeIcon?: string;
-            });
+  private createArtist(createArtistDto: CreateArtistDto): void {
+    this.artistService.bulkCreateArtist({ items: [createArtistDto] }).subscribe((respDto) => {
+      const { isSuccessful, errors }: CommandResult = respDto.data.items[0];
+      if (isSuccessful) {
+        this.isDialogFormSubmitted = true;
+        this.isDialogShowed = false;
+        this.addMessage({
+          title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
+          content: $localize`:@@MESSAGE_ARTIST_CREATED_SUCCESSFUL:Artist was created successfully.`
+        });
+      } else {
+        const message = this.exceptionHandler.handle(errors[0]);
+        this.addMessage(message, 'error');
+      }
+    });
+  }
+
+  private deleteArtist(deleteArtistDto: DeleteArtistDto) {
+    const { id } = deleteArtistDto;
+    this.artistService.bulkDeleteArtist({ items: [deleteArtistDto] }).subscribe((respDto) => {
+      const { isSuccessful, errors } = respDto.data.items[0];
+      if (isSuccessful) {
+        this.artists.update((artists) => artists.filter((artist) => artist.id != id));
+        this.addMessage({
+          title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
+          content: $localize`:@@MESSAGE_ARTIST_DETELED_SUCCESSFUL:Artist was deleted successfully.`
+        });
+      } else {
+        const message = this.exceptionHandler.handle(errors[0]);
+        this.addMessage(message, 'error');
+      }
+    });
+  }
+
+  private loadData() {
+    this.artistService.getMockArtists().subscribe((respDto: ResponseDto<ArtistDto[]>) => {
+      this.artists.set(respDto.data.map(this.artistMapper.mapToArtist));
+    });
+  }
+
+  private listenAndProcessFormControlValueChange() {
+    this.thumbnailUrlFormControl.valueChanges.subscribe(
+      (value: string) => !this.thumbnailUrlFormControl.errors && this.processImagePreview(value)
+    );
+    this.backgroundUrlFormControl.valueChanges.subscribe(
+      (value: string) => !this.backgroundUrlFormControl.errors && this.processImagePreview(value)
+    );
+  }
+
+  private listenAndProcessArtistCreated() {
+    this.artistService.artistCreatedId().subscribe((newArtistId) => {
+      if (newArtistId) {
+        this.newArtistIds.add(newArtistId);
+        if (this.newArtistIds.size && this.fetchNewArtistIntervalId < 0) {
+          const updateNewArtists = () => {
+            const fetchNewArtists = this.artistService.getArtistByIds([...this.newArtistIds]).pipe(
+              map((respDto) => {
+                const artistDtos: ArtistDto[] = respDto.data;
+                const newArtists: Artist[] = artistDtos
+                  .filter((artistDto) => artistDto)
+                  .map(this.artistMapper.mapToArtist);
+                this.artists.update((artists) => [...newArtists, ...artists]);
+                newArtists.forEach(({ id }) => this.newArtistIds.has(id) && this.newArtistIds.delete(id));
+                return !this.newArtistIds.size;
+              })
+            );
+
+            this.fetchNewArtistIntervalId = window.setTimeout(() => {
+              fetchNewArtists.subscribe((isAllFetched) =>
+                isAllFetched ? (this.fetchNewArtistIntervalId = -1) : updateNewArtists()
+              );
+            }, 1000);
+          };
+          updateNewArtists();
         }
-      });
+      }
+    });
+  }
+
+  private addMessage({ title, content }: Message, severity: string = 'success', key?: string) {
+    this.messageService.add({
+      severity,
+      summary: title,
+      detail: content,
+      life: 3000,
+      key
+    });
   }
 
   private processImagePreview(url: string): void {

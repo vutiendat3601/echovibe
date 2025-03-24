@@ -1,3 +1,5 @@
+import { SafeHtml } from '@angular/platform-browser';
+
 export interface ArtistProfile {
   name: string;
   description: string | null;
