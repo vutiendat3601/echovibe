@@ -25,6 +25,7 @@ export interface ArtistDto {
   refCode: string;
   profile: ArtistProfile;
   isPublic: boolean;
+  isVerified: boolean;
   isReleased: boolean;
   tags: string[];
 }

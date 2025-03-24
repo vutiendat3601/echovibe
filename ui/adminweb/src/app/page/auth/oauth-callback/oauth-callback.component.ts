@@ -16,6 +16,6 @@ export class OauthCallbackComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.authService.isAuthenticated ? this.router.navigate(['/']) : this.authService.signIn();
-    }, 1000);
+    }, 1_000);
   }
 }
