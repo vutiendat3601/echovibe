@@ -19,6 +19,7 @@
     "BUTTON_LABEL_SIGN_OUT": "Sign out",
     "BUTTON_LABEL_CREATE": "Create",
     "BUTTON_LABEL_DELETE": "Delete",
+    "BUTTON_LABEL_EDIT": "Edit",
     "BUTTON_LABEL_SAVE": "Save",
     "BUTTON_LABEL_CANCEL": "Cancel",
     "PAGE_LABEL_MANAGE_ARTIST": "Manage Artists",

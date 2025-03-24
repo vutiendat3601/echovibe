@@ -37,6 +37,7 @@ import { ArtistService } from '../../../service/artist.service';
 import { UrlValidator } from '../../../validator/url.validator';
 import { ArtistDto, CreateArtistDto, DeleteArtistDto } from './../../../dto/artist-dto';
 import { ExceptionHandler, Message } from './../../../exception/exception-handler';
+import { Router, RouterModule } from '@angular/router';
 
 type ActionType = 'new' | 'edit';
 
@@ -83,7 +84,8 @@ interface ExportColumn {
     ConfirmPopupModule,
     SafeHtmlPipe,
     IconFieldModule,
-    InputIconModule
+    InputIconModule,
+    RouterModule
   ],
   templateUrl: './artist-management.component.html',
   styleUrl: './artist-management.component.scss',
@@ -137,7 +139,8 @@ export class ArtistManagementComponent implements OnInit {
     private readonly artistService: ArtistService,
     private readonly http: HttpClient,
     private readonly artistMapper: ArtistMapper,
-    private readonly exceptionHandler: ExceptionHandler
+    private readonly exceptionHandler: ExceptionHandler,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
@@ -152,6 +155,11 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   handleDeleteSelectedArtists(): void {}
+
+  handleEditSelectedArtists(): void {
+    const ids = this.selectedArtists.map((artist) => artist.id).join(',');
+    this.router.navigate(['/management/artist/bulk-edit'], { queryParams: { ids } });
+  }
 
   handleExportCsv(): void {}
 
