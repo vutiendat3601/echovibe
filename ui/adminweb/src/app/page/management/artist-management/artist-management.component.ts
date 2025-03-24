@@ -1,29 +1,44 @@
-import { Artist } from './../../../dto/artist-dto';
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
-import { ArtistService } from '../../../service/artist.service';
-import { Table, TableModule } from 'primeng/table';
-import { ConfirmationService, MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, signal, WritableSignal } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmPopupModule } from 'primeng/confirmpopup';
+import { DialogModule } from 'primeng/dialog';
+import { EditorModule } from 'primeng/editor';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { IconFieldModule } from 'primeng/iconfield';
+import { ImageModule } from 'primeng/image';
+import { InputIconModule } from 'primeng/inputicon';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
+import { PanelModule } from 'primeng/panel';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { RatingModule } from 'primeng/rating';
 import { RippleModule } from 'primeng/ripple';
+import { SelectModule } from 'primeng/select';
+import { Table, TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
+import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { RatingModule } from 'primeng/rating';
-import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
-import { SelectModule } from 'primeng/select';
-import { RadioButtonModule } from 'primeng/radiobutton';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { DialogModule } from 'primeng/dialog';
-import { TagModule } from 'primeng/tag';
-import { InputIconModule } from 'primeng/inputicon';
-import { IconFieldModule } from 'primeng/iconfield';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { EditorModule } from 'primeng/editor';
-import { ARTIST_NATIONALITIES } from '../../../constant/constant';
-import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs';
+import { ArtistNationality, URL_REGEX } from '../../../constant/constant';
+import { ResponseDto } from '../../../dto/response-dto';
+import { ArtistMapper } from '../../../mapper/artist-mapper';
+import { Artist } from '../../../model/artist';
+import { CommandResult } from '../../../model/command-result';
+import { ArtistNationalityPipe } from '../../../pipe/artist-nationality.pipe';
+import { SafeHtmlPipe } from '../../../pipe/safe-html.pipe';
+import { ArtistService } from '../../../service/artist.service';
 import { UrlValidator } from '../../../validator/url.validator';
+import { ArtistDto, CreateArtistDto, DeleteArtistDto } from './../../../dto/artist-dto';
+import { ExceptionHandler, Message } from './../../../exception/exception-handler';
+
+type ActionType = 'new' | 'edit';
 
 interface Column {
   field: string;
@@ -39,6 +54,7 @@ interface ExportColumn {
 @Component({
   selector: 'app-artist-management',
   imports: [
+    ArtistNationalityPipe,
     CommonModule,
     TableModule,
     FormsModule,
@@ -57,259 +73,255 @@ interface ExportColumn {
     InputIconModule,
     IconFieldModule,
     ConfirmDialogModule,
-    EditorModule
+    EditorModule,
+    ImageModule,
+    ReactiveFormsModule,
+    CardModule,
+    FloatLabelModule,
+    PanelModule,
+    ToastModule,
+    ConfirmPopupModule,
+    SafeHtmlPipe,
+    IconFieldModule,
+    InputIconModule
   ],
   templateUrl: './artist-management.component.html',
   styleUrl: './artist-management.component.scss',
   providers: [MessageService, ArtistService, ConfirmationService, UrlValidator]
 })
 export class ArtistManagementComponent implements OnInit {
-  productDialog: boolean = false;
-  products = signal<Artist[]>([]);
-  product!: Artist;
-  selectedProducts!: Artist[] | null;
-  submitted: boolean = false;
-  statuses!: any[];
-  @ViewChild('dt') dt!: Table;
-  exportColumns!: ExportColumn[];
-  cols!: Column[];
-
-  isUpdate: boolean = false;
-
-  countries: any[] | undefined;
-  selectedCountry: string | undefined;
-
-  thumbnailUrlValid: boolean = false;
-  backgroundUrlValid: boolean = false;
+  readonly I18N_IS_PUBLIC_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES:Yes`;
+  readonly I18N_IS_PUBLIC_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO:No`;
+  readonly I18N_IS_VERIFIED_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_YES:Yes`;
+  readonly I18N_IS_VERIFIED_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_NO:No`;
+  readonly I18N_IS_RELEASED_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_YES:Yes`;
+  readonly I18N_IS_RELEASED_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_NO:No`;
+  private readonly newArtistIds: Set<string> = new Set();
+  readonly nameFormControl: FormControl = new FormControl<string>('', [Validators.required, Validators.maxLength(250)]);
+  readonly descriptionFormControl: FormControl = new FormControl<string>('');
+  readonly biographyFormControl: FormControl = new FormControl<string>('');
+  readonly thumbnailUrlFormControl: FormControl = new FormControl<string>('', [Validators.pattern(URL_REGEX)]);
+  readonly backgroundUrlFormControl: FormControl = new FormControl<string>('', [Validators.pattern(URL_REGEX)]);
+  readonly nationalityIsoCodeFormControl: FormControl = new FormControl<string | null>(null);
+  readonly isVerifiedFormControl: FormControl = new FormControl<boolean>(false);
+  readonly tagsFormControl: FormControl = new FormControl<string[]>([]);
+  readonly refCodeFormControl: FormControl = new FormControl<string | null>(null);
+  readonly artistFormGroup: FormGroup = new FormGroup({
+    nameFormControl: this.nameFormControl,
+    descriptionFormControl: this.descriptionFormControl,
+    biographyFormControl: this.biographyFormControl,
+    thumbnailUrlFormControl: this.thumbnailUrlFormControl,
+    backgroundUrlFormControl: this.backgroundUrlFormControl,
+    nationalityIsoCodeFormControl: this.nationalityIsoCodeFormControl,
+    isVerifiedFormControl: this.isVerifiedFormControl,
+    tagsFormControl: this.tagsFormControl,
+    refCodeFormControl: this.refCodeFormControl
+  });
+  readonly artistNationalities: { code: string; name: string }[] = Object.keys(ArtistNationality).map((key) => ({
+    code: key,
+    name: `${ArtistNationality[key as keyof typeof ArtistNationality]}`
+  }));
+  readonly renderableImageUrls: string[] = [];
+  readonly selectedArtists: Artist[] = [];
+  readonly artists: WritableSignal<Artist[]> = signal<Artist[]>([]);
+  private fetchNewArtistIntervalId: number = -1;
+  private editArtistId: string | null = null;
+  isDialogFormSubmitted: boolean = false;
+  isDialogShowed: boolean = false;
+  action: ActionType = 'new';
+  readonly columns: Column[] = [];
 
   constructor(
-    private artistService: ArtistService,
-    private messageService: MessageService,
-    private confirmationService: ConfirmationService,
-    private http: HttpClient,
-    private urlValidator: UrlValidator
+    private readonly messageService: MessageService,
+    private readonly confirmationService: ConfirmationService,
+    private readonly artistService: ArtistService,
+    private readonly http: HttpClient,
+    private readonly artistMapper: ArtistMapper,
+    private readonly exceptionHandler: ExceptionHandler
   ) {}
 
-  ngOnInit() {
-    this.loadDemoData();
-    this.countries = ARTIST_NATIONALITIES;
+  ngOnInit(): void {
+    this.listenAndProcessArtistCreated();
+    this.listenAndProcessFormControlValueChange();
+    this.loadData();
   }
 
-  exportCSV() {
-    this.dt.exportCSV();
+  handleHideArtistDialog(): void {
+    this.isDialogShowed = false;
+    this.isDialogFormSubmitted = false;
   }
 
-  loadDemoData() {
-    this.artistService.getProducts().then((data) => {
-      this.products.set(data);
-    });
+  handleDeleteSelectedArtists(): void {}
 
-    this.statuses = [
-      { label: 'INSTOCK', value: 'instock' },
-      { label: 'LOWSTOCK', value: 'lowstock' },
-      { label: 'OUTOFSTOCK', value: 'outofstock' }
-    ];
+  handleExportCsv(): void {}
 
-    this.cols = [
-      { field: 'ref_code', header: 'Reference Code' },
-      { field: 'profile.name', header: 'Name' },
-      { field: 'profile.biography', header: 'Biography' },
-      { field: 'profile.description', header: 'Description' },
-      { field: 'profile.thumbnailUrl', header: 'Thumbnail' },
-      { field: 'profile.backgroundUrl', header: 'Background' }
-    ];
-
-    this.exportColumns = this.cols.map((col) => ({ title: col.header, dataKey: col.field }));
-  }
-
-  onGlobalFilter(table: Table, event: Event) {
+  handleGlobalFilter(table: Table, event: Event) {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 
-  openNew() {
-    this.product = {
-      id: '',
-      urn: '',
-      ref_code: '',
-      profile: {
-        name: '',
-        biography: '',
-        description: '',
-        thumbnailUrl: '',
-        backgroundUrl: '',
-        thumbnailFileKey: null,
-        backgroundFileKey: null
-      },
-      isPublic: false,
-      tags: []
-    };
-    this.submitted = false;
-    this.productDialog = true;
-    this.isUpdate = false;
-  }
-
-  editProduct(product: Artist) {
-    this.product = structuredClone(product);
-    this.productDialog = true;
-    this.isUpdate = true;
-  }
-
-  deleteSelectedProducts() {
-    this.confirmationService.confirm({
-      message: 'Are you sure you want to delete the selected products?',
-      header: 'Confirm',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.products.set(this.products().filter((val) => !this.selectedProducts?.includes(val)));
-        this.selectedProducts = null;
-        this.showMessage('success', 'Successful', 'Products Deleted');
-      }
-    });
-  }
-
-  hideDialog() {
-    this.productDialog = false;
-    this.submitted = false;
-    this.isUpdate = false;
-  }
-
-  deleteProduct(product: Artist) {
-    this.confirmationService.confirm({
-      message: 'Are you sure you want to delete ' + product.profile.name + '?',
-      header: 'Confirm',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.products.set(this.products().filter((val) => val.id !== product.id));
-        this.product = {
-          id: '',
-          urn: '',
-          ref_code: '',
-          profile: {
-            name: '',
-            biography: '',
-            description: '',
-            thumbnailUrl: '',
-            backgroundUrl: '',
-            thumbnailFileKey: null,
-            backgroundFileKey: null
-          },
-          isPublic: false,
-          tags: []
-        };
-        this.showMessage('success', 'Successful', 'Product Deleted');
-      }
-    });
-  }
-
-  findIndexById(id: string): number {
-    let index = -1;
-    for (let i = 0; i < this.products().length; i++) {
-      if (this.products()[i].id === id) {
-        index = i;
-        break;
-      }
+  handleNewArtist(): void {
+    this.editArtistId = null;
+    this.refCodeFormControl.enable();
+    if (this.action === 'edit' || this.isDialogFormSubmitted) {
+      // These two cases: [The action is edit before, the Artist (create, edit) was saved]
+      // We'll erase the data in the form.
+      this.artistFormGroup.reset();
     }
-
-    return index;
+    this.openArtistDialog('new');
   }
 
-  createId(): string {
-    let id = '';
-    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (var i = 0; i < 5; i++) {
-      id += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return id;
+  handleEditArtist(artist: Artist): void {
+    const {
+      id,
+      profile: { name, description, biography, thumbnailUrl, backgroundUrl, nationalityIsoCode },
+      refCode
+    } = artist;
+    this.nameFormControl.setValue(name);
+    this.descriptionFormControl.setValue(description);
+    this.biographyFormControl.setValue(biography);
+    this.backgroundUrlFormControl.setValue(backgroundUrl);
+    this.nationalityIsoCodeFormControl.setValue(nationalityIsoCode);
+    this.thumbnailUrlFormControl.setValue(thumbnailUrl);
+    this.refCodeFormControl.setValue(refCode);
+    artist.isReleased && this.refCodeFormControl.disable();
+    this.editArtistId = id;
+    this.openArtistDialog('edit');
   }
 
-  getSeverity(status: string) {
-    if (status) {
-      return 'success';
-    }
-    return 'danger';
-  }
-
-  async saveProduct() {
-    this.submitted = true;
-
-    // Validate required fields
-    if (!this.product.profile.name?.trim() || !this.product.profile.biography?.trim() || !this.product.profile.description?.trim() || !this.product.profile.thumbnailUrl?.trim() || !this.product.profile.backgroundUrl?.trim()) {
-      return;
-    }
-
-    // Check if URLs exist
-    this.urlValidator.checkUrlImage(this.product.profile.thumbnailUrl).subscribe(isValid => {
-      this.thumbnailUrlValid = isValid;
-    });
-    this.urlValidator.checkUrlImage(this.product.profile.backgroundUrl).subscribe(isValid => {
-      this.backgroundUrlValid = isValid;
-    });
-    if (!this.thumbnailUrlValid || !this.backgroundUrlValid) {
-      this.showMessage('error', 'URL Not Found', 'One or both URLs do not exist.');
-      return;
-    }
-
-    let _products = this.products();
-    if (this.product.profile.name?.trim()) {
-      if (this.product.id) {
-        console.log('update existing artist');
-        // Update existing artist
-        const index = this.findIndexById(this.product.id);
-        if (index !== -1) {
-          _products[index] = this.product;
-          this.products.set([..._products]);
-          this.showMessage('success', 'Successful', 'Product Updated');
-        }
-      } else {
-        console.log('create new artist');
-        this.product.id = this.createId();
-        this.product.ref_code = 'PD' + Date.now().toLocaleString();
-        this.product.profile.thumbnailUrl = this.product.profile.thumbnailUrl;
-        this.product.profile.backgroundUrl = this.product.profile.backgroundUrl;
-        this.product.profile.biography = this.product.profile.biography;
-        this.product.profile.description = this.product.profile.description;
-        this.product.profile.name = this.product.profile.name;
-
-        this.showMessage('success', 'Successful', 'Product Created');
-
-        this.products.set([..._products, this.product]);
-      }
-
-      this.productDialog = false;
-      this.product = {
-        id: '',
-        urn: '',
-        ref_code: '',
+  handleSaveArtist(): void {
+    if (this.action === 'new') {
+      const createArtistDto: CreateArtistDto = {
         profile: {
-          name: '',
-          biography: '',
-          description: '',
-          thumbnailUrl: '',
-          backgroundUrl: '',
-          thumbnailFileKey: null,
-          backgroundFileKey: null
+          name: this.nameFormControl.value,
+          description: this.descriptionFormControl.value,
+          biography: this.biographyFormControl.value,
+          nationalityIsoCode: this.nationalityIsoCodeFormControl.value || null,
+          thumbnailUrl: this.thumbnailUrlFormControl.value || null,
+          backgroundUrl: this.backgroundUrlFormControl.value || null
         },
-        isPublic: false,
+        refCode: this.refCodeFormControl.value,
+        isVerified: false,
         tags: []
       };
+      this.createArtist(createArtistDto);
+    } else if (this.action === 'edit') {
     }
   }
 
-  checkUrls(): void {
-    if (this.product.profile.thumbnailUrl) {
-      this.urlValidator.checkUrl(this.product.profile.thumbnailUrl).subscribe(isValid => {
-        this.thumbnailUrlValid = isValid;
-      });
-    }
+  handleDeleteArtist({ id }: Artist): void {
+    this.confirmationService.confirm({
+      message: $localize`:@@CONFIRM_MESSAGE_ARTIST_DELETE:Are you sure you want to delete the selected Artist?`,
+      header: $localize`:@@DIALOG_LABEL_CONFIRM_DELETE:Confirm delete`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => this.deleteArtist({ id })
+    });
+  }
 
-    if (this.product.profile.backgroundUrl) {
-      this.urlValidator.checkUrl(this.product.profile.backgroundUrl).subscribe(isValid => {
-        this.backgroundUrlValid = isValid;
-      });
+  private openArtistDialog(action: ActionType): void {
+    if (this.action == action) {
+      this.isDialogShowed = true;
+    } else {
+      this.action = action;
+      this.isDialogFormSubmitted = false;
+      this.isDialogShowed = true;
     }
   }
 
-  showMessage(type: string, summary: string, detail: string) {
-    this.messageService.add({ severity: type, summary: summary, detail: detail, key: 'br', life: 3000 });
+  private createArtist(createArtistDto: CreateArtistDto): void {
+    this.artistService.bulkCreateArtist({ items: [createArtistDto] }).subscribe((respDto) => {
+      const { isSuccessful, errors }: CommandResult = respDto.data.items[0];
+      if (isSuccessful) {
+        this.isDialogFormSubmitted = true;
+        this.isDialogShowed = false;
+        this.addMessage({
+          title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
+          content: $localize`:@@MESSAGE_ARTIST_CREATED_SUCCESSFUL:Artist was created successfully.`
+        });
+      } else {
+        const message = this.exceptionHandler.handle(errors[0]);
+        this.addMessage(message, 'error');
+      }
+    });
+  }
+
+  private deleteArtist(deleteArtistDto: DeleteArtistDto) {
+    const { id } = deleteArtistDto;
+    this.artistService.bulkDeleteArtist({ items: [deleteArtistDto] }).subscribe((respDto) => {
+      const { isSuccessful, errors } = respDto.data.items[0];
+      if (isSuccessful) {
+        this.artists.update((artists) => artists.filter((artist) => artist.id != id));
+        this.addMessage({
+          title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
+          content: $localize`:@@MESSAGE_ARTIST_DETELED_SUCCESSFUL:Artist was deleted successfully.`
+        });
+      } else {
+        const message = this.exceptionHandler.handle(errors[0]);
+        this.addMessage(message, 'error');
+      }
+    });
+  }
+
+  private loadData() {
+    this.artistService.getMockArtists().subscribe((respDto: ResponseDto<ArtistDto[]>) => {
+      this.artists.set(respDto.data.map(this.artistMapper.mapToArtist));
+    });
+  }
+
+  private listenAndProcessFormControlValueChange() {
+    this.thumbnailUrlFormControl.valueChanges.subscribe(
+      (value: string) => !this.thumbnailUrlFormControl.errors && this.processImagePreview(value)
+    );
+    this.backgroundUrlFormControl.valueChanges.subscribe(
+      (value: string) => !this.backgroundUrlFormControl.errors && this.processImagePreview(value)
+    );
+  }
+
+  private listenAndProcessArtistCreated() {
+    this.artistService.artistCreatedId().subscribe((newArtistId) => {
+      if (newArtistId) {
+        this.newArtistIds.add(newArtistId);
+        if (this.newArtistIds.size && this.fetchNewArtistIntervalId < 0) {
+          const updateNewArtists = () => {
+            const fetchNewArtists = this.artistService.getArtistByIds([...this.newArtistIds]).pipe(
+              map((respDto) => {
+                const artistDtos: ArtistDto[] = respDto.data;
+                const newArtists: Artist[] = artistDtos
+                  .filter((artistDto) => artistDto)
+                  .map(this.artistMapper.mapToArtist);
+                this.artists.update((artists) => [...newArtists, ...artists]);
+                newArtists.forEach(({ id }) => this.newArtistIds.has(id) && this.newArtistIds.delete(id));
+                return !this.newArtistIds.size;
+              })
+            );
+
+            this.fetchNewArtistIntervalId = window.setTimeout(() => {
+              fetchNewArtists.subscribe((isAllFetched) =>
+                isAllFetched ? (this.fetchNewArtistIntervalId = -1) : updateNewArtists()
+              );
+            }, 1_000);
+          };
+          updateNewArtists();
+        }
+      }
+    });
+  }
+
+  private addMessage({ title, content }: Message, severity: string = 'success', key?: string) {
+    this.messageService.add({
+      severity,
+      summary: title,
+      detail: content,
+      life: 3000,
+      key
+    });
+  }
+
+  private processImagePreview(url: string): void {
+    !this.renderableImageUrls.includes(url) &&
+      this.http.head(url, { observe: 'response' }).subscribe((resp) => {
+        if (resp.status === 200 && resp.headers.get('Content-Type')?.startsWith('image')) {
+          this.renderableImageUrls.push(url);
+        }
+      });
   }
 }

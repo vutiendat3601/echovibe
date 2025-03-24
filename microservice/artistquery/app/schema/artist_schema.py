@@ -19,8 +19,10 @@ class ArtistSchema(BaseModel):
     id: str = Field()
     urn: str = Field()
     ref_code: str | None = Field(default=None, alias="refCode")
-    profile: ArtistProfileSchema | None = Field(default=None)
-    is_public: bool = Field(alias="isPublic")
+    profile: ArtistProfileSchema | None = Field(default=None, alias="profile")
+    is_public: bool = Field(default=False, alias="isPublic")
+    is_released: bool = Field(default=False, alias="isReleased")
+    is_verified: bool = Field(default=False, alias="isVerified")
     tags: list[str] = Field(default=[], alias="tags")
 
     class Config:

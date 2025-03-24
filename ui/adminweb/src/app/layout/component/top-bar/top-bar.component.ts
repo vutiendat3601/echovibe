@@ -2,13 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { MenuItem } from 'primeng/api';
+import { AvatarModule } from 'primeng/avatar';
 import { StyleClassModule } from 'primeng/styleclass';
 import { UserProfile } from '../../../model/user-profile';
-import { ArtistService } from '../../../service/artist.service';
 import { AuthService } from '../../../service/auth.service';
 import { LayoutService } from '../../service/layout.service';
 import { ConfiguratorComponent } from '../configurator/configurator.component';
-import { AvatarModule } from 'primeng/avatar';
 
 interface TopBarActionMenuItem {
   [key: string]: MenuItem;
@@ -26,12 +25,11 @@ export class TopBarComponent implements OnInit {
   actionMenuItems: TopBarActionMenuItem = { profile: { label: $localize`:@@MENU_ITEM_LABEL_USER_PROFILE:Profile` } };
   constructor(
     public readonly layoutService: LayoutService,
-    public readonly authService: AuthService,
-    private readonly artistService: ArtistService
+    public readonly authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.authService.userProfile().subscribe((userProfile) => ((this.userProfile = userProfile), console.log(userProfile)));
+    this.authService.userProfile().subscribe((userProfile) => (this.userProfile = userProfile));
   }
 
   toggleDarkMode(): void {

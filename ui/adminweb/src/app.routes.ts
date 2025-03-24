@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { LayoutComponent } from './app/layout/component/layout/layout.component';
 import { NotFoundComponent } from './app/page/not-found/not-found.component';
-import { Landing } from './app/demo/landing/landing';
 import { AdminRoleGuard } from './app/guard/admin-role.guard';
 
 export const routes: Routes = [
@@ -16,7 +15,5 @@ export const routes: Routes = [
   },
   { path: 'auth', loadChildren: () => import('./app/page/auth/auth.routes') },
   { path: 'not-found', component: NotFoundComponent },
-  { path: 'demo', component: LayoutComponent, loadChildren: () => import('./app/demo/demo.routes') },
-  { path: 'landing', component: Landing },
   { path: '**', redirectTo: '/not-found' }
 ];

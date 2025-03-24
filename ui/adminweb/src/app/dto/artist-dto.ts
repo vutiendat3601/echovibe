@@ -1,7 +1,7 @@
 import { ArtistProfile } from '../model/artist-profile';
 
 export interface CreateArtistProfileDto {
-  name: string;
+  name: string | null;
   description: string | null;
   biography: string | null;
   thumbnailUrl: string | null;
@@ -16,28 +16,24 @@ export interface CreateArtistDto {
   tags: string[];
 }
 
+export interface DeleteArtistDto {
+  id: string;
+}
 export interface ArtistDto {
   id: string;
   urn: string;
   refCode: string;
   profile: ArtistProfile;
   isPublic: boolean;
+  isVerified: boolean;
+  isReleased: boolean;
   tags: string[];
 }
 
-export interface Artist {
+export interface UpdateArtistProfileDto {
   id: string;
-  urn: string;
-  ref_code: string;
-  profile: {
-    name: string;
-    biography: string;
-    description: string;
-    thumbnailFileKey: string | null;
-    thumbnailUrl: string | null;
-    backgroundFileKey: string | null;
-    backgroundUrl: string | null;
-  };
-  isPublic: boolean;
-  tags: string[];
+  description: string | null;
+  biography: string | null;
+  thumbnailUrl: string | null;
+  backgroundUrl: string | null;
 }

@@ -21,7 +21,7 @@ export const authorizationCodePkceFlowConfig: AuthConfig = {
   // The api scope is a usecase specific one
   useSilentRefresh: true,
   scope: 'openid profile email offline_access',
-  showDebugInformation: true
+  showDebugInformation: false
 };
 
 export const oauthModuleConfig: OAuthModuleConfig = {
