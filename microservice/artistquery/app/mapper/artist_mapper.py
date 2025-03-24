@@ -17,5 +17,7 @@ def map_to_artist_schema(artist: Artist):
                         urn=artist.urn,
                         ref_code=artist.ref_code,
                         is_public=artist.is_public,
+                        is_verified=artist.is_verified,
+                        is_released=artist.is_released,
                         tags=artist.tags,
                         profile=profile_schema)
