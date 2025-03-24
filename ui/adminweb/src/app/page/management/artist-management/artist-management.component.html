@@ -88,10 +88,13 @@
       </th>
 
       <!-- Public -->
-      <th pSortableColumn="inventoryStatus" style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_PUBLIC">
-        Public
-        <p-sortIcon field="inventoryStatus" />
-      </th>
+      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_PUBLIC">Public</th>
+
+      <!-- Verified -->
+      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_VERIFIED">Verified</th>
+
+      <!-- Released -->
+      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_RELEASED">Released</th>
 
       <!-- Reference code -->
       <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_REFERENCE_CODE">Reference code</th>
@@ -142,8 +145,27 @@
       <!-- Public -->
       <td style="min-width: 12rem">
         <p-tag
-          [value]="artist.isPublic ? IS_PUBLIC_TRUE : IS_PUBLIC_FALSE"
+          [icon]="'pi ' + (artist.isPublic ? 'pi-check' : 'pi-times')"
+          [value]="artist.isPublic ? I18N_IS_PUBLIC_TRUE : I18N_IS_PUBLIC_FALSE"
           [severity]="artist.isPublic ? 'success' : 'danger'"
+        />
+      </td>
+
+      <!-- Verified  -->
+      <td style="min-width: 12rem">
+        <p-tag
+          [icon]="'pi ' + (artist.isVerified ? 'pi-check' : 'pi-times')"
+          [value]="artist.isVerified ? I18N_IS_VERIFIED_TRUE : I18N_IS_VERIFIED_FALSE"
+          [severity]="artist.isVerified ? 'success' : 'danger'"
+        />
+      </td>
+
+      <!-- Released -->
+      <td style="min-width: 12rem">
+        <p-tag
+          [icon]="'pi ' + (artist.isReleased ? 'pi-check' : 'pi-times')"
+          [value]="artist.isReleased ? I18N_IS_RELEASED_TRUE : I18N_IS_RELEASED_FALSE"
+          [severity]="artist.isReleased ? 'success' : 'danger'"
         />
       </td>
 
@@ -389,18 +411,18 @@
     <ng-template #footer>
       <div>
         <p-button
-          type="submit"
-          [disabled]="!artistFormGroup.valid"
-          i18n-label="@@BUTTON_LABEL_SAVE"
-          label="Save"
-          icon="pi pi-check"
-        />
-        <p-button
           i18n-label="@@BUTTON_LABEL_CANCEL"
           label="Cancel"
           icon="pi pi-times"
           text
           (click)="handleHideArtistDialog()"
+        />
+        <p-button
+          type="submit"
+          [disabled]="!artistFormGroup.valid"
+          i18n-label="@@BUTTON_LABEL_SAVE"
+          label="Save"
+          icon="pi pi-check"
         />
       </div>
     </ng-template>

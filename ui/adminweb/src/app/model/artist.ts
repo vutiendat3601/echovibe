@@ -6,6 +6,7 @@ export interface Artist {
   refCode: string;
   profile: ArtistProfile;
   isPublic: boolean;
-  isReleased?: boolean;
+  isVerified: boolean;
+  isReleased: boolean;
   tags: string[];
 }

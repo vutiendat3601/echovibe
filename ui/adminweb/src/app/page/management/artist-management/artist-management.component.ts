@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { DomSanitizer } from '@angular/platform-browser';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -26,18 +25,18 @@ import { TagModule } from 'primeng/tag';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
-import { BehaviorSubject, map, tap } from 'rxjs';
+import { map } from 'rxjs';
 import { ArtistNationality, URL_REGEX } from '../../../constant/constant';
 import { ResponseDto } from '../../../dto/response-dto';
+import { ArtistMapper } from '../../../mapper/artist-mapper';
 import { Artist } from '../../../model/artist';
 import { CommandResult } from '../../../model/command-result';
 import { ArtistNationalityPipe } from '../../../pipe/artist-nationality.pipe';
+import { SafeHtmlPipe } from '../../../pipe/safe-html.pipe';
 import { ArtistService } from '../../../service/artist.service';
 import { UrlValidator } from '../../../validator/url.validator';
 import { ArtistDto, CreateArtistDto, DeleteArtistDto } from './../../../dto/artist-dto';
 import { ExceptionHandler, Message } from './../../../exception/exception-handler';
-import { ArtistMapper } from '../../../mapper/artist-mapper';
-import { SafeHtmlPipe } from '../../../pipe/safe-html.pipe';
 
 type ActionType = 'new' | 'edit';
 
@@ -82,15 +81,21 @@ interface ExportColumn {
     PanelModule,
     ToastModule,
     ConfirmPopupModule,
-    SafeHtmlPipe
+    SafeHtmlPipe,
+    IconFieldModule,
+    InputIconModule
   ],
   templateUrl: './artist-management.component.html',
   styleUrl: './artist-management.component.scss',
   providers: [MessageService, ArtistService, ConfirmationService, UrlValidator]
 })
 export class ArtistManagementComponent implements OnInit {
-  readonly IS_PUBLIC_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES:Yes`;
-  readonly IS_PUBLIC_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO:No`;
+  readonly I18N_IS_PUBLIC_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES:Yes`;
+  readonly I18N_IS_PUBLIC_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO:No`;
+  readonly I18N_IS_VERIFIED_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_YES:Yes`;
+  readonly I18N_IS_VERIFIED_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_NO:No`;
+  readonly I18N_IS_RELEASED_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_YES:Yes`;
+  readonly I18N_IS_RELEASED_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_NO:No`;
   private readonly newArtistIds: Set<string> = new Set();
   readonly nameFormControl: FormControl = new FormControl<string>('', [Validators.required, Validators.maxLength(250)]);
   readonly descriptionFormControl: FormControl = new FormControl<string>('');
@@ -157,7 +162,9 @@ export class ArtistManagementComponent implements OnInit {
   handleNewArtist(): void {
     this.editArtistId = null;
     this.refCodeFormControl.enable();
-    if (this.isDialogFormSubmitted) {
+    if (this.action === 'edit' || this.isDialogFormSubmitted) {
+      // These two cases: [The action is edit before, the Artist (create, edit) was saved]
+      // We'll erase the data in the form.
       this.artistFormGroup.reset();
     }
     this.openArtistDialog('new');
@@ -291,7 +298,7 @@ export class ArtistManagementComponent implements OnInit {
               fetchNewArtists.subscribe((isAllFetched) =>
                 isAllFetched ? (this.fetchNewArtistIntervalId = -1) : updateNewArtists()
               );
-            }, 1000);
+            }, 1_000);
           };
           updateNewArtists();
         }
