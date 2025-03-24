@@ -158,17 +158,7 @@ export class ArtistManagementComponent implements OnInit {
     this.editArtistId = null;
     this.refCodeFormControl.enable();
     if (this.isDialogFormSubmitted) {
-      this.nameFormControl.reset();
-      this.descriptionFormControl.reset();
-      this.nameFormControl.reset();
-      this.descriptionFormControl.reset();
-      this.biographyFormControl.reset();
-      this.thumbnailUrlFormControl.reset();
-      this.backgroundUrlFormControl.reset();
-      this.nationalityIsoCodeFormControl.reset();
-      this.isVerifiedFormControl.reset();
-      this.tagsFormControl.reset();
-      this.refCodeFormControl.reset();
+      this.artistFormGroup.reset();
     }
     this.openArtistDialog('new');
   }
@@ -213,7 +203,7 @@ export class ArtistManagementComponent implements OnInit {
 
   handleDeleteArtist({ id }: Artist): void {
     this.confirmationService.confirm({
-      message: $localize`:@@CONFIRM_MESSAGE_ARTIST_DELETE:Are you sure you want to delete the selected products?`,
+      message: $localize`:@@CONFIRM_MESSAGE_ARTIST_DELETE:Are you sure you want to delete the selected Artist?`,
       header: $localize`:@@DIALOG_LABEL_CONFIRM_DELETE:Confirm delete`,
       icon: 'pi pi-exclamation-triangle',
       accept: () => this.deleteArtist({ id })
