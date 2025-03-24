@@ -27,6 +27,7 @@
             "outputPath": "dist/echovibe-adminweb",
             "index": "src/index.html",
             "browser": "src/main.ts",
+            "allowedCommonJsDependencies": ["quill-delta"],
             "polyfills": ["zone.js", "@angular/localize/init"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
@@ -85,8 +86,12 @@
             "development": {
               "buildTarget": "echovibe-adminweb:build:development"
             },
-            "en": { "buildTarget": "echovibe-adminweb:build:development,en" },
-            "vi": { "buildTarget": "echovibe-adminweb:build:development,vi" }
+            "en": {
+              "buildTarget": "echovibe-adminweb:build:development,en"
+            },
+            "vi": {
+              "buildTarget": "echovibe-adminweb:build:development,vi"
+            }
           },
           "defaultConfiguration": "development"
         },

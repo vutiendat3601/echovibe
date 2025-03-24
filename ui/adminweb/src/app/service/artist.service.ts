@@ -1,220 +1,68 @@
-import { Injectable } from '@angular/core';
-import { environment } from '../../environment/environment';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { CreateArtistDto } from '../dto/artist-dto';
-import { ResponseDto } from '../dto/response-dto';
-import { BulkResult } from '../model/bulk-result';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
+import { environment } from '../../environment/environment';
+import { ArtistDto, CreateArtistDto, DeleteArtistDto } from '../dto/artist-dto';
 import { BulkDto } from '../dto/bulk-dto';
+import { BulkResult } from '../model/bulk-result';
+import { ResponseDto } from './../dto/response-dto';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ArtistService {
+  private readonly artistCreatedIdSubject = new BehaviorSubject<string | null>(null);
+
   constructor(private readonly http: HttpClient) {}
 
-  createArtist(bulkCreateArtistDtos: BulkDto<CreateArtistDto>): Observable<ResponseDto<BulkResult>> {
-    return this.http.post<ResponseDto<BulkResult>>(`${environment.artistCommandBaseUrl}/bulk-create`, bulkCreateArtistDtos);
+  artistCreatedId(): Observable<string | null> {
+    return this.artistCreatedIdSubject;
   }
 
-  getProductsData() {
-    return [
-      {
-        id: 'tPye9pizwpcU',
-        urn: 'echovibe:artist:tPye9pizwpcU',
-        ref_code: 'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        profile: {
-          name: 'Sơn Tùng M-TP',
-          biography: 'Ca sĩ Sơn Tùng M-TP',
-          description: 'Ca sĩ Sơn Tùng M-TP',
-          thumbnailFileKey: null,
-          thumbnailUrl: 'https://danviet.mediacdn.vn/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg',
-          backgroundFileKey: null,
-          backgroundUrl: 'https://cdn.tgdd.vn//GameApp/1353930//58-800x450.jpg'
-        },
-        isPublic: false,
-        tags: []
-      },
-      {
-        id: 'tPye9pizwpcU1',
-        urn: 'echovibe:artist:tPye9pizwpcU',
-        ref_code: 'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        profile: {
-          name: 'Jack 97',
-          biography: 'Ca Jack 97',
-          description: 'Ca sĩ Jack 97',
-          thumbnailFileKey: null,
-          thumbnailUrl: 'https://danviet.mediacdn.vn/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg',
-          backgroundFileKey: null,
-          backgroundUrl: 'https://cdn.tgdd.vn//GameApp/1353930//58-800x450.jpg'
-        },
-        isPublic: false,
-        tags: []
-      },
-      {
-        id: 'tPye9pizwpcU2',
-        urn: 'echovibe:artist:tPye9pizwpcU',
-        ref_code: 'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        profile: {
-          name: 'Sơn Tùng M-TP',
-          biography: 'Ca sĩ Sơn Tùng M-TP',
-          description: 'Ca sĩ Sơn Tùng M-TP',
-          thumbnailFileKey: null,
-          thumbnailUrl: 'https://danviet.mediacdn.vn/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg',
-          backgroundFileKey: null,
-          backgroundUrl: 'https://cdn.tgdd.vn//GameApp/1353930//58-800x450.jpg'
-        },
-        isPublic: false,
-        tags: []
-      },
-      {
-        id: 'tPye9pizwpcU3',
-        urn: 'echovibe:artist:tPye9pizwpcU',
-        ref_code: 'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        profile: {
-          name: 'Sơn Tùng M-TP',
-          biography: 'Ca sĩ Sơn Tùng M-TP',
-          description: 'Ca sĩ Sơn Tùng M-TP',
-          thumbnailFileKey: null,
-          thumbnailUrl: 'https://danviet.mediacdn.vn/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg',
-          backgroundFileKey: null,
-          backgroundUrl: 'https://cdn.tgdd.vn//GameApp/1353930//58-800x450.jpg'
-        },
-        isPublic: false,
-        tags: []
-      },
-      {
-        id: 'tPye9pizwpcU4',
-        urn: 'echovibe:artist:tPye9pizwpcU',
-        ref_code: 'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        profile: {
-          name: 'Sơn Tùng M-TP',
-          biography: 'Ca sĩ Sơn Tùng M-TP',
-          description: 'Ca sĩ Sơn Tùng M-TP',
-          thumbnailFileKey: null,
-          thumbnailUrl: 'https://danviet.mediacdn.vn/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg',
-          backgroundFileKey: null,
-          backgroundUrl: 'https://cdn.tgdd.vn//GameApp/1353930//58-800x450.jpg'
-        },
-        isPublic: false,
-        tags: []
-      },
-      {
-        id: 'tPye9pizwpcU5',
-        urn: 'echovibe:artist:tPye9pizwpcU',
-        ref_code: 'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        profile: {
-          name: 'Sơn Tùng M-TP',
-          biography: 'Ca sĩ Sơn Tùng M-TP',
-          description: 'Ca sĩ Sơn Tùng M-TP',
-          thumbnailFileKey: null,
-          thumbnailUrl: 'https://danviet.mediacdn.vn/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg',
-          backgroundFileKey: null,
-          backgroundUrl: 'https://cdn.tgdd.vn//GameApp/1353930//58-800x450.jpg'
-        },
-        isPublic: false,
-        tags: []
-      },
-      {
-        id: 'tPye9pizwpcU6',
-        urn: 'echovibe:artist:tPye9pizwpcU',
-        ref_code: 'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        profile: {
-          name: 'A M-TP',
-          biography: 'Ca sĩ Sơn Tùng M-TP',
-          description: 'Ca sĩ Sơn Tùng M-TP',
-          thumbnailFileKey: null,
-          thumbnailUrl: 'https://danviet.mediacdn.vn/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg',
-          backgroundFileKey: null,
-          backgroundUrl: 'https://cdn.tgdd.vn//GameApp/1353930//58-800x450.jpg'
-        },
-        isPublic: false,
-        tags: []
-      },
-      {
-        id: 'tPye9pizwpcU7',
-        urn: 'echovibe:artist:tPye9pizwpcU',
-        ref_code: 'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        profile: {
-          name: 'Sơn Tùng M-TP',
-          biography: 'Ca sĩ Sơn Tùng M-TP',
-          description: 'Ca sĩ Sơn Tùng M-TP',
-          thumbnailFileKey: null,
-          thumbnailUrl: 'https://danviet.mediacdn.vn/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg',
-          backgroundFileKey: null,
-          backgroundUrl: 'https://cdn.tgdd.vn//GameApp/1353930//58-800x450.jpg'
-        },
-        isPublic: false,
-        tags: []
-      },
-      {
-        id: 'tPye9pizwpcU8',
-        urn: 'echovibe:artist:tPye9pizwpcU',
-        ref_code: 'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        profile: {
-          name: 'Sơn Tùng M-TP',
-          biography: 'Ca sĩ Sơn Tùng M-TP',
-          description: 'Ca sĩ Sơn Tùng M-TP',
-          thumbnailFileKey: null,
-          thumbnailUrl: 'https://danviet.mediacdn.vn/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg',
-          backgroundFileKey: null,
-          backgroundUrl: 'https://cdn.tgdd.vn//GameApp/1353930//58-800x450.jpg'
-        },
-        isPublic: true,
-        tags: []
-      },
-      {
-        id: 'tPye9pizwpcU9',
-        urn: 'echovibe:artist:tPye9pizwpcU',
-        ref_code: 'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        profile: {
-          name: 'Sơn Tùng M-TP',
-          biography: 'Ca sĩ Sơn Tùng M-TP',
-          description: 'Ca sĩ Sơn Tùng M-TP',
-          thumbnailFileKey: null,
-          thumbnailUrl: 'https://danviet.mediacdn.vn/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg',
-          backgroundFileKey: null,
-          backgroundUrl: 'https://cdn.tgdd.vn//GameApp/1353930//58-800x450.jpg'
-        },
-        isPublic: true,
-        tags: []
-      },
-      {
-        id: 'tPye9pizwpcU10',
-        urn: 'echovibe:artist:tPye9pizwpcU',
-        ref_code: 'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        profile: {
-          name: 'Sơn Tùng M-TP',
-          biography: 'Ca sĩ Sơn Tùng M-TP',
-          description: 'Ca sĩ Sơn Tùng M-TP',
-          thumbnailFileKey: null,
-          thumbnailUrl: 'https://danviet.mediacdn.vn/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg',
-          backgroundFileKey: null,
-          backgroundUrl: 'https://cdn.tgdd.vn//GameApp/1353930//58-800x450.jpg'
-        },
-        isPublic: false,
-        tags: []
-      },
-      {
-        id: 'tPye9pizwpcU11',
-        urn: 'echovibe:artist:tPye9pizwpcU',
-        ref_code: 'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        profile: {
-          name: 'Sơn Tùng M-TP',
-          biography: 'Ca sĩ Sơn Tùng M-TP',
-          description: 'Ca sĩ Sơn Tùng M-TP',
-          thumbnailFileKey: null,
-          thumbnailUrl: 'https://danviet.mediacdn.vn/296231569849192448/2024/6/13/son-tung-mtp-17182382517241228747767.jpg',
-          backgroundFileKey: null,
-          backgroundUrl: 'https://cdn.tgdd.vn//GameApp/1353930//58-800x450.jpg'
-        },
-        isPublic: false,
-        tags: []
-      }
-    ];
+  bulkCreateArtist(bulkCreateArtistDtos: BulkDto<CreateArtistDto>): Observable<ResponseDto<BulkResult>> {
+    return this.http
+      .post<ResponseDto<BulkResult>>(`${environment.artistCommandBaseUrl}/bulk-create`, bulkCreateArtistDtos)
+      .pipe(
+        tap((respDto) =>
+          respDto.data.items.filter(({ id }) => id).forEach(({ id }) => this.artistCreatedIdSubject.next(id))
+        )
+      );
   }
 
-  getProducts() {
-    return Promise.resolve(this.getProductsData());
+  bulkDeleteArtist(bulkDeleteArtistDtos: BulkDto<DeleteArtistDto>): Observable<ResponseDto<BulkResult>> {
+    return this.http.post<ResponseDto<BulkResult>>(
+      `${environment.artistCommandBaseUrl}/bulk-delete`,
+      bulkDeleteArtistDtos
+    );
+  }
+
+  getArtistByIds(ids: string[]): Observable<ResponseDto<ArtistDto[]>> {
+    return this.http.get<ResponseDto<ArtistDto[]>>(`${environment.artistQueryBaseUrl}/byId?ids=${ids.join(',')}`);
+  }
+
+  getArtistByRefCodes(refCodes: string[]): Observable<ResponseDto<ArtistDto[]>> {
+    return this.http.get<ResponseDto<ArtistDto[]>>(
+      `${environment.artistQueryBaseUrl}/byRefCode?refCodes=${refCodes.join(',')}`
+    );
+  }
+
+  // ### Mock datas, need to remove when finish ################################
+
+  getMockArtists(): Observable<ResponseDto<ArtistDto[]>> {
+    return this.getArtistByRefCodes([
+      'spt_5dfZ5uSmzR7VQK0udbAVpf',
+      'spt_2Bwp23pD4UVsSkchHDZw4F',
+      'spt_0r63ReVRjxrS4ATbLrdcrL',
+      'spt_1CWwyDPjCowRTO4p6A7r6g',
+      'spt_5HZtdKfC4xU0wvhEyYDWiY',
+      'spt_57g2v7gJZepcwsuwssIfZs',
+      'spt_2aQnC3DbZB9GbauvhAw7ve',
+      'spt_1L1VfizWn4DkFt602yD80U',
+      'spt_3y0Tmt0epaxAHy6L89dGGC',
+      'spt_0l3YAI1xmZKCZBzduST5ft',
+      'spt_5lAfakPZgxFKgiJD6xAF1G',
+      'spt_3diftVOq7aEIebXKkC34oR',
+      'spt_2NRcG7E1j2sSi8vnUzCcpi'
+    ]);
   }
 }

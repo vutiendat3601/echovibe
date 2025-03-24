@@ -1,0 +1,173 @@
+{
+  "items": [
+    {
+      "profile": {
+        "name": "Sơn Tùng M-TP",
+        "biography": "Ca sĩ Sơn Tùng M-TP",
+        "description": "Ca sĩ Sơn Tùng M-TP",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5eb7afc6ecdb9102abd1e10d338",
+        "backgroundUrl": "https://i.scdn.co/image/ab67618600001016bfff12c781d46c46b5268efb",
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_5dfZ5uSmzR7VQK0udbAVpf",
+      "isVerified": true,
+      "tags": ["Sơn Tùng M-TP"]
+    },
+    {
+      "profile": {
+        "name": "Karik",
+        "biography": "Rapper Karik",
+        "description": "Rapper Karik",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5eb3e1b16e263e182dc85f2b7c3",
+        "backgroundUrl": null,
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_2Bwp23pD4UVsSkchHDZw4F",
+      "isVerified": true,
+      "tags": ["Karik"]
+    },
+    {
+      "profile": {
+        "name": "Hoàng Thùy Linh",
+        "biography": "Ca sĩ Hoàng Thùy Linh",
+        "description": "Ca sĩ Hoàng Thùy Linh",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5ebe7b7fa8d03a2e3b6a800bdb4",
+        "backgroundUrl": null,
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_0r63ReVRjxrS4ATbLrdcrL",
+      "isVerified": true,
+      "tags": ["Hoàng Thùy Linh"]
+    },
+    {
+      "profile": {
+        "name": "Mỹ Tâm",
+        "biography": "Ca sĩ Mỹ Tâm",
+        "description": "Ca sĩ Mỹ Tâm",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5eb5d4a6001ce67c78aa3873c6a",
+        "backgroundUrl": null,
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_1CWwyDPjCowRTO4p6A7r6g",
+      "isVerified": true,
+      "tags": ["Mỹ Tâm"]
+    },
+    {
+      "profile": {
+        "name": "HIEUTHUHAI",
+        "biography": "Ca sĩ HIEUTHUHAI",
+        "description": "Ca sĩ HIEUTHUHAI",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5ebe1cbc9e7ba8fbc5d7738ea51",
+        "backgroundUrl": null,
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_5HZtdKfC4xU0wvhEyYDWiY",
+      "isVerified": true,
+      "tags": ["HIEUTHUHAI"]
+    },
+    {
+      "profile": {
+        "name": "Vũ.",
+        "biography": "Ca sĩ Vũ.",
+        "description": "Ca sĩ Vũ.",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5ebbbb15879256a5443ef7d87b4",
+        "backgroundUrl": null,
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_57g2v7gJZepcwsuwssIfZs",
+      "isVerified": true,
+      "tags": ["Vũ."]
+    },
+    {
+      "profile": {
+        "name": "AMEE",
+        "biography": "Ca sĩ AMEE",
+        "description": "Ca sĩ AMEE",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5ebb69fbf5081cca8aaa587267b",
+        "backgroundUrl": null,
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_2aQnC3DbZB9GbauvhAw7ve",
+      "isVerified": true,
+      "tags": ["AMEE"]
+    },
+    {
+      "profile": {
+        "name": "ERIK",
+        "biography": "Ca sĩ ERIK",
+        "description": "Ca sĩ ERIK",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5eb63ba7b9441e542f3b2938b83",
+        "backgroundUrl": null,
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_1L1VfizWn4DkFt602yD80U",
+      "isVerified": true,
+      "tags": ["ERIK"]
+    },
+    {
+      "profile": {
+        "name": "Ngô Lan Hương",
+        "biography": "Ca sĩ Ngô Lan Hương",
+        "description": "Ca sĩ Ngô Lan Hương",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5ebcb6b0722d8b3d6b81395a9e1",
+        "backgroundUrl": null,
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_3y0Tmt0epaxAHy6L89dGGC",
+      "isVerified": true,
+      "tags": ["Ngô Lan Hương"]
+    },
+    {
+      "profile": {
+        "name": "Thùy Chi",
+        "biography": "Ca sĩ Thùy Chi",
+        "description": "Ca sĩ Thùy Chi",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5eb907bbd0b2531b8e793ebd242",
+        "backgroundUrl": null,
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_0l3YAI1xmZKCZBzduST5ft",
+      "isVerified": true,
+      "tags": ["Thùy Chi"]
+    },
+    {
+      "profile": {
+        "name": "Orange",
+        "biography": "Ca sĩ Orange",
+        "description": "Ca sĩ Orange",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5ebd4050562a6008252b169801c",
+        "backgroundUrl": null,
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_5lAfakPZgxFKgiJD6xAF1G",
+      "isVerified": true,
+      "tags": ["Orange"]
+    },
+    {
+      "profile": {
+        "name": "tlinh",
+        "biography": "Rapper tlinh",
+        "description": "Rapper tlinh",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5eb2bcb72091c46d935e195aa87",
+        "backgroundUrl": null,
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_3diftVOq7aEIebXKkC34oR",
+      "isVerified": true,
+      "tags": ["tlinh"]
+    },
+    {
+      "profile": {
+        "name": "Quân A.P",
+        "biography": "Ca sĩ Quân A.P",
+        "description": "Ca sĩ Quân A.P",
+        "thumbnailUrl": "https://i.scdn.co/image/ab6761610000e5eb916d46fa6ab17246f55a00f7",
+        "backgroundUrl": null,
+        "nationalityIsoCode": "VN"
+      },
+      "refCode": "spt_2NRcG7E1j2sSi8vnUzCcpi",
+      "isVerified": true,
+      "tags": ["Quân A.P"]
+    }
+  ]
+}
