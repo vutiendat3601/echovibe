@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import vn.io.echovibe.core.command.Command;
@@ -19,6 +20,7 @@ import vn.io.echovibe.core.exception.Error;
 import vn.io.echovibe.core.model.BulkResult;
 import vn.io.echovibe.core.model.CommandResult;
 
+@Slf4j
 @SuppressWarnings({"rawtypes", "unchecked"})
 @Service
 public class ArtistCommandDispatcher implements CommandDispatcher {
@@ -70,6 +72,7 @@ public class ArtistCommandDispatcher implements CommandDispatcher {
         commandResult.setMessage(message);
         commandResult.setIsSuccessful(false);
       } catch (Exception e) {
+        log.error(Optional.ofNullable(e.getCause()).orElse(e).getMessage(), e);
         message =
             "Command '%s' was processed unsuccessfully: %s"
                 .formatted(commandType, Optional.ofNullable(e.getCause()).orElse(e).getMessage());

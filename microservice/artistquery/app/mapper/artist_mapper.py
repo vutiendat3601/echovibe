@@ -19,5 +19,10 @@ def map_to_artist_schema(artist: Artist):
                         is_public=artist.is_public,
                         is_verified=artist.is_verified,
                         is_released=artist.is_released,
+                        revision_number=artist.revision_number,
                         tags=artist.tags,
-                        profile=profile_schema)
+                        profile=profile_schema,
+                        created_at=artist.created_at,
+                        updated_at=artist.updated_at,
+                        created_by=artist.created_by,
+                        updated_by=artist.updated_by)

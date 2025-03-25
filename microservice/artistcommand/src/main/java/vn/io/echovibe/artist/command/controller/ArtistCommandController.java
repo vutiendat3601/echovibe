@@ -125,9 +125,9 @@ public class ArtistCommandController {
     return ResponseEntity.ok(ResponseDto.ok(REQUEST_PROCESSED_SUCCESS, bulkResult));
   }
 
-  @Operation(operationId = "Bulk Set Artist's visibility")
-  @PostMapping("bulk-set-visibility")
-  public ResponseEntity<ResponseDto<BulkResult>> bulkSetArtistVisibility(
+  @Operation(operationId = "Bulk Set Artist's verification")
+  @PostMapping("bulk-set-verification")
+  public ResponseEntity<ResponseDto<BulkResult>> bulkSetArtistVerification(
       @Valid @RequestBody BulkDto<SetArtistVisibilityDto> bulkSetArtistVisibilityDtos) {
     final List<SetArtistVerificationCommand> setArtistVisibilityCommands =
         bulkSetArtistVisibilityDtos.items().stream()

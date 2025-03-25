@@ -15,10 +15,23 @@ artist_service: ArtistService = Provide[Container.artist_service]
 
 
 @artist_router.get(
+    path="/byId/{id}",
+    response_model=ResponseSchema[list[artist_schema.ArtistSchema]])
+def get_artist_by_ids(id: str):
+    artist_schemas = artist_service.get_artist_by_aggregate_id(
+        id=id, isLoadImages=True, isLoadRevisions=True)
+    response = ok(data=artist_schemas)
+    return JSONResponse(content=jsonable_encoder(response))
+
+
+@artist_router.get(
     path="/byId",
     response_model=ResponseSchema[list[artist_schema.ArtistSchema]])
-def get_artist_by_ids(ids: str = Query(..., regex=AGGREGATE_ID_LIST_REGEX)):
-    artist_schemas = artist_service.get_artist_by_aggregate_ids(ids.split(","))
+def get_artist_by_ids(ids: str = Query(..., regex=AGGREGATE_ID_LIST_REGEX),
+                      loadImages: bool = Query(default=False),
+                      loadRevisions: bool = Query(default=False)):
+    artist_schemas = artist_service.get_artist_by_aggregate_ids(
+        ids.split(","), isLoadImages=loadImages, isLoadRevisions=loadRevisions)
     response = ok(data=artist_schemas)
     return JSONResponse(content=jsonable_encoder(response))
 
@@ -27,8 +40,12 @@ def get_artist_by_ids(ids: str = Query(..., regex=AGGREGATE_ID_LIST_REGEX)):
     path="/byRefCode",
     response_model=ResponseSchema[list[artist_schema.ArtistSchema]])
 def get_artist_by_ref_codes(ref_codes: str = Query(
-    ..., alias="refCodes", regex=AGGREGATE_REF_CODE_LIST_REGEX)):
+    ..., alias="refCodes", regex=AGGREGATE_REF_CODE_LIST_REGEX),
+                            loadImages: bool = Query(default=False),
+                            loadRevisions: bool = Query(default=False)):
     artist_schemas = artist_service.get_artist_by_ref_codes(
-        ref_codes.split(","))
+        ref_codes.split(","),
+        isLoadImages=loadImages,
+        isLoadRevisions=loadRevisions)
     response = ok(data=artist_schemas)
     return JSONResponse(content=jsonable_encoder(response))

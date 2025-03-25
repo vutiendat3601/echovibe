@@ -11,9 +11,10 @@ import vn.io.echovibe.web.dto.ResponseDto;
 @FeignClient(name = "artistQueryClient", url = "${app.web.client.artistquery.baseUrl}")
 public interface ArtistQueryClient {
   @GetMapping("v1/artists/byId")
-  ResponseEntity<ResponseDto<List<ArtistDto>>> getArtistByIds(@RequestParam List<String> ids);
+  ResponseEntity<ResponseDto<List<ArtistDto>>> getArtistByIds(
+      @RequestParam("ids") List<String> ids);
 
   @GetMapping("v1/artists/byRefCode")
   ResponseEntity<ResponseDto<List<ArtistDto>>> getArtistByRefCodes(
-      @RequestParam List<String> refCodes);
+      @RequestParam("refCodes") List<String> refCodes);
 }
