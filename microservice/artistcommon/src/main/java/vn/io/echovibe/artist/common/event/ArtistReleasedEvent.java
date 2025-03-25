@@ -25,7 +25,7 @@ public class ArtistReleasedEvent extends Event {
 
   private String refCode;
 
-  private Integer releasedVersion;
+  private Integer revisionNumber;
 
   @Builder.Default private Boolean isReleased = true;
 

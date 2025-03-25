@@ -13,7 +13,7 @@ import vn.io.echovibe.artist.command.handler.CommandHandler;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
 import vn.io.echovibe.artist.command.model.ReleaseArtistCommand;
-import vn.io.echovibe.artist.command.model.SetArtistVisibilityCommand;
+import vn.io.echovibe.artist.command.model.SetArtistVerificationCommand;
 import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.client.rest.ArtistQueryClient;
 import vn.io.echovibe.core.command.CommandDispatcher;
@@ -35,7 +35,7 @@ public class ArtistCommandApplication {
     commandDispatcher.registerHandler(UpdateArtistCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(DeleteArtistCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(ReleaseArtistCommand.class, commandHandler::handle);
-    commandDispatcher.registerHandler(SetArtistVisibilityCommand.class, commandHandler::handle);
+    commandDispatcher.registerHandler(SetArtistVerificationCommand.class, commandHandler::handle);
   }
 
   public static void main(String[] args) {

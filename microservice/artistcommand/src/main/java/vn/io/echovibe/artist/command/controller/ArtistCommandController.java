@@ -25,7 +25,7 @@ import vn.io.echovibe.artist.command.dto.UpdateArtistDto;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
 import vn.io.echovibe.artist.command.model.ReleaseArtistCommand;
-import vn.io.echovibe.artist.command.model.SetArtistVisibilityCommand;
+import vn.io.echovibe.artist.command.model.SetArtistVerificationCommand;
 import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.artist.common.model.ArtistProfile;
 import vn.io.echovibe.core.command.CommandDispatcher;
@@ -129,11 +129,11 @@ public class ArtistCommandController {
   @PostMapping("bulk-set-visibility")
   public ResponseEntity<ResponseDto<BulkResult>> bulkSetArtistVisibility(
       @Valid @RequestBody BulkDto<SetArtistVisibilityDto> bulkSetArtistVisibilityDtos) {
-    final List<SetArtistVisibilityCommand> setArtistVisibilityCommands =
+    final List<SetArtistVerificationCommand> setArtistVisibilityCommands =
         bulkSetArtistVisibilityDtos.items().stream()
             .map(
                 sav ->
-                    SetArtistVisibilityCommand.builder()
+                    SetArtistVerificationCommand.builder()
                         .id(sav.id())
                         .isPublic(sav.isPublic())
                         .build())

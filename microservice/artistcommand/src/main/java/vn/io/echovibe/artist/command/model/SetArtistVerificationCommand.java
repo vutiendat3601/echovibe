@@ -14,6 +14,6 @@ import vn.io.echovibe.core.command.Command;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SetArtistVisibilityCommand extends Command {
+public class SetArtistVerificationCommand extends Command {
   private Boolean isPublic;
 }
