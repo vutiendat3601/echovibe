@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from datetime import datetime, timezone
 
 
 class ArtistProfileSchema(BaseModel):
@@ -23,7 +24,12 @@ class ArtistSchema(BaseModel):
     is_public: bool = Field(default=False, alias="isPublic")
     is_released: bool = Field(default=False, alias="isReleased")
     is_verified: bool = Field(default=False, alias="isVerified")
+    revision_number: bool = Field(alias="revisionNumber")
     tags: list[str] = Field(default=[], alias="tags")
+    created_at: datetime = Field(alias="createdAt")
+    updated_at: datetime = Field(alias="updatedAt")
+    created_by: str | None = Field(default=None, alias="createdBy")
+    updated_by: str | None = Field(default=None, alias="updatedBy")
 
     class Config:
         populate_by_name = True

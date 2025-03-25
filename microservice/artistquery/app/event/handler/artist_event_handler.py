@@ -4,9 +4,13 @@ import json
 from app.core.logger import Logger
 from datetime import datetime, timezone
 from app.core.configuration import configuration
-from app.repository.artist_repository import ArtistRepository
+from app.repository.impl.sqlmodel_artist_repository import ArtistRepository
 from app.core.container import Container
-from app.event.schema.artist_event_schema import ArtistCreatedEvent, ArtistReleasedEvent, ArtistUpdatedEvent, ArtistDeletedEvent, ArtistVerificationSetEvent
+from app.event.schema.artist_event_schema import (ArtistCreatedEvent,
+                                                  ArtistReleasedEvent,
+                                                  ArtistUpdatedEvent,
+                                                  ArtistDeletedEvent,
+                                                  ArtistVerificationSetEvent)
 from app.model.artist import Artist, ArtistProfile, ArtistImage
 from app.constant.artist_image_type import ArtistImageType
 

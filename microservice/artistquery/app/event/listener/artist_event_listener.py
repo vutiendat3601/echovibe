@@ -13,7 +13,7 @@ from app.event.handler.artist_event_handler import (
     handle_artist_verification_set_event)
 from app.constant.constant import APP_NAME
 from app.core.configuration import configuration
-from app.repository.artist_repository import ArtistRepository
+from app.repository.impl.sqlmodel_artist_repository import ArtistRepository
 from app.core.container import Container
 from app.event.schema.artist_event_schema import (ArtistCreatedEvent,
                                                   ArtistReleasedEvent,
