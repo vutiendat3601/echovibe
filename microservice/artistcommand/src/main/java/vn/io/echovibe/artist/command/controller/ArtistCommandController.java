@@ -21,12 +21,12 @@ import vn.io.echovibe.artist.command.dto.CreateArtistProfileDto;
 import vn.io.echovibe.artist.command.dto.DeleteArtistDto;
 import vn.io.echovibe.artist.command.dto.ReleaseArtistDto;
 import vn.io.echovibe.artist.command.dto.SetArtistVisibilityDto;
-import vn.io.echovibe.artist.command.dto.UpdateArtistProfileDto;
+import vn.io.echovibe.artist.command.dto.UpdateArtistDto;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
 import vn.io.echovibe.artist.command.model.ReleaseArtistCommand;
 import vn.io.echovibe.artist.command.model.SetArtistVisibilityCommand;
-import vn.io.echovibe.artist.command.model.UpdateArtistProfileCommand;
+import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.artist.common.model.ArtistProfile;
 import vn.io.echovibe.core.command.CommandDispatcher;
 import vn.io.echovibe.core.model.BulkResult;
@@ -72,24 +72,28 @@ public class ArtistCommandController {
     return ResponseEntity.ok(ResponseDto.ok(REQUEST_PROCESSED_SUCCESS, bulkResult));
   }
 
-  @Operation(operationId = "Bulk Update Artist's profile")
-  @PostMapping("bulk-update-profile")
+  @Operation(operationId = "Bulk Update Artist")
+  @PostMapping("bulk-update")
   public ResponseEntity<ResponseDto<BulkResult>> bulkUpdateArtistProfile(
-      @Valid @RequestBody BulkDto<UpdateArtistProfileDto> bulkUpdateArtistProfileDtos) {
-    final List<UpdateArtistProfileCommand> updateArtistCommands =
-        bulkUpdateArtistProfileDtos.items().stream()
+      @Valid @RequestBody BulkDto<UpdateArtistDto> bulkUpdateArtistDtos) {
+    final List<UpdateArtistCommand> updateArtistCommands =
+        bulkUpdateArtistDtos.items().stream()
             .map(
                 uad -> {
-                  return UpdateArtistProfileCommand.builder()
+                  final ArtistProfile profile =
+                      ArtistProfile.builder()
+                          .name(uad.profile().name())
+                          .biography(uad.profile().biography())
+                          .description(uad.profile().description())
+                          .thumbnailUrl(uad.profile().thumbnailUrl())
+                          .backgroundUrl(uad.profile().backgroundUrl())
+                          .build();
+                  return UpdateArtistCommand.builder()
                       .id(uad.id())
-                      .profile(
-                          ArtistProfile.builder()
-                              .name(uad.name())
-                              .biography(uad.biography())
-                              .description(uad.description())
-                              .thumbnailUrl(uad.thumbnailUrl())
-                              .backgroundUrl(uad.backgroundUrl())
-                              .build())
+                      .refCode(uad.refCode())
+                      .isPublic(uad.isPublic())
+                      .tags(uad.tags())
+                      .profile(profile)
                       .build();
                 })
             .collect(Collectors.toList());

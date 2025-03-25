@@ -4,18 +4,21 @@ import static vn.io.echovibe.artist.common.constant.ArtistBussinessRuleConstant.
 import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_URN_PREFIX;
 import static vn.io.echovibe.core.constant.BusinessRuleConstant.BR_01;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
-import vn.io.echovibe.artist.command.model.UpdateArtistProfileCommand;
+import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.artist.common.event.ArtistCreatedEvent;
 import vn.io.echovibe.artist.common.event.ArtistDeletedEvent;
-import vn.io.echovibe.artist.common.event.ArtistProfileUpdatedEvent;
 import vn.io.echovibe.artist.common.event.ArtistReleasedEvent;
-import vn.io.echovibe.artist.common.event.ArtistVisibilitySetEvent;
+import vn.io.echovibe.artist.common.event.ArtistUpdatedEvent;
+import vn.io.echovibe.artist.common.event.ArtistVerificationSetEvent;
 import vn.io.echovibe.artist.common.model.ArtistProfile;
 import vn.io.echovibe.core.domain.AggregateRoot;
 import vn.io.echovibe.core.exception.BusinessRuleViolationException;
@@ -37,6 +40,8 @@ public class ArtistAggregate extends AggregateRoot {
 
   private Boolean isVerified;
 
+  private Integer releasedVersion = -1;
+
   private List<String> tags;
 
   public ArtistAggregate(CreateArtistCommand createArtistCommand) {
@@ -49,6 +54,7 @@ public class ArtistAggregate extends AggregateRoot {
             .refCode(createArtistCommand.getRefCode())
             .profile(createArtistCommand.getProfile())
             .isReleased(false)
+            .releasedVersion(-1)
             .isPublic(false)
             .isActive(true)
             .isVerified(createArtistCommand.getIsVerified())
@@ -57,7 +63,7 @@ public class ArtistAggregate extends AggregateRoot {
     raiseEvent(artistCreatedEvent);
   }
 
-  public void update(UpdateArtistProfileCommand updateArtistProfileCommand) {
+  public void update(UpdateArtistCommand updateArtistProfileCommand) {
     final ArtistProfile updateProfile = updateArtistProfileCommand.getProfile();
 
     boolean hasChange = false;
@@ -71,21 +77,30 @@ public class ArtistAggregate extends AggregateRoot {
             .backgroundFileKey(this.profile.getBackgroundFileKey())
             .backgroundUrl(this.profile.getBackgroundUrl())
             .build();
+    final ArtistUpdatedEvent artistUpdatedEvent =
+        ArtistUpdatedEvent.builder()
+            .id(id)
+            .refCode(refCode)
+            .isReleased(false)
+            .isPublic(isPublic)
+            .tags(tags)
+            .profile(updatedProfile)
+            .build();
 
     // name
     if (!Objects.equals(updateProfile.getName(), updatedProfile.getName())) {
       hasChange = true;
       updatedProfile.setName(updateProfile.getName());
     }
-    // biography
-    if (!Objects.equals(updateProfile.getBiography(), updatedProfile.getBiography())) {
-      hasChange = true;
-      updatedProfile.setBiography(updateProfile.getBiography());
-    }
     // description
     if (!Objects.equals(updateProfile.getDescription(), updatedProfile.getDescription())) {
       hasChange = true;
       updatedProfile.setDescription(updateProfile.getDescription());
+    }
+    // biography
+    if (!Objects.equals(updateProfile.getBiography(), updatedProfile.getBiography())) {
+      hasChange = true;
+      updatedProfile.setBiography(updateProfile.getBiography());
     }
     // thumbnailUrl
     if (!Objects.equals(updateProfile.getThumbnailUrl(), updatedProfile.getThumbnailUrl())) {
@@ -97,19 +112,35 @@ public class ArtistAggregate extends AggregateRoot {
       hasChange = true;
       updatedProfile.setBackgroundUrl(updateProfile.getBackgroundUrl());
     }
+    // refCode
+    if (!Objects.equals(artistUpdatedEvent.getRefCode(), updateArtistProfileCommand.getRefCode())) {
+      hasChange = true;
+      artistUpdatedEvent.setRefCode(updateArtistProfileCommand.getRefCode());
+    }
+    // isPublic
+    if (!Objects.equals(
+        artistUpdatedEvent.getIsPublic(), updateArtistProfileCommand.getIsPublic())) {
+      hasChange = true;
+      artistUpdatedEvent.setIsPublic(updateArtistProfileCommand.getIsPublic());
+    }
+    // tags
+    if (Objects.nonNull(updateArtistProfileCommand.getTags())) {
+      final Set<String> updatedTagsSet =
+          new HashSet<>(
+              Optional.ofNullable(artistUpdatedEvent.getTags()).orElse(new ArrayList<>()));
+      final Set<String> updateTagsSet = new HashSet<>(updateArtistProfileCommand.getTags());
+      if (!updatedTagsSet.containsAll(updateTagsSet)) {
+        hasChange = true;
+        artistUpdatedEvent.setTags(new ArrayList<>(updateTagsSet));
+      }
+    }
     if (!hasChange) {
       throw new BusinessRuleViolationException(
           BR_01,
           "Artist's profile has no changes: aggregateId=%s"
               .formatted(updateArtistProfileCommand.getId()));
     }
-    final ArtistProfileUpdatedEvent artistProfileUpdatedEvent =
-        ArtistProfileUpdatedEvent.builder()
-            .type(ArtistProfileUpdatedEvent.class.getSimpleName())
-            .id(id)
-            .profile(updatedProfile)
-            .build();
-    raiseEvent(artistProfileUpdatedEvent);
+    raiseEvent(artistUpdatedEvent);
   }
 
   public void release() {
@@ -124,6 +155,7 @@ public class ArtistAggregate extends AggregateRoot {
             .urn(urn)
             .profile(profile)
             .isReleased(true)
+            .releasedVersion(++releasedVersion)
             .isPublic(isPublic)
             .tags(tags)
             .build();
@@ -142,19 +174,21 @@ public class ArtistAggregate extends AggregateRoot {
     raiseEvent(artistDeletedEvent);
   }
 
-  public void setIsPublic(Boolean isPublic) {
-    if (Objects.nonNull(isPublic) && isPublic.equals(this.isPublic)) {
+  public void setVerified(Boolean isVerified) {
+    if (Objects.equals(this.isVerified, isVerified)) {
       throw new BusinessRuleViolationException(
           BR_01,
-          "Artist's visiblity has no changes: aggregateId=%s, isPublic=%s".formatted(id, isPublic));
+          "Artist's verification has no changes: aggregateId=%s, isVerified=%s"
+              .formatted(id, isVerified));
     }
-    final ArtistVisibilitySetEvent artistVisibilityChangedEvent =
-        ArtistVisibilitySetEvent.builder()
-            .type(ArtistVisibilitySetEvent.class.getSimpleName())
+    final ArtistVerificationSetEvent artistVerificationSetEvent =
+        ArtistVerificationSetEvent.builder()
+            .type(ArtistVerificationSetEvent.class.getSimpleName())
             .id(id)
-            .isPublic(isPublic)
+            .isVerified(isVerified)
+            .isReleased(false)
             .build();
-    raiseEvent(artistVisibilityChangedEvent);
+    raiseEvent(artistVerificationSetEvent);
   }
 
   // ### ArtistAggregate event apply functions #################################
@@ -170,7 +204,7 @@ public class ArtistAggregate extends AggregateRoot {
     this.tags = artistCreatedEvent.getTags();
   }
 
-  void apply(ArtistProfileUpdatedEvent artistProfileUpdatedEvent) {
+  void apply(ArtistUpdatedEvent artistProfileUpdatedEvent) {
     this.id = artistProfileUpdatedEvent.getId();
     this.profile = artistProfileUpdatedEvent.getProfile();
   }
@@ -188,8 +222,8 @@ public class ArtistAggregate extends AggregateRoot {
     this.isActive = artistDeletedEvent.getIsActive();
   }
 
-  void apply(ArtistVisibilitySetEvent artistVisibilityChangedEvent) {
+  void apply(ArtistVerificationSetEvent artistVisibilityChangedEvent) {
     this.id = artistVisibilityChangedEvent.getId();
-    this.isPublic = artistVisibilityChangedEvent.getIsPublic();
+    this.isPublic = artistVisibilityChangedEvent.getIsVerified();
   }
 }

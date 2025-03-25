@@ -14,7 +14,7 @@ import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
 import vn.io.echovibe.artist.command.model.ReleaseArtistCommand;
 import vn.io.echovibe.artist.command.model.SetArtistVisibilityCommand;
-import vn.io.echovibe.artist.command.model.UpdateArtistProfileCommand;
+import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.client.rest.ArtistQueryClient;
 import vn.io.echovibe.core.command.CommandDispatcher;
 import vn.io.echovibe.core.domain.EventStoreRepository;
@@ -32,7 +32,7 @@ public class ArtistCommandApplication {
   @EventListener(ApplicationReadyEvent.class)
   void registerHandlers() {
     commandDispatcher.registerHandler(CreateArtistCommand.class, commandHandler::handle);
-    commandDispatcher.registerHandler(UpdateArtistProfileCommand.class, commandHandler::handle);
+    commandDispatcher.registerHandler(UpdateArtistCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(DeleteArtistCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(ReleaseArtistCommand.class, commandHandler::handle);
     commandDispatcher.registerHandler(SetArtistVisibilityCommand.class, commandHandler::handle);
