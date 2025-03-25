@@ -51,7 +51,7 @@ def upgrade() -> None:
                   unique=True),
         sa.Column("ref_code", sa.String(length=255), nullable=True,
                   unique=True),
-        sa.Column("name", sa.Text(length=255), nullable=False),
+        sa.Column("name", sa.String(length=255), nullable=False),
         sa.Column("description", sa.String(length=255), nullable=True),
         sa.Column("biography", sa.Text(), nullable=True),
         sa.Column("nationality_iso_code", sa.Text(), nullable=True),
@@ -96,7 +96,7 @@ def upgrade() -> None:
         sa.Column("aggregate_id", sa.String(length=12), nullable=False),
         sa.Column("version", sa.Numeric, nullable=False, default=-1),
         sa.Column("ref_code", sa.String(length=255), nullable=True),
-        sa.Column("name", sa.Text(), nullable=False),
+        sa.Column("name", sa.String(length=255), nullable=False),
         sa.Column("urn", sa.String(length=255), nullable=False, unique=True),
         sa.Column("is_public", sa.Boolean(), nullable=False, default=False),
         sa.Column("is_released", sa.Boolean(), nullable=False, default=False),
@@ -120,10 +120,10 @@ def upgrade() -> None:
         sa.Column("updated_by", sa.String(length=255), nullable=True))
 
     op.create_foreign_key(
-        constraint_name="fk_artist__profile_id___artist_profile__id",
-        source_table="artist",
-        local_cols=["profile_id"],
-        referent_table="artist_profile",
+        constraint_name="fk_artist_profile__artist_id___artist__id",
+        source_table="artist_profile",
+        local_cols=["artist_id"],
+        referent_table="artist",
         remote_cols=["id"],
         onupdate="CASCADE",
         ondelete="CASCADE")
