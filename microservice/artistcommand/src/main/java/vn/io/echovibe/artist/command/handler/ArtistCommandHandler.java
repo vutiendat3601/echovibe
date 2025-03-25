@@ -14,7 +14,7 @@ import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
 import vn.io.echovibe.artist.command.model.ReleaseArtistCommand;
 import vn.io.echovibe.artist.command.model.SetArtistVisibilityCommand;
-import vn.io.echovibe.artist.command.model.UpdateArtistProfileCommand;
+import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.artist.common.dto.ArtistDto;
 import vn.io.echovibe.client.rest.ArtistQueryClient;
 import vn.io.echovibe.core.event.EventSourcingHandler;
@@ -43,7 +43,7 @@ public class ArtistCommandHandler implements CommandHandler {
   }
 
   @Override
-  public void handle(@NonNull UpdateArtistProfileCommand updateArtistCommand) {
+  public void handle(@NonNull UpdateArtistCommand updateArtistCommand) {
     final ArtistAggregate artistAggregate = findArtistAggregateById(updateArtistCommand.getId());
     artistAggregate.update(updateArtistCommand);
     eventSourcingHandler.save(artistAggregate);
@@ -67,7 +67,7 @@ public class ArtistCommandHandler implements CommandHandler {
   public void handle(@NonNull SetArtistVisibilityCommand changeArtistVisibilityCommand) {
     final ArtistAggregate artistAggregate =
         findArtistAggregateById(changeArtistVisibilityCommand.getId());
-    artistAggregate.setIsPublic(changeArtistVisibilityCommand.getIsPublic());
+    artistAggregate.setVerified(changeArtistVisibilityCommand.getIsPublic());
     eventSourcingHandler.save(artistAggregate);
   }
 

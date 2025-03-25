@@ -1,5 +1,6 @@
 package vn.io.echovibe.artist.command.model;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,12 @@ import vn.io.echovibe.core.command.Command;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateArtistProfileCommand extends Command {
+public class UpdateArtistCommand extends Command {
+  private String refCode;
+
+  private Boolean isPublic;
+
+  private List<String> tags;
+
   private ArtistProfile profile;
 }

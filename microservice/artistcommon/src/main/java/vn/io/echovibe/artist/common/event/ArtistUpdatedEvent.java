@@ -1,5 +1,6 @@
 package vn.io.echovibe.artist.common.event;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,14 @@ import vn.io.echovibe.core.event.Event;
 @SuperBuilder
 @Getter
 @Setter
-public class ArtistProfileUpdatedEvent extends Event {
+public class ArtistUpdatedEvent extends Event {
+  private String refCode;
+
+  private Boolean isPublic;
+
+  private Boolean isReleased;
+
+  private List<String> tags;
+
   private ArtistProfile profile;
 }

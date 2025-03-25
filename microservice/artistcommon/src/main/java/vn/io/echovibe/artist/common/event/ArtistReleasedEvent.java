@@ -21,7 +21,13 @@ public class ArtistReleasedEvent extends Event {
 
   private ArtistProfile profile;
 
-  @Builder.Default private Boolean isReleased = false;
+  private Boolean isVerifed;
+
+  private String refCode;
+
+  private Integer releasedVersion;
+
+  @Builder.Default private Boolean isReleased = true;
 
   @Builder.Default private Boolean isPublic = false;
 

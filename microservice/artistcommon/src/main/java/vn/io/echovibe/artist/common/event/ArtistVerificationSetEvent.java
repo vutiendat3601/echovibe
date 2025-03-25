@@ -1,6 +1,7 @@
 package vn.io.echovibe.artist.common.event;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,6 +13,8 @@ import vn.io.echovibe.core.event.Event;
 @SuperBuilder
 @Getter
 @Setter
-public class ArtistVisibilitySetEvent extends Event {
-  private Boolean isPublic;
+public class ArtistVerificationSetEvent extends Event {
+  private Boolean isVerified;
+
+  @Builder.Default private Boolean isReleased = false;
 }
