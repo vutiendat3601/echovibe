@@ -23,7 +23,7 @@ public class ArtistCreatedEvent extends Event {
 
   private ArtistProfile profile;
 
-  @Builder.Default private Integer releasedVersion = -1;
+  @Builder.Default private Integer revisionNumber = -1;
 
   @Builder.Default private Boolean isReleased = false;
 

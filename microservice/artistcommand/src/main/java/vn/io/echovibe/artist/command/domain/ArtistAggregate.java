@@ -40,7 +40,7 @@ public class ArtistAggregate extends AggregateRoot {
 
   private Boolean isVerified;
 
-  private Integer releasedVersion = -1;
+  private Integer revisionNumber = -1;
 
   private List<String> tags;
 
@@ -49,22 +49,21 @@ public class ArtistAggregate extends AggregateRoot {
     final ArtistCreatedEvent artistCreatedEvent =
         ArtistCreatedEvent.builder()
             .id(createArtistCommand.getId())
-            .type(ArtistCreatedEvent.class.getSimpleName())
             .urn(urn)
             .refCode(createArtistCommand.getRefCode())
             .profile(createArtistCommand.getProfile())
-            .isReleased(false)
-            .releasedVersion(-1)
             .isPublic(false)
             .isActive(true)
             .isVerified(createArtistCommand.getIsVerified())
+            .isReleased(false)
+            .revisionNumber(-1)
             .tags(createArtistCommand.getTags())
             .build();
     raiseEvent(artistCreatedEvent);
   }
 
-  public void update(UpdateArtistCommand updateArtistProfileCommand) {
-    final ArtistProfile updateProfile = updateArtistProfileCommand.getProfile();
+  public void update(UpdateArtistCommand updateArtistCommand) {
+    final ArtistProfile updateProfile = updateArtistCommand.getProfile();
 
     boolean hasChange = false;
     final ArtistProfile updatedProfile =
@@ -113,22 +112,21 @@ public class ArtistAggregate extends AggregateRoot {
       updatedProfile.setBackgroundUrl(updateProfile.getBackgroundUrl());
     }
     // refCode
-    if (!Objects.equals(artistUpdatedEvent.getRefCode(), updateArtistProfileCommand.getRefCode())) {
+    if (!Objects.equals(artistUpdatedEvent.getRefCode(), updateArtistCommand.getRefCode())) {
       hasChange = true;
-      artistUpdatedEvent.setRefCode(updateArtistProfileCommand.getRefCode());
+      artistUpdatedEvent.setRefCode(updateArtistCommand.getRefCode());
     }
     // isPublic
-    if (!Objects.equals(
-        artistUpdatedEvent.getIsPublic(), updateArtistProfileCommand.getIsPublic())) {
+    if (!Objects.equals(artistUpdatedEvent.getIsPublic(), updateArtistCommand.getIsPublic())) {
       hasChange = true;
-      artistUpdatedEvent.setIsPublic(updateArtistProfileCommand.getIsPublic());
+      artistUpdatedEvent.setIsPublic(updateArtistCommand.getIsPublic());
     }
     // tags
-    if (Objects.nonNull(updateArtistProfileCommand.getTags())) {
+    if (Objects.nonNull(updateArtistCommand.getTags())) {
       final Set<String> updatedTagsSet =
           new HashSet<>(
               Optional.ofNullable(artistUpdatedEvent.getTags()).orElse(new ArrayList<>()));
-      final Set<String> updateTagsSet = new HashSet<>(updateArtistProfileCommand.getTags());
+      final Set<String> updateTagsSet = new HashSet<>(updateArtistCommand.getTags());
       if (!updatedTagsSet.containsAll(updateTagsSet)) {
         hasChange = true;
         artistUpdatedEvent.setTags(new ArrayList<>(updateTagsSet));
@@ -136,9 +134,7 @@ public class ArtistAggregate extends AggregateRoot {
     }
     if (!hasChange) {
       throw new BusinessRuleViolationException(
-          BR_01,
-          "Artist's profile has no changes: aggregateId=%s"
-              .formatted(updateArtistProfileCommand.getId()));
+          BR_01, "Artist has no changes: aggregateId=%s".formatted(updateArtistCommand.getId()));
     }
     raiseEvent(artistUpdatedEvent);
   }
@@ -150,12 +146,11 @@ public class ArtistAggregate extends AggregateRoot {
     }
     final ArtistReleasedEvent artistReleasedEvent =
         ArtistReleasedEvent.builder()
-            .type(ArtistReleasedEvent.class.getSimpleName())
             .id(id)
             .urn(urn)
             .profile(profile)
             .isReleased(true)
-            .releasedVersion(++releasedVersion)
+            .revisionNumber(++revisionNumber)
             .isPublic(isPublic)
             .tags(tags)
             .build();
@@ -165,12 +160,7 @@ public class ArtistAggregate extends AggregateRoot {
   public void delete() {
     final Boolean isSoftDeleted = Optional.ofNullable(isReleased).orElse(false);
     final ArtistDeletedEvent artistDeletedEvent =
-        ArtistDeletedEvent.builder()
-            .type(ArtistDeletedEvent.class.getSimpleName())
-            .id(id)
-            .isSoftDeleted(isSoftDeleted)
-            .isActive(false)
-            .build();
+        ArtistDeletedEvent.builder().id(id).isSoftDeleted(isSoftDeleted).isActive(false).build();
     raiseEvent(artistDeletedEvent);
   }
 
@@ -183,7 +173,6 @@ public class ArtistAggregate extends AggregateRoot {
     }
     final ArtistVerificationSetEvent artistVerificationSetEvent =
         ArtistVerificationSetEvent.builder()
-            .type(ArtistVerificationSetEvent.class.getSimpleName())
             .id(id)
             .isVerified(isVerified)
             .isReleased(false)
@@ -201,20 +190,29 @@ public class ArtistAggregate extends AggregateRoot {
     this.isActive = artistCreatedEvent.getIsActive();
     this.isVerified = artistCreatedEvent.getIsVerified();
     this.isReleased = artistCreatedEvent.getIsReleased();
+    this.revisionNumber = artistCreatedEvent.getRevisionNumber();
     this.tags = artistCreatedEvent.getTags();
   }
 
-  void apply(ArtistUpdatedEvent artistProfileUpdatedEvent) {
-    this.id = artistProfileUpdatedEvent.getId();
-    this.profile = artistProfileUpdatedEvent.getProfile();
+  void apply(ArtistUpdatedEvent artistUpdatedEvent) {
+    this.id = artistUpdatedEvent.getId();
+    this.refCode = artistUpdatedEvent.getRefCode();
+    this.profile = artistUpdatedEvent.getProfile();
+    this.isPublic = artistUpdatedEvent.getIsPublic();
+    this.isReleased = artistUpdatedEvent.getIsReleased();
+    this.tags = artistUpdatedEvent.getTags();
   }
 
   void apply(ArtistReleasedEvent artistReleasedEvent) {
     this.id = artistReleasedEvent.getId();
     this.urn = artistReleasedEvent.getUrn();
     this.profile = artistReleasedEvent.getProfile();
+    this.isVerified = artistReleasedEvent.getIsVerifed();
+    this.refCode = artistReleasedEvent.getRefCode();
+    this.revisionNumber = artistReleasedEvent.getRevisionNumber();
     this.isReleased = artistReleasedEvent.getIsReleased();
     this.isPublic = artistReleasedEvent.getIsPublic();
+    this.tags = artistReleasedEvent.getTags();
   }
 
   void apply(ArtistDeletedEvent artistDeletedEvent) {
@@ -222,8 +220,8 @@ public class ArtistAggregate extends AggregateRoot {
     this.isActive = artistDeletedEvent.getIsActive();
   }
 
-  void apply(ArtistVerificationSetEvent artistVisibilityChangedEvent) {
-    this.id = artistVisibilityChangedEvent.getId();
-    this.isPublic = artistVisibilityChangedEvent.getIsVerified();
+  void apply(ArtistVerificationSetEvent artistVerificationSetEvent) {
+    this.id = artistVerificationSetEvent.getId();
+    this.isReleased = artistVerificationSetEvent.getIsReleased();
   }
 }

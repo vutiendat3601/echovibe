@@ -19,12 +19,12 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @SuperBuilder
 @ToString
-public abstract class Event {
+public abstract class Event implements EventGetter {
   protected String id;
 
   protected int version;
 
-  protected String type;
+  protected final String type = getType();
 
   @Builder.Default protected String createdBy = AUTH_SYSTEM_USERNAME;
 
