@@ -8,7 +8,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import vn.io.echovibe.artist.command.domain.ArtistAggregate;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
@@ -34,7 +33,9 @@ public class ArtistCommandHandler implements CommandHandler {
     if (Objects.nonNull(refCode)) {
       final ResponseDto<List<ArtistDto>> respDto =
           artistQueryClient.getArtistByRefCodes(List.of(refCode)).getBody();
-      if (Objects.isNull(respDto) || !CollectionUtils.isEmpty(respDto.data())) {
+      if (Objects.isNull(respDto)) {
+        throw new RuntimeException("Interal Server Error");
+      } else if (Objects.nonNull(respDto.data().get(0))) {
         throw new BusinessRuleViolationException(ARTIST_BR_02);
       }
     }
