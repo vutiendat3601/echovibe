@@ -36,35 +36,47 @@ export class ArtistService {
     );
   }
 
-  getArtistByIds(ids: string[]): Observable<ResponseDto<[ArtistDto | null]>> {
+  getArtistByIds(
+    ids: string[],
+    loadImages: boolean = false,
+    loadRevisions: boolean = false
+  ): Observable<ResponseDto<[ArtistDto | null]>> {
     return this.http.get<ResponseDto<[ArtistDto | null]>>(
-      `${environment.artistQueryBaseUrl}/byId?ids=${ids.join(',')}`
+      `${environment.artistQueryBaseUrl}/byId?loadImages=true&loadRevisions=true&ids=${ids.join(',')}`
     );
   }
 
-  getArtistByRefCodes(refCodes: string[]): Observable<ResponseDto<[ArtistDto | null]>> {
+  getArtistByRefCodes(
+    refCodes: string[],
+    loadImages: boolean = false,
+    loadRevisions: boolean = false
+  ): Observable<ResponseDto<[ArtistDto | null]>> {
     return this.http.get<ResponseDto<[ArtistDto | null]>>(
-      `${environment.artistQueryBaseUrl}/byRefCode?refCodes=${refCodes.join(',')}`
+      `${environment.artistQueryBaseUrl}/byRefCode?loadImages=true&loadRevisions=true&refCodes=${refCodes.join(',')}`
     );
   }
 
   // ### Mock datas, need to remove when finish ################################
 
   getMockArtists(): Observable<ResponseDto<[ArtistDto | null]>> {
-    return this.getArtistByRefCodes([
-      'spt_5dfZ5uSmzR7VQK0udbAVpf',
-      'spt_2Bwp23pD4UVsSkchHDZw4F',
-      'spt_0r63ReVRjxrS4ATbLrdcrL',
-      'spt_1CWwyDPjCowRTO4p6A7r6g',
-      'spt_5HZtdKfC4xU0wvhEyYDWiY',
-      'spt_57g2v7gJZepcwsuwssIfZs',
-      'spt_2aQnC3DbZB9GbauvhAw7ve',
-      'spt_1L1VfizWn4DkFt602yD80U',
-      'spt_3y0Tmt0epaxAHy6L89dGGC',
-      'spt_0l3YAI1xmZKCZBzduST5ft',
-      'spt_5lAfakPZgxFKgiJD6xAF1G',
-      'spt_3diftVOq7aEIebXKkC34oR',
-      'spt_2NRcG7E1j2sSi8vnUzCcpi'
-    ]);
+    return this.getArtistByRefCodes(
+      [
+        'spt_5dfZ5uSmzR7VQK0udbAVpf',
+        'spt_2Bwp23pD4UVsSkchHDZw4F',
+        'spt_0r63ReVRjxrS4ATbLrdcrL',
+        'spt_1CWwyDPjCowRTO4p6A7r6g',
+        'spt_5HZtdKfC4xU0wvhEyYDWiY',
+        'spt_57g2v7gJZepcwsuwssIfZs',
+        'spt_2aQnC3DbZB9GbauvhAw7ve',
+        'spt_1L1VfizWn4DkFt602yD80U',
+        'spt_3y0Tmt0epaxAHy6L89dGGC',
+        'spt_0l3YAI1xmZKCZBzduST5ft',
+        'spt_5lAfakPZgxFKgiJD6xAF1G',
+        'spt_3diftVOq7aEIebXKkC34oR',
+        'spt_2NRcG7E1j2sSi8vnUzCcpi'
+      ],
+      true,
+      true
+    );
   }
 }

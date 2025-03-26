@@ -1,4 +1,4 @@
-import { ArtistProfile } from '../model/artist-profile';
+import { ArtistImage, ArtistProfile, ArtistRevision } from '../model/artist-profile';
 
 export interface CreateArtistProfileDto {
   name: string | null;
@@ -27,7 +27,9 @@ export interface ArtistDto {
   isPublic: boolean;
   isReleased: boolean;
   isVerified: boolean;
+  images: ArtistImage[] | null;
   revisionNumber: number;
+  revisions: ArtistRevision[] | null;
   tags: string[];
   createdAt: string;
   updatedAt: string;
