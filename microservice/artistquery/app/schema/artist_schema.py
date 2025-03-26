@@ -19,35 +19,37 @@ class ArtistProfileSchema(BaseModel):
 
 
 class ArtistImageSchema(BaseModel):
-    url: str | None = Field(alias="fileUrl")
-    type: ArtistImageType
-    created_at: datetime = Field(alias="createdAt")
+    url: str | None = Field(alias="url")
+    type: ArtistImageType = Field(alias="type")
+    created_at: datetime | None = Field(alias="createdAt")
     created_by: str | None = Field(default=None, alias="createdBy")
 
+    class Config:
+        populate_by_name = True
+        extra = "allow"
 
-class ArtistImageSchema(BaseModel):
-    number: int = Field(default=0)
-    ref_code: str | None = Field(None, max_length=100)
-    name: str = Field(..., max_length=255)
-    urn: str = Field(..., max_length=255)
-    is_public: bool = Field(default=False)
-    is_released: bool = Field(default=False)
-    is_verified: bool = Field(default=False)
-    is_active: bool = Field(default=True)
-    description: str | None = Field(None, max_length=250)
-    biography: str | None = Field(None)
-    nationality_iso_code: str | None = Field(None)
-    thumbnail_url: str | None = Field(None)
-    thumbnail_file_key: str | None = Field(None)
-    background_url: str | None = Field(None)
-    tags: list[str] = Field([])
-    event_type: str | None = Field(None)
-    event_version: int | None = Field(None)
-    event_timestamp: datetime | None = Field(None)
-    created_at: datetime = Field()
-    updated_at: datetime = Field()
-    created_by: str | None = Field(None)
-    updated_by: str | None = Field(None)
+
+class ArtistRevisionSchema(BaseModel):
+    number: int = Field(0, alias="number")
+    ref_code: str | None = Field(None, alias="refCode")
+    name: str = Field(..., alias="name")
+    urn: str = Field(..., alias="urn")
+    is_public: bool = Field(False, alias="isPublic")
+    is_released: bool = Field(False, alias="isReleased")
+    is_verified: bool = Field(False, alias="isVerified")
+    is_active: bool = Field(True, alias="isActive")
+    description: str | None = Field(None, alias="description")
+    biography: str | None = Field(None, alias="biography")
+    nationality_iso_code: str | None = Field(None, alias="nationalityIsoCode")
+    thumbnail_url: str | None = Field(None, alias="thumbnailUrl")
+    background_url: str | None = Field(None, alias="backgroundUrl")
+    tags: list[str] = Field([], alias="tags")
+    created_at: datetime = Field(alias="createdAt")
+    created_by: str | None = Field(None, alias="createdBy")
+
+    class Config:
+        populate_by_name = True
+        extra = "allow"
 
 
 class ArtistSchema(BaseModel):
@@ -60,6 +62,9 @@ class ArtistSchema(BaseModel):
     is_verified: bool = Field(default=False, alias="isVerified")
     revision_number: int = Field(alias="revisionNumber")
     tags: list[str] = Field(default=[], alias="tags")
+    images: list[ArtistImageSchema] | None = Field(default=None, alias="images")
+    revisions: list[ArtistRevisionSchema] | None = Field(default=None,
+                                                         alias="revisions")
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
     created_by: str | None = Field(default=None, alias="createdBy")

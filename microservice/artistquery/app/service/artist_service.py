@@ -14,35 +14,47 @@ class ArtistService:
     def get_artist_by_aggregate_id(
             self,
             aggregate_id: str,
-            isLoadImages: bool = False,
-            isLoadRevisions: bool = False) -> ArtistSchema:
+            is_load_images: bool = False,
+            is_load_revisions: bool = False) -> ArtistSchema:
         artist = self.artist_repository.find_by_aggregate_id_and_is_active_true(
             aggregate_id=aggregate_id,
-            isLoadImages=isLoadImages,
-            isLoadRevisions=isLoadRevisions)
+            is_load_images=is_load_images,
+            is_load_revisions=is_load_revisions)
         if (artist is None):
             raise NotFoundException(
                 f"Artist not found: aggregate_id={aggregate_id}")
-        return map_to_artist_schema(artist)
+        return map_to_artist_schema(artist, is_load_images, is_load_revisions)
 
     def get_artist_by_aggregate_ids(
             self,
             aggregate_ids: list[str],
-            isLoadImages: bool = False,
-            isLoadRevisions: bool = False) -> list[ArtistSchema]:
+            is_load_images: bool = False,
+            is_load_revisions: bool = False) -> list[ArtistSchema]:
         artists = self.artist_repository.find_by_aggregate_ids_and_is_active_true(
             aggregate_ids=aggregate_ids,
-            isLoadImages=isLoadImages,
-            isLoadRevisions=isLoadRevisions)
-        return [map_to_artist_schema(artist) for artist in artists]
+            is_load_images=is_load_images,
+            is_load_revisions=is_load_revisions)
+        artist_schemas_map = dict(
+            map(
+                lambda artist: (artist.aggregate_id,
+                                map_to_artist_schema(artist, is_load_images,
+                                                     is_load_revisions)),
+                artists))
+        return [
+            artist_schemas_map.get(aggregate_id)
+            for aggregate_id in aggregate_ids
+        ]
 
     def get_artist_by_ref_codes(
             self,
             ref_codes: list[str],
-            isLoadImages: bool = False,
-            isLoadRevisions: bool = False) -> list[ArtistSchema]:
+            is_load_images: bool = False,
+            is_load_revisions: bool = False) -> list[ArtistSchema]:
         artists = self.artist_repository.find_by_ref_codes_and_is_active_true(
             ref_codes=ref_codes,
-            isLoadImages=isLoadImages,
-            isLoadRevisions=isLoadRevisions)
-        return [map_to_artist_schema(artist, isLoadImages, isLoadRevisions) for artist in artists]
+            is_load_images=is_load_images,
+            is_load_revisions=is_load_revisions)
+        artist_schemas_map = dict(
+            map(lambda artist: (artist.ref_code, map_to_artist_schema(artist)),
+                artists))
+        return [artist_schemas_map.get(ref_code) for ref_code in ref_codes]

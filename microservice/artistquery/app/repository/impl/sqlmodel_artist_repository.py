@@ -30,10 +30,10 @@ class SqlModelArtistRepository(ArtistRepository):
     def find_by_aggregate_id_and_is_active_true(
             self,
             aggregate_id: str,
-            isLoadImages: bool = False,
-            isLoadRevisions: bool = True) -> Artist | None:
-        options = self._build_options(isLoadImages=isLoadImages,
-                                      isLoadRevisions=isLoadRevisions)
+            is_load_images: bool = False,
+            is_load_revisions: bool = True) -> Artist | None:
+        options = self._build_options(isLoadImages=is_load_images,
+                                      isLoadRevisions=is_load_revisions)
         try:
             with self.session_factory() as session:
                 statement = (select(Artist).options(*options).filter(
@@ -49,11 +49,11 @@ class SqlModelArtistRepository(ArtistRepository):
     def find_by_aggregate_ids_and_is_active_true(
             self,
             aggregate_ids: list[str],
-            isLoadImages: bool = False,
-            isLoadRevisions: bool = True) -> list[Artist]:
+            is_load_images: bool = False,
+            is_load_revisions: bool = True) -> list[Artist]:
         try:
             with self.session_factory() as session:
-                options = self._build_options(isLoadImages, isLoadRevisions)
+                options = self._build_options(is_load_images, is_load_revisions)
                 statement = (select(Artist).options(*options).filter(
                     Artist.is_active == True,
                     Artist.aggregate_id.in_(aggregate_ids)))
@@ -67,9 +67,9 @@ class SqlModelArtistRepository(ArtistRepository):
     def find_by_ref_codes_and_is_active_true(
             self,
             ref_codes: list[str],
-            isLoadImages: bool = False,
-            isLoadRevisions: bool = True) -> list[Artist]:
-        options = self._build_options(isLoadImages, isLoadRevisions)
+            is_load_images: bool = False,
+            is_load_revisions: bool = True) -> list[Artist]:
+        options = self._build_options(is_load_images, is_load_revisions)
         try:
             with self.session_factory() as session:
                 statement = (select(Artist).options(*options).filter(

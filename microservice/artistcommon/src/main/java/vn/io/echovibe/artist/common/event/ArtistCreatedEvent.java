@@ -2,13 +2,16 @@ package vn.io.echovibe.artist.common.event;
 
 import java.util.LinkedList;
 import java.util.List;
+
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.artist.common.model.ArtistProfile;
 import vn.io.echovibe.core.event.Event;
 
+@NoArgsConstructor
 @SuperBuilder
 @Getter
 @Setter

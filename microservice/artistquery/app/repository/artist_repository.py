@@ -24,8 +24,8 @@ class ArtistRepository(ABC):
     def find_by_ref_codes_and_is_active_true(
             self,
             ref_codes: list[str],
-            isLoadImages: bool = False,
-            isLoadRevisions: bool = True) -> list[Artist]:
+            is_load_images: bool = False,
+            is_load_revisions: bool = True) -> list[Artist]:
         pass
 
     @abstractmethod

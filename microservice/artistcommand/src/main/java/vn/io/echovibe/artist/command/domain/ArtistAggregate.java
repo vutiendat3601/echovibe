@@ -23,8 +23,8 @@ import vn.io.echovibe.artist.common.model.ArtistProfile;
 import vn.io.echovibe.core.domain.AggregateRoot;
 import vn.io.echovibe.core.exception.BusinessRuleViolationException;
 
-@Getter
 @NoArgsConstructor
+@Getter
 public class ArtistAggregate extends AggregateRoot {
   private String urn;
 

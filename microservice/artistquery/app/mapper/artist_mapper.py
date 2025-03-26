@@ -1,12 +1,33 @@
-from app.model.artist import Artist, ArtistImage
-from app.schema.artist_schema import ArtistSchema, ArtistProfileSchema, ArtistImageSchema
+from app.model.artist import (Artist, ArtistImage, ArtistRevision)
+from app.schema.artist_schema import (ArtistSchema, ArtistProfileSchema,
+                                      ArtistImageSchema, ArtistRevisionSchema)
 
 
 def map_to_image_schema(artist_image: ArtistImage):
-    return ArtistImageSchema(file_url=artist_image.file_url,
+    return ArtistImageSchema(url=artist_image.file_url,
                              type=artist_image.type,
                              created_at=artist_image.created_at,
                              created_by=artist_image.created_by)
+
+
+def map_to_revision_schema(artist_revision: ArtistRevision):
+    return ArtistRevisionSchema(
+        number=artist_revision.number,
+        ref_code=artist_revision.ref_code,
+        name=artist_revision.name,
+        urn=artist_revision.urn,
+        is_public=artist_revision.is_public,
+        is_released=artist_revision.is_released,
+        is_verified=artist_revision.is_verified,
+        is_active=artist_revision.is_active,
+        description=artist_revision.description,
+        biography=artist_revision.biography,
+        nationality_iso_code=artist_revision.nationality_iso_code,
+        thumbnail_url=artist_revision.thumbnail_url,
+        background_url=artist_revision.background_url,
+        tags=artist_revision.tags,
+        created_at=artist_revision.created_at,
+        created_by=artist_revision.created_by)
 
 
 def map_to_artist_schema(artist: Artist,
@@ -22,25 +43,25 @@ def map_to_artist_schema(artist: Artist,
         nationality_iso_code=profile.nationality_iso_code,
         thumbnail_url=profile.thumbnail_url,
         background_url=profile.background_url)
-    images = None
-    if (is_load_images):
-        images = [map_to_image_schema(image) for image in images]
-        print(f"{artist.images}")
-    revisions = None
-    if (is_load_revisions):
-        revisions = []
-        print(f"{artist.revisions}")
-    # if (artist.)
-    # revision_schemas: list[revision_schemas]
+    images: list[ArtistImageSchema] | None = None
+    if is_load_images:
+        images = [map_to_image_schema(image) for image in artist.images]
+    revisions: list[ArtistRevisionSchema] | None = None
+    if is_load_revisions:
+        revisions = [
+            map_to_revision_schema(revision) for revision in artist.revisions
+        ]
     return ArtistSchema(id=artist.aggregate_id,
                         urn=artist.urn,
                         ref_code=artist.ref_code,
                         is_public=artist.is_public,
                         is_verified=artist.is_verified,
                         is_released=artist.is_released,
-                        revision_number=artist.revision_number,
                         tags=artist.tags,
                         profile=profile_schema,
+                        images=images,
+                        revision_number=artist.revision_number,
+                        revisions=revisions,
                         created_at=artist.created_at,
                         updated_at=artist.updated_at,
                         created_by=artist.created_by,

@@ -17,9 +17,15 @@ artist_service: ArtistService = Provide[Container.artist_service]
 @artist_router.get(
     path="/byId/{id}",
     response_model=ResponseSchema[list[artist_schema.ArtistSchema]])
-def get_artist_by_ids(id: str):
+def get_artist_by_ids(id: str,
+                      load_images: bool = Query(default=False,
+                                                alias="loadImages"),
+                      load_revisions: bool = Query(default=False,
+                                                   alias="loadRevisions")):
     artist_schemas = artist_service.get_artist_by_aggregate_id(
-        id=id, isLoadImages=True, isLoadRevisions=True)
+        aggregate_id=id,
+        is_load_images=load_images,
+        is_load_revisions=load_revisions)
     response = ok(data=artist_schemas)
     return JSONResponse(content=jsonable_encoder(response))
 
@@ -28,10 +34,14 @@ def get_artist_by_ids(id: str):
     path="/byId",
     response_model=ResponseSchema[list[artist_schema.ArtistSchema]])
 def get_artist_by_ids(ids: str = Query(..., regex=AGGREGATE_ID_LIST_REGEX),
-                      loadImages: bool = Query(default=False),
-                      loadRevisions: bool = Query(default=False)):
+                      load_images: bool = Query(default=False,
+                                                alias="loadImages"),
+                      load_revisions: bool = Query(default=False,
+                                                   alias="loadRevisions")):
     artist_schemas = artist_service.get_artist_by_aggregate_ids(
-        ids.split(","), isLoadImages=loadImages, isLoadRevisions=loadRevisions)
+        ids.split(","),
+        is_load_images=load_images,
+        is_load_revisions=load_revisions)
     response = ok(data=artist_schemas)
     return JSONResponse(content=jsonable_encoder(response))
 
@@ -39,13 +49,15 @@ def get_artist_by_ids(ids: str = Query(..., regex=AGGREGATE_ID_LIST_REGEX),
 @artist_router.get(
     path="/byRefCode",
     response_model=ResponseSchema[list[artist_schema.ArtistSchema]])
-def get_artist_by_ref_codes(ref_codes: str = Query(
-    ..., alias="refCodes", regex=AGGREGATE_REF_CODE_LIST_REGEX),
-                            loadImages: bool = Query(default=False),
-                            loadRevisions: bool = Query(default=False)):
+def get_artist_by_ref_codes(
+        ref_codes: str = Query(...,
+                               alias="refCodes",
+                               regex=AGGREGATE_REF_CODE_LIST_REGEX),
+        load_images: bool = Query(default=False, alias="loadImages"),
+        load_revisions: bool = Query(default=False, alias="loadRevisions")):
     artist_schemas = artist_service.get_artist_by_ref_codes(
         ref_codes.split(","),
-        isLoadImages=loadImages,
-        isLoadRevisions=loadRevisions)
+        is_load_images=load_images,
+        is_load_revisions=load_revisions)
     response = ok(data=artist_schemas)
     return JSONResponse(content=jsonable_encoder(response))
