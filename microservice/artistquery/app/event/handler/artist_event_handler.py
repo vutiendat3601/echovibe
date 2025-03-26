@@ -6,7 +6,8 @@ from app.event.schema.artist_event_schema import (ArtistCreatedEvent,
                                                   ArtistUpdatedEvent,
                                                   ArtistDeletedEvent,
                                                   ArtistVerificationSetEvent)
-from app.model.artist import Artist, ArtistProfile, ArtistImage
+from app.model.artist import (Artist, ArtistProfile, ArtistImage,
+                              ArtistRevision)
 from app.enum.artist_image_type import ArtistImageType
 
 
@@ -91,19 +92,46 @@ class ArtistEventHandler:
             artist.profile.name = artist_released_event.profile.name
             artist.profile.biography = artist_released_event.profile.biography
             artist.profile.description = artist_released_event.profile.description
-            artist.is_released = artist_released_event.is_released
-            artist.is_public = artist_released_event.is_public
-            artist.is_active = artist_released_event.is_active
-            artist.is_verified = artist_released_event.is_verified
             artist.profile.thumbnail_file_key = artist_released_event.profile.thumbnail_file_key
             artist.profile.thumbnail_url = artist_released_event.profile.thumbnail_url
             artist.profile.background_file_key = artist_released_event.profile.background_file_key
             artist.profile.background_url = artist_released_event.profile.background_url
+            artist.is_released = artist_released_event.is_released
+            artist.is_public = artist_released_event.is_public
+            artist.is_active = artist_released_event.is_active
+            artist.is_verified = artist_released_event.is_verified
             artist.tags = artist_released_event.tags
             artist.event_type = artist_released_event.type
             artist.event_version = artist_released_event.version
             artist.event_timestamp = artist_released_event.timestamp
             artist.updated_at = updated_at
+            revision = ArtistRevision(
+                artist_id=artist.id,
+                aggregate_id=artist.aggregate_id,
+                name=artist.profile.name,
+                number=artist.revision_number + 1,
+                description=artist.profile.description,
+                biography=artist.profile.biography,
+                nationality_iso_code=artist.profile.nationality_iso_code,
+                thumbnail_url=artist.profile.thumbnail_url,
+                thumbnail_file_key=artist.profile.thumbnail_file_key,
+                background_url=artist.profile.background_url,
+                background_file_key=artist.profile.background_file_key,
+                ref_code=artist.ref_code,
+                urn=artist.urn,
+                is_public=artist.is_public,
+                is_released=artist.is_released,
+                is_verified=artist.is_verified,
+                is_active=artist.is_active,
+                tags=artist.tags,
+                event_type=artist.event_type,
+                event_version=artist.event_version,
+                event_timestamp=artist.event_timestamp,
+                created_at=artist.created_at,
+                updated_at=artist.updated_at,
+                created_by=artist.created_by,
+                updated_by=artist.updated_by)
+            artist.revisions.append(revision)
             self.artist_repository.save_artist(artist)
         self.logger.info(
             f"Processed ArtistReleasedEvent: id={artist_released_event.id}, version={artist_released_event.version}"
