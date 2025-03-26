@@ -24,4 +24,8 @@ public class ArtistUpdatedEvent extends Event {
   private List<String> tags;
 
   private ArtistProfile profile;
+
+  {
+    type = getClass().getSimpleName();
+  }
 }

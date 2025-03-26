@@ -21,7 +21,7 @@ public class CreateArtistCommand extends Command {
 
   private String refCode;
 
-  private Boolean isVerified;
+  private Boolean isPublic;
 
   private List<String> tags;
 }

@@ -45,4 +45,4 @@ class ArtistService:
             ref_codes=ref_codes,
             isLoadImages=isLoadImages,
             isLoadRevisions=isLoadRevisions)
-        return [map_to_artist_schema(artist) for artist in artists]
+        return [map_to_artist_schema(artist, isLoadImages, isLoadRevisions) for artist in artists]
