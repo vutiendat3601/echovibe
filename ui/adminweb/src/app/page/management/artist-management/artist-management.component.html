@@ -79,20 +79,23 @@
         <p-tableHeaderCheckbox />
       </th>
 
+      <!-- Action Buttons -->
+      <th style="min-width: 8rem">Action</th>
+
       <!-- ID -->
-      <th style="min-width: 12rem">ID</th>
+      <th style="width: 8rem">ID</th>
 
       <!-- Thumbnail -->
       <th style="min-width: 8rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_THUMBNAIL">Thumbnail</th>
 
       <!-- Name -->
-      <th pSortableColumn="name" style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NAME">
+      <th pSortableColumn="name" style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NAME">
         Name
         <p-sortIcon field="name" />
       </th>
 
       <!-- Nationality -->
-      <th i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NATIONALITY" pSortableColumn="nationalityIsoCode" style="min-width: 16rem">
+      <th i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NATIONALITY" pSortableColumn="nationalityIsoCode" style="min-width: 12rem">
         Nationality
         <p-sortIcon field="nationalityIsoCode" />
       </th>
@@ -102,6 +105,9 @@
 
       <!-- Verified -->
       <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_VERIFIED">Verified</th>
+
+      <!-- Revision -->
+      <th style="min-width: 8rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_REVISION">Revision</th>
 
       <!-- Released -->
       <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_RELEASED">Released</th>
@@ -116,10 +122,7 @@
       <th style="min-width: 32rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_BIOGRAPHY">Biography</th>
 
       <!-- Background -->
-      <th style="min-width: 20rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_BACKGROUND">Background</th>
-
-      <!-- Action Buttons -->
-      <th style="min-width: 8rem"></th>
+      <th style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_BACKGROUND">Background</th>
     </tr>
   </ng-template>
   <ng-template #body let-artist>
@@ -129,8 +132,31 @@
         <p-tableCheckbox [value]="artist" />
       </td>
 
+      <!-- Action -->
+      <td>
+        <!-- Edit -->
+        <p-button
+          icon="pi pi-pencil"
+          class="mr-2"
+          [rounded]="true"
+          [outlined]="true"
+          (click)="handleEditArtist(artist)"
+        />
+
+        <!-- Delete -->
+        <p-button
+          icon="pi pi-trash"
+          severity="danger"
+          [rounded]="true"
+          [outlined]="true"
+          (click)="handleDeleteArtist(artist)"
+        />
+      </td>
+
       <!-- ID -->
-      <td style="min-width: 12rem">{{ artist.id }}</td>
+      <td>
+        <p style="width: 8rem">{{ artist.id }}</p>
+      </td>
 
       <!-- Thumbnail -->
       <td style="min-width: 8rem">
@@ -144,10 +170,10 @@
       </td>
 
       <!-- Name -->
-      <td style="min-width: 16rem">{{ artist.profile.name }}</td>
+      <td style="min-width: 12rem">{{ artist.profile.name }}</td>
 
       <!-- Nationality -->
-      <td style="min-width: 16rem">
+      <td style="min-width: 12rem">
         <span [class]="'fi fi-' + artist.profile.nationalityIsoCode.toLowerCase()"></span>
         <span class="ml-2"> {{ artist.profile.nationalityIsoCode | artistNationalityName }}</span>
       </td>
@@ -168,6 +194,11 @@
           [value]="artist.isVerified ? I18N_IS_VERIFIED_TRUE : I18N_IS_VERIFIED_FALSE"
           [severity]="artist.isVerified ? 'success' : 'danger'"
         />
+      </td>
+
+      <!-- Revision -->
+      <td style="min-width: 8rem">
+        {{ artist.revisionNumber }}
       </td>
 
       <!-- Released -->
@@ -191,34 +222,13 @@
       <td style="min-width: 32rem" [innerHTML]="artist.profile.biography | safeHtmlPipe"></td>
 
       <!-- Background -->
-      <td style="min-width: 20rem">
+      <td style="min-width: 16rem">
         <p-image
           [preview]="true"
           styleClass="rounded object-cover h-20"
           class="rounded"
           [src]="artist.profile.backgroundUrl"
           [alt]="artist.profile.name + '\'s background.'"
-        />
-      </td>
-
-      <!-- Action -->
-      <td>
-        <!-- Edit -->
-        <p-button
-          icon="pi pi-pencil"
-          class="mr-2"
-          [rounded]="true"
-          [outlined]="true"
-          (click)="handleEditArtist(artist)"
-        />
-
-        <!-- Delete -->
-        <p-button
-          icon="pi pi-trash"
-          severity="danger"
-          [rounded]="true"
-          [outlined]="true"
-          (click)="handleDeleteArtist(artist)"
         />
       </td>
     </tr>
@@ -282,11 +292,11 @@
                   >
                     <ng-template #selectedItem let-selectedNationality>
                       <span [class]="'fi fi-' + selectedNationality.code.toLowerCase()"></span>
-                      <span class="ml-2"> {{ selectedNationality.name }}</span>
+                      <span class="ml-2"> {{ selectedNationality.code | artistNationalityName }}</span>
                     </ng-template>
                     <ng-template let-nationality #item>
                       <span [class]="'fi fi-' + nationality.code.toLowerCase()"></span>
-                      <span class="ml-2"> {{ nationality.name }}</span>
+                      <span class="ml-2"> {{ nationality.code | artistNationalityName }}</span>
                     </ng-template>
                   </p-select>
                   <label i18n="@@FORM_LABEL_ARTIST_NATIONALITY" for="nationality">Nationality</label>

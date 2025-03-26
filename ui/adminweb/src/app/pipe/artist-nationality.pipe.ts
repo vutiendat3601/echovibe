@@ -1,5 +1,3 @@
-import { ArtistNationality } from '../constant/constant';
-import { Nationality } from './../model/nationality';
 import { Pipe, PipeTransform } from '@angular/core';
 
 const NATIONALITY_MAP: { [key: string]: string } = {
@@ -257,7 +255,7 @@ const NATIONALITY_MAP: { [key: string]: string } = {
 @Pipe({
   name: 'artistNationalityName'
 })
-export class ArtistNationalityPipe implements PipeTransform {
+export class ArtistNationalityNamePipe implements PipeTransform {
   transform(nationalityIsoCode: string | null): string {
     if (nationalityIsoCode && NATIONALITY_MAP[nationalityIsoCode]) {
       return NATIONALITY_MAP[nationalityIsoCode];

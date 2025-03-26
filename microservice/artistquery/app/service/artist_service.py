@@ -55,6 +55,9 @@ class ArtistService:
             is_load_images=is_load_images,
             is_load_revisions=is_load_revisions)
         artist_schemas_map = dict(
-            map(lambda artist: (artist.ref_code, map_to_artist_schema(artist)),
+            map(
+                lambda artist: (artist.ref_code,
+                                map_to_artist_schema(artist, is_load_images,
+                                                     is_load_revisions)),
                 artists))
         return [artist_schemas_map.get(ref_code) for ref_code in ref_codes]
