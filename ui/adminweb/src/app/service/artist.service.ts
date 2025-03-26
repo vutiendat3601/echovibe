@@ -36,19 +36,21 @@ export class ArtistService {
     );
   }
 
-  getArtistByIds(ids: string[]): Observable<ResponseDto<ArtistDto[]>> {
-    return this.http.get<ResponseDto<ArtistDto[]>>(`${environment.artistQueryBaseUrl}/byId?ids=${ids.join(',')}`);
+  getArtistByIds(ids: string[]): Observable<ResponseDto<[ArtistDto | null]>> {
+    return this.http.get<ResponseDto<[ArtistDto | null]>>(
+      `${environment.artistQueryBaseUrl}/byId?ids=${ids.join(',')}`
+    );
   }
 
-  getArtistByRefCodes(refCodes: string[]): Observable<ResponseDto<ArtistDto[]>> {
-    return this.http.get<ResponseDto<ArtistDto[]>>(
+  getArtistByRefCodes(refCodes: string[]): Observable<ResponseDto<[ArtistDto | null]>> {
+    return this.http.get<ResponseDto<[ArtistDto | null]>>(
       `${environment.artistQueryBaseUrl}/byRefCode?refCodes=${refCodes.join(',')}`
     );
   }
 
   // ### Mock datas, need to remove when finish ################################
 
-  getMockArtists(): Observable<ResponseDto<ArtistDto[]>> {
+  getMockArtists(): Observable<ResponseDto<[ArtistDto | null]>> {
     return this.getArtistByRefCodes([
       'spt_5dfZ5uSmzR7VQK0udbAVpf',
       'spt_2Bwp23pD4UVsSkchHDZw4F',

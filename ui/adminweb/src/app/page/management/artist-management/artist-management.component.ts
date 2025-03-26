@@ -31,7 +31,7 @@ import { ResponseDto } from '../../../dto/response-dto';
 import { ArtistMapper } from '../../../mapper/artist-mapper';
 import { Artist } from '../../../model/artist';
 import { CommandResult } from '../../../model/command-result';
-import { ArtistNationalityPipe } from '../../../pipe/artist-nationality.pipe';
+import { ArtistNationalityNamePipe } from '../../../pipe/artist-nationality.pipe';
 import { SafeHtmlPipe } from '../../../pipe/safe-html.pipe';
 import { ArtistService } from '../../../service/artist.service';
 import { UrlValidator } from '../../../validator/url.validator';
@@ -55,7 +55,7 @@ interface ExportColumn {
 @Component({
   selector: 'app-artist-management',
   imports: [
-    ArtistNationalityPipe,
+    ArtistNationalityNamePipe,
     CommonModule,
     TableModule,
     FormsModule,
@@ -270,8 +270,8 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   private loadData() {
-    this.artistService.getMockArtists().subscribe((respDto: ResponseDto<ArtistDto[]>) => {
-      this.artists.set(respDto.data.map(this.artistMapper.mapToArtist));
+    this.artistService.getMockArtists().subscribe((respDto: ResponseDto<[ArtistDto | null]>) => {
+      this.artists.set(respDto.data.filter((artistDto) => artistDto != null).map(this.artistMapper.mapToArtist));
     });
   }
 
@@ -292,9 +292,9 @@ export class ArtistManagementComponent implements OnInit {
           const updateNewArtists = () => {
             const fetchNewArtists = this.artistService.getArtistByIds([...this.newArtistIds]).pipe(
               map((respDto) => {
-                const artistDtos: ArtistDto[] = respDto.data;
+                const artistDtos: [ArtistDto | null] = respDto.data;
                 const newArtists: Artist[] = artistDtos
-                  .filter((artistDto) => artistDto)
+                  .filter((artistDto) => artistDto != null)
                   .map(this.artistMapper.mapToArtist);
                 this.artists.update((artists) => [...newArtists, ...artists]);
                 newArtists.forEach(({ id }) => this.newArtistIds.has(id) && this.newArtistIds.delete(id));
