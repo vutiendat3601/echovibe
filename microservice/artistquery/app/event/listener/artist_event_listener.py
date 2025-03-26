@@ -7,10 +7,7 @@ from app.constant.artist_constant import (ARTIST_CREATED_EVENT,
                                           ARTIST_UPDATED_EVENT,
                                           ARTIST_DELETED_EVENT,
                                           ARTIST_VERIFICATION_SET_EVENT)
-from app.event.handler.artist_event_handler import (
-    handle_artist_created_event, handle_artist_deleted_event,
-    handle_artist_released_event, handle_artist_updated_event,
-    handle_artist_verification_set_event)
+from app.event.handler.artist_event_handler import ArtistEventHandler
 from app.constant.constant import APP_NAME
 from app.core.configuration import configuration
 from app.repository.impl.sqlmodel_artist_repository import ArtistRepository
@@ -23,6 +20,8 @@ from app.event.schema.artist_event_schema import (ArtistCreatedEvent,
 
 kafka_broker_bootstrap_server_urls = configuration.get_kafka_broker_bootstrap_server_urls(
 )
+artist_event_handler: ArtistEventHandler = Provide[
+    Container.artist_event_handler]
 
 artist_repository: ArtistRepository = Provide[Container.artist_repository]
 
@@ -32,7 +31,8 @@ kafka_consumer_properties = {
     "bootstrap_servers": kafka_broker_bootstrap_server_urls,
     "group_id": APP_NAME,
     "key_deserializer": lambda k: json.loads(k.decode()) if k else None,
-    "value_deserializer": lambda v: json.loads(v.decode()) if v else None
+    "value_deserializer": lambda v: json.loads(v.decode()) if v else None,
+    "enable_auto_commit": False
 }
 
 
@@ -47,7 +47,11 @@ async def listen_artist_created_event():
             logger.info(
                 f"Received {ArtistCreatedEvent.__name__}: id={artist_created_event.id}, version={artist_created_event.version}"
             )
-            handle_artist_created_event(artist_created_event)
+            artist_event_handler.handle_artist_created_event(
+                artist_created_event)
+            await artist_created_event_listener.commit()
+    except Exception as e:
+        logger.info(f"{e}")
     finally:
         await artist_created_event_listener.stop()
 
@@ -63,7 +67,9 @@ async def listen_artist_released_event():
             logger.info(
                 f"Received {ArtistReleasedEvent.__name__}: id={artist_released_event.id}, version={artist_released_event.version}, timestamp={artist_released_event.timestamp}"
             )
-            handle_artist_released_event(artist_released_event)
+            artist_event_handler.handle_artist_released_event(
+                artist_released_event)
+            await artist_released_event_listener.commit()
     finally:
         await artist_released_event_listener.stop()
 
@@ -79,7 +85,9 @@ async def listen_artist_profile_updated_event():
             logger.info(
                 f"Received {ArtistUpdatedEvent.__name__}: id={artist_updated_event.id}, version={artist_updated_event.version}, timestamp={artist_updated_event.timestamp}"
             )
-            handle_artist_updated_event(artist_updated_event)
+            artist_event_handler.handle_artist_updated_event(
+                artist_updated_event)
+            await artist_updated_event_listener.commit()
     finally:
         await artist_updated_event_listener.stop()
 
@@ -95,7 +103,9 @@ async def listen_artist_deleted_event():
             logger.info(
                 f"Received {ArtistDeletedEvent.__name__}: id={artist_deleted_event.id}, version={artist_deleted_event.version}, timestamp={artist_deleted_event.timestamp}"
             )
-            handle_artist_deleted_event(artist_deleted_event)
+            artist_event_handler.handle_artist_deleted_event(
+                artist_deleted_event)
+            await artist_deleted_event_consumer.commit()
     finally:
         await artist_deleted_event_consumer.stop()
 
@@ -112,7 +122,9 @@ async def listen_artist_visibility_set_event():
             logger.info(
                 f"Received {ArtistVerificationSetEvent.__name__}: id={artist_verification_set_event.id}, version={artist_verification_set_event.version}, timestamp={artist_verification_set_event.timestamp}"
             )
-            handle_artist_verification_set_event(artist_verification_set_event)
+            artist_event_handler.handle_artist_verification_set_event(
+                artist_verification_set_event)
+            await artist_visibility_changed_event_consumer.commit()
     finally:
         await artist_visibility_changed_event_consumer.stop()
 

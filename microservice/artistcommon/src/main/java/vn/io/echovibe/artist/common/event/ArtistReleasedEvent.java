@@ -32,4 +32,8 @@ public class ArtistReleasedEvent extends Event {
   @Builder.Default private Boolean isPublic = false;
 
   @Builder.Default private List<String> tags = new LinkedList<>();
+
+  {
+    type = getClass().getSimpleName();
+  }
 }

@@ -17,4 +17,8 @@ public class ArtistVerificationSetEvent extends Event {
   private Boolean isVerified;
 
   @Builder.Default private Boolean isReleased = false;
+
+  {
+    type = getClass().getSimpleName();
+  }
 }

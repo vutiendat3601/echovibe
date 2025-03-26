@@ -54,7 +54,7 @@ public class ArtistCommandController {
                   return CreateArtistCommand.builder()
                       .id(IdentityUtils.generateAggregateId())
                       .refCode(cad.refCode())
-                      .isVerified(Optional.of(cad.isVerified()).orElse(false))
+                      .isPublic(Optional.of(cad.isPublic()).orElse(false))
                       .tags(Optional.of(cad.tags()).orElse(new LinkedList<>()))
                       .profile(
                           ArtistProfile.builder()

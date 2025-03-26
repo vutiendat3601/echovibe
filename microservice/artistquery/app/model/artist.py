@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM
 from sqlalchemy import TEXT
-from app.constant.artist_image_type import ArtistImageType
+from app.enum.artist_image_type import ArtistImageType
 
 
 class Artist(SQLModel, table=True):
@@ -63,7 +63,7 @@ class ArtistImage(SQLModel, table=True):
     artist_id: uuid.UUID = Field(foreign_key="artist.id")
     artist: Artist = Relationship(back_populates="images")
     aggregate_id: str = Field(..., max_length=16)
-    artist_ref_code: str | None = Field(..., max_length=100)
+    ref_code: str | None = Field(None, max_length=100)
     file_url: str | None = Field(None, max_length=255)
     file_key: str | None = Field(None, max_length=255)
     is_active: bool = Field(default=True)
