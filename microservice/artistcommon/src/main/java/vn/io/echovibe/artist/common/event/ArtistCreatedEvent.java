@@ -2,7 +2,6 @@ package vn.io.echovibe.artist.common.event;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
