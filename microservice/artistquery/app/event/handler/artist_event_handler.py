@@ -20,6 +20,8 @@ class ArtistEventHandler:
     def handle_artist_created_event(self,
                                     artist_created_event: ArtistCreatedEvent):
         created_at = datetime.now(timezone.utc)
+
+        # Artist, ArtistProfile
         artist_profile_attributes = {
             **artist_created_event.profile.model_dump(), "id": None,
             "aggregate_id": artist_created_event.id,
@@ -33,8 +35,7 @@ class ArtistEventHandler:
             "updated_by": artist_created_event.created_by
         }
         artist_profile = ArtistProfile(**artist_profile_attributes)
-
-        artist_props = {
+        artist_attributes = {
             **artist_created_event.model_dump(), "id": None,
             "images": [],
             "profile": artist_profile,
@@ -47,7 +48,9 @@ class ArtistEventHandler:
             "created_by": artist_created_event.created_by,
             "updated_by": artist_created_event.created_by
         }
-        artist = Artist(**artist_props)
+        artist = Artist(**artist_attributes)
+
+        # ArtistImage thumbnail
         if artist_created_event.profile.thumbnail_url is not None:
             artist.images.append(
                 ArtistImage(file_url=artist_created_event.profile.thumbnail_url,
@@ -61,6 +64,8 @@ class ArtistEventHandler:
                             updated_at=created_at,
                             created_by=artist_created_event.created_by,
                             updated_by=artist_created_event.created_by))
+
+        # ArtistImage background
         if artist_created_event.profile.background_url is not None:
             artist.images.append(
                 ArtistImage(
@@ -75,6 +80,7 @@ class ArtistEventHandler:
                     updated_at=created_at,
                     created_by=artist_created_event.created_by,
                     updated_by=artist_created_event.created_by))
+
         self.artist_repository.save_artist(artist)
         self.logger.info(
             f"Processed ArtistCreatedEvent: id={artist_created_event.id}, version={artist_created_event.version}"
@@ -88,14 +94,16 @@ class ArtistEventHandler:
         if artist is not None:
             if artist.profile is None:
                 artist.profile = ArtistProfile()
+            # Update Artist, ArtistProfile
+            release_profile = artist_released_event.profile
             artist.urn = artist_released_event.urn
-            artist.profile.name = artist_released_event.profile.name
-            artist.profile.biography = artist_released_event.profile.biography
-            artist.profile.description = artist_released_event.profile.description
-            artist.profile.thumbnail_file_key = artist_released_event.profile.thumbnail_file_key
-            artist.profile.thumbnail_url = artist_released_event.profile.thumbnail_url
-            artist.profile.background_file_key = artist_released_event.profile.background_file_key
-            artist.profile.background_url = artist_released_event.profile.background_url
+            artist.profile.name = release_profile.name
+            artist.profile.biography = release_profile.biography
+            artist.profile.description = release_profile.description
+            artist.profile.thumbnail_file_key = release_profile.thumbnail_file_key
+            artist.profile.thumbnail_url = release_profile.thumbnail_url
+            artist.profile.background_file_key = release_profile.background_file_key
+            artist.profile.background_url = release_profile.background_url
             artist.is_released = artist_released_event.is_released
             artist.is_public = artist_released_event.is_public
             artist.is_active = artist_released_event.is_active
@@ -105,33 +113,33 @@ class ArtistEventHandler:
             artist.event_version = artist_released_event.version
             artist.event_timestamp = artist_released_event.timestamp
             artist.updated_at = updated_at
-            revision = ArtistRevision(
-                artist_id=artist.id,
-                aggregate_id=artist.aggregate_id,
-                name=artist.profile.name,
-                number=artist.revision_number + 1,
-                description=artist.profile.description,
-                biography=artist.profile.biography,
-                nationality_iso_code=artist.profile.nationality_iso_code,
-                thumbnail_url=artist.profile.thumbnail_url,
-                thumbnail_file_key=artist.profile.thumbnail_file_key,
-                background_url=artist.profile.background_url,
-                background_file_key=artist.profile.background_file_key,
-                ref_code=artist.ref_code,
-                urn=artist.urn,
-                is_public=artist.is_public,
-                is_released=artist.is_released,
-                is_verified=artist.is_verified,
-                is_active=artist.is_active,
-                tags=artist.tags,
-                event_type=artist.event_type,
-                event_version=artist.event_version,
-                event_timestamp=artist.event_timestamp,
-                created_at=artist.created_at,
-                updated_at=artist.updated_at,
-                created_by=artist.created_by,
-                updated_by=artist.updated_by)
+
+            # Revision
+            revision_attributes = {
+                **artist_released_event.model_dump(),
+                "id": None,
+                "artist_id": artist.id,
+                "aggregate_id": artist.aggregate_id,
+                "name": artist.profile.name,
+                "number": artist.revision_number + 1,
+                "description": artist.profile.description,
+                "biography": artist.profile.biography,
+                "nationality_iso_code": artist.profile.nationality_iso_code,
+                "thumbnail_url": artist.profile.thumbnail_url,
+                "thumbnail_file_key": artist.profile.thumbnail_file_key,
+                "background_url": artist.profile.background_url,
+                "background_file_key": artist.profile.background_file_key,
+                "event_type": artist.event_type,
+                "event_version": artist.event_version,
+                "event_timestamp": artist.event_timestamp,
+                "created_at": artist.created_at,
+                "updated_at": artist.updated_at,
+                "created_by": artist.created_by,
+                "updated_by": artist.updated_by,
+            }
+            revision = ArtistRevision(**revision_attributes)
             artist.revisions.append(revision)
+
             self.artist_repository.save_artist(artist)
         self.logger.info(
             f"Processed ArtistReleasedEvent: id={artist_released_event.id}, version={artist_released_event.version}"

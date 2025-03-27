@@ -43,6 +43,7 @@ class SqlModelArtistRepository(ArtistRepository):
                 return artist
         except SQLAlchemyError as e:
             self.logger.error(f"{e}")
+            raise e
         finally:
             session.close()
 
@@ -61,6 +62,7 @@ class SqlModelArtistRepository(ArtistRepository):
                 return artists
         except SQLAlchemyError as e:
             self.logger.error(f"{e}")
+            raise e
         finally:
             session.close()
 
@@ -78,6 +80,7 @@ class SqlModelArtistRepository(ArtistRepository):
                 return artists
         except SQLAlchemyError as e:
             self.logger.error(f"{e}")
+            raise e
         finally:
             session.close()
 
@@ -92,6 +95,7 @@ class SqlModelArtistRepository(ArtistRepository):
         except SQLAlchemyError as e:
             session.rollback()
             self.logger.error(f"{e}")
+            raise e
         finally:
             session.close()
 
@@ -106,5 +110,6 @@ class SqlModelArtistRepository(ArtistRepository):
         except SQLAlchemyError as e:
             session.rollback()
             self.logger.error(f"{e}")
+            raise e
         finally:
             session.close()

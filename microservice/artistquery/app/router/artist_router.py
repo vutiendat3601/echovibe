@@ -17,7 +17,7 @@ artist_service: ArtistService = Provide[Container.artist_service]
 @artist_router.get(
     path="/byId/{id}",
     response_model=ResponseSchema[list[artist_schema.ArtistSchema]])
-def get_artist_by_ids(id: str,
+def get_artist_by_id(id: str,
                       load_images: bool = Query(default=False,
                                                 alias="loadImages"),
                       load_revisions: bool = Query(default=False,

@@ -13,5 +13,6 @@ import io.swagger.v3.oas.annotations.servers.Server;
             title = "Echo Vibe - Artist Command APIs",
             version = "1.0",
             description =
-                "Echo Vibe - Artist Command APIs contains APIs which create or change data related to artist."))
+                "Echo Vibe - Artist Command APIs contains APIs which create or change data related"
+                    + " to artist."))
 public class OpenApiDefinitionConfiguration {}
