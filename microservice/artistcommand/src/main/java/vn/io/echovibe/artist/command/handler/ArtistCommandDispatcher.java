@@ -8,9 +8,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import vn.io.echovibe.artist.command.model.CreateArtistCommand;
+import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
+import vn.io.echovibe.artist.command.model.ReleaseArtistCommand;
+import vn.io.echovibe.artist.command.model.SetArtistVerificationCommand;
+import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.core.command.Command;
 import vn.io.echovibe.core.command.CommandDispatcher;
 import vn.io.echovibe.core.command.CommandHandlerFunction;
@@ -22,9 +30,21 @@ import vn.io.echovibe.core.model.CommandResult;
 
 @Slf4j
 @SuppressWarnings({"rawtypes", "unchecked"})
+@RequiredArgsConstructor
 @Service
 public class ArtistCommandDispatcher implements CommandDispatcher {
   private final Map<Class<? extends Command>, CommandHandlerFunction> handlerMap = new HashMap<>();
+
+  private final CommandHandler commandHandler;
+
+  @EventListener(ApplicationReadyEvent.class)
+  void onApplicationReadyEvent() {
+    registerHandler(CreateArtistCommand.class, commandHandler::handle);
+    registerHandler(UpdateArtistCommand.class, commandHandler::handle);
+    registerHandler(DeleteArtistCommand.class, commandHandler::handle);
+    registerHandler(ReleaseArtistCommand.class, commandHandler::handle);
+    registerHandler(SetArtistVerificationCommand.class, commandHandler::handle);
+  }
 
   @Override
   public <T extends Command> void registerHandler(

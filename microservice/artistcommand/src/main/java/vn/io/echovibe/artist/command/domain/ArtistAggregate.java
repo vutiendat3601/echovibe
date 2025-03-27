@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
@@ -22,6 +23,7 @@ import vn.io.echovibe.artist.common.event.ArtistVerificationSetEvent;
 import vn.io.echovibe.artist.common.model.ArtistProfile;
 import vn.io.echovibe.core.domain.AggregateRoot;
 import vn.io.echovibe.core.exception.BusinessRuleViolationException;
+import vn.io.echovibe.core.util.StringUtils;
 
 @NoArgsConstructor
 @Getter
@@ -46,6 +48,11 @@ public class ArtistAggregate extends AggregateRoot {
 
   public ArtistAggregate(CreateArtistCommand createArtistCommand) {
     final String urn = ARTIST_URN_PREFIX + createArtistCommand.getId();
+    // Add name as initial tag.
+    createArtistCommand.getTags().add(createArtistCommand.getProfile().getName());
+    final Set<String> updatedTagsSet =
+        new HashSet<>(createArtistCommand.getTags())
+            .stream().map(StringUtils::removeAccent).collect(Collectors.toSet());
     final ArtistCreatedEvent artistCreatedEvent =
         ArtistCreatedEvent.builder()
             .id(createArtistCommand.getId())
@@ -57,15 +64,15 @@ public class ArtistAggregate extends AggregateRoot {
             .isVerified(false)
             .isReleased(false)
             .revisionNumber(-1)
-            .tags(createArtistCommand.getTags())
+            .tags(new ArrayList<>(updatedTagsSet))
             .build();
     raiseEvent(artistCreatedEvent);
   }
 
   public void update(UpdateArtistCommand updateArtistCommand) {
     final ArtistProfile updateProfile = updateArtistCommand.getProfile();
-
     boolean hasChange = false;
+
     final ArtistProfile updatedProfile =
         ArtistProfile.builder()
             .name(this.profile.getName())
@@ -126,7 +133,9 @@ public class ArtistAggregate extends AggregateRoot {
       final Set<String> updatedTagsSet =
           new HashSet<>(
               Optional.ofNullable(artistUpdatedEvent.getTags()).orElse(new ArrayList<>()));
-      final Set<String> updateTagsSet = new HashSet<>(updateArtistCommand.getTags());
+      final Set<String> updateTagsSet =
+          new HashSet<>(updateArtistCommand.getTags())
+              .stream().map(StringUtils::removeAccent).collect(Collectors.toSet());
       if (!updatedTagsSet.containsAll(updateTagsSet)) {
         hasChange = true;
         artistUpdatedEvent.setTags(new ArrayList<>(updateTagsSet));
