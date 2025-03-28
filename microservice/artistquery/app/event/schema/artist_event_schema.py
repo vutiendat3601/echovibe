@@ -43,7 +43,7 @@ class ArtistReleasedEvent(EventSchema):
     is_verified: bool = Field(default=False, alias="isVerified")
     is_public: bool = Field(default=False, alias="isPublic")
     is_active: bool = Field(default=True, alias="isActive")
-    ref_code: bool | None = Field(default=None, alias="refCode")
+    ref_code: str | None = Field(default=None, alias="refCode")
     tags: list[TagSchema] = Field(default=[], alias="tags")
 
     class Config:
