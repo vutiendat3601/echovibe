@@ -115,6 +115,7 @@ class ArtistEventHandler:
             artist.ref_code = artist_released_event.ref_code
             artist.is_public = artist_released_event.is_public
             artist.is_active = artist_released_event.is_active
+            artist.is_released = artist_released_event.is_released
             artist.is_verified = artist_released_event.is_verified
             artist.tags = [
                 tag.name for tag in artist_released_event.tags if tag.is_active
