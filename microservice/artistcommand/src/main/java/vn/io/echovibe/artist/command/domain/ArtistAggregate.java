@@ -44,8 +44,6 @@ public class ArtistAggregate extends AggregateRoot {
 
   public ArtistAggregate(CreateArtistCommand createArtistCommand) {
     final String urn = ARTIST_URN_PREFIX + createArtistCommand.getId();
-    // Add name as initial tag.
-
     final ArtistCreatedEvent artistCreatedEvent =
         ArtistCreatedEvent.builder()
             .id(createArtistCommand.getId())
@@ -179,6 +177,7 @@ public class ArtistAggregate extends AggregateRoot {
   void apply(ArtistCreatedEvent artistCreatedEvent) {
     this.id = artistCreatedEvent.getId();
     this.urn = artistCreatedEvent.getUrn();
+    this.refCode = artistCreatedEvent.getRefCode();
     this.profile = artistCreatedEvent.getProfile();
     this.isPublic = artistCreatedEvent.getIsPublic();
     this.isActive = artistCreatedEvent.getIsActive();
