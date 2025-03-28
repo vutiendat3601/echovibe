@@ -52,7 +52,7 @@ async def listen_artist_created_event():
                 artist_created_event)
             await artist_created_event_listener.commit()
     except Exception as e:
-        logger.info(f"{e}")
+        logger.info(f"Error when handling {ArtistCreatedEvent.__name__}: {e}")
     finally:
         await artist_created_event_listener.stop()
 
@@ -71,6 +71,8 @@ async def listen_artist_released_event():
             artist_event_handler.handle_artist_released_event(
                 artist_released_event)
             await artist_released_event_listener.commit()
+    except Exception as e:
+        logger.info(f"Error when handling {ArtistReleasedEvent.__name__}: {e}")
     finally:
         await artist_released_event_listener.stop()
 
@@ -89,6 +91,8 @@ async def listen_artist_profile_updated_event():
             artist_event_handler.handle_artist_updated_event(
                 artist_updated_event)
             await artist_updated_event_listener.commit()
+    except Exception as e:
+        logger.info(f"Error when handling {ArtistUpdatedEvent.__name__}: {e}")
     finally:
         await artist_updated_event_listener.stop()
 
@@ -107,6 +111,8 @@ async def listen_artist_deleted_event():
             artist_event_handler.handle_artist_deleted_event(
                 artist_deleted_event)
             await artist_deleted_event_consumer.commit()
+    except Exception as e:
+        logger.info(f"Error when handling {ArtistDeletedEvent.__name__}: {e}")
     finally:
         await artist_deleted_event_consumer.stop()
 
@@ -126,6 +132,9 @@ async def listen_artist_visibility_set_event():
             artist_event_handler.handle_artist_verification_set_event(
                 artist_verification_set_event)
             await artist_visibility_changed_event_consumer.commit()
+    except Exception as e:
+        logger.info(
+            f"Error when handling {ArtistVerificationSetEvent.__name__}: {e}")
     finally:
         await artist_visibility_changed_event_consumer.stop()
 

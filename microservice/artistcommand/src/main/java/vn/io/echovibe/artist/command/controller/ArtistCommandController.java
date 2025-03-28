@@ -3,9 +3,7 @@ package vn.io.echovibe.artist.command.controller;
 import static vn.io.echovibe.core.constant.Constant.REQUEST_PROCESSED_SUCCESS;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -16,8 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import vn.io.echovibe.artist.command.dto.ArtistProfileDto;
 import vn.io.echovibe.artist.command.dto.CreateArtistDto;
-import vn.io.echovibe.artist.command.dto.CreateArtistProfileDto;
 import vn.io.echovibe.artist.command.dto.DeleteArtistDto;
 import vn.io.echovibe.artist.command.dto.ReleaseArtistDto;
 import vn.io.echovibe.artist.command.dto.SetArtistVisibilityDto;
@@ -28,13 +26,14 @@ import vn.io.echovibe.artist.command.model.ReleaseArtistCommand;
 import vn.io.echovibe.artist.command.model.SetArtistVerificationCommand;
 import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.artist.common.model.ArtistProfile;
+import vn.io.echovibe.artist.common.model.Tag;
 import vn.io.echovibe.core.command.CommandDispatcher;
 import vn.io.echovibe.core.model.BulkResult;
 import vn.io.echovibe.core.util.IdentityUtils;
 import vn.io.echovibe.web.dto.BulkDto;
 import vn.io.echovibe.web.dto.ResponseDto;
 
-@Tag(name = "Artist")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Artist")
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("v1/artists")
@@ -50,12 +49,15 @@ public class ArtistCommandController {
         bulkCreateArtistDtos.items().stream()
             .map(
                 cad -> {
-                  final CreateArtistProfileDto createArtistProfileDto = cad.profile();
+                  final ArtistProfileDto createArtistProfileDto = cad.profile();
                   return CreateArtistCommand.builder()
                       .id(IdentityUtils.generateAggregateId())
                       .refCode(cad.refCode())
                       .isPublic(Optional.of(cad.isPublic()).orElse(false))
-                      .tags(Optional.of(cad.tags()).orElse(new LinkedList<>()))
+                      .tags(
+                          cad.tags().stream()
+                              .map(tagDto -> new Tag(tagDto.name(), tagDto.isActive()))
+                              .collect(Collectors.toList()))
                       .profile(
                           ArtistProfile.builder()
                               .name(createArtistProfileDto.name())
@@ -92,7 +94,10 @@ public class ArtistCommandController {
                       .id(uad.id())
                       .refCode(uad.refCode())
                       .isPublic(uad.isPublic())
-                      .tags(uad.tags())
+                      .tags(
+                          uad.tags().stream()
+                              .map(tagDto -> new Tag(tagDto.name(), tagDto.isActive()))
+                              .collect(Collectors.toList()))
                       .profile(profile)
                       .build();
                 })

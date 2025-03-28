@@ -8,8 +8,6 @@ from app.service.artist_service import ArtistService
 from app.core.container import Container
 from app.schema.schema import ResponseSchema, ok
 
-from http import HTTPStatus
-
 artist_router = APIRouter(prefix="/v1/artists", tags=["Artist"])
 
 artist_service: ArtistService = Provide[Container.artist_service]

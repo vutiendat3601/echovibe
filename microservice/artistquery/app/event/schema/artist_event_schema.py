@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from app.event.schema.event_schema import EventSchema
+from app.schema.tag_schema import TagSchema
 
 
 class ArtistProfileSchema(BaseModel):
@@ -24,11 +25,11 @@ class ArtistCreatedEvent(EventSchema):
     urn: str
     ref_code: str | None = Field(default=None, alias="refCode")
     profile: ArtistProfileSchema
-    tags: list[str] = Field(default=[], alias="tags")
     is_released: bool = Field(default=False, alias="isReleased")
     is_public: bool = Field(default=False, alias="isPublic")
     is_active: bool = Field(default=True, alias="isActive")
     is_verified: bool = Field(default=True, alias="isVerified")
+    tags: list[TagSchema] = Field(default=[], alias="tags")
 
     class Config:
         populate_by_name = True
@@ -42,7 +43,8 @@ class ArtistReleasedEvent(EventSchema):
     is_verified: bool = Field(default=False, alias="isVerified")
     is_public: bool = Field(default=False, alias="isPublic")
     is_active: bool = Field(default=True, alias="isActive")
-    tags: list[str] = Field(default=[], alias="tags")
+    ref_code: bool | None = Field(default=None, alias="refCode")
+    tags: list[TagSchema] = Field(default=[], alias="tags")
 
     class Config:
         populate_by_name = True
@@ -51,7 +53,8 @@ class ArtistReleasedEvent(EventSchema):
 
 class ArtistUpdatedEvent(EventSchema):
     profile: ArtistProfileSchema
-    tags: list[str] = Field(default=[], alias="tags")
+    is_public: bool = Field(default=False, alias="isPublic")
+    tags: list[TagSchema] = Field(default=[], alias="tags")
 
     class Config:
         populate_by_name = True
