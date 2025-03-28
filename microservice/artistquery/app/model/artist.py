@@ -2,9 +2,10 @@ from sqlmodel import SQLModel, Field, Column, Relationship
 from typing import Optional
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy.dialects.postgresql import ARRAY, ENUM
+from sqlalchemy.dialects.postgresql import ARRAY, ENUM, JSONB
 from sqlalchemy import TEXT
 from app.enum.artist_image_type import ArtistImageType
+from app.schema.tag_schema import TagSchema
 
 
 class Artist(SQLModel, table=True):
@@ -18,6 +19,7 @@ class Artist(SQLModel, table=True):
     is_verified: bool = Field(default=False)
     is_active: bool = Field(default=True)
     tags: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
+    tags_json: list[dict[str, any]] = Field([], sa_column=Column(JSONB))
     profile: Optional["ArtistProfile"] = Relationship(back_populates="artist")
     images: list["ArtistImage"] = Relationship(back_populates="artist")
     revision_number: int = Field(default=-1)
@@ -29,6 +31,9 @@ class Artist(SQLModel, table=True):
     updated_at: datetime = Field(default=datetime.now(timezone.utc))
     created_by: str | None = Field(None)
     updated_by: str | None = Field(None)
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class ArtistProfile(SQLModel, table=True):
@@ -98,7 +103,7 @@ class ArtistRevision(SQLModel, table=True):
     thumbnail_file_key: str | None = Field(None)
     background_url: str | None = Field(None)
     background_file_key: str | None = Field(None)
-    tags: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
+    tags_json: list[dict[str, any]] = Field([], sa_column=Column(JSONB))
     event_type: str | None = Field(None)
     event_version: int | None = Field(None)
     event_timestamp: datetime | None = Field(None)
@@ -106,3 +111,6 @@ class ArtistRevision(SQLModel, table=True):
     updated_at: datetime = Field(default=datetime.now(timezone.utc))
     created_by: str | None = Field(None)
     updated_by: str | None = Field(None)
+
+    class Config:
+        arbitrary_types_allowed = True

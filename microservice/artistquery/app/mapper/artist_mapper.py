@@ -1,6 +1,7 @@
 from app.model.artist import (Artist, ArtistImage, ArtistRevision)
 from app.schema.artist_schema import (ArtistSchema, ArtistProfileSchema,
                                       ArtistImageSchema, ArtistRevisionSchema)
+from app.schema.tag_schema import TagSchema
 
 
 def map_to_image_schema(artist_image: ArtistImage):
@@ -25,7 +26,7 @@ def map_to_revision_schema(artist_revision: ArtistRevision):
         nationality_iso_code=artist_revision.nationality_iso_code,
         thumbnail_url=artist_revision.thumbnail_url,
         background_url=artist_revision.background_url,
-        tags=artist_revision.tags,
+        tags=[TagSchema(**tag) for tag in artist_revision.tags_json],
         created_at=artist_revision.created_at,
         created_by=artist_revision.created_by)
 
@@ -57,7 +58,7 @@ def map_to_artist_schema(artist: Artist,
                         is_public=artist.is_public,
                         is_verified=artist.is_verified,
                         is_released=artist.is_released,
-                        tags=artist.tags,
+                        tags=[TagSchema(**tag) for tag in artist.tags_json],
                         profile=profile_schema,
                         images=images,
                         revision_number=artist.revision_number,

@@ -37,6 +37,13 @@ class ArtistEventHandler:
         artist_profile = ArtistProfile(**artist_profile_attributes)
         artist_attributes = {
             **artist_created_event.model_dump(), "id": None,
+            "tags": [
+                tag.name for tag in artist_created_event.tags if tag.is_active
+            ],
+            "tags_json": [
+                tag.model_dump(by_alias=True)
+                for tag in artist_created_event.tags
+            ],
             "images": [],
             "profile": artist_profile,
             "aggregate_id": artist_created_event.id,
@@ -83,7 +90,7 @@ class ArtistEventHandler:
 
         self.artist_repository.save_artist(artist)
         self.logger.info(
-            f"Processed ArtistCreatedEvent: id={artist_created_event.id}, version={artist_created_event.version}"
+            f"Processed {ArtistCreatedEvent.__name__}: id={artist_created_event.id}, version={artist_created_event.version}"
         )
 
     def handle_artist_released_event(
@@ -105,10 +112,17 @@ class ArtistEventHandler:
             artist.profile.background_file_key = release_profile.background_file_key
             artist.profile.background_url = release_profile.background_url
             artist.is_released = artist_released_event.is_released
+            artist.ref_code = artist_released_event.ref_code
             artist.is_public = artist_released_event.is_public
             artist.is_active = artist_released_event.is_active
             artist.is_verified = artist_released_event.is_verified
-            artist.tags = artist_released_event.tags
+            artist.tags = [
+                tag.name for tag in artist_released_event.tags if tag.is_active
+            ]
+            artist.tags_json = [
+                tag.model_dump(by_alias=True)
+                for tag in artist_released_event.tags
+            ]
             artist.event_type = artist_released_event.type
             artist.event_version = artist_released_event.version
             artist.event_timestamp = artist_released_event.timestamp
@@ -121,6 +135,15 @@ class ArtistEventHandler:
                 "artist_id": artist.id,
                 "aggregate_id": artist.aggregate_id,
                 "name": artist.profile.name,
+                "tags_json": [
+                    tag.model_dump(by_alias=True)
+                    for tag in artist_released_event.tags
+                ],
+                "tags": [
+                    tag.name
+                    for tag in artist_released_event.tags
+                    if tag.is_active
+                ],
                 "number": artist.revision_number + 1,
                 "description": artist.profile.description,
                 "biography": artist.profile.biography,
@@ -142,7 +165,7 @@ class ArtistEventHandler:
 
             self.artist_repository.save_artist(artist)
         self.logger.info(
-            f"Processed ArtistReleasedEvent: id={artist_released_event.id}, version={artist_released_event.version}"
+            f"Processed {ArtistReleasedEvent.__name__}: id={artist_released_event.id}, version={artist_released_event.version}"
         )
 
     def handle_artist_updated_event(self,
@@ -154,6 +177,14 @@ class ArtistEventHandler:
             if artist.profile is None:
                 artist.profile = ArtistProfile()
             artist.profile.name = artist_updated_event.profile.name
+            artist.tags = [
+                tag.name for tag in artist_updated_event.tags if tag.is_active
+            ]
+            artist.tags_json = [
+                tag.model_dump(by_alias=True)
+                for tag in artist_updated_event.tags
+            ]
+            artist.is_public = artist_updated_event.is_public
             artist.profile.biography = artist_updated_event.profile.biography
             artist.profile.description = artist_updated_event.profile.description
             artist.profile.thumbnail_file_key = artist_updated_event.profile.thumbnail_file_key
@@ -166,7 +197,7 @@ class ArtistEventHandler:
             artist.updated_at = updated_at
             self.artist_repository.save_artist(artist)
         self.logger.info(
-            f"Processed ArtistUpdatedEvent: id={artist_updated_event.id}, version={artist_updated_event.version}, timestamp={artist_updated_event.timestamp}"
+            f"Processed {ArtistUpdatedEvent.__name__}: id={artist_updated_event.id}, version={artist_updated_event.version}, timestamp={artist_updated_event.timestamp}"
         )
 
     def handle_artist_deleted_event(self,
@@ -185,7 +216,7 @@ class ArtistEventHandler:
         else:
             self.artist_repository.delete_artist(artist_deleted_event.id)
         self.logger.info(
-            f"Processed ArtistDeletedEvent: id={artist_deleted_event.id}, version={artist_deleted_event.version}, timestamp={artist_deleted_event.timestamp}"
+            f"Processed {ArtistDeletedEvent.__name__}: id={artist_deleted_event.id}, version={artist_deleted_event.version}, timestamp={artist_deleted_event.timestamp}"
         )
 
     def handle_artist_verification_set_event(
@@ -194,12 +225,12 @@ class ArtistEventHandler:
         artist = self.artist_repository.find_by_aggregate_id_and_is_active_true(
             artist_verification_set_event.id)
         if artist is not None:
-            artist.is_public = artist_verification_set_event.is_public
+            artist.is_verified = artist_verification_set_event.is_verified
             artist.event_timestamp = artist_verification_set_event.timestamp
             artist.event_type = artist_verification_set_event.type
             artist.event_version = artist_verification_set_event.version
             artist.updated_at = updated_at
             self.artist_repository.save_artist(artist)
         self.logger.info(
-            f"Processed ArtistVerificationSetEvent: id={artist_verification_set_event.id}, version={artist_verification_set_event.version}, timestamp={artist_verification_set_event.timestamp}"
+            f"Processed {ArtistVerificationSetEvent.__name__}: id={artist_verification_set_event.id}, version={artist_verification_set_event.version}, timestamp={artist_verification_set_event.timestamp}"
         )

@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.artist.common.model.ArtistProfile;
+import vn.io.echovibe.artist.common.model.Tag;
 import vn.io.echovibe.core.command.Command;
 
 @SuperBuilder
@@ -21,7 +22,7 @@ public class UpdateArtistCommand extends Command {
 
   private Boolean isPublic;
 
-  private List<String> tags;
+  private List<Tag> tags;
 
   private ArtistProfile profile;
 }

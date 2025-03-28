@@ -1,8 +1,7 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from app.enum.artist_image_type import ArtistImageType
-from enum import Enum
-
+from app.schema.tag_schema import TagSchema
 
 class ArtistProfileSchema(BaseModel):
     name: str
@@ -43,7 +42,7 @@ class ArtistRevisionSchema(BaseModel):
     nationality_iso_code: str | None = Field(None, alias="nationalityIsoCode")
     thumbnail_url: str | None = Field(None, alias="thumbnailUrl")
     background_url: str | None = Field(None, alias="backgroundUrl")
-    tags: list[str] = Field([], alias="tags")
+    tags: list[TagSchema] = Field([], alias="tags")
     created_at: datetime = Field(alias="createdAt")
     created_by: str | None = Field(None, alias="createdBy")
 
@@ -61,7 +60,7 @@ class ArtistSchema(BaseModel):
     is_released: bool = Field(default=False, alias="isReleased")
     is_verified: bool = Field(default=False, alias="isVerified")
     revision_number: int = Field(alias="revisionNumber")
-    tags: list[str] = Field(default=[], alias="tags")
+    tags: list[TagSchema] = Field(default=[], alias="tags")
     images: list[ArtistImageSchema] | None = Field(default=None, alias="images")
     revisions: list[ArtistRevisionSchema] | None = Field(default=None,
                                                          alias="revisions")

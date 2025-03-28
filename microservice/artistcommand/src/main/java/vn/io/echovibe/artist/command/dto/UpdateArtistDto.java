@@ -7,5 +7,5 @@ public record UpdateArtistDto(
     @NotBlank(message = "The field 'id' must not be null or blank.") String id,
     String refCode,
     Boolean isPublic,
-    List<String> tags,
-    UpdateArtistProfileDto profile) {}
+    List<TagDto> tags,
+    ArtistProfileDto profile) {}

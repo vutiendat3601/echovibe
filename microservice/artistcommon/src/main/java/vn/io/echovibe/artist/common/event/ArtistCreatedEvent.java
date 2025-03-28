@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.artist.common.model.ArtistProfile;
+import vn.io.echovibe.artist.common.model.Tag;
 import vn.io.echovibe.core.event.Event;
 
 @NoArgsConstructor
@@ -29,7 +30,7 @@ public class ArtistCreatedEvent extends Event {
 
   @Builder.Default private Boolean isActive = true;
 
-  @Builder.Default private List<String> tags = new LinkedList<>();
+  @Builder.Default private List<Tag> tags = new LinkedList<>();
 
   @Builder.Default private Boolean isVerified = false;
 

@@ -4,13 +4,9 @@ import static vn.io.echovibe.artist.common.constant.ArtistBussinessRuleConstant.
 import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_URN_PREFIX;
 import static vn.io.echovibe.core.constant.BusinessRuleConstant.BR_01;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
@@ -21,9 +17,9 @@ import vn.io.echovibe.artist.common.event.ArtistReleasedEvent;
 import vn.io.echovibe.artist.common.event.ArtistUpdatedEvent;
 import vn.io.echovibe.artist.common.event.ArtistVerificationSetEvent;
 import vn.io.echovibe.artist.common.model.ArtistProfile;
+import vn.io.echovibe.artist.common.model.Tag;
 import vn.io.echovibe.core.domain.AggregateRoot;
 import vn.io.echovibe.core.exception.BusinessRuleViolationException;
-import vn.io.echovibe.core.util.StringUtils;
 
 @NoArgsConstructor
 @Getter
@@ -44,15 +40,12 @@ public class ArtistAggregate extends AggregateRoot {
 
   private Integer revisionNumber = -1;
 
-  private List<String> tags;
+  private List<Tag> tags;
 
   public ArtistAggregate(CreateArtistCommand createArtistCommand) {
     final String urn = ARTIST_URN_PREFIX + createArtistCommand.getId();
     // Add name as initial tag.
-    createArtistCommand.getTags().add(createArtistCommand.getProfile().getName());
-    final Set<String> updatedTagsSet =
-        new HashSet<>(createArtistCommand.getTags())
-            .stream().map(StringUtils::removeAccent).collect(Collectors.toSet());
+
     final ArtistCreatedEvent artistCreatedEvent =
         ArtistCreatedEvent.builder()
             .id(createArtistCommand.getId())
@@ -64,7 +57,7 @@ public class ArtistAggregate extends AggregateRoot {
             .isVerified(false)
             .isReleased(false)
             .revisionNumber(-1)
-            .tags(new ArrayList<>(updatedTagsSet))
+            .tags(createArtistCommand.getTags())
             .build();
     raiseEvent(artistCreatedEvent);
   }
@@ -75,22 +68,22 @@ public class ArtistAggregate extends AggregateRoot {
 
     final ArtistProfile updatedProfile =
         ArtistProfile.builder()
-            .name(this.profile.getName())
-            .biography(this.profile.getBiography())
-            .description(this.profile.getDescription())
-            .thumbnailFileKey(this.profile.getThumbnailFileKey())
-            .thumbnailUrl(this.profile.getThumbnailUrl())
-            .backgroundFileKey(this.profile.getBackgroundFileKey())
-            .backgroundUrl(this.profile.getBackgroundUrl())
+            .name(profile.getName())
+            .biography(profile.getBiography())
+            .description(profile.getDescription())
+            .thumbnailFileKey(profile.getThumbnailFileKey())
+            .thumbnailUrl(profile.getThumbnailUrl())
+            .backgroundFileKey(profile.getBackgroundFileKey())
+            .backgroundUrl(profile.getBackgroundUrl())
             .build();
     final ArtistUpdatedEvent artistUpdatedEvent =
         ArtistUpdatedEvent.builder()
             .id(id)
             .refCode(refCode)
-            .isReleased(false)
             .isPublic(isPublic)
             .tags(tags)
             .profile(updatedProfile)
+            .isReleased(false)
             .build();
 
     // name
@@ -130,16 +123,7 @@ public class ArtistAggregate extends AggregateRoot {
     }
     // tags
     if (Objects.nonNull(updateArtistCommand.getTags())) {
-      final Set<String> updatedTagsSet =
-          new HashSet<>(
-              Optional.ofNullable(artistUpdatedEvent.getTags()).orElse(new ArrayList<>()));
-      final Set<String> updateTagsSet =
-          new HashSet<>(updateArtistCommand.getTags())
-              .stream().map(StringUtils::removeAccent).collect(Collectors.toSet());
-      if (!updatedTagsSet.containsAll(updateTagsSet)) {
-        hasChange = true;
-        artistUpdatedEvent.setTags(new ArrayList<>(updateTagsSet));
-      }
+      artistUpdatedEvent.setTags(updateArtistCommand.getTags());
     }
     if (!hasChange) {
       throw new BusinessRuleViolationException(
@@ -158,6 +142,7 @@ public class ArtistAggregate extends AggregateRoot {
             .id(id)
             .urn(urn)
             .profile(profile)
+            .refCode(refCode)
             .isReleased(true)
             .revisionNumber(++revisionNumber)
             .isPublic(isPublic)
