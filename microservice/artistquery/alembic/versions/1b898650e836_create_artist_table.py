@@ -152,8 +152,7 @@ CREATE TABLE artist_revision (
 	updated_at timestamptz NOT NULL,
 	created_by varchar(255) NULL,
 	updated_by varchar(255) NULL,
-	CONSTRAINT artist_revision_pkey PRIMARY KEY (id),
-	CONSTRAINT artist_revision_urn_key UNIQUE (urn)
+	CONSTRAINT artist_revision_pkey PRIMARY KEY (id)
 );
 
 -- Foreign key: 
