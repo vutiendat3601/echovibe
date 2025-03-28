@@ -185,6 +185,7 @@ class ArtistEventHandler:
                 tag.model_dump(by_alias=True)
                 for tag in artist_updated_event.tags
             ]
+            artist.is_released = artist_updated_event.is_released
             artist.is_public = artist_updated_event.is_public
             artist.profile.biography = artist_updated_event.profile.biography
             artist.profile.description = artist_updated_event.profile.description
@@ -227,6 +228,7 @@ class ArtistEventHandler:
             artist_verification_set_event.id)
         if artist is not None:
             artist.is_verified = artist_verification_set_event.is_verified
+            artist.is_released = artist_verification_set_event.is_released
             artist.event_timestamp = artist_verification_set_event.timestamp
             artist.event_type = artist_verification_set_event.type
             artist.event_version = artist_verification_set_event.version

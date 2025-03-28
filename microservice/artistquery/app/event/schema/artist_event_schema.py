@@ -55,6 +55,7 @@ class ArtistReleasedEvent(EventSchema):
 class ArtistUpdatedEvent(EventSchema):
     profile: ArtistProfileSchema
     is_public: bool = Field(default=False, alias="isPublic")
+    is_released: bool = Field(default=False, alias="isReleased")
     tags: list[TagSchema] = Field(default=[], alias="tags")
 
     class Config:
@@ -73,6 +74,7 @@ class ArtistDeletedEvent(EventSchema):
 
 class ArtistVerificationSetEvent(EventSchema):
     is_verified: bool = Field(alias="isVerified")
+    is_released: bool = Field(default=False, alias="isReleased")
 
     class Config:
         populate_by_name = True
