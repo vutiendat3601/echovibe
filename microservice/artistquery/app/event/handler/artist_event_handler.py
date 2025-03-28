@@ -112,10 +112,10 @@ class ArtistEventHandler:
             artist.profile.background_file_key = release_profile.background_file_key
             artist.profile.background_url = release_profile.background_url
             artist.is_released = artist_released_event.is_released
+            artist.revision_number = artist_released_event.revision_number
             artist.ref_code = artist_released_event.ref_code
             artist.is_public = artist_released_event.is_public
             artist.is_active = artist_released_event.is_active
-            artist.is_released = artist_released_event.is_released
             artist.is_verified = artist_released_event.is_verified
             artist.tags = [
                 tag.name for tag in artist_released_event.tags if tag.is_active
@@ -145,7 +145,7 @@ class ArtistEventHandler:
                     for tag in artist_released_event.tags
                     if tag.is_active
                 ],
-                "number": artist.revision_number + 1,
+                "number": artist_released_event.revision_number,
                 "description": artist.profile.description,
                 "biography": artist.profile.biography,
                 "nationality_iso_code": artist.profile.nationality_iso_code,
