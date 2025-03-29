@@ -42,7 +42,6 @@ CREATE TABLE artist (
 	updated_by varchar(255) NULL,
 	CONSTRAINT artist_aggregate_id_key UNIQUE (aggregate_id),
 	CONSTRAINT artist_pkey PRIMARY KEY (id),
-	CONSTRAINT artist_ref_code_key UNIQUE (ref_code),
 	CONSTRAINT artist_urn_key UNIQUE (urn)
 );
 CREATE INDEX idx_artist__tsv ON artist USING GIN (tsv);
@@ -88,8 +87,7 @@ CREATE TABLE artist_profile (
 	updated_by varchar(255) NULL,
 	CONSTRAINT artist_profile_aggregate_id_key UNIQUE (aggregate_id),
 	CONSTRAINT artist_profile_artist_id_key UNIQUE (artist_id),
-	CONSTRAINT artist_profile_pkey PRIMARY KEY (id),
-	CONSTRAINT artist_profile_ref_code_key UNIQUE (ref_code)
+	CONSTRAINT artist_profile_pkey PRIMARY KEY (id)
 );
 
 -- Foreign key: 
