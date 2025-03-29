@@ -189,6 +189,7 @@ class ArtistEventHandler:
             artist.is_public = artist_updated_event.is_public
             artist.profile.biography = artist_updated_event.profile.biography
             artist.profile.description = artist_updated_event.profile.description
+            artist.profile.nationality_iso_code = artist_updated_event.profile.nationality_iso_code
             artist.profile.thumbnail_file_key = artist_updated_event.profile.thumbnail_file_key
             artist.profile.thumbnail_url = artist_updated_event.profile.thumbnail_url
             artist.profile.background_file_key = artist_updated_event.profile.background_file_key
