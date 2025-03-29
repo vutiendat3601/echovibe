@@ -1,4 +1,5 @@
 import { ArtistProfile } from './artist-profile';
+import { Tag } from './tag';
 
 export interface Artist {
   id: string;
@@ -9,7 +10,7 @@ export interface Artist {
   isReleased: boolean;
   isVerified: boolean;
   revisionNumber: number;
-  tags: string[];
+  tags: Tag[];
   createdAt: string;
   updatedAt: string;
   createdBy: string | null;

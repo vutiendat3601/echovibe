@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { environment } from '../../environment/environment';
-import { ArtistDto, CreateArtistDto, DeleteArtistDto } from '../dto/artist-dto';
+import { ArtistDto, CreateArtistDto, DeleteArtistDto, UpdateArtistDto } from '../dto/artist-dto';
 import { BulkDto } from '../dto/bulk-dto';
 import { BulkResult } from '../model/bulk-result';
 import { ResponseDto } from './../dto/response-dto';
@@ -11,12 +11,17 @@ import { ResponseDto } from './../dto/response-dto';
   providedIn: 'root'
 })
 export class ArtistService {
-  private readonly artistCreatedIdSubject = new BehaviorSubject<string | null>(null);
+  private readonly artistCreatedSubject = new BehaviorSubject<string | null>(null);
+  private readonly artistUpdatedSubject = new BehaviorSubject<string | null>(null);
 
   constructor(private readonly http: HttpClient) {}
 
-  artistCreatedId(): Observable<string | null> {
-    return this.artistCreatedIdSubject;
+  get artistCreatedEvent(): Observable<string | null> {
+    return this.artistCreatedSubject;
+  }
+
+  get artistUpdatedEvent(): Observable<string | null> {
+    return this.artistUpdatedSubject;
   }
 
   bulkCreateArtist(bulkCreateArtistDtos: BulkDto<CreateArtistDto>): Observable<ResponseDto<BulkResult>> {
@@ -24,7 +29,21 @@ export class ArtistService {
       .post<ResponseDto<BulkResult>>(`${environment.artistCommandBaseUrl}/bulk-create`, bulkCreateArtistDtos)
       .pipe(
         tap((respDto) =>
-          respDto.data.items.filter(({ id }) => id).forEach(({ id }) => this.artistCreatedIdSubject.next(id))
+          respDto.data.items
+            .filter(({ id, isSuccessful }) => id && isSuccessful)
+            .forEach(({ id }) => this.artistCreatedSubject.next(id))
+        )
+      );
+  }
+
+  bulkUpdateArtist(bulkUpdateArtistDtos: BulkDto<UpdateArtistDto>): Observable<ResponseDto<BulkResult>> {
+    return this.http
+      .post<ResponseDto<BulkResult>>(`${environment.artistCommandBaseUrl}/bulk-update`, bulkUpdateArtistDtos)
+      .pipe(
+        tap((respDto) =>
+          respDto.data.items
+            .filter(({ id, isSuccessful }) => id && isSuccessful)
+            .forEach(({ id }) => this.artistUpdatedSubject.next(id))
         )
       );
   }
@@ -42,7 +61,7 @@ export class ArtistService {
     loadRevisions: boolean = false
   ): Observable<ResponseDto<[ArtistDto | null]>> {
     return this.http.get<ResponseDto<[ArtistDto | null]>>(
-      `${environment.artistQueryBaseUrl}/byId?loadImages=true&loadRevisions=true&ids=${ids.join(',')}`
+      `${environment.artistQueryBaseUrl}/byId?loadImages=${loadImages}&loadRevisions=${loadRevisions}&ids=${ids.join(',')}`
     );
   }
 
@@ -52,7 +71,7 @@ export class ArtistService {
     loadRevisions: boolean = false
   ): Observable<ResponseDto<[ArtistDto | null]>> {
     return this.http.get<ResponseDto<[ArtistDto | null]>>(
-      `${environment.artistQueryBaseUrl}/byRefCode?loadImages=true&loadRevisions=true&refCodes=${refCodes.join(',')}`
+      `${environment.artistQueryBaseUrl}/byRefCode?loadImages=${loadImages}&loadRevisions=${loadRevisions}&refCodes=${refCodes.join(',')}`
     );
   }
 
