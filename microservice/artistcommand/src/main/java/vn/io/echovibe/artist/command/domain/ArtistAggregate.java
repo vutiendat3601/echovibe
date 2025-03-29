@@ -103,7 +103,7 @@ public class ArtistAggregate extends AggregateRoot {
     if (!Objects.equals(
         updateProfile.getNationalityIsoCode(), updatedProfile.getNationalityIsoCode())) {
       hasChange = true;
-      updatedProfile.setThumbnailUrl(updateProfile.getThumbnailUrl());
+      updatedProfile.setNationalityIsoCode(updateProfile.getNationalityIsoCode());
     }
     // thumbnailUrl
     if (!Objects.equals(updateProfile.getThumbnailUrl(), updatedProfile.getThumbnailUrl())) {
