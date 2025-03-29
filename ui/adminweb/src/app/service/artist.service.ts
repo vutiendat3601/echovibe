@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { environment } from '../../environment/environment';
-import { ArtistDto, CreateArtistDto, DeleteArtistDto, UpdateArtistDto } from '../dto/artist-dto';
+import { ArtistDto, CreateArtistDto, DeleteArtistDto, ReleaseArtistDto, UpdateArtistDto } from '../dto/artist-dto';
 import { BulkDto } from '../dto/bulk-dto';
 import { BulkResult } from '../model/bulk-result';
 import { ResponseDto } from './../dto/response-dto';
@@ -13,6 +13,8 @@ import { ResponseDto } from './../dto/response-dto';
 export class ArtistService {
   private readonly artistCreatedSubject = new BehaviorSubject<string | null>(null);
   private readonly artistUpdatedSubject = new BehaviorSubject<string | null>(null);
+  private readonly artistReleasedSubject = new BehaviorSubject<string | null>(null);
+  private readonly artistDeletedSubject = new BehaviorSubject<string | null>(null);
 
   constructor(private readonly http: HttpClient) {}
 
@@ -22,6 +24,14 @@ export class ArtistService {
 
   get artistUpdatedEvent(): Observable<string | null> {
     return this.artistUpdatedSubject;
+  }
+
+  get artistReleasedEvent(): Observable<string | null> {
+    return this.artistReleasedSubject;
+  }
+
+  get artistDeletedEvent(): Observable<string | null> {
+    return this.artistDeletedSubject;
   }
 
   bulkCreateArtist(bulkCreateArtistDtos: BulkDto<CreateArtistDto>): Observable<ResponseDto<BulkResult>> {
@@ -49,10 +59,27 @@ export class ArtistService {
   }
 
   bulkDeleteArtist(bulkDeleteArtistDtos: BulkDto<DeleteArtistDto>): Observable<ResponseDto<BulkResult>> {
-    return this.http.post<ResponseDto<BulkResult>>(
-      `${environment.artistCommandBaseUrl}/bulk-delete`,
-      bulkDeleteArtistDtos
-    );
+    return this.http
+      .post<ResponseDto<BulkResult>>(`${environment.artistCommandBaseUrl}/bulk-delete`, bulkDeleteArtistDtos)
+      .pipe(
+        tap((respDto) =>
+          respDto.data.items
+            .filter(({ id, isSuccessful }) => id && isSuccessful)
+            .forEach(({ id }) => this.artistDeletedSubject.next(id))
+        )
+      );
+  }
+
+  bulkReleaseArtist(bulkReleaseArtistDtos: BulkDto<ReleaseArtistDto>): Observable<ResponseDto<BulkResult>> {
+    return this.http
+      .post<ResponseDto<BulkResult>>(`${environment.artistCommandBaseUrl}/bulk-release`, bulkReleaseArtistDtos)
+      .pipe(
+        tap((respDto) =>
+          respDto.data.items
+            .filter(({ id, isSuccessful }) => id && isSuccessful)
+            .forEach(({ id }) => this.artistReleasedSubject.next(id))
+        )
+      );
   }
 
   getArtistByIds(
