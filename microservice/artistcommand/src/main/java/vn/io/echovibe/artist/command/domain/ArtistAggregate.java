@@ -127,6 +127,7 @@ public class ArtistAggregate extends AggregateRoot {
     }
     // tags
     if (Objects.nonNull(updateArtistCommand.getTags())) {
+      hasChange = true;
       artistUpdatedEvent.setTags(updateArtistCommand.getTags());
     }
     if (!hasChange) {
