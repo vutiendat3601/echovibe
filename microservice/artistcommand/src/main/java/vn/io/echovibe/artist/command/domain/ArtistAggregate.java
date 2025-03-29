@@ -99,6 +99,12 @@ public class ArtistAggregate extends AggregateRoot {
       hasChange = true;
       updatedProfile.setBiography(updateProfile.getBiography());
     }
+    // nationalityIsoCode
+    if (!Objects.equals(
+        updateProfile.getNationalityIsoCode(), updatedProfile.getNationalityIsoCode())) {
+      hasChange = true;
+      updatedProfile.setThumbnailUrl(updateProfile.getThumbnailUrl());
+    }
     // thumbnailUrl
     if (!Objects.equals(updateProfile.getThumbnailUrl(), updatedProfile.getThumbnailUrl())) {
       hasChange = true;
