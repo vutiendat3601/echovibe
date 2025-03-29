@@ -119,7 +119,7 @@ export class ArtistManagementBulkComponent implements OnInit {
     NO_RESULTS_FOUND: $localize`:@@MESSAGE_NO_RESULT_FOUND:No results found.`,
     ADD_TAG: $localize`:@@BUTTON_LABEL_ADD_TAG:Add Tag`,
     EDIT_TAGS: $localize`:@@FORM_LABEL_ARTIST_TAG_EDIT:Edit Tags`,
-    TAGS: $localize`:@@COLUMN_LABEL_MANAGE_ARTIST_TAG:Tags`,
+    TAGS: $localize`:@@COLUMN_LABEL_MANAGE_ARTIST_TAG:Tags`
   };
 
   // Constants
@@ -181,7 +181,7 @@ export class ArtistManagementBulkComponent implements OnInit {
     return this.handleGetFormGroupAt(this.selectedArtistIndex);
   }
 
-  getSelectedArtist(): Artist | null {
+  handleGetSelectedArtist(): Artist | null {
     if (this.selectedArtistIndex === -1) return null;
     return this.artists()[this.selectedArtistIndex];
   }
@@ -207,7 +207,6 @@ export class ArtistManagementBulkComponent implements OnInit {
     }
 
     this.isTagsDialogVisible = true;
-
   }
 
   handleSaveTags(): void {
@@ -234,7 +233,7 @@ export class ArtistManagementBulkComponent implements OnInit {
     this.tagFilterKeyword = tagName;
 
     if (tagName?.trim()) {
-      const artist = this.getSelectedArtist();
+      const artist = this.handleGetSelectedArtist();
       this.tagFilterFoundExactMatch = !!(artist && artist.tags.some(({ name }) => name === tagName));
     } else {
       this.tagFilterFoundExactMatch = true;

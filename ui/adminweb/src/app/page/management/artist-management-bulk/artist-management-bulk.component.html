@@ -393,12 +393,12 @@
   [dismissableMask]="true"
   styleClass="tags-dialog"
 >
-  <ng-container *ngIf="handleGetSelectedArtistFormGroup() && getSelectedArtist()">
+  <ng-container *ngIf="handleGetSelectedArtistFormGroup() && handleGetSelectedArtist()">
     <form [formGroup]="handleGetSelectedArtistFormGroup()!" class="flex flex-col gap-3">
       <div class="w-full">
         <p-multiSelect
           formControlName="tags"
-          [options]="getSelectedArtist()!.tags"
+          [options]="handleGetSelectedArtist()!.tags"
           optionLabel="name"
           optionValue="name"
           [placeholder]="'Select tags'"
