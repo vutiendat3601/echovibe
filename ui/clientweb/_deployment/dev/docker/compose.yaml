@@ -1,0 +1,12 @@
+name: echovibe-clientweb
+services:
+  proxy-i1:
+    image: "nginx:stable-alpine3.20-perl"
+    container_name: "echovibe-clientweb-proxy-i1"
+    hostname: "echovibe-clientweb-proxy-i1"
+    volumes:
+      - "../../../dist/echovibe-clientweb/:/usr/share/nginx/html/echovibe-clientweb/"
+      - "./conf.d/:/etc/nginx/conf.d/:ro"
+    ports:
+      - "80:80"
+      - "443:443"
