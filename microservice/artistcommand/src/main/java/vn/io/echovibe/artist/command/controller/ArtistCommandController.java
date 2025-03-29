@@ -61,11 +61,11 @@ public class ArtistCommandController {
                       .profile(
                           ArtistProfile.builder()
                               .name(createArtistProfileDto.name())
-                              .nationalityIsoCode(createArtistProfileDto.nationalityIsoCode())
                               .biography(createArtistProfileDto.biography())
                               .description(createArtistProfileDto.description())
                               .thumbnailUrl(createArtistProfileDto.thumbnailUrl())
                               .backgroundUrl(createArtistProfileDto.backgroundUrl())
+                              .nationalityIsoCode(createArtistProfileDto.nationalityIsoCode())
                               .build())
                       .build();
                 })
@@ -89,6 +89,7 @@ public class ArtistCommandController {
                           .description(uad.profile().description())
                           .thumbnailUrl(uad.profile().thumbnailUrl())
                           .backgroundUrl(uad.profile().backgroundUrl())
+                          .nationalityIsoCode(uad.profile().nationalityIsoCode())
                           .build();
                   return UpdateArtistCommand.builder()
                       .id(uad.id())
