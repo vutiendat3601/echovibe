@@ -14,6 +14,7 @@
     "MESSAGE_ARTIST_BULK_REQUEST_DETELE_SUCCESSFUL": "Bulk delete Artist request was processed successfully.",
     "MESSAGE_ARTIST_BULK_REQUEST_RELEASE_SUCCESSFUL": "Bulk release Artist request was processed successfully.",
     "MESSAGE_ERROR_SYSTEM": "An unexpected error occurred. Please try again later.",
+    "MESSAGE_SUCCESS_TAGS": "Tags updated successfully!",
     "MESSAGE_NO_RESULT_FOUND": "No results found.",
     "MENU_ITEM_LABEL_MANAGEMENT": "Management",
     "MENU_ITEM_LABEL_ARTIST": "Artist",
@@ -312,6 +313,24 @@
     "COUNTRY_ISO_NAME_EH": "Western Sahara",
     "COUNTRY_ISO_NAME_YE": "Yemen",
     "COUNTRY_ISO_NAME_ZM": "Zambia",
-    "COUNTRY_ISO_NAME_ZW": "Zimbabwe"
+    "COUNTRY_ISO_NAME_ZW": "Zimbabwe",
+    "DIALOG_LABEL_EDIT_THUMBNAIL": "Edit Thumbnail",
+    "DIALOG_LABEL_EDIT_BACKGROUND": "Edit Background",
+    "DIALOG_LABEL_EDIT_BIOGRAPHY": "Edit Biography",
+    "MESSAGE_SUCCESS_THUMBNAIL": "Thumbnail URL updated successfully!",
+    "MESSAGE_SUCCESS_BACKGROUND": "Background URL updated successfully!",
+    "MESSAGE_SUCCESS_BIOGRAPHY": "Biography updated successfully!",
+    "BUTTON_LABEL_IMPORT_CSV": "Import CSV",
+    "CONFIRM_MESSAGE_ARTIST_DELETE_MULTIPLE": "Are you sure you want to delete the selected Artists from the update Artist list?",
+    "MESSAGE_ARTIST_DELETED_MULTIPLE_SUCCESSFUL": "Artists were deleted from the updated Artist list.",
+    "CONFIRM_MESSAGE_ARTIST_DELETE_SINGLE": "Are you sure you want to delete this Artist from the update Artist list?",
+    "MESSAGE_ARTIST_DELETED_SINGLE_SUCCESSFUL": "Artist removed from the updated Artist list.",
+    "DIALOG_SUMMARY_CONFIRM": "Confirmed",
+    "MESSAGE_ARTIST_UPDATE_MULTIPLE_SUCCESSFUL": "Artists were updated successfully.",
+    "FIX_VALIDATION_ERRORS": "Please fix the validation errors.",
+    "TITLE_SUCCESS": "Success",
+    "TITLE_ERROR": "Error",
+    "TABLE_LABEL_UPDATE_ARTISTS": "Update Artists",
+    "BUTTON_LABEL_ADD_TAG": "Add Tag"
   }
 }
