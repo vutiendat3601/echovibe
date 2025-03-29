@@ -20,6 +20,11 @@ export interface CreateArtistDto {
 export interface DeleteArtistDto {
   id: string;
 }
+
+export interface ReleaseArtistDto {
+  id: string;
+}
+
 export interface ArtistDto {
   id: string;
   urn: string;

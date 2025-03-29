@@ -40,7 +40,13 @@ import { ArtistNationalityNamePipe } from '../../../pipe/artist-nationality.pipe
 import { SafeHtmlPipe } from '../../../pipe/safe-html.pipe';
 import { ArtistService } from '../../../service/artist.service';
 import { UrlValidator } from '../../../validator/url.validator';
-import { ArtistDto, CreateArtistDto, DeleteArtistDto, UpdateArtistDto } from './../../../dto/artist-dto';
+import {
+  ArtistDto,
+  CreateArtistDto,
+  DeleteArtistDto,
+  ReleaseArtistDto,
+  UpdateArtistDto
+} from './../../../dto/artist-dto';
 import { ExceptionHandler, Message } from './../../../exception/exception-handler';
 import { Nationality } from './../../../model/nationality';
 import { InputGroupModule } from 'primeng/inputgroup';
@@ -146,7 +152,7 @@ export class ArtistManagementComponent implements OnInit {
   readonly renderableImageUrls: string[] = [];
   readonly selectedArtists: Artist[] = [];
   readonly artists: WritableSignal<Artist[]> = signal<Artist[]>([]);
-  private fetchArtistIntervalId: number = -1;
+  private fetchArtistTimeoutId: number = -1;
   isDialogFormSubmitted: boolean = false;
   isDialogShowed: boolean = false;
   action: ActionType = 'new';
@@ -173,7 +179,29 @@ export class ArtistManagementComponent implements OnInit {
     this.isDialogFormSubmitted = false;
   }
 
-  handleDeleteSelectedArtists(): void {}
+  handleDeleteSelectedArtists(): void {
+    const deleteArtistDtos: DeleteArtistDto[] = this.selectedArtists.map(({ id }) => ({
+      id
+    }));
+    this.confirmationService.confirm({
+      message: $localize`:@@CONFIRM_MESSAGE_ARTIST_BULK_REQUEST_DELETE:Are you sure you want to delete the selected Artists?`,
+      header: $localize`:@@DIALOG_LABEL_CONFIRM_DELETE:Confirm delete`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => this.bulkDeleteArtist(deleteArtistDtos)
+    });
+  }
+
+  handleReleaseSelectedArtists(): void {
+    const releaseArtistDtos: ReleaseArtistDto[] = this.selectedArtists.map(({ id }) => ({
+      id
+    }));
+    this.confirmationService.confirm({
+      message: $localize`:@@CONFIRM_MESSAGE_ARTIST_BULK_REQUEST_RELEASE:Are you sure you want to release the selected Artists?`,
+      header: $localize`:@@DIALOG_LABEL_CONFIRM_RELEASE:Confirm release`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => this.bulkReleaseArtist(releaseArtistDtos)
+    });
+  }
 
   handleEditSelectedArtists(): void {
     const ids = this.selectedArtists.map((artist) => artist.id).join(',');
@@ -202,6 +230,7 @@ export class ArtistManagementComponent implements OnInit {
       id,
       profile: { name, description, biography, thumbnailUrl, backgroundUrl, nationalityIsoCode },
       refCode,
+      isPublic,
       tags
     } = artist;
     this.nameFormControl.setValue(name);
@@ -211,7 +240,8 @@ export class ArtistManagementComponent implements OnInit {
     this.nationalityIsoCodeFormControl.setValue(nationalityIsoCode);
     this.thumbnailUrlFormControl.setValue(thumbnailUrl);
     this.refCodeFormControl.setValue(refCode);
-    artist.isReleased && this.refCodeFormControl.disable();
+    this.isPublicFormControl.setValue(isPublic);
+    artist.revisionNumber > -1 && this.refCodeFormControl.disable();
     this.tagsFormControl.setValue(tags.filter(({ isActive }) => isActive).map(({ name }) => name));
     this.currentArtistAttribute = { id, tags, tagFilterFoundExactMatch: true, tagFilterKeyword: null };
 
@@ -261,6 +291,15 @@ export class ArtistManagementComponent implements OnInit {
       header: $localize`:@@DIALOG_LABEL_CONFIRM_DELETE:Confirm delete`,
       icon: 'pi pi-exclamation-triangle',
       accept: () => id && this.deleteArtist({ id })
+    });
+  }
+
+  handleReleaseArtist({ id }: Artist): void {
+    this.confirmationService.confirm({
+      message: $localize`:@@CONFIRM_MESSAGE_ARTIST_RELEASE:Are you sure you want to release the selected Artist?`,
+      header: $localize`:@@DIALOG_LABEL_CONFIRM_RELEASE:Confirm release`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => id && this.releaseArtist({ id })
     });
   }
 
@@ -332,14 +371,57 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   private deleteArtist(deleteArtistDto: DeleteArtistDto) {
-    const { id } = deleteArtistDto;
     this.artistService.bulkDeleteArtist({ items: [deleteArtistDto] }).subscribe((respDto) => {
       const { isSuccessful, errors } = respDto.data.items[0];
       if (isSuccessful) {
-        this.artists.update((artists) => artists.filter((artist) => artist.id != id));
         this.addMessage({
           title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
           content: $localize`:@@MESSAGE_ARTIST_DETELED_SUCCESSFUL:Artist was deleted successfully.`
+        });
+      } else {
+        const message = this.exceptionHandler.handle(errors[0]);
+        this.addMessage(message, 'error');
+      }
+    });
+  }
+
+  private bulkDeleteArtist(deleteArtistDtos: DeleteArtistDto[]) {
+    this.artistService.bulkDeleteArtist({ items: deleteArtistDtos }).subscribe((respDto) => {
+      const { isSuccessful, errors } = respDto.data.items[0];
+      if (isSuccessful) {
+        this.addMessage({
+          title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
+          content: $localize`:@@MESSAGE_ARTIST_BULK_REQUEST_DETELE_SUCCESSFUL:Bulk delete artist was processed successfully.`
+        });
+      } else {
+        const message = this.exceptionHandler.handle(errors[0]);
+        this.addMessage(message, 'error');
+      }
+    });
+  }
+
+  private releaseArtist(releaseArtistDto: ReleaseArtistDto) {
+    this.artistService.bulkReleaseArtist({ items: [releaseArtistDto] }).subscribe((respDto) => {
+      const { isSuccessful, errors } = respDto.data.items[0];
+      if (isSuccessful) {
+        this.addMessage({
+          title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
+          content: $localize`:@@MESSAGE_ARTIST_RELEASED_SUCCESSFUL:Bulk delete Artist request was processed successfully.`
+        });
+      } else {
+        const message = this.exceptionHandler.handle(errors[0]);
+        this.addMessage(message, 'error');
+      }
+    });
+  }
+
+  private bulkReleaseArtist(releaseArtistDtos: ReleaseArtistDto[]) {
+    this.artistService.bulkReleaseArtist({ items: releaseArtistDtos }).subscribe((respDto) => {
+      const { isSuccessful, errors } = respDto.data.items[0];
+      if (isSuccessful) {
+        this.addMessage({
+          title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
+          content: $localize`:@@MESSAGE_ARTIST_BULK_REQUEST_RELEASE_SUCCESSFUL:Bulk release Artist request was processed successfully.`
         });
       } else {
         const message = this.exceptionHandler.handle(errors[0]);
@@ -355,7 +437,7 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   private refreshData(): void {
-    if (this.changedArtistIds.size && this.fetchArtistIntervalId < 0) {
+    if (this.changedArtistIds.size && this.fetchArtistTimeoutId < 0) {
       const updateArtists = () => {
         const fetchNewArtists = this.artistService.getArtistByIds([...this.changedArtistIds]).pipe(
           map((respDto) => {
@@ -379,11 +461,14 @@ export class ArtistManagementComponent implements OnInit {
           })
         );
 
-        this.fetchArtistIntervalId = window.setTimeout(() => {
-          fetchNewArtists.subscribe((isAllFetched) =>
-            isAllFetched ? (this.fetchArtistIntervalId = -1) : updateArtists()
-          );
-        }, 1_000);
+        this.fetchArtistTimeoutId = window.setTimeout(
+          () => {
+            fetchNewArtists.subscribe((isAllFetched) =>
+              isAllFetched ? (this.fetchArtistTimeoutId = -1) : updateArtists()
+            );
+          },
+          this.changedArtistIds.size >= 5 ? 5_000 : 1_000
+        );
       };
       updateArtists();
     }
@@ -417,6 +502,17 @@ export class ArtistManagementComponent implements OnInit {
       if (id) {
         this.changedArtistIds.add(id);
         this.refreshData();
+      }
+    });
+    this.artistService.artistReleasedEvent.subscribe((id) => {
+      if (id) {
+        this.changedArtistIds.add(id);
+        this.refreshData();
+      }
+    });
+    this.artistService.artistDeletedEvent.subscribe((id) => {
+      if (id) {
+        this.artists.update((artists) => artists.filter((artist) => artist.id != id));
       }
     });
   }
