@@ -1,5 +1,5 @@
 export interface ArtistProfile {
-  name: string;
+  name: string | null;
   description: string | null;
   biography: string | null;
   nationalityIsoCode: string | null;

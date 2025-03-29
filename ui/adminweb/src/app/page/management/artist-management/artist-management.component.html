@@ -174,7 +174,15 @@
 
       <!-- Nationality -->
       <td style="min-width: 12rem">
-        <span [class]="'fi fi-' + artist.profile.nationalityIsoCode.toLowerCase()"></span>
+        <span
+          [class]="
+            'fi fi-' +
+            (![UNDEFINED, null].includes(artist.profile.nationalityIsoCode)
+              ? artist.profile.nationalityIsoCode
+              : 'xx'
+            ).toLowerCase()
+          "
+        ></span>
         <span class="ml-2"> {{ artist.profile.nationalityIsoCode | artistNationalityName }}</span>
       </td>
 
@@ -261,8 +269,8 @@
             />
           </div>
           <div class="flex-1">
-            <div>
-              <!-- Name -->
+            <!-- Name -->
+            <div class="flex-1">
               <p-floatlabel variant="on" class="w-full">
                 <input id="name" ng-invalid ng-dirty pInputText formControlName="nameFormControl" class="w-full" />
                 <label i18n="@@FORM_LABEL_ARTIST_NAME" for="name">Name</label>
@@ -382,6 +390,61 @@
         </div>
       </p-panel>
 
+      <p-panel styleClass="mt-4" i18n-header="@@FORM_SECTION_ARTIST_ATTRIBUTE" header="Control attributes">
+        <div class="flex items-center gap-4 w-full">
+          <!-- isPublic -->
+          <div>
+            <p-checkbox formControlName="isPublicFormControl" [binary]="true" inputId="isPublic" />
+            <label i18n="@@FORM_LABEL_ARTIST_IS_PUBLIC" for="isPublic" class="ml-2">Public</label>
+          </div>
+
+          <!-- tags -->
+          <p-multiselect
+            class="flex-1"
+            [options]="this.currentArtistAttribute.tags"
+            formControlName="tagsFormControl"
+            i18n-placeholder="@@FORM_LABEL_ARTIST_TAG_EDIT"
+            placeholder="Edit tags"
+            optionLabel="name"
+            optionValue="name"
+            styleClass="w-full md:w-80"
+            display="chip"
+            i18n-emptyFilterMessage="@@MESSAGE_NO_RESULT_FOUND"
+            emptyFilterMessage="No results found."
+            [filterValue]="currentArtistAttribute.tagFilterKeyword || ''"
+            (onFilter)="handleTagFilter($event)"
+          >
+            <ng-template #header>
+              <div class="font-medium px-3 py-2">Tag</div>
+            </ng-template>
+            <ng-template #footer>
+              @if (!currentArtistAttribute.tagFilterFoundExactMatch) {
+                <div [style]="{ padding: 'var(--p-multiselect-list-padding)' }">
+                  <p-button severity="secondary" text size="small" styleClass="w-full" (onClick)="handleCreateTag()">
+                    <i class="pi pi-plus"></i>
+                    <span>
+                      Add tag
+                      <span>'{{ currentArtistAttribute.tagFilterKeyword }}'</span>
+                    </span>
+                  </p-button>
+                </div>
+              }
+            </ng-template>
+            <ng-template let-tag #item>
+              <div class="flex items-center gap-2">
+                <p>{{ tag.name }}</p>
+              </div>
+            </ng-template>
+            <ng-template #dropdownicon>
+              <i class="pi pi-tags"></i>
+            </ng-template>
+            <ng-template #filtericon>
+              <i class="pi pi-hashtag"></i>
+            </ng-template>
+          </p-multiselect>
+        </div>
+      </p-panel>
+
       <!-- Biography -->
       <p-editor
         id="biography"
@@ -451,4 +514,3 @@
 
 <p-confirmdialog [style]="{ width: 'clamp(320px, 60vw, 540px)' }" />
 <p-toast position="top-right" />
-<router-outlet></router-outlet>

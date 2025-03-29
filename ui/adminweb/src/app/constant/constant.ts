@@ -3,6 +3,8 @@ export const ROLE_ARTIST_MANAGER: string = 'artistmanager';
 export const URL_REGEX: RegExp =
   /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
 
+export const UNDEFINED = 'UNDEFINED';
+
 export enum ArtistNationality {
   AF = 'Afghanistan',
   AX = 'Åland Islands',
@@ -254,3 +256,8 @@ export enum ArtistNationality {
   ZM = 'Zambia',
   ZW = 'Zimbabwe'
 }
+
+export const ARTIST_NATIONALITIES = Object.keys(ArtistNationality).map((key) => ({
+  code: key,
+  name: `${ArtistNationality[key as keyof typeof ArtistNationality]}`
+}));
