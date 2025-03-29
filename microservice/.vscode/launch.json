@@ -16,16 +16,6 @@
       "justMyCode": false
     },
     {
-      "name": "product",
-      "type": "debugpy",
-      "request": "launch",
-      "module": "uvicorn",
-      "cwd": "${workspaceFolder}/product",
-      "args": ["app.main:app", "--reload", "--port=6200"],
-      "jinja": true,
-      "envFile": "${workspaceFolder}/product/.env"
-    },
-    {
       "type": "java",
       "name": "ArtistCommandApplication",
       "request": "launch",
@@ -33,8 +23,7 @@
       "projectName": "artistcommand",
       "cwd": "${workspaceFolder}/artistcommand",
       "env": {
-        "APP_WEB_CLIENT_ARTISTQUERY_BASEURL": "http://localhost:6110",
-        "APP_WEB_CLIENT_ARTISTQUERY_ENABLED": "true"
+        "APP_WEB_CLIENT_ARTISTQUERY_BASEURL": "http://localhost:6110"
       }
     },
     {
@@ -52,6 +41,16 @@
       "mainClass": "vn.io.echovibe.playlist.command.PlaylistCommandApplication",
       "projectName": "playlistcommand",
       "cwd": "${workspaceFolder}/playlistcommand"
+    },
+    {
+      "name": "product",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "cwd": "${workspaceFolder}/product",
+      "args": ["app.main:app", "--reload", "--port=6200"],
+      "jinja": true,
+      "envFile": "${workspaceFolder}/product/.env"
     }
   ]
 }

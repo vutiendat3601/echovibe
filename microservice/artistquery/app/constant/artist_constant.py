@@ -1,5 +1,5 @@
 ARTIST_CREATED_EVENT = "artist.ArtistCreatedEvent"
 ARTIST_RELEASED_EVENT = "artist.ArtistReleasedEvent"
-ARTIST_UPDATED_EVENT = "artist.ArtistProfileUpdatedEvent"
+ARTIST_UPDATED_EVENT = "artist.ArtistUpdatedEvent"
 ARTIST_DELETED_EVENT = "artist.ArtistDeletedEvent"
-ARTIST_VISIBILITY_SET_EVENT = "artist.ArtistVisibilitySetEvent"
+ARTIST_VERIFICATION_SET_EVENT = "artist.ArtistVerificationSetEvent"

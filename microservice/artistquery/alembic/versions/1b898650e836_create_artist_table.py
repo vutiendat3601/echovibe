@@ -1,4 +1,4 @@
-"""create tables: artist, artist_profile
+"""create tables: artist, artist_profile, artist_image, artist_revision
 
 Revision ID: 1b898650e836
 Revises: 
@@ -18,66 +18,168 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.create_table(
-        "artist",
-        sa.Column("id",
-                  sa.UUID(),
-                  primary_key=True,
-                  nullable=False,
-                  unique=True),
-        sa.Column("profile_id", sa.UUID(), nullable=True, unique=True),
-        sa.Column("aggregate_id",
-                  sa.String(length=12),
-                  nullable=False,
-                  unique=True),
-        sa.Column("urn", sa.String(length=255), nullable=False, unique=True),
-        sa.Column("ref_code",
-                  sa.String(length=100),
-                  nullable=True,
-                  unique=True,
-                  default=None),
-        sa.Column("is_public", sa.Boolean(), nullable=False, default=False),
-        sa.Column("is_released", sa.Boolean(), nullable=False, default=False),
-        sa.Column("is_active", sa.Boolean(), nullable=False, default=True),
-        sa.Column("tags", sa.ARRAY(sa.Text()), nullable=False, default="{}"),
-        sa.Column("event_timestamp",
-                  sa.TIMESTAMP(timezone=True),
-                  nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False),
-        sa.Column("created_by", sa.String(length=255), nullable=True),
-        sa.Column("updated_by", sa.String(length=255), nullable=True))
+    create_artist_table_ddl = """
+-- Table: artist
+CREATE TABLE artist (
+	id uuid NOT NULL,
+	aggregate_id varchar(12) NOT NULL,
+	urn varchar(255) NOT NULL,
+	ref_code varchar(100) NULL,
+	revision_number numeric NOT NULL,
+	is_public bool NOT NULL,
+	is_released bool NOT NULL,
+	is_active bool NOT NULL,
+	is_verified bool NOT NULL,
+	tags _text NOT NULL DEFAULT '{}', -- used for tsv trigger
+  tags_json jsonb NOT NULL,
+  tsv tsvector,
+	event_type text NULL,
+	event_version numeric NULL,
+	event_timestamp timestamptz NULL,
+	created_at timestamptz NOT NULL,
+	updated_at timestamptz NOT NULL,
+	created_by varchar(255) NULL,
+	updated_by varchar(255) NULL,
+	CONSTRAINT artist_aggregate_id_key UNIQUE (aggregate_id),
+	CONSTRAINT artist_pkey PRIMARY KEY (id),
+	CONSTRAINT artist_ref_code_key UNIQUE (ref_code),
+	CONSTRAINT artist_urn_key UNIQUE (urn)
+);
+CREATE INDEX idx_artist__tsv ON artist USING GIN (tsv);
 
-    op.create_table(
-        "artist_profile",
-        sa.Column("id",
-                  sa.UUID(),
-                  primary_key=True,
-                  nullable=False,
-                  unique=True),
-        sa.Column("name", sa.String(length=255), nullable=False),
-        sa.Column("biography", sa.String(length=255), nullable=True),
-        sa.Column("description", sa.Text(), nullable=True),
-        sa.Column("thumbnail_file_key", sa.Text(), nullable=True),
-        sa.Column("thumbnail_url", sa.Text(), nullable=True),
-        sa.Column("background_file_key", sa.Text(), nullable=True),
-        sa.Column("background_url", sa.Text(), nullable=True),
-        sa.Column("event_timestamp",
-                  sa.TIMESTAMP(timezone=True),
-                  nullable=False),
-        sa.Column("created_at", sa.TIMESTAMP(timezone=True), nullable=False),
-        sa.Column("updated_at", sa.TIMESTAMP(timezone=True), nullable=False),
-        sa.Column("created_by", sa.String(length=255), nullable=True),
-        sa.Column("updated_by", sa.String(length=255), nullable=True))
-    op.create_foreign_key(constraint_name="fk_artist_profile_id_artist_profile",
-                          source_table="artist",
-                          referent_table="artist_profile",
-                          local_cols=["profile_id"],
-                          remote_cols=["id"],
-                          onupdate="CASCADE",
-                          ondelete="CASCADE")
+-- Function: artist_update_tsv
+CREATE OR REPLACE FUNCTION artist_update_tsv()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.tsv = to_tsvector('english', array_to_string(NEW.tags, ' '));
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql
+;
+
+-- Trigger: artist_update_tsv_trigger
+CREATE TRIGGER artist_update_tsv_trigger
+BEFORE INSERT OR UPDATE ON artist
+FOR EACH ROW
+EXECUTE FUNCTION artist_update_tsv()
+;"""
+
+    create_artist_profile_ddl = """
+CREATE TABLE artist_profile (
+	id uuid NOT NULL,
+	artist_id uuid NULL,
+	aggregate_id varchar(12) NOT NULL,
+	ref_code varchar(255) NULL,
+	"name" varchar(255) NOT NULL,
+	description varchar(255) NULL,
+	biography text NULL,
+	nationality_iso_code text NULL,
+	thumbnail_file_key text NULL,
+	thumbnail_url text NULL,
+	background_file_key text NULL,
+	background_url text NULL,
+	is_active bool NOT NULL,
+	event_type text NULL,
+	event_version numeric NULL,
+	event_timestamp timestamptz NULL,
+	created_at timestamptz NOT NULL,
+	updated_at timestamptz NOT NULL,
+	created_by varchar(255) NULL,
+	updated_by varchar(255) NULL,
+	CONSTRAINT artist_profile_aggregate_id_key UNIQUE (aggregate_id),
+	CONSTRAINT artist_profile_artist_id_key UNIQUE (artist_id),
+	CONSTRAINT artist_profile_pkey PRIMARY KEY (id),
+	CONSTRAINT artist_profile_ref_code_key UNIQUE (ref_code)
+);
+
+-- Foreign key: 
+ALTER TABLE artist_profile ADD CONSTRAINT fk_artist_profile__artist_id___artist__id
+FOREIGN KEY (artist_id) REFERENCES artist(id) ON DELETE CASCADE ON UPDATE CASCADE
+;"""
+
+    create_artist_image_table_ddl = """
+CREATE TABLE artist_image (
+	id uuid NOT NULL,
+	artist_id uuid NOT NULL,
+	aggregate_id varchar(12) NOT NULL,
+	ref_code varchar(255) NULL,
+	file_url text NULL,
+	file_key text NULL,
+	is_active bool NOT NULL,
+	"type" varchar(32) NULL,
+	thumbnail_url text NULL,
+	event_type text NULL,
+	event_version numeric NULL,
+	event_timestamp timestamptz NULL,
+	created_at timestamptz NOT NULL,
+	updated_at timestamptz NOT NULL,
+	created_by varchar(255) NULL,
+	updated_by varchar(255) NULL,
+	CONSTRAINT artist_image_pkey PRIMARY KEY (id)
+);
+
+-- Foreign key: 
+ALTER TABLE artist_image ADD CONSTRAINT fk_artist_image__artist_id___artist__id
+FOREIGN KEY (artist_id) REFERENCES artist(id) ON DELETE CASCADE ON UPDATE CASCADE
+;"""
+
+    create_artist_revision_table_ddl = """
+CREATE TABLE artist_revision (
+	id uuid NOT NULL,
+	artist_id uuid NOT NULL,
+	aggregate_id varchar(12) NOT NULL,
+	"number" numeric NOT NULL,
+	ref_code varchar(255) NULL,
+	"name" varchar(255) NOT NULL,
+	urn varchar(255) NOT NULL,
+	is_public bool NOT NULL,
+	is_released bool NOT NULL,
+	is_verified bool NOT NULL,
+	is_active bool NOT NULL,
+	description varchar(255) NULL,
+	biography text NULL,
+	nationality_iso_code text NULL,
+	thumbnail_url text NULL,
+	thumbnail_file_key text NULL,
+	background_url text NULL,
+	background_file_key text NULL,
+	-- tags _text NOT NULL DEFAULT '{}',
+  tags_json jsonb NOT NULL,
+	event_type text NULL,
+	event_version numeric NULL,
+	event_timestamp timestamptz NULL,
+	created_at timestamptz NOT NULL,
+	updated_at timestamptz NOT NULL,
+	created_by varchar(255) NULL,
+	updated_by varchar(255) NULL,
+	CONSTRAINT artist_revision_pkey PRIMARY KEY (id)
+);
+
+-- Foreign key: 
+ALTER TABLE artist_revision ADD CONSTRAINT fk_artist_revision__artist_id___artist__id
+FOREIGN KEY (artist_id) REFERENCES artist(id) ON DELETE CASCADE ON UPDATE CASCADE
+;"""
+
+    ddls = [
+        create_artist_table_ddl, create_artist_profile_ddl,
+        create_artist_image_table_ddl, create_artist_revision_table_ddl
+    ]
+    for ddl in ddls:
+        op.execute(ddl)
 
 
 def downgrade() -> None:
-    op.drop_table("artist_profile")
-    op.drop_table("artist")
+    drop_artist_update_tsv_trigger_ddl = "DROP TRIGGER IF EXISTS artist_update_tsv_trigger ON artist;"
+    drop_artist_update_tsv_function_ddl = "DROP FUNCTION IF EXISTS artist_update_tsv;"
+    drop_artist_revision_table_ddl = "DROP TABLE IF EXISTS artist_revision;"
+    drop_artist_profile_table_ddl = "DROP TABLE IF EXISTS artist_profile;"
+    drop_artist_image_table_ddl = "DROP TABLE IF EXISTS artist_image;"
+    drop_artist_table_ddl = "DROP TABLE IF EXISTS artist;"
+
+    ddls = [
+        drop_artist_update_tsv_trigger_ddl, drop_artist_update_tsv_function_ddl,
+        drop_artist_revision_table_ddl, drop_artist_profile_table_ddl,
+        drop_artist_image_table_ddl, drop_artist_table_ddl
+    ]
+    for ddl in ddls:
+        op.execute(ddl)

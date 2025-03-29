@@ -3,11 +3,21 @@ import { RecommendationSystemComponent } from '../system/recommendation-system/r
 import { ArtistManagementComponent } from './artist-management/artist-management.component';
 import { PlaylistManagementComponent } from './playlist-management/playlist-management.component';
 import { TrackManagementComponent } from './track-management/track-management.component';
+import { ArtistManagementBulkComponent } from './artist-management-bulk/artist-management-bulk.component';
 
 export default [
   {
     path: 'artist',
-    component: ArtistManagementComponent
+    children: [
+      {
+        path: '',
+        component: ArtistManagementComponent
+      },
+      {
+        path: 'bulk-edit',
+        component: ArtistManagementBulkComponent
+      }
+    ]
     // canActivate: [ArtistManagerRoleGuard]
   },
   {

@@ -6,6 +6,6 @@ resource "digitalocean_kubernetes_cluster" "echovibe-sgp-k8s-cluster" {
   node_pool {
     name       = "worker-pool"
     size       = "s-1vcpu-2gb"
-    node_count = 2
+    node_count = 1
   }
 }

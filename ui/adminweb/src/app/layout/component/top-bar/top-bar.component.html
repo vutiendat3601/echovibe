@@ -48,11 +48,11 @@
       <div class="layout-topbar-menu-content">
         <a type="button" class="layout-topbar-action" [href]="this.userProfile.info?.iss + '/account'">
           <i class="pi pi-user"></i>
-          <span>Profile</span>
+          <span>{{ this.userProfile.info?.preferred_username || actionMenuItems['profile'].label }}</span>
         </a>
         <button type="button" class="layout-topbar-action" (click)="signOut()">
           <i class="pi pi-sign-out"></i>
-          <span>Logout</span>
+          <span i18n="@@BUTTON_LABEL_SIGN_OUT">Sign out</span>
         </button>
       </div>
     </div>

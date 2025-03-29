@@ -2,6 +2,7 @@ package vn.io.echovibe.artist.common.dto;
 
 import java.util.List;
 import vn.io.echovibe.artist.common.model.ArtistProfile;
+import vn.io.echovibe.artist.common.model.Tag;
 
 public record ArtistDto(
     String id,
@@ -9,4 +10,4 @@ public record ArtistDto(
     String refCode,
     ArtistProfile profile,
     String isPublic,
-    List<String> tags) {}
+    List<Tag> tags) {}

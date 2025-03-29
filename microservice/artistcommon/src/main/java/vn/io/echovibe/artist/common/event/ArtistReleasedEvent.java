@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.artist.common.model.ArtistProfile;
+import vn.io.echovibe.artist.common.model.Tag;
 import vn.io.echovibe.core.event.Event;
 
 @NoArgsConstructor
@@ -21,9 +22,19 @@ public class ArtistReleasedEvent extends Event {
 
   private ArtistProfile profile;
 
-  @Builder.Default private Boolean isReleased = false;
+  private Boolean isVerifed;
+
+  private String refCode;
+
+  private Integer revisionNumber;
+
+  @Builder.Default private Boolean isReleased = true;
 
   @Builder.Default private Boolean isPublic = false;
 
-  @Builder.Default private List<String> tags = new LinkedList<>();
+  @Builder.Default private List<Tag> tags = new LinkedList<>();
+
+  {
+    type = getClass().getSimpleName();
+  }
 }

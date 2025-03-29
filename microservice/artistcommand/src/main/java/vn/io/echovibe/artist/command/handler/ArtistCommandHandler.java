@@ -13,8 +13,8 @@ import vn.io.echovibe.artist.command.domain.ArtistAggregate;
 import vn.io.echovibe.artist.command.model.CreateArtistCommand;
 import vn.io.echovibe.artist.command.model.DeleteArtistCommand;
 import vn.io.echovibe.artist.command.model.ReleaseArtistCommand;
-import vn.io.echovibe.artist.command.model.SetArtistVisibilityCommand;
-import vn.io.echovibe.artist.command.model.UpdateArtistProfileCommand;
+import vn.io.echovibe.artist.command.model.SetArtistVerificationCommand;
+import vn.io.echovibe.artist.command.model.UpdateArtistCommand;
 import vn.io.echovibe.artist.common.dto.ArtistDto;
 import vn.io.echovibe.client.rest.ArtistQueryClient;
 import vn.io.echovibe.core.event.EventSourcingHandler;
@@ -34,7 +34,9 @@ public class ArtistCommandHandler implements CommandHandler {
     if (Objects.nonNull(refCode)) {
       final ResponseDto<List<ArtistDto>> respDto =
           artistQueryClient.getArtistByRefCodes(List.of(refCode)).getBody();
-      if (Objects.isNull(respDto) || !CollectionUtils.isEmpty(respDto.data())) {
+      if (Objects.isNull(respDto) || CollectionUtils.isEmpty(respDto.data())) {
+        throw new RuntimeException("Internal Server Error");
+      } else if (Objects.nonNull(respDto.data().get(0))) {
         throw new BusinessRuleViolationException(ARTIST_BR_02);
       }
     }
@@ -43,7 +45,7 @@ public class ArtistCommandHandler implements CommandHandler {
   }
 
   @Override
-  public void handle(@NonNull UpdateArtistProfileCommand updateArtistCommand) {
+  public void handle(@NonNull UpdateArtistCommand updateArtistCommand) {
     final ArtistAggregate artistAggregate = findArtistAggregateById(updateArtistCommand.getId());
     artistAggregate.update(updateArtistCommand);
     eventSourcingHandler.save(artistAggregate);
@@ -64,10 +66,10 @@ public class ArtistCommandHandler implements CommandHandler {
   }
 
   @Override
-  public void handle(@NonNull SetArtistVisibilityCommand changeArtistVisibilityCommand) {
+  public void handle(@NonNull SetArtistVerificationCommand setArtistVerificationCommand) {
     final ArtistAggregate artistAggregate =
-        findArtistAggregateById(changeArtistVisibilityCommand.getId());
-    artistAggregate.setIsPublic(changeArtistVisibilityCommand.getIsPublic());
+        findArtistAggregateById(setArtistVerificationCommand.getId());
+    artistAggregate.setVerified(setArtistVerificationCommand.getIsPublic());
     eventSourcingHandler.save(artistAggregate);
   }
 

@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import vn.io.echovibe.artist.command.domain.ArtistAggregate;
 import vn.io.echovibe.core.domain.EventStoreRepository;
 import vn.io.echovibe.core.event.Event;
@@ -38,6 +39,7 @@ public class ArtistEventStore implements EventStore {
       event.setVersion(version);
       event.setCreatedBy(
           Optional.ofNullable(JwtSecurityHolder.getSubject()).orElse(AUTH_SYSTEM_USERNAME));
+
       EventDocument eventDocument =
           EventDocument.builder()
               .aggregateId(aggregateId)
@@ -48,7 +50,7 @@ public class ArtistEventStore implements EventStore {
               .createdBy(event.getCreatedBy())
               .build();
       eventDocument = eventStoreRepository.save(eventDocument);
-      if (!eventDocument.getId().isEmpty()) {
+      if (StringUtils.hasText(eventDocument.getId())) {
         final String eventTopic = ARTIST_EVENT_TOPIC_PREFIX + event.getClass().getSimpleName();
         eventProducer.produce(eventTopic, event);
       }

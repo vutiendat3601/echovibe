@@ -1,6 +1,7 @@
-name: "echovibe"
+name: "echovibe-pg"
 services:
   echovibe-pg-i1:
+    container_name: "echovibe-pg-i1"
     image: "postgres:17.2-bookworm"
     environment:
       # - POSTGRES_DB=echovibe
@@ -9,4 +10,4 @@ services:
     volumes:
       - "./initdb.d/:/docker-entrypoint-initdb.d/"
     ports:
-      - "5000:5432"
+      - "6000:5432"
