@@ -15,6 +15,7 @@
     "MESSAGE_ARTIST_BULK_REQUEST_RELEASE_SUCCESSFUL": "Yêu cầu xuất bản các Nghệ sĩ đã được xử lý thành công.",
     "MESSAGE_ERROR_SYSTEM": "Có lỗi xảy ra. Vui lòng thử lại sau.",
     "MESSAGE_NO_RESULT_FOUND": "Không có kết quả.",
+    "MESSAGE_SUCCESS_TAGS": "Đã cập nhật nhãn dán thành công.",
     "MENU_ITEM_LABEL_MANAGEMENT": "Quản lý sản phẩm",
     "MENU_ITEM_LABEL_ARTIST": "Nghệ sĩ",
     "MENU_ITEM_LABEL_TRACK": "Bài hát",
@@ -315,6 +316,24 @@
     "COUNTRY_ISO_NAME_EH": "Tây Xa-ha-ra",
     "COUNTRY_ISO_NAME_YE": "Y-ê-men",
     "COUNTRY_ISO_NAME_ZM": "Dăm-bi-a",
-    "COUNTRY_ISO_NAME_ZW": "Dim-ba-bu-ê"
+    "COUNTRY_ISO_NAME_ZW": "Dim-ba-bu-ê",
+    "DIALOG_LABEL_EDIT_THUMBNAIL": "Chỉnh sửa ảnh hồ sơ",
+    "DIALOG_LABEL_EDIT_BACKGROUND": "Chỉnh sửa ảnh nền",
+    "DIALOG_LABEL_EDIT_BIOGRAPHY": "Chỉnh sửa tiểu sử",
+    "MESSAGE_SUCCESS_THUMBNAIL": "Đã cập nhật link ảnh hồ sơ thành công!",
+    "MESSAGE_SUCCESS_BACKGROUND": "Đã cập nhật link ảnh nền thành công!",
+    "MESSAGE_SUCCESS_BIOGRAPHY": "Đã cập nhật tiểu sử thành công!",
+    "BUTTON_LABEL_IMPORT_CSV": "Nhập từ CSV",
+    "CONFIRM_MESSAGE_ARTIST_DELETE_MULTIPLE": "Bạn có chắc chắn muốn xoá các Nghệ sĩ đã chọn khỏi danh sách cập nhật không?",
+    "MESSAGE_ARTIST_DELETED_MULTIPLE_SUCCESSFUL": "Đã xoá các Nghệ sĩ đã chọn khỏi danh sách cập nhật.",
+    "CONFIRM_MESSAGE_ARTIST_DELETE_SINGLE": "Bạn có chắc chắn muốn xoá Nghệ sĩ này khỏi danh sách cập nhật không?",
+    "MESSAGE_ARTIST_DELETED_SINGLE_SUCCESSFUL": "Đã xoá Nghệ sĩ khỏi danh sách cập nhật.",
+    "DIALOG_SUMMARY_CONFIRM": "Xác nhận",
+    "MESSAGE_ARTIST_UPDATE_MULTIPLE_SUCCESSFUL": "Đã cập nhật các Nghệ sĩ đã chọn thành công.",
+    "FIX_VALIDATION_ERRORS": "Vui lòng sửa các lỗi bên dưới trước khi gửi.",
+    "TITLE_SUCCESS": "Thành công",
+    "TITLE_ERROR": "Lỗi",
+    "TABLE_LABEL_UPDATE_ARTISTS": "Cập nhật Nghệ sĩ",
+    "BUTTON_LABEL_ADD_TAG": "Thêm nhãn dán"
   }
 }
