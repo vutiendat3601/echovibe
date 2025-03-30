@@ -117,7 +117,7 @@ public class ArtistAggregate extends AggregateRoot {
       updatedProfile.setBackgroundUrl(updateProfile.getBackgroundUrl());
     }
     // refCode
-    if (!Objects.equals(artistUpdatedEvent.getRefCode(), updateArtistCommand.getRefCode())) {
+    if (!Objects.equals(updateArtistCommand.getRefCode(), artistUpdatedEvent.getRefCode())) {
       if (this.revisionNumber > -1) {
         throw new BusinessRuleViolationException(
             ARTIST_BR_03,
@@ -128,12 +128,12 @@ public class ArtistAggregate extends AggregateRoot {
       artistUpdatedEvent.setRefCode(updateArtistCommand.getRefCode());
     }
     // isPublic
-    if (!Objects.equals(artistUpdatedEvent.getIsPublic(), updateArtistCommand.getIsPublic())) {
+    if (!Objects.equals(updateArtistCommand.getIsPublic(), artistUpdatedEvent.getIsPublic())) {
       hasChange = true;
       artistUpdatedEvent.setIsPublic(updateArtistCommand.getIsPublic());
     }
     // tags
-    if (Objects.nonNull(updateArtistCommand.getTags())) {
+    if (!Objects.equals(updateArtistCommand.getTags(), artistUpdatedEvent.getTags())) {
       hasChange = true;
       artistUpdatedEvent.setTags(updateArtistCommand.getTags());
     }
