@@ -107,6 +107,7 @@ class ArtistEventHandler:
             artist.profile.name = release_profile.name
             artist.profile.biography = release_profile.biography
             artist.profile.description = release_profile.description
+            artist.profile.nationality_iso_code = release_profile.nationality_iso_code
             artist.profile.thumbnail_file_key = release_profile.thumbnail_file_key
             artist.profile.thumbnail_url = release_profile.thumbnail_url
             artist.profile.background_file_key = release_profile.background_file_key

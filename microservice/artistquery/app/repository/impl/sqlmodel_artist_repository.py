@@ -8,7 +8,7 @@ from app.core.logger import Logger
 from app.repository.artist_repository import ArtistRepository
 
 
-class SqlModelArtistRepository(ArtistRepository):
+class SqlmodelArtistRepository(ArtistRepository):
 
     def __init__(
         self, logger: Logger,

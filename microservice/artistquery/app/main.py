@@ -64,7 +64,7 @@ Powered by FastAPI
             f"Cross-origin resource sharing (CORS) configuration: allowedOriginPatterns={allow_origins[0]}, allowedMethods={allow_methods[0]}, allowedHeaders={allow_headers[0]}, allowCredentials={allow_credentials[0]}, maxAge={max_age}"
         )
 
-        # # Set routes
+        # Set routes
         self.app.include_router(apiRouter)
         self.logger.info("App is initialized successfully.")
 
