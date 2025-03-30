@@ -55,70 +55,25 @@ async def listen_artist_released_event():
         await artist_released_event_listener.stop()
 
 
-async def listen_artist_updated_event():
-    artist_updated_event_listener = AIOKafkaConsumer(
-        ARTIST_UPDATED_EVENT, **kafka_consumer_properties)
-    await artist_updated_event_listener.start()
-    logger.info(f"Listening: topic={ARTIST_UPDATED_EVENT}")
+async def listen_artist_deleted_event():
+    artist_deleted_event_consumer = AIOKafkaConsumer(
+        ARTIST_DELETED_EVENT, **kafka_consumer_properties)
+    await artist_deleted_event_consumer.start()
+    logger.info(f"Listening: topic={ARTIST_DELETED_EVENT}")
     try:
-        async for message in artist_updated_event_listener:
-            artist_updated_event = ArtistUpdatedEvent(**message.value)
+        async for message in artist_deleted_event_consumer:
+            artist_deleted_event = ArtistDeletedEvent(**message.value)
             logger.info(
-                f"Received {ArtistUpdatedEvent.__name__}: id={artist_updated_event.id}, version={artist_updated_event.version}, timestamp={artist_updated_event.timestamp}"
+                f"Received {ArtistDeletedEvent.__name__}: id={artist_deleted_event.id}, version={artist_deleted_event.version}, timestamp={artist_deleted_event.timestamp}"
             )
-            artist_event_handler.handle_artist_updated_event(
-                artist_updated_event)
-            await artist_updated_event_listener.commit()
+            artist_event_handler.handle_artist_deleted_event(
+                artist_deleted_event)
+            await artist_deleted_event_consumer.commit()
     except Exception as e:
-        logger.info(f"Error when handling {ArtistUpdatedEvent.__name__}: {e}")
+        logger.info(f"Error when handling {ArtistDeletedEvent.__name__}: {e}")
     finally:
-        await artist_updated_event_listener.stop()
-
-
-# async def listen_artist_deleted_event():
-#     artist_deleted_event_consumer = AIOKafkaConsumer(
-#         ARTIST_DELETED_EVENT, **kafka_consumer_properties)
-#     await artist_deleted_event_consumer.start()
-#     logger.info(f"Listening: topic={ARTIST_DELETED_EVENT}")
-#     try:
-#         async for message in artist_deleted_event_consumer:
-#             artist_deleted_event = ArtistDeletedEvent(**message.value)
-#             logger.info(
-#                 f"Received {ArtistDeletedEvent.__name__}: id={artist_deleted_event.id}, version={artist_deleted_event.version}, timestamp={artist_deleted_event.timestamp}"
-#             )
-#             artist_event_handler.handle_artist_deleted_event(
-#                 artist_deleted_event)
-#             await artist_deleted_event_consumer.commit()
-#     except Exception as e:
-#         logger.info(f"Error when handling {ArtistDeletedEvent.__name__}: {e}")
-#     finally:
-#         await artist_deleted_event_consumer.stop()
-
-# async def listen_artist_visibility_set_event():
-#     artist_visibility_changed_event_consumer = AIOKafkaConsumer(
-#         ARTIST_VERIFICATION_SET_EVENT, **kafka_consumer_properties)
-#     await artist_visibility_changed_event_consumer.start()
-#     logger.info(f"Listening: topic={ARTIST_VERIFICATION_SET_EVENT}")
-#     try:
-#         async for message in artist_visibility_changed_event_consumer:
-#             artist_verification_set_event = ArtistVerificationSetEvent(
-#                 **message.value)
-#             logger.info(
-#                 f"Received {ArtistVerificationSetEvent.__name__}: id={artist_verification_set_event.id}, version={artist_verification_set_event.version}, timestamp={artist_verification_set_event.timestamp}"
-#             )
-#             artist_event_handler.handle_artist_verification_set_event(
-#                 artist_verification_set_event)
-#             await artist_visibility_changed_event_consumer.commit()
-#     except Exception as e:
-#         logger.info(
-#             f"Error when handling {ArtistVerificationSetEvent.__name__}: {e}")
-#     finally:
-#         await artist_visibility_changed_event_consumer.stop()
+        await artist_deleted_event_consumer.stop()
 
 
 def get_artist_event_listeners() -> list[callable]:
-    return [
-        listen_artist_released_event,
-        listen_artist_updated_event,
-        # listen_artist_deleted_event, listen_artist_visibility_set_event
-    ]
+    return [listen_artist_released_event, listen_artist_deleted_event]

@@ -99,7 +99,7 @@ class SqlmodelArtistRepository(ArtistRepository):
         finally:
             session.close()
 
-    def delete_artist(self, aggregate_id: str) -> None:
+    def delete_by_aggregate_id(self, aggregate_id: str) -> None:
         try:
             with self.session_factory() as session:
                 statement = (delete(Artist).where(
