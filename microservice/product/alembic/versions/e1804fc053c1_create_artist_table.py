@@ -60,7 +60,7 @@ CREATE INDEX idx_artist__tsv ON artist USING GIN (tsv);
 CREATE OR REPLACE FUNCTION artist_update_tsv()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.tsv = to_tsvector('english', NEW.name || unaccent(NEW.name) || array_to_string(NEW.tags, ' ') || unaccent(array_to_string(NEW.tags, ' ')));
+    NEW.tsv = to_tsvector('english', NEW.name || ' ' || unaccent(NEW.name) || ' ' || array_to_string(NEW.tags, ' ') || ' ' || unaccent(array_to_string(NEW.tags, ' ')));
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql

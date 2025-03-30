@@ -58,7 +58,7 @@ BEGIN
     SELECT COALESCE(name, '') INTO artist_name
     FROM artist_profile WHERE aggregate_id = NEW.aggregate_id;
     
-    NEW.tsv = to_tsvector('english', artist_name || unaccent(artist_name) || array_to_string(NEW.tags, ' ') || unaccent(array_to_string(NEW.tags, ' ')));
+    NEW.tsv = to_tsvector('english', artist_name || ' ' || unaccent(artist_name) || ' ' || array_to_string(NEW.tags, ' ') || ' ' || unaccent(array_to_string(NEW.tags, ' ')));
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
