@@ -117,10 +117,11 @@ FOREIGN KEY (artist_id) REFERENCES artist(id) ON DELETE CASCADE ON UPDATE CASCAD
 
 
 -- Function: artist_set_tsv
-CREATE OR REPLACE FUNCTION artist_profile_after_insert_update_trigger()
+CREATE OR REPLACE FUNCTION on_artist_profile_after_insert_update()
 RETURNS trigger AS $$
 BEGIN
     PERFORM artist_update_tsv(NEW.aggregate_id);
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -128,7 +129,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER artist_profile_after_insert_update_trigger
 AFTER INSERT OR UPDATE ON artist_profile
 FOR EACH ROW
-EXECUTE FUNCTION artist_profile_after_insert_update_trigger();
+EXECUTE FUNCTION on_artist_profile_after_insert_update();
 """
 
     create_artist_image_table_ddl = """
