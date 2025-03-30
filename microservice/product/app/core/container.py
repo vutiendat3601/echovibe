@@ -6,11 +6,13 @@ from app.repository.impl.sqlmodel_artist_repository import SqlmodelArtistReposit
 from app.repository.impl.sqlmodel_artist_detail_repository import SqlmodelArtistDetailRepository
 from app.service.artist_service import ArtistService
 from app.event.handler.artist_event_handler import ArtistEventHandler
+from app.service.search_service import SearchService
 
 
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(modules=[
-        "app.router.artist_router", "app.event.listener.artist_event_listener"
+        "app.router.artist_router", "app.router.search_router",
+        "app.event.listener.artist_event_listener"
     ])
 
     logger = providers.Singleton(Logger)
@@ -31,8 +33,13 @@ class Container(containers.DeclarativeContainer):
     # Service
     artist_service = providers.Factory(
         ArtistService,
+        logger=logger,
+        artist_detail_repository=artist_detail_repository)
+    search_service = providers.Factory(
+        SearchService,
+        logger=logger,
         artist_detail_repository=artist_detail_repository,
-        logger=logger)
+    )
     # Event Handler
     artist_event_handler = providers.Factory(
         ArtistEventHandler, artist_repository=artist_repository, logger=logger)

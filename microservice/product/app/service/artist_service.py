@@ -32,8 +32,8 @@ class ArtistService:
                 lambda artist_detail:
                 (artist_detail.aggregate_id,
                  map_to_artist_detail_schema(artist_detail)), artist_details))
-        artist_schemas = [
+        artist_detail_schemas = [
             artist_detail_schemas_map.get(aggregate_id)
             for aggregate_id in aggregate_ids
         ]
-        return artist_schemas
+        return artist_detail_schemas
