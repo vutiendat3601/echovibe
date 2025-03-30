@@ -69,17 +69,17 @@ BEFORE INSERT OR UPDATE ON artist
 FOR EACH ROW
 EXECUTE FUNCTION artist_set_tsv();
 
-CREATE OR REPLACE FUNCTION artist_update_tsv(aggregate_id TEXT)
+CREATE OR REPLACE FUNCTION artist_update_tsv(update_aggregate_id TEXT)
 RETURNS void AS $$
 DECLARE
     artist_name text;
 BEGIN
     SELECT COALESCE(name, '') INTO artist_name
-    FROM artist_profile WHERE aggregate_id = NEW.aggregate_id;
+    FROM artist_profile WHERE aggregate_id = update_aggregate_id;
     
     UPDATE artist
     SET tsv = to_tsvector('english', artist_name || unaccent(artist_name) || array_to_string(NEW.tags, ' ') || unaccent(array_to_string(NEW.tags, ' ')))
-    WHERE aggregate_id = aggregate_id;
+    WHERE aggregate_id = update_aggregate_id;
 END;
 $$ LANGUAGE plpgsql;
 """
