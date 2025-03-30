@@ -125,7 +125,7 @@ export class ArtistManagementBulkComponent implements OnInit {
     EXPORT_TEMPLATE: $localize`:@@BUTTON_LABEL_EXPORT_TEMPLATE:Export Template`,
     IMPORT_SUCCESSFUL: $localize`:@@MESSAGE_IMPORT_SUCCESSFUL:CSV data has been imported successfully`,
     CREATE_ARTISTS: $localize`:@@TABLE_LABEL_CREATE_ARTISTS:Create Artists`,
-    DELETE_FROM_LIST: $localize`:@@BUTTON_LABEL_DELETE_FROM_LIST:Delete from List`,
+    DELETE_FROM_LIST: $localize`:@@BUTTON_LABEL_DELETE_FROM_LIST:Delete from List`
   };
 
   // Constants
@@ -646,8 +646,8 @@ export class ArtistManagementBulkComponent implements OnInit {
         // Parse the JSON string into an array of tag names
         const tagNames = data.tagsJson;
         tags = Array.isArray(tagNames) ? tagNames.map((name) => ({ name, isActive: true })) : [];
-      } catch (e) {
-        console.error('Error parsing tagsJson:', data.tagsJson, e);
+      } catch (e: any) {
+        this.showErrorMessage(this.I18N.TITLE_ERROR, 'Invalid JSON format in tagsJson for artist: ' + data.name);
       }
     }
 
@@ -696,8 +696,8 @@ export class ArtistManagementBulkComponent implements OnInit {
           try {
             // Parse JSON string, handling escaped double quotes
             artistData[header] = JSON.parse(artistData[header].replace(/""/g, '"'));
-          } catch (e) {
-            console.error('Error parsing tagsJson:', artistData[header], e);
+          } catch (e: any) {
+            this.showErrorMessage(this.I18N.TITLE_ERROR, 'Invalid JSON format in tagsJson');
             artistData[header] = [];
           }
         }
