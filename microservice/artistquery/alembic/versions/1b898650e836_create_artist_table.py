@@ -53,12 +53,12 @@ CREATE INDEX idx_artist__tsv ON artist USING GIN (tsv);
 CREATE OR REPLACE FUNCTION artist_set_tsv()
 RETURNS trigger AS $$
 DECLARE
-  name text;
+  artist_name text;
 BEGIN
-    SELECT COALESCE(name, '') INTO name
+    SELECT COALESCE(name, '') INTO artist_name
     FROM artist_profile WHERE aggregate_id = NEW.aggregate_id;
     
-    NEW.tsv = to_tsvector('english', name || unaccent(name) || array_to_string(NEW.tags, ' ') || unaccent(array_to_string(NEW.tags, ' ')));
+    NEW.tsv = to_tsvector('english', artist_name || unaccent(artist_name) || array_to_string(NEW.tags, ' ') || unaccent(array_to_string(NEW.tags, ' ')));
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
