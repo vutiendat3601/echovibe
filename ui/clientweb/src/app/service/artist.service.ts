@@ -10,7 +10,8 @@ import { ResponseDto } from './../dto/response-dto';
 })
 export class ArtistService {
   constructor(private readonly http: HttpClient) {}
+
   getArtistById(id: string): Observable<ResponseDto<ArtistDto | null>> {
-    return this.http.get<ResponseDto<ArtistDto | null>>(`${environment.productBaseUrl}/v1/artist/${id}`);
+    return this.http.get<ResponseDto<ArtistDto | null>>(`${environment.productBaseUrl}/v1/artists/${id}`);
   }
 }

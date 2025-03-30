@@ -8,7 +8,7 @@ export const authorizationCodePkceFlowConfig: AuthConfig = {
   redirectUri: `${window.location.origin}/auth/oidc/callback`,
   // The SPA's id. The SPA is registerd with this id at the auth-server
   // clientId: 'server.code',
-  clientId: 'echovibe-adminweb',
+  clientId: environment.oauthClientId,
   // Just needed if your auth server demands a secret. In general, this
   // is a sign that the auth server is not configured with SPAs in mind
   // and it might not enforce further best practices vital for security
