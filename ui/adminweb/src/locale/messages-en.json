@@ -331,6 +331,12 @@
     "TITLE_SUCCESS": "Success",
     "TITLE_ERROR": "Error",
     "TABLE_LABEL_UPDATE_ARTISTS": "Update Artists",
-    "BUTTON_LABEL_ADD_TAG": "Add Tag"
+    "BUTTON_LABEL_ADD_TAG": "Add Tag",
+    "TABLE_LABEL_CREATE_ARTISTS": "Create Artists",
+    "COLUMN_LABEL_MANAGE_ARTIST_ACTIONS": "Actions",
+    "MESSAGE_IMPORT_SUCCESSFUL": "CSV data has been imported successfully.",
+    "BUTTON_LABEL_EXPORT_TEMPLATE": "Export Template",
+    "BUTTON_LABEL_DELETE_FROM_LIST": "Delete from list",
+    "BUTTON_LABEL_UPLOAD_CSV": "Upload CSV"
   }
 }

@@ -1,3 +1,4 @@
+import { CreateArtistDto } from './../../../dto/artist-dto';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
@@ -39,6 +40,7 @@ import { ArtistService } from '../../../service/artist.service';
 import { UrlValidator } from '../../../validator/url.validator';
 import { MultiSelectModule, MultiSelectFilterEvent } from 'primeng/multiselect';
 import { Tag } from '../../../model/tag';
+import { CommandResult } from '../../../model/command-result';
 
 interface Column {
   field: string;
@@ -93,7 +95,7 @@ export class ArtistManagementBulkComponent implements OnInit {
     IS_RELEASED_TRUE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_YES:Yes`,
     IS_RELEASED_FALSE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_NO:No`,
     SAVE: $localize`:@@BUTTON_LABEL_SAVE:Save`,
-    IMPORT_CSV: $localize`:@@BUTTON_LABEL_IMPORT_CSV:Import CSV`,
+    UPLOAD_CSV: $localize`:@@BUTTON_LABEL_UPLOAD_CSV:Upload CSV`,
     DELETE: $localize`:@@BUTTON_LABEL_DELETE:Delete`,
     MANAGE_ARTISTS: $localize`:@@PAGE_LABEL_MANAGE_ARTIST:Manage Artists`,
     EDIT_THUMBNAIL: $localize`:@@DIALOG_LABEL_EDIT_THUMBNAIL:Edit Thumbnail`,
@@ -119,7 +121,11 @@ export class ArtistManagementBulkComponent implements OnInit {
     NO_RESULTS_FOUND: $localize`:@@MESSAGE_NO_RESULT_FOUND:No results found.`,
     ADD_TAG: $localize`:@@BUTTON_LABEL_ADD_TAG:Add Tag`,
     EDIT_TAGS: $localize`:@@FORM_LABEL_ARTIST_TAG_EDIT:Edit Tags`,
-    TAGS: $localize`:@@COLUMN_LABEL_MANAGE_ARTIST_TAG:Tags`
+    TAGS: $localize`:@@COLUMN_LABEL_MANAGE_ARTIST_TAG:Tags`,
+    EXPORT_TEMPLATE: $localize`:@@BUTTON_LABEL_EXPORT_TEMPLATE:Export Template`,
+    IMPORT_SUCCESSFUL: $localize`:@@MESSAGE_IMPORT_SUCCESSFUL:CSV data has been imported successfully`,
+    CREATE_ARTISTS: $localize`:@@TABLE_LABEL_CREATE_ARTISTS:Create Artists`,
+    DELETE_FROM_LIST: $localize`:@@BUTTON_LABEL_DELETE_FROM_LIST:Delete from List`,
   };
 
   // Constants
@@ -138,6 +144,7 @@ export class ArtistManagementBulkComponent implements OnInit {
 
   selectedArtistIndex: number = -1;
   ids: string | null = null;
+  isEdit: boolean = false;
 
   // Tag management
   tagFilterKeyword: string | null = null;
@@ -151,6 +158,19 @@ export class ArtistManagementBulkComponent implements OnInit {
   isBackgroundDialogVisible = false;
   isBiographyDialogVisible = false;
   isTagsDialogVisible = false;
+
+  readonly headers: string[] = [
+    'name',
+    'isVerified',
+    'isPublic',
+    'description',
+    'biography',
+    'nationalityIsoCode',
+    'thumbnailUrl',
+    'backgroundUrl',
+    'refCode',
+    'tagsJson'
+  ];
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -225,7 +245,7 @@ export class ArtistManagementBulkComponent implements OnInit {
     }));
 
     this.isTagsDialogVisible = false;
-    this.showSuccessMessage('Success', this.I18N.SUCCESS_TAGS);
+    this.showSuccessMessage(this.I18N.TITLE_SUCCESS, this.I18N.SUCCESS_TAGS);
   }
 
   handleTagFilter(event: MultiSelectFilterEvent): void {
@@ -282,7 +302,32 @@ export class ArtistManagementBulkComponent implements OnInit {
   }
 
   handleSaveArtists(): void {
-    this.updateArtists();
+    if (!this.isEdit) {
+      // Create new artists
+      const createArtistsDto: CreateArtistDto[] = [];
+      this.artistsForm.controls.forEach((formGroup) => {
+        const createArtistDto: CreateArtistDto = {
+          profile: {
+            name: formGroup.get('name')?.value,
+            description: formGroup.get('description')?.value,
+            biography: formGroup.get('biography')?.value || null,
+            nationalityIsoCode: formGroup.get('nationalityIsoCode')?.value || null,
+            thumbnailUrl: formGroup.get('thumbnailUrl')?.value || null,
+            backgroundUrl: formGroup.get('backgroundUrl')?.value || null
+          },
+          refCode: formGroup.get('refCode')?.value || null,
+          isPublic: formGroup.get('isPublic')?.value || false,
+          tags: formGroup.get('tags')?.value.map((tag: string) => ({ name: tag, isActive: true })) || []
+        };
+        createArtistsDto.push(createArtistDto);
+      });
+      if (createArtistsDto.length > 0) {
+        this.createArtist(createArtistsDto);
+      }
+    } else {
+      // Update existing artists
+      this.updateArtists();
+    }
   }
 
   handleDeleteArtist(event: Event, artist: Artist): void {
@@ -400,6 +445,69 @@ export class ArtistManagementBulkComponent implements OnInit {
     this.showSuccessMessage(this.I18N.TITLE_SUCCESS, this.I18N.SUCCESS_BIOGRAPHY);
   }
 
+  handleImportCSV(event: Event): void {
+    const fileInput = event.target as HTMLInputElement;
+    const file = fileInput.files?.[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const csvContent = e.target?.result as string;
+      this.parseCSV(csvContent);
+    };
+
+    reader.readAsText(file);
+  }
+
+  handleExportCSVTemplate(): void {
+    const headers = [
+      'name',
+      'isverified',
+      'ispublic',
+      'description',
+      'biography',
+      'nationalityisocode',
+      'thumbnailurl',
+      'backgroundurl',
+      'refcode',
+      'tagsjson'
+    ];
+
+    let csv = headers.join(',') + '\n';
+
+    // Add sample row if there's no data
+    if (this.artists().length === 0) {
+      csv +=
+        'Artist Name,TRUE,TRUE,Description text,Biography content,US,' +
+        'https://example.com/image.jpg,https://example.com/background.jpg,' +
+        'REF123,"[""Ngô Thiên""]"\n';
+    } else {
+      // Add actual data
+      this.artists().forEach((artist) => {
+        const tagJson = JSON.stringify(artist.tags.filter((t) => t.isActive).map((t) => t.name));
+
+        const row = [
+          this.escapeCsvValue(artist.profile.name || ''),
+          artist.isVerified,
+          artist.isPublic,
+          this.escapeCsvValue(artist.profile.description || ''),
+          this.escapeCsvValue(artist.profile.biography || ''),
+          artist.profile.nationalityIsoCode,
+          this.escapeCsvValue(artist.profile.thumbnailUrl || ''),
+          this.escapeCsvValue(artist.profile.backgroundUrl || ''),
+          this.escapeCsvValue(artist.refCode || ''),
+          this.escapeCsvValue(tagJson)
+        ];
+
+        csv += row.join(',') + '\n';
+      });
+    }
+
+    this.downloadCSV(csv, 'artist_template.csv');
+  }
+
   // Private methods
   private initializeComponent(): void {
     this.setupFormListeners();
@@ -416,6 +524,7 @@ export class ArtistManagementBulkComponent implements OnInit {
       )
       .subscribe(() => {
         if (this.ids) {
+          this.isEdit = true;
           this.fetchArtists(this.ids);
         }
       });
@@ -467,7 +576,8 @@ export class ArtistManagementBulkComponent implements OnInit {
       description: [artist.profile.description],
       biography: [artist.profile.biography || ''],
       thumbnailUrl: [artist.profile.thumbnailUrl || ''],
-      backgroundUrl: [artist.profile.backgroundUrl || '']
+      backgroundUrl: [artist.profile.backgroundUrl || ''],
+      tags: [artist.tags.filter((tag) => tag.isActive).map((tag) => tag.name)]
     });
   }
 
@@ -485,6 +595,152 @@ export class ArtistManagementBulkComponent implements OnInit {
         }
       });
     });
+  }
+
+  private createArtist(createArtistDto: CreateArtistDto[]): void {
+    this.artistService.bulkCreateArtist({ items: createArtistDto }).subscribe((respDto) => {
+      const { isSuccessful, errors }: CommandResult = respDto.data.items[0];
+      if (isSuccessful) {
+        this.addMessage({
+          title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
+          content: $localize`:@@MESSAGE_ARTIST_CREATED_SUCCESSFUL:Artist was created successfully.`
+        });
+      } else {
+        const message = this.exceptionHandler.handle(errors[0]);
+        this.addMessage(message, 'error');
+      }
+    });
+  }
+
+  private escapeCsvValue(value: string): string {
+    if (!value) return '';
+
+    // If the value contains commas, quotes, or newlines, wrap in quotes and escape existing quotes
+    if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+      return `"${value.replace(/"/g, '""')}"`;
+    }
+    return value;
+  }
+
+  private downloadCSV(csv: string, filename: string): void {
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  private createArtistFromCSV(data: any): Artist {
+    // Generate a temporary ID for new artists
+    const tempId = 'temp_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+
+    // Parse tags from JSON string if available
+    let tags: Tag[] = [];
+    if (data.tagsJson) {
+      try {
+        // Parse the JSON string into an array of tag names
+        const tagNames = data.tagsJson;
+        tags = Array.isArray(tagNames) ? tagNames.map((name) => ({ name, isActive: true })) : [];
+      } catch (e) {
+        console.error('Error parsing tagsJson:', data.tagsJson, e);
+      }
+    }
+
+    return {
+      id: tempId,
+      urn: data.urn || '',
+      profile: {
+        name: data.name || '',
+        nationalityIsoCode: data.nationalityIsoCode || '',
+        description: data.description || '',
+        biography: data.biography || '',
+        thumbnailUrl: data.thumbnailUrl || '',
+        backgroundUrl: data.backgroundUrl || ''
+      },
+      refCode: data.refCode || '',
+      isPublic: data.isPublic === 'TRUE',
+      isVerified: data.isVerified === 'TRUE',
+      isReleased: false,
+      revisionNumber: 0,
+      tags: tags,
+      createdAt: data.createdAt || new Date().toISOString(),
+      updatedAt: data.updatedAt || new Date().toISOString(),
+      createdBy: data.createdBy || null,
+      updatedBy: data.updatedBy || null
+    };
+  }
+
+  private parseCSV(csvContent: string): void {
+    const lines = csvContent.split('\n');
+
+    // Reset current artists
+    this.artists.set([]);
+    this.artistsForm.clear();
+
+    // Process each line
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue; // Skip empty lines
+
+      const values = this.splitCSVLine(lines[i]);
+      const artistData: any = {};
+
+      // Map CSV columns to artist properties
+      this.headers.forEach((header, index) => {
+        artistData[header] = values[index]?.trim();
+        if (header === 'tagsJson' && artistData[header]) {
+          try {
+            // Parse JSON string, handling escaped double quotes
+            artistData[header] = JSON.parse(artistData[header].replace(/""/g, '"'));
+          } catch (e) {
+            console.error('Error parsing tagsJson:', artistData[header], e);
+            artistData[header] = [];
+          }
+        }
+      });
+
+      // Create artist object
+      const artist = this.createArtistFromCSV(artistData);
+
+      // Add to state
+      this.artists.update((artists) => [...artists, artist]);
+      this.artistsForm.push(this.createArtistFormGroup(artist));
+    }
+
+    // Show success message
+    this.showSuccessMessage(this.I18N.TITLE_SUCCESS, this.I18N.IMPORT_SUCCESSFUL);
+  }
+
+  private splitCSVLine(line: string): string[] {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+
+      if (char === '"' && (i === 0 || line[i - 1] !== '\\')) {
+        if (inQuotes && line[i + 1] === '"') {
+          // Handle escaped double quotes
+          current += '"';
+          i++; // Skip the next quote
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+
+    result.push(current.trim()); // Add the last value
+    return result;
   }
 
   private updateArtists(): void {
