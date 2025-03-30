@@ -78,7 +78,7 @@ BEGIN
     FROM artist_profile WHERE aggregate_id = update_aggregate_id;
     
     UPDATE artist
-    SET tsv = to_tsvector('english', artist_name || unaccent(artist_name) || array_to_string(NEW.tags, ' ') || unaccent(array_to_string(NEW.tags, ' ')))
+    SET tsv = to_tsvector('english', artist_name || unaccent(artist_name) || array_to_string(tags, ' ') || unaccent(array_to_string(tags, ' ')))
     WHERE aggregate_id = update_aggregate_id;
 END;
 $$ LANGUAGE plpgsql;
