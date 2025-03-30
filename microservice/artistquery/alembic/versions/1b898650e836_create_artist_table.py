@@ -18,6 +18,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    create_uuid_ossp_extension_ddl = 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
+    create_unaccent_extension_ddl = "CREATE EXTENSION IF NOT EXISTS unaccent;"
+
     create_artist_table_ddl = """
 -- Table: artist
 CREATE TABLE artist (
@@ -50,7 +53,7 @@ CREATE INDEX idx_artist__tsv ON artist USING GIN (tsv);
 CREATE OR REPLACE FUNCTION artist_update_tsv()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.tsv = to_tsvector('english', array_to_string(NEW.tags, ' '));
+    NEW.tsv = to_tsvector('english', NEW.name || unaccent(NEW.name) || array_to_string(NEW.tags, ' ') || unaccent(array_to_string(NEW.tags, ' ')));
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql
@@ -159,6 +162,7 @@ FOREIGN KEY (artist_id) REFERENCES artist(id) ON DELETE CASCADE ON UPDATE CASCAD
 ;"""
 
     ddls = [
+        create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
         create_artist_table_ddl, create_artist_profile_ddl,
         create_artist_image_table_ddl, create_artist_revision_table_ddl
     ]
@@ -167,6 +171,8 @@ FOREIGN KEY (artist_id) REFERENCES artist(id) ON DELETE CASCADE ON UPDATE CASCAD
 
 
 def downgrade() -> None:
+    drop_uuid_ossp_extension_ddl = 'DROP EXTENSION IF NOT EXISTS "uuid-ossp";'
+    drop_unaccent_extension_ddl = "DROP EXTENSION IF NOT EXISTS unaccent;"
     drop_artist_update_tsv_trigger_ddl = "DROP TRIGGER IF EXISTS artist_update_tsv_trigger ON artist;"
     drop_artist_update_tsv_function_ddl = "DROP FUNCTION IF EXISTS artist_update_tsv;"
     drop_artist_revision_table_ddl = "DROP TABLE IF EXISTS artist_revision;"
@@ -175,6 +181,7 @@ def downgrade() -> None:
     drop_artist_table_ddl = "DROP TABLE IF EXISTS artist;"
 
     ddls = [
+        drop_uuid_ossp_extension_ddl, drop_unaccent_extension_ddl,
         drop_artist_update_tsv_trigger_ddl, drop_artist_update_tsv_function_ddl,
         drop_artist_revision_table_ddl, drop_artist_profile_table_ddl,
         drop_artist_image_table_ddl, drop_artist_table_ddl
