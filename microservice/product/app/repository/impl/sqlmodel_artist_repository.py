@@ -1,4 +1,4 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, select, delete
 from sqlalchemy.exc import SQLAlchemyError
 from contextlib import AbstractContextManager
 from typing import Callable
@@ -41,6 +41,21 @@ class SqlmodelArtistRepository(ArtistRepository):
                 artist = session.exec(statement).first()
                 return artist
         except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
+    def delete_by_aggregate_id(self, aggregate_id: str) -> None:
+        try:
+            with self.session_factory() as session:
+                statement = (delete(Artist).where(
+                    Artist.aggregate_id == aggregate_id))
+                session.exec(statement)
+                session.commit()
+                session.expunge_all()
+        except SQLAlchemyError as e:
+            session.rollback()
             self.logger.error(f"{e}")
             raise e
         finally:

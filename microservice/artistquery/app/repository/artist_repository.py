@@ -33,5 +33,5 @@ class ArtistRepository(ABC):
         """Save Artist"""
 
     @abstractmethod
-    def delete_artist(self, aggregate_id: str) -> None:
-        """Delete Artist"""
+    def delete_by_aggregate_id(self, aggregate_id: str) -> None:
+        """Delete Artist by aggregate_id"""

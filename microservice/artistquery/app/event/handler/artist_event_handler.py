@@ -218,7 +218,7 @@ class ArtistEventHandler:
                 artist.updated_at = updated_at
                 self.artist_repository.save_artist(artist)
         else:
-            self.artist_repository.delete_artist(artist_deleted_event.id)
+            self.artist_repository.delete_by_aggregate_id(artist_deleted_event.id)
         self.logger.info(
             f"Processed {ArtistDeletedEvent.__name__}: id={artist_deleted_event.id}, version={artist_deleted_event.version}, timestamp={artist_deleted_event.timestamp}"
         )

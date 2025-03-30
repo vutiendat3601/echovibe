@@ -89,7 +89,8 @@ AS SELECT id,
     background_url,
     is_public,
     is_verified,
-    tags
+    tags,
+    tsv
    FROM artist
   WHERE is_active
 WITH DATA
