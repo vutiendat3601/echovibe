@@ -334,6 +334,12 @@
     "TITLE_SUCCESS": "Thành công",
     "TITLE_ERROR": "Lỗi",
     "TABLE_LABEL_UPDATE_ARTISTS": "Cập nhật Nghệ sĩ",
-    "BUTTON_LABEL_ADD_TAG": "Thêm nhãn dán"
+    "BUTTON_LABEL_ADD_TAG": "Thêm nhãn dán",
+    "TABLE_LABEL_CREATE_ARTISTS": "Tạo Nghệ sĩ",
+    "COLUMN_LABEL_MANAGE_ARTIST_ACTIONS": "Hành động",
+    "MESSAGE_IMPORT_SUCCESSFUL": "Csv đã được nhập thành công.",
+    "BUTTON_LABEL_EXPORT_TEMPLATE": "Xuất mẫu",
+    "BUTTON_LABEL_DELETE_FROM_LIST": "Xoá khỏi danh sách",
+    "BUTTON_LABEL_UPLOAD_CSV": "Tải lên CSV"
   }
 }

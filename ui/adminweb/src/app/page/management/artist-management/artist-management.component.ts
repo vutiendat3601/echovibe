@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Attribute, Component, OnInit, Signal, signal, WritableSignal } from '@angular/core';
+import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -205,7 +205,11 @@ export class ArtistManagementComponent implements OnInit {
 
   handleEditSelectedArtists(): void {
     const ids = this.selectedArtists.map((artist) => artist.id).join(',');
-    this.router.navigate(['/management/artist/bulk-edit'], { queryParams: { ids } });
+    this.router.navigate(['/management/artist/bulk'], { queryParams: { ids } });
+  }
+
+  handleImportCsv(): void {
+    this.router.navigate(['/management/artist/bulk']);
   }
 
   handleExportCsv(): void {}
