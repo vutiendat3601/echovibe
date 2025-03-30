@@ -14,6 +14,7 @@ import { ArtistDto } from '../../../dto/artist-dto';
 })
 export class ArtistDetailComponent implements OnInit {
   artist: Artist | null = null;
+  artistJson: string | null = null;
 
   constructor(
     private readonly activeRoute: ActivatedRoute,
@@ -32,6 +33,7 @@ export class ArtistDetailComponent implements OnInit {
         this.artistService.getArtistById(params['id']).subscribe((respDto: ResponseDto<ArtistDto | null>) => {
           if (respDto.data) {
             this.artist = this.artistMapper.mapToArtist(respDto.data);
+            this.artistJson = JSON.stringify(this.artist);
           } else {
             this.router.navigate(['/not-found']);
           }
