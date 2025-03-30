@@ -112,11 +112,64 @@ FOR EACH STATEMENT
 EXECUTE FUNCTION refresh_mv_artist_detail()
 ;"""
 
+    search_artist_function_ddl = """
+CREATE OR REPLACE FUNCTION search_artist(keyword text)
+  RETURNS TABLE (
+    tsv_criteria text,
+    id uuid,
+    aggregate_id varchar,
+    urn varchar,
+    "name" varchar,
+    description varchar,
+    biography text,
+    nationality_iso_code varchar,
+    thumbnail_file_key text,
+    thumbnail_url text,
+    background_file_key text,
+    background_url text,
+    is_public boolean,
+    is_verified boolean,
+    tags text[],
+    tsv tsvector
+  ) 
+LANGUAGE PLPGSQL AS $function$
+DECLARE
+    words text[];
+    tsv_criteria text;
+BEGIN
+    --  SELECT string_to_array(keyword || ' ' || unaccent(keyword), ' ') INTO words;
+    SELECT string_to_array(keyword, ' ') INTO words;
+    SELECT array_to_string(words, ':* | ') INTO tsv_criteria;
+    SELECT tsv_criteria || ':*' INTO tsv_criteria;
+    RETURN QUERY
+    SELECT
+      tsv_criteria,
+      a.id uuid,
+      a.aggregate_id,
+      a.urn,
+      a."name",
+      a.description,
+      a.biography,
+      a.nationality_iso_code,
+      a.thumbnail_file_key,
+      a.thumbnail_url,
+      a.background_file_key,
+      a.background_url,
+      a.is_public,
+      a.is_verified,
+      a.tags,
+      a.tsv
+    FROM artist a
+    WHERE a.is_active AND a.is_public AND a.tsv @@ to_tsquery('english', tsv_criteria);
+END;
+$function$
+;"""
+
     ddls = [
         create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
         create_artist_table_ddl, create_artist_detail_materialized_view_ddl,
         refresh_mv_artist_detail_view_function_ddl,
-        artist_refresh_mv_artist_detail_trigger_ddl
+        artist_refresh_mv_artist_detail_trigger_ddl, search_artist_function_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)
@@ -127,11 +180,13 @@ def downgrade() -> None:
     drop_unaccent_extension_ddl = "DROP EXTENSION IF NOT EXISTS unaccent;"
     drop_artist_detail_materialized_view = "DROP MATERIALIZED VIEW mv_artist_detail;"
     drop_artist_table_ddl = "DROP TABLE IF EXISTS artist;"
+    drop_search_artist_function_ddl = "DROP FUNCTION IF EXISTS search_artist;"
     drop_artist_refresh_mv_artist_detail_trigger = "DROP TRIGGER IF EXISTS artist_refresh_mv_artist_detail_trigger;"
     drop_refresh_mv_artist_detail_function = "DROP FUNCTION IF EXISTS refresh_mv_artist_detail;"
     ddls = [
         drop_uuid_ossp_extension_ddl, drop_unaccent_extension_ddl,
         drop_artist_detail_materialized_view, drop_artist_table_ddl,
+        drop_search_artist_function_ddl,
         drop_artist_refresh_mv_artist_detail_trigger,
         drop_refresh_mv_artist_detail_function
     ]
