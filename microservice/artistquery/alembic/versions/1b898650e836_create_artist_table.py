@@ -72,13 +72,13 @@ EXECUTE FUNCTION artist_set_tsv();
 CREATE OR REPLACE FUNCTION artist_update_tsv(aggregate_id TEXT)
 RETURNS void AS $$
 DECLARE
-  name text;
+    artist_name text;
 BEGIN
-    SELECT COALESCE(name, '') INTO name
+    SELECT COALESCE(name, '') INTO artist_name
     FROM artist_profile WHERE aggregate_id = NEW.aggregate_id;
     
     UPDATE artist
-    SET tsv = to_tsvector('english', name || unaccent(name) || array_to_string(NEW.tags, ' ') || unaccent(array_to_string(NEW.tags, ' ')))
+    SET tsv = to_tsvector('english', artist_name || unaccent(artist_name) || array_to_string(NEW.tags, ' ') || unaccent(array_to_string(NEW.tags, ' ')))
     WHERE aggregate_id = aggregate_id;
 END;
 $$ LANGUAGE plpgsql;
@@ -111,7 +111,7 @@ CREATE TABLE artist_profile (
 	CONSTRAINT artist_profile_pkey PRIMARY KEY (id)
 );
 
--- Foreign key: 
+-- Foreign key:
 ALTER TABLE artist_profile ADD CONSTRAINT fk_artist_profile__artist_id___artist__id
 FOREIGN KEY (artist_id) REFERENCES artist(id) ON DELETE CASCADE ON UPDATE CASCADE;
 
