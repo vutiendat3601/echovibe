@@ -77,7 +77,7 @@ async def listen_artist_released_event():
         await artist_released_event_listener.stop()
 
 
-async def listen_artist_profile_updated_event():
+async def listen_artist_updated_event():
     artist_updated_event_listener = AIOKafkaConsumer(
         ARTIST_UPDATED_EVENT, **kafka_consumer_properties)
     await artist_updated_event_listener.start()
@@ -142,6 +142,6 @@ async def listen_artist_visibility_set_event():
 def get_artist_event_listeners() -> list[callable]:
     return [
         listen_artist_created_event, listen_artist_released_event,
-        listen_artist_profile_updated_event, listen_artist_deleted_event,
+        listen_artist_updated_event, listen_artist_deleted_event,
         listen_artist_visibility_set_event
     ]

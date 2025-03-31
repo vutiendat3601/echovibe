@@ -5,7 +5,6 @@ from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM, JSONB
 from sqlalchemy import TEXT
 from app.enum.artist_image_type import ArtistImageType
-from app.schema.tag_schema import TagSchema
 
 
 class Artist(SQLModel, table=True):

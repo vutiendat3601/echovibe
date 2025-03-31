@@ -2,7 +2,7 @@ from dependency_injector import containers, providers
 from app.core.logger import Logger
 from app.core.database import Database
 from app.core.configuration import configuration
-from app.repository.impl.sqlmodel_artist_repository import SqlModelArtistRepository
+from app.repository.impl.sqlmodel_artist_repository import SqlmodelArtistRepository
 from app.service.artist_service import ArtistService
 from app.event.handler.artist_event_handler import ArtistEventHandler
 
@@ -19,7 +19,7 @@ class Container(containers.DeclarativeContainer):
 
     # Repository
     artist_repository = providers.Factory(
-        SqlModelArtistRepository,
+        SqlmodelArtistRepository,
         logger=logger,
         session_factory=database.provided.session)
 

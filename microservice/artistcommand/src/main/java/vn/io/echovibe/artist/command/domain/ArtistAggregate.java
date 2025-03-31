@@ -1,6 +1,7 @@
 package vn.io.echovibe.artist.command.domain;
 
 import static vn.io.echovibe.artist.common.constant.ArtistBussinessRuleConstant.ARTIST_BR_01;
+import static vn.io.echovibe.artist.common.constant.ArtistBussinessRuleConstant.ARTIST_BR_03;
 import static vn.io.echovibe.artist.common.constant.ArtistConstant.ARTIST_URN_PREFIX;
 import static vn.io.echovibe.core.constant.BusinessRuleConstant.BR_01;
 
@@ -103,7 +104,7 @@ public class ArtistAggregate extends AggregateRoot {
     if (!Objects.equals(
         updateProfile.getNationalityIsoCode(), updatedProfile.getNationalityIsoCode())) {
       hasChange = true;
-      updatedProfile.setThumbnailUrl(updateProfile.getThumbnailUrl());
+      updatedProfile.setNationalityIsoCode(updateProfile.getNationalityIsoCode());
     }
     // thumbnailUrl
     if (!Objects.equals(updateProfile.getThumbnailUrl(), updatedProfile.getThumbnailUrl())) {
@@ -116,17 +117,23 @@ public class ArtistAggregate extends AggregateRoot {
       updatedProfile.setBackgroundUrl(updateProfile.getBackgroundUrl());
     }
     // refCode
-    if (!Objects.equals(artistUpdatedEvent.getRefCode(), updateArtistCommand.getRefCode())) {
+    if (!Objects.equals(updateArtistCommand.getRefCode(), artistUpdatedEvent.getRefCode())) {
+      if (this.revisionNumber > -1) {
+        throw new BusinessRuleViolationException(
+            ARTIST_BR_03,
+            "Can't update Artist's refCode once it has been released at least once: aggregateId=%s"
+                .formatted(updateArtistCommand.getId()));
+      }
       hasChange = true;
       artistUpdatedEvent.setRefCode(updateArtistCommand.getRefCode());
     }
     // isPublic
-    if (!Objects.equals(artistUpdatedEvent.getIsPublic(), updateArtistCommand.getIsPublic())) {
+    if (!Objects.equals(updateArtistCommand.getIsPublic(), artistUpdatedEvent.getIsPublic())) {
       hasChange = true;
       artistUpdatedEvent.setIsPublic(updateArtistCommand.getIsPublic());
     }
     // tags
-    if (Objects.nonNull(updateArtistCommand.getTags())) {
+    if (!Objects.equals(updateArtistCommand.getTags(), artistUpdatedEvent.getTags())) {
       hasChange = true;
       artistUpdatedEvent.setTags(updateArtistCommand.getTags());
     }

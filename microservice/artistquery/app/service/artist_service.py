@@ -29,7 +29,7 @@ class ArtistService:
             self,
             aggregate_ids: list[str],
             is_load_images: bool = False,
-            is_load_revisions: bool = False) -> list[ArtistSchema]:
+            is_load_revisions: bool = False) -> list[ArtistSchema | None]:
         artists = self.artist_repository.find_by_aggregate_ids_and_is_active_true(
             aggregate_ids=aggregate_ids,
             is_load_images=is_load_images,

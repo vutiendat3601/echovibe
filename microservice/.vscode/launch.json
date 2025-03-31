@@ -27,22 +27,6 @@
       }
     },
     {
-      "type": "java",
-      "name": "TrackCommandApplication",
-      "request": "launch",
-      "mainClass": "vn.io.echovibe.track.command.TrackCommandApplication",
-      "projectName": "trackcommand",
-      "cwd": "${workspaceFolder}/trackcommand"
-    },
-    {
-      "type": "java",
-      "name": "PlaylistCommandApplication",
-      "request": "launch",
-      "mainClass": "vn.io.echovibe.playlist.command.PlaylistCommandApplication",
-      "projectName": "playlistcommand",
-      "cwd": "${workspaceFolder}/playlistcommand"
-    },
-    {
       "name": "product",
       "type": "debugpy",
       "request": "launch",
@@ -50,7 +34,8 @@
       "cwd": "${workspaceFolder}/product",
       "args": ["app.main:app", "--reload", "--port=6200"],
       "jinja": true,
-      "envFile": "${workspaceFolder}/product/.env"
+      "envFile": "${workspaceFolder}/product/.env",
+      "justMyCode": false
     }
   ]
 }

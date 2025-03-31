@@ -20,7 +20,7 @@ export class AuthService {
     this.oauthService
       .loadDiscoveryDocumentAndLogin()
       .then((hasTokens) => hasTokens && setTimeout(() => this.loadUserProfile(), 1_000));
-    // this.oauthService.setupAutomaticSilentRefresh(); // This command keep fetching Auth Server every a few ms
+    this.oauthService.setupAutomaticSilentRefresh(); // This command keep fetching Auth Server every a few ms
     this.oauthService.events
       .pipe(filter((event) => ['token_received', 'token_refreshed'].includes(event.type)))
       .subscribe((_) => setTimeout(() => this.loadUserProfile(), 1_000));

@@ -8,7 +8,7 @@ from app.core.logger import Logger
 from app.repository.artist_repository import ArtistRepository
 
 
-class SqlModelArtistRepository(ArtistRepository):
+class SqlmodelArtistRepository(ArtistRepository):
 
     def __init__(
         self, logger: Logger,
@@ -99,7 +99,7 @@ class SqlModelArtistRepository(ArtistRepository):
         finally:
             session.close()
 
-    def delete_artist(self, aggregate_id: str) -> None:
+    def delete_by_aggregate_id(self, aggregate_id: str) -> None:
         try:
             with self.session_factory() as session:
                 statement = (delete(Artist).where(

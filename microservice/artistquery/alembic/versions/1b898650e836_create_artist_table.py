@@ -18,6 +18,9 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    create_uuid_ossp_extension_ddl = 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp";'
+    create_unaccent_extension_ddl = "CREATE EXTENSION IF NOT EXISTS unaccent;"
+
     create_artist_table_ddl = """
 -- Table: artist
 CREATE TABLE artist (
@@ -42,27 +45,44 @@ CREATE TABLE artist (
 	updated_by varchar(255) NULL,
 	CONSTRAINT artist_aggregate_id_key UNIQUE (aggregate_id),
 	CONSTRAINT artist_pkey PRIMARY KEY (id),
-	CONSTRAINT artist_ref_code_key UNIQUE (ref_code),
 	CONSTRAINT artist_urn_key UNIQUE (urn)
 );
 CREATE INDEX idx_artist__tsv ON artist USING GIN (tsv);
 
--- Function: artist_update_tsv
-CREATE OR REPLACE FUNCTION artist_update_tsv()
-RETURNS TRIGGER AS $$
+-- Function: artist_set_tsv
+CREATE OR REPLACE FUNCTION artist_set_tsv()
+RETURNS trigger AS $$
+DECLARE
+  artist_name text;
 BEGIN
-    NEW.tsv = to_tsvector('english', array_to_string(NEW.tags, ' '));
+    SELECT COALESCE(name, '') INTO artist_name
+    FROM artist_profile WHERE aggregate_id = NEW.aggregate_id;
+    
+    NEW.tsv = to_tsvector('english', artist_name || ' ' || unaccent(artist_name) || ' ' || array_to_string(NEW.tags, ' ') || ' ' || unaccent(array_to_string(NEW.tags, ' ')));
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql
-;
+$$ LANGUAGE plpgsql;
 
--- Trigger: artist_update_tsv_trigger
-CREATE TRIGGER artist_update_tsv_trigger
+-- Trigger: artist_set_tsv_trigger
+CREATE TRIGGER artist_set_tsv_trigger
 BEFORE INSERT OR UPDATE ON artist
 FOR EACH ROW
-EXECUTE FUNCTION artist_update_tsv()
-;"""
+EXECUTE FUNCTION artist_set_tsv();
+
+CREATE OR REPLACE FUNCTION artist_update_tsv(update_aggregate_id TEXT)
+RETURNS void AS $$
+DECLARE
+    artist_name text;
+BEGIN
+    SELECT COALESCE(name, '') INTO artist_name
+    FROM artist_profile WHERE aggregate_id = update_aggregate_id;
+    
+    UPDATE artist
+    SET tsv = to_tsvector('english', artist_name || unaccent(artist_name) || array_to_string(tags, ' ') || unaccent(array_to_string(tags, ' ')))
+    WHERE aggregate_id = update_aggregate_id;
+END;
+$$ LANGUAGE plpgsql;
+"""
 
     create_artist_profile_ddl = """
 CREATE TABLE artist_profile (
@@ -88,14 +108,29 @@ CREATE TABLE artist_profile (
 	updated_by varchar(255) NULL,
 	CONSTRAINT artist_profile_aggregate_id_key UNIQUE (aggregate_id),
 	CONSTRAINT artist_profile_artist_id_key UNIQUE (artist_id),
-	CONSTRAINT artist_profile_pkey PRIMARY KEY (id),
-	CONSTRAINT artist_profile_ref_code_key UNIQUE (ref_code)
+	CONSTRAINT artist_profile_pkey PRIMARY KEY (id)
 );
 
--- Foreign key: 
+-- Foreign key:
 ALTER TABLE artist_profile ADD CONSTRAINT fk_artist_profile__artist_id___artist__id
-FOREIGN KEY (artist_id) REFERENCES artist(id) ON DELETE CASCADE ON UPDATE CASCADE
-;"""
+FOREIGN KEY (artist_id) REFERENCES artist(id) ON DELETE CASCADE ON UPDATE CASCADE;
+
+
+-- Function: artist_set_tsv
+CREATE OR REPLACE FUNCTION on_artist_profile_after_insert_update()
+RETURNS trigger AS $$
+BEGIN
+    PERFORM artist_update_tsv(NEW.aggregate_id);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger: artist_profile_after_insert_update_trigger
+CREATE TRIGGER artist_profile_after_insert_update_trigger
+AFTER INSERT OR UPDATE ON artist_profile
+FOR EACH ROW
+EXECUTE FUNCTION on_artist_profile_after_insert_update();
+"""
 
     create_artist_image_table_ddl = """
 CREATE TABLE artist_image (
@@ -161,6 +196,7 @@ FOREIGN KEY (artist_id) REFERENCES artist(id) ON DELETE CASCADE ON UPDATE CASCAD
 ;"""
 
     ddls = [
+        create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
         create_artist_table_ddl, create_artist_profile_ddl,
         create_artist_image_table_ddl, create_artist_revision_table_ddl
     ]
@@ -169,15 +205,18 @@ FOREIGN KEY (artist_id) REFERENCES artist(id) ON DELETE CASCADE ON UPDATE CASCAD
 
 
 def downgrade() -> None:
-    drop_artist_update_tsv_trigger_ddl = "DROP TRIGGER IF EXISTS artist_update_tsv_trigger ON artist;"
-    drop_artist_update_tsv_function_ddl = "DROP FUNCTION IF EXISTS artist_update_tsv;"
+    drop_uuid_ossp_extension_ddl = 'DROP EXTENSION IF NOT EXISTS "uuid-ossp";'
+    drop_unaccent_extension_ddl = "DROP EXTENSION IF NOT EXISTS unaccent;"
+    drop_artist_set_tsv_trigger_ddl = "DROP TRIGGER IF EXISTS artist_set_tsv_trigger ON artist;"
+    drop_artist_set_tsv_function_ddl = "DROP FUNCTION IF EXISTS artist_set_tsv;"
     drop_artist_revision_table_ddl = "DROP TABLE IF EXISTS artist_revision;"
     drop_artist_profile_table_ddl = "DROP TABLE IF EXISTS artist_profile;"
     drop_artist_image_table_ddl = "DROP TABLE IF EXISTS artist_image;"
     drop_artist_table_ddl = "DROP TABLE IF EXISTS artist;"
 
     ddls = [
-        drop_artist_update_tsv_trigger_ddl, drop_artist_update_tsv_function_ddl,
+        drop_uuid_ossp_extension_ddl, drop_unaccent_extension_ddl,
+        drop_artist_set_tsv_trigger_ddl, drop_artist_set_tsv_function_ddl,
         drop_artist_revision_table_ddl, drop_artist_profile_table_ddl,
         drop_artist_image_table_ddl, drop_artist_table_ddl
     ]

@@ -7,7 +7,9 @@ from contextlib import AbstractContextManager, contextmanager
 class Database:
 
     def __init__(self, database_uri: str) -> None:
-        self._engine = create_engine(database_uri, echo=False)
+        self._engine = create_engine(database_uri,
+                                     echo=False,
+                                     pool_pre_ping=True)
 
     @contextmanager
     def session(self) -> Generator[Any, Any, AbstractContextManager[Session]]:

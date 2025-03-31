@@ -9,17 +9,9 @@
       class="mr-2"
       (onClick)="handleNewArtist()"
     />
+
     <p-button
-      severity="secondary"
-      i18n-label="@@BUTTON_LABEL_DELETE"
-      label="Delete"
-      icon="pi pi-trash"
-      outlined
-      class="mr-2"
-      (onClick)="handleDeleteSelectedArtists()"
-      [disabled]="!selectedArtists.length"
-    />
-    <p-button
+      class="ml-2"
       severity="secondary"
       i18n-label="@@BUTTON_LABEL_EDIT"
       label="Delete"
@@ -28,9 +20,37 @@
       (onClick)="handleEditSelectedArtists()"
       [disabled]="!selectedArtists.length"
     />
+    <p-button
+      class="ml-2"
+      severity="secondary"
+      i18n-label="@@BUTTON_LABEL_RELEASE"
+      label="Delete"
+      icon="pi pi-bolt"
+      outlined
+      (onClick)="handleReleaseSelectedArtists()"
+      [disabled]="!selectedArtists.length"
+    />
+    <p-button
+      class="ml-2"
+      severity="secondary"
+      i18n-label="@@BUTTON_LABEL_DELETE"
+      label="Delete"
+      icon="pi pi-trash"
+      outlined
+      (onClick)="handleDeleteSelectedArtists()"
+      [disabled]="!selectedArtists.length"
+    />
   </ng-template>
 
   <ng-template #end>
+    <p-button
+      severity="secondary"
+      i18n-label="@@BUTTON_LABEL_IMPORT_CSV"
+      label="Import CSV"
+      icon="pi pi-file-import"
+      class="mr-2"
+      (onClick)="handleImportCsv()"
+    />
     <p-button
       label="Export"
       icon="pi pi-upload"
@@ -80,7 +100,7 @@
       </th>
 
       <!-- Action Buttons -->
-      <th style="min-width: 8rem">Action</th>
+      <th style="min-width: 12rem">Action</th>
 
       <!-- ID -->
       <th style="width: 8rem">ID</th>
@@ -121,6 +141,9 @@
       <!-- Biography -->
       <th style="min-width: 32rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_BIOGRAPHY">Biography</th>
 
+      <!-- Tag -->
+      <th style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_TAG">Tag</th>
+
       <!-- Background -->
       <th style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_BACKGROUND">Background</th>
     </tr>
@@ -132,19 +155,30 @@
         <p-tableCheckbox [value]="artist" />
       </td>
 
-      <!-- Action -->
-      <td>
+      <!-- Action Buttons -->
+      <td style="min-width: 12rem">
         <!-- Edit -->
         <p-button
+          severity="success"
           icon="pi pi-pencil"
-          class="mr-2"
           [rounded]="true"
           [outlined]="true"
           (click)="handleEditArtist(artist)"
         />
 
+        <!-- Release -->
+        <p-button
+          class="ml-2"
+          icon="pi pi-bolt"
+          severity="success"
+          [rounded]="true"
+          [outlined]="true"
+          (click)="handleReleaseArtist(artist)"
+        />
+
         <!-- Delete -->
         <p-button
+          class="ml-2"
           icon="pi pi-trash"
           severity="danger"
           [rounded]="true"
@@ -174,7 +208,15 @@
 
       <!-- Nationality -->
       <td style="min-width: 12rem">
-        <span [class]="'fi fi-' + artist.profile.nationalityIsoCode.toLowerCase()"></span>
+        <span
+          [class]="
+            'fi fi-' +
+            (![UNDEFINED, null].includes(artist.profile.nationalityIsoCode)
+              ? artist.profile.nationalityIsoCode
+              : 'xx'
+            ).toLowerCase()
+          "
+        ></span>
         <span class="ml-2"> {{ artist.profile.nationalityIsoCode | artistNationalityName }}</span>
       </td>
 
@@ -221,6 +263,15 @@
       <!-- Biography -->
       <td style="min-width: 32rem" [innerHTML]="artist.profile.biography | safeHtmlPipe"></td>
 
+      <!-- Tag -->
+      <td style="min-width: 16rem">
+        <div class="flex items-center gap-x-1">
+          @for (tag of artist.tags; track tag.name) {
+            <p-tag [value]="tag.name" [severity]="'info'" />
+          }
+        </div>
+      </td>
+
       <!-- Background -->
       <td style="min-width: 16rem">
         <p-image
@@ -254,15 +305,16 @@
               [src]="
                 renderableImageUrls.includes(thumbnailUrlFormControl.value)
                   ? thumbnailUrlFormControl.value
-                  : 'asset/image/default-artist-image.jpg'
+                  : 'asset/image/default-artist-thumbnail-image.png'
               "
+              styleClass="w-full h-full"
               imageClass="block m-auto w-full h-full object-cover rounded"
               [preview]="true"
             />
           </div>
           <div class="flex-1">
-            <div>
-              <!-- Name -->
+            <!-- Name -->
+            <div class="flex-1">
               <p-floatlabel variant="on" class="w-full">
                 <input id="name" ng-invalid ng-dirty pInputText formControlName="nameFormControl" class="w-full" />
                 <label i18n="@@FORM_LABEL_ARTIST_NAME" for="name">Name</label>
@@ -382,6 +434,61 @@
         </div>
       </p-panel>
 
+      <p-panel styleClass="mt-4" i18n-header="@@FORM_SECTION_ARTIST_ATTRIBUTE" header="Control attributes">
+        <div class="flex items-center gap-4 w-full">
+          <!-- Public -->
+          <div>
+            <p-checkbox formControlName="isPublicFormControl" [binary]="true" inputId="isPublic" />
+            <label i18n="@@FORM_LABEL_ARTIST_IS_PUBLIC" for="isPublic" class="ml-2">Public</label>
+          </div>
+
+          <!-- Tag -->
+          <p-multiselect
+            class="flex-1"
+            [options]="this.currentArtistAttribute.tags"
+            formControlName="tagsFormControl"
+            i18n-placeholder="@@FORM_LABEL_ARTIST_TAG_EDIT"
+            placeholder="Edit tags"
+            optionLabel="name"
+            optionValue="name"
+            styleClass="w-full md:w-80"
+            display="chip"
+            i18n-emptyFilterMessage="@@MESSAGE_NO_RESULT_FOUND"
+            emptyFilterMessage="No results found."
+            [filterValue]="currentArtistAttribute.tagFilterKeyword || ''"
+            (onFilter)="handleTagFilter($event)"
+          >
+            <ng-template #header>
+              <div class="font-medium px-3 py-2">Tag</div>
+            </ng-template>
+            <ng-template #footer>
+              @if (!currentArtistAttribute.tagFilterFoundExactMatch) {
+                <div [style]="{ padding: 'var(--p-multiselect-list-padding)' }">
+                  <p-button severity="secondary" text size="small" styleClass="w-full" (onClick)="handleCreateTag()">
+                    <i class="pi pi-plus"></i>
+                    <span>
+                      Add tag
+                      <span>'{{ currentArtistAttribute.tagFilterKeyword }}'</span>
+                    </span>
+                  </p-button>
+                </div>
+              }
+            </ng-template>
+            <ng-template let-tag #item>
+              <div class="flex items-center gap-2">
+                <p>{{ tag.name }}</p>
+              </div>
+            </ng-template>
+            <ng-template #dropdownicon>
+              <i class="pi pi-tags"></i>
+            </ng-template>
+            <ng-template #filtericon>
+              <i class="pi pi-hashtag"></i>
+            </ng-template>
+          </p-multiselect>
+        </div>
+      </p-panel>
+
       <!-- Biography -->
       <p-editor
         id="biography"
@@ -393,18 +500,16 @@
 
       <p-panel styleClass="mt-4" i18n-header="@@FORM_SECTION_ARTIST_BACKGROUND" header="Background">
         <!-- Background -->
-        <div>
-          <p-image
-            styleClass="w-ful"
-            [src]="
-              renderableImageUrls.includes(thumbnailUrlFormControl.value)
-                ? backgroundUrlFormControl.value
-                : 'asset/image/default-artist-image.jpg'
-            "
-            imageClass="block m-auto w-full h-full object-cover rounded"
-            [preview]="true"
-          />
-        </div>
+        @if (renderableImageUrls.includes(thumbnailUrlFormControl.value)) {
+          <div>
+            <p-image
+              styleClass="w-ful"
+              [src]="backgroundUrlFormControl.value"
+              imageClass="block m-auto w-full h-full object-cover rounded"
+              [preview]="true"
+            />
+          </div>
+        }
         <!-- Backround URL -->
         <div class="mt-2">
           <p-floatlabel variant="on" class="w-full">
@@ -451,4 +556,3 @@
 
 <p-confirmdialog [style]="{ width: 'clamp(320px, 60vw, 540px)' }" />
 <p-toast position="top-right" />
-<router-outlet></router-outlet>

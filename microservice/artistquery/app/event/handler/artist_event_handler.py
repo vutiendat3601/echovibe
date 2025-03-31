@@ -107,6 +107,7 @@ class ArtistEventHandler:
             artist.profile.name = release_profile.name
             artist.profile.biography = release_profile.biography
             artist.profile.description = release_profile.description
+            artist.profile.nationality_iso_code = release_profile.nationality_iso_code
             artist.profile.thumbnail_file_key = release_profile.thumbnail_file_key
             artist.profile.thumbnail_url = release_profile.thumbnail_url
             artist.profile.background_file_key = release_profile.background_file_key
@@ -217,7 +218,7 @@ class ArtistEventHandler:
                 artist.updated_at = updated_at
                 self.artist_repository.save_artist(artist)
         else:
-            self.artist_repository.delete_artist(artist_deleted_event.id)
+            self.artist_repository.delete_by_aggregate_id(artist_deleted_event.id)
         self.logger.info(
             f"Processed {ArtistDeletedEvent.__name__}: id={artist_deleted_event.id}, version={artist_deleted_event.version}, timestamp={artist_deleted_event.timestamp}"
         )

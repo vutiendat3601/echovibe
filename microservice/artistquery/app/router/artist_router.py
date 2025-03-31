@@ -16,17 +16,17 @@ artist_service: ArtistService = Provide[Container.artist_service]
 
 
 @artist_router.get(path="/byId/{id}",
-                   response_model=ResponseSchema[list[ArtistSchema]])
+                   response_model=ResponseSchema[ArtistSchema])
 def get_artist_by_id(id: str,
                      load_images: bool = Query(default=False,
                                                alias="loadImages"),
                      load_revisions: bool = Query(default=False,
                                                   alias="loadRevisions")):
-    artist_schemas = artist_service.get_artist_by_aggregate_id(
+    artist_schema = artist_service.get_artist_by_aggregate_id(
         aggregate_id=id,
         is_load_images=load_images,
         is_load_revisions=load_revisions)
-    response = ok(data=artist_schemas)
+    response = ok(data=artist_schema)
     return JSONResponse(content=jsonable_encoder(response))
 
 

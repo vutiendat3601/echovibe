@@ -14,7 +14,7 @@ export default [
         component: ArtistManagementComponent
       },
       {
-        path: 'bulk-edit',
+        path: 'bulk',
         component: ArtistManagementBulkComponent
       }
     ]

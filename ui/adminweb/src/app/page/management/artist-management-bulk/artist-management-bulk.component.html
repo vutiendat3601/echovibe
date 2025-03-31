@@ -1,1 +1,508 @@
-<p>artist-management-bulk works!</p>
+<!-- Toolbar -->
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <p-button
+      i18n-label="@@BUTTON_LABEL_SAVE"
+      [label]="I18N.SAVE"
+      icon="pi pi-save"
+      severity="success"
+      class="mr-2"
+      (onClick)="handleSaveArtists()"
+      [disabled]="loading()"
+    />
+    <p-button
+      severity="secondary"
+      i18n-label="@@BUTTON_LABEL_DELETE_FROM_LIST"
+      [label]="I18N.DELETE_FROM_LIST"
+      icon="pi pi-minus-circle"
+      outlined
+      class="mr-2"
+      (onClick)="handleDeleteSelectedArtists($event)"
+      [disabled]="!selectedArtists.length || loading()"
+    />
+
+    @if (!isEdit) {
+      <!-- CSV Import Button -->
+      <p-button
+        i18n-label="@@BUTTON_LABEL_UPLOAD_CSV"
+        [label]="I18N.UPLOAD_CSV"
+        icon="pi pi-file-arrow-up"
+        severity="secondary"
+        class="mr-2"
+        (onClick)="fileInput.click()"
+      />
+      <input #fileInput type="file" accept=".csv" style="display: none" (change)="handleImportCSV($event)" />
+
+      <!-- CSV Template Button -->
+      <p-button
+        i18n-label="@@BUTTON_LABEL_EXPORT_TEMPLATE"
+        icon="pi pi-file-export"
+        [label]="I18N.EXPORT_TEMPLATE"
+        outlined
+        severity="secondary"
+        class="mr-2"
+        (onClick)="handleExportCSVTemplate()"
+      />
+    }
+  </ng-template>
+</p-toolbar>
+
+<form [formGroup]="fb.group({ artists: artistsForm })">
+  <!-- List of Artists -->
+  <p-table
+    #dt
+    [value]="artists()"
+    [rows]="5"
+    [columns]="columns"
+    [paginator]="true"
+    [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedArtists"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} artists"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[5, 10, 50, 100]"
+    [loading]="loading()"
+  >
+    <ng-template #caption>
+      <div class="flex items-center justify-between">
+        @if (isEdit) {
+          <h5 class="m-0" i18n="@@TABLE_LABEL_UPDATE_ARTISTS">{{ I18N.UPDATE_ARTISTS }}</h5>
+        } @else {
+          <h5 class="m-0" i18n="@@TABLE_LABEL_CREATE_ARTISTS">{{ I18N.CREATE_ARTISTS }}</h5>
+        }
+      </div>
+    </ng-template>
+    <ng-template #header>
+      <tr>
+        <!-- Checkbox -->
+        <th style="width: 4rem">
+          <p-tableHeaderCheckbox />
+        </th>
+
+        <!-- Action Buttons -->
+        <th style="min-width: 8rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_ACTIONS">Action</th>
+
+        <!-- ID -->
+        <th style="min-width: 12rem">ID</th>
+
+        <!-- Thumbnail -->
+        <th style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_THUMBNAIL">Thumbnail</th>
+
+        <!-- Name -->
+        <th pSortableColumn="name" style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NAME">
+          Name
+          <p-sortIcon field="name" />
+        </th>
+
+        <!-- Nationality -->
+        <th
+          i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NATIONALITY"
+          pSortableColumn="nationalityIsoCode"
+          style="min-width: 16rem"
+        >
+          Nationality
+          <p-sortIcon field="nationalityIsoCode" />
+        </th>
+
+        <!-- Public -->
+        <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_PUBLIC">Public</th>
+
+        <!-- Verified -->
+        <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_VERIFIED">Verified</th>
+
+        <!-- Revision -->
+        <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_REVISION">Revision</th>
+
+        <!-- Released -->
+        <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_RELEASED">Released</th>
+
+        <!-- Reference code -->
+        <th style="min-width: 24rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_REFERENCE_CODE">Reference code</th>
+
+        <!-- Description -->
+        <th style="min-width: 20rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_DESCRIPTION">Description</th>
+
+        <!-- Biography -->
+        <th style="min-width: 32rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_BIOGRAPHY">Biography</th>
+
+        <!-- Tag -->
+        <th style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_TAG">Tag</th>
+
+        <!-- Background -->
+        <th style="min-width: 20rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_BACKGROUND">Background</th>
+      </tr>
+    </ng-template>
+    <ng-template #body let-artist let-rowIndex="rowIndex">
+      <ng-container [formGroup]="handleGetFormGroupAt(rowIndex)">
+        <tr>
+          <!-- Checkbox -->
+          <td style="width: 4rem">
+            <p-tableCheckbox [value]="artist" />
+          </td>
+
+          <!-- Action -->
+          <td>
+            <!-- Delete -->
+            <p-button
+              icon="pi pi-minus-circle"
+              severity="danger"
+              [rounded]="true"
+              [outlined]="true"
+              (click)="handleDeleteArtist($event, artist)"
+            />
+          </td>
+
+          <!-- ID -->
+          <td style="min-width: 12rem">{{ artist.id }}</td>
+
+          <!-- Thumbnail -->
+          <td style="min-width: 16rem">
+            <div class="flex items-center">
+              <p-button
+                icon="pi pi-pencil"
+                class="mr-2"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="handleOpenThumbnailDialog(artist)"
+              />
+              <p-image
+                [preview]="false"
+                class="rounded cursor-pointer"
+                imageClass="rounded object-cover w-20 h-20"
+                [src]="artist.profile.thumbnailUrl"
+                [alt]="artist.profile.name + '\'s thumbnail'"
+                (click)="handleOpenThumbnailDialog(artist)"
+              ></p-image>
+            </div>
+          </td>
+
+          <!-- Name - Editable -->
+          <td style="min-width: 16rem">
+            <input pInputText type="text" formControlName="name" class="w-full" />
+          </td>
+
+          <!-- Nationality - Editable -->
+          <td style="min-width: 16rem">
+            <p-select
+              formControlName="nationalityIsoCode"
+              [options]="artistNationalities"
+              optionValue="code"
+              optionLabel="name"
+              appendTo="body"
+              class="w-full"
+            >
+              <ng-template #selectedItem let-selectedNationality>
+                <span
+                  [class]="
+                    'fi fi-' +
+                    (![UNDEFINED, null].includes(selectedNationality.code)
+                      ? selectedNationality.code
+                      : 'xx'
+                    ).toLowerCase()
+                  "
+                ></span>
+                <span class="ml-2"> {{ selectedNationality.code | artistNationalityName }}</span>
+              </ng-template>
+              <ng-template let-nationality #item>
+                <span [class]="'fi fi-' + nationality.code.toLowerCase()"></span>
+                <span class="ml-2"> {{ nationality.code | artistNationalityName }}</span>
+              </ng-template>
+            </p-select>
+          </td>
+
+          <!-- Public - Display Only with Hidden Form Control -->
+          <td style="min-width: 12rem" class="text-center">
+            <p-select
+              formControlName="isPublic"
+              [options]="publicOptions"
+              optionLabel="label"
+              optionValue="value"
+              class="w-full"
+              appendTo="body"
+            />
+          </td>
+
+          <!-- Verified - Display Only with Hidden Form Control -->
+          <td style="min-width: 12rem" class="text-center">
+            <p-tag
+              [icon]="'pi ' + (artist.isVerified ? 'pi-check' : 'pi-times')"
+              [value]="artist.isVerified ? I18N.IS_VERIFIED_TRUE : I18N.IS_VERIFIED_FALSE"
+              [severity]="artist.isVerified ? 'success' : 'danger'"
+            />
+            <input type="hidden" formControlName="isVerified" />
+          </td>
+
+          <!-- Revision - Not Editable -->
+          <td style="min-width: 8rem">
+            {{ artist.revisionNumber }}
+          </td>
+
+          <!-- Released - Display Only with Hidden Form Control -->
+          <td style="min-width: 12rem" class="text-center">
+            <p-tag
+              [icon]="'pi ' + (artist.isReleased ? 'pi-check' : 'pi-times')"
+              [value]="artist.isReleased ? I18N.IS_RELEASED_TRUE : I18N.IS_RELEASED_FALSE"
+              [severity]="artist.isReleased ? 'success' : 'danger'"
+            />
+            <input type="hidden" formControlName="isReleased" />
+          </td>
+          <!-- Reference code - Editable -->
+          <td style="min-width: 24rem">
+            <input pInputText type="text" formControlName="refCode" class="w-full" />
+          </td>
+
+          <!-- Description - Editable -->
+          <td style="min-width: 8rem">
+            <textarea pInputText formControlName="description" rows="3" class="w-full"></textarea>
+          </td>
+
+          <!-- Biography -->
+          <td style="min-width: 32rem">
+            <div class="flex items-center">
+              <p-button
+                icon="pi pi-pencil"
+                class="mr-2"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="handleOpenBiographyDialog(artist)"
+              />
+              <span [innerHTML]="artist.profile.biography | safeHtmlPipe"></span>
+            </div>
+          </td>
+
+          <!-- Tag -->
+          <td style="min-width: 16rem">
+            <div class="flex items-center">
+              <p-button
+                icon="pi pi-pencil"
+                class="mr-2"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="handleOpenTagsDialog(artist)"
+              />
+              <div class="flex flex-wrap gap-1">
+                @for (tag of artist.tags; track tag.name) {
+                  @if (tag.isActive) {
+                    <p-tag [value]="tag.name" [severity]="'info'" />
+                  }
+                }
+              </div>
+            </div>
+          </td>
+
+          <!-- Background -->
+          <td style="min-width: 10rem">
+            <div class="flex items-center">
+              <p-button
+                icon="pi pi-pencil"
+                class="mr-2"
+                [rounded]="true"
+                [outlined]="true"
+                (click)="handleOpenBackgroundDialog(artist)"
+              />
+              @if (artist.profile.backgroundUrl) {
+                <p-image
+                  [preview]="false"
+                  class="rounded cursor-pointer"
+                  imageClass="rounded object-cover h-20"
+                  [src]="artist.profile.backgroundUrl"
+                  [alt]="artist.profile.name + '\'s background.'"
+                />
+              }
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="15">
+          <div class="flex flex-col items-center justify-center">
+            <div class="text-center p-4">No artists found. Please check your query parameters.</div>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</form>
+
+<!-- Thumbnail URL Dialog -->
+<p-dialog
+  [(visible)]="isImageDialogVisible"
+  [style]="{ width: '400px' }"
+  [header]="I18N.EDIT_THUMBNAIL"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="true"
+>
+  <ng-container *ngIf="handleGetSelectedArtistFormGroup()">
+    <form [formGroup]="handleGetSelectedArtistFormGroup()!" class="flex flex-col gap-3">
+      <!-- Image Preview -->
+      <div class="w-full flex justify-center">
+        <p-image
+          [src]="
+            renderableImageUrls.includes(handleGetSelectedArtistFormGroup()!.get('thumbnailUrl')?.value)
+              ? handleGetSelectedArtistFormGroup()!.get('thumbnailUrl')?.value
+              : 'asset/image/default-artist-thumbnail-image.png'
+          "
+          [alt]="'Thumbnail Preview'"
+          [preview]="false"
+          class="rounded cursor-pointer"
+          imageClass="rounded object-cover w-50 h-50"
+        />
+      </div>
+
+      <!-- Input Field for Thumbnail URL -->
+      <div class="w-full">
+        <label for="thumbnailUrl" class="block mb-2">{{ I18N.THUMBNAIL_URL }}</label>
+        <input id="thumbnailUrl" type="text" pInputText formControlName="thumbnailUrl" class="w-full" />
+      </div>
+    </form>
+
+    <!-- Save Button -->
+    <ng-template #footer>
+      <p-button [label]="I18N.CANCEL" severity="danger" (click)="isImageDialogVisible = false" />
+      <p-button [label]="I18N.SAVE" severity="success" (click)="handleSaveThumbnailUrl()" />
+    </ng-template>
+  </ng-container>
+</p-dialog>
+
+<!-- Background URL Dialog -->
+<p-dialog
+  [(visible)]="isBackgroundDialogVisible"
+  [style]="{ width: '400px' }"
+  [header]="I18N.EDIT_BACKGROUND"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="true"
+>
+  <ng-container *ngIf="handleGetSelectedArtistFormGroup()">
+    <form [formGroup]="handleGetSelectedArtistFormGroup()!" class="flex flex-col gap-3">
+      <!-- Image Preview -->
+      <div class="w-full flex justify-center">
+        <p-image
+          [src]="
+            renderableImageUrls.includes(handleGetSelectedArtistFormGroup()!.get('backgroundUrl')?.value)
+              ? handleGetSelectedArtistFormGroup()!.get('backgroundUrl')?.value
+              : 'asset/image/default-artist-thumbnail-image.png'
+          "
+          [alt]="'Background Preview'"
+          [preview]="false"
+          class="rounded cursor-pointer"
+          imageClass="rounded object-cover w-50 h-50"
+        />
+      </div>
+
+      <!-- Input Field for Background URL -->
+      <div class="w-full">
+        <label for="backgroundUrl" class="block mb-2">{{ I18N.BACKGROUND_URL }}</label>
+        <input id="backgroundUrl" type="text" pInputText formControlName="backgroundUrl" class="w-full" />
+      </div>
+    </form>
+
+    <!-- Save Button -->
+    <ng-template #footer>
+      <p-button [label]="I18N.CANCEL" severity="danger" (click)="isBackgroundDialogVisible = false" />
+      <p-button [label]="I18N.SAVE" severity="success" (click)="handleSaveBackgroundUrl()" />
+    </ng-template>
+  </ng-container>
+</p-dialog>
+
+<!-- Biography Dialog -->
+<p-dialog
+  [(visible)]="isBiographyDialogVisible"
+  [style]="{ width: '600px' }"
+  [header]="I18N.EDIT_BIOGRAPHY"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="true"
+>
+  <ng-container *ngIf="handleGetSelectedArtistFormGroup()">
+    <form [formGroup]="handleGetSelectedArtistFormGroup()!" class="flex flex-col gap-3">
+      <!-- Editor for Biography -->
+      <div class="w-full">
+        <p-editor id="biography" formControlName="biography" [style]="{ height: '200px' }"></p-editor>
+      </div>
+    </form>
+
+    <!-- Save and Cancel Buttons -->
+    <ng-template #footer>
+      <p-button [label]="I18N.CANCEL" severity="danger" (click)="isBiographyDialogVisible = false" />
+      <p-button [label]="I18N.SAVE" severity="success" (click)="handleSaveBiography()" />
+    </ng-template>
+  </ng-container>
+</p-dialog>
+
+<!-- Tags Dialog -->
+<p-dialog
+  [(visible)]="isTagsDialogVisible"
+  [style]="{ width: '500px' }"
+  [header]="I18N.EDIT_TAGS"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="true"
+  styleClass="tags-dialog"
+>
+  <ng-container *ngIf="handleGetSelectedArtistFormGroup() && handleGetSelectedArtist()">
+    <form [formGroup]="handleGetSelectedArtistFormGroup()!" class="flex flex-col gap-3">
+      <div class="w-full">
+        <p-multiSelect
+          formControlName="tags"
+          [options]="handleGetSelectedArtist()!.tags"
+          optionLabel="name"
+          optionValue="name"
+          [placeholder]="'Select tags'"
+          [filterValue]="tagFilterKeyword || ''"
+          (onFilter)="handleTagFilter($event)"
+          styleClass="w-full tags-multiselect"
+          display="chip"
+          [emptyFilterMessage]="I18N.NO_RESULTS_FOUND"
+          [showToggleAll]="false"
+          [virtualScroll]="true"
+          [virtualScrollItemSize]="38"
+        >
+          <ng-template #header>
+            <div class="font-medium px-3 py-2">{{ I18N.TAGS }}</div>
+          </ng-template>
+          <ng-template #footer>
+            <ng-container *ngIf="!tagFilterFoundExactMatch && tagFilterKeyword">
+              <div [style]="{ padding: 'var(--p-multiselect-list-padding)' }">
+                <p-button severity="secondary" text size="small" styleClass="w-full" (onClick)="handleCreateTag()">
+                  <i class="pi pi-plus"></i>
+                  <span>
+                    {{ I18N.ADD_TAG }}
+                    <span>'{{ tagFilterKeyword }}'</span>
+                  </span>
+                </p-button>
+              </div>
+            </ng-container>
+          </ng-template>
+          <ng-template let-tag #item>
+            <div class="flex items-center gap-2">
+              <p>{{ tag.name }}</p>
+            </div>
+          </ng-template>
+          <ng-template #dropdownicon>
+            <i class="pi pi-tags"></i>
+          </ng-template>
+          <ng-template #filtericon>
+            <i class="pi pi-hashtag"></i>
+          </ng-template>
+        </p-multiSelect>
+      </div>
+    </form>
+
+    <!-- Save Button -->
+    <ng-template #footer>
+      <p-button [label]="I18N.CANCEL" severity="danger" (click)="isTagsDialogVisible = false" />
+      <p-button [label]="I18N.SAVE" severity="success" (click)="handleSaveTags()" />
+    </ng-template>
+  </ng-container>
+</p-dialog>
+
+<p-confirmdialog />
+<p-toast position="top-right" />
+<router-outlet></router-outlet>
