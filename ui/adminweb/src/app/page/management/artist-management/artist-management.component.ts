@@ -204,8 +204,12 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   handleEditSelectedArtists(): void {
-    const ids = this.selectedArtists.map((artist) => artist.id).join(',');
-    this.router.navigate(['/management/artist/bulk'], { queryParams: { ids } });
+    if (this.selectedArtists.length === 1) {
+      this.handleEditArtist(this.selectedArtists[0]);
+    } else if (this.selectedArtists.length > 1) {
+      const ids = this.selectedArtists.map((artist) => artist.id).join(',');
+      this.router.navigate(['/management/artist/bulk'], { queryParams: { ids } });
+    }
   }
 
   handleImportCsv(): void {

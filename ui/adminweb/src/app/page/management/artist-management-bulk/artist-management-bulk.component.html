@@ -119,7 +119,7 @@
         <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_RELEASED">Released</th>
 
         <!-- Reference code -->
-        <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_REFERENCE_CODE">Reference code</th>
+        <th style="min-width: 24rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_REFERENCE_CODE">Reference code</th>
 
         <!-- Description -->
         <th style="min-width: 20rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_DESCRIPTION">Description</th>
@@ -146,7 +146,7 @@
           <td>
             <!-- Delete -->
             <p-button
-              icon="pi pi-trash"
+              icon="pi pi-minus-circle"
               severity="danger"
               [rounded]="true"
               [outlined]="true"
@@ -203,23 +203,25 @@
                     ).toLowerCase()
                   "
                 ></span>
-                <span class="ml-2"> {{ selectedNationality.name }}</span>
+                <span class="ml-2"> {{ selectedNationality.code | artistNationalityName }}</span>
               </ng-template>
               <ng-template let-nationality #item>
                 <span [class]="'fi fi-' + nationality.code.toLowerCase()"></span>
-                <span class="ml-2"> {{ nationality.name }}</span>
+                <span class="ml-2"> {{ nationality.code | artistNationalityName }}</span>
               </ng-template>
             </p-select>
           </td>
 
           <!-- Public - Display Only with Hidden Form Control -->
           <td style="min-width: 12rem" class="text-center">
-            <p-tag
-              [icon]="'pi ' + (artist.isPublic ? 'pi-check' : 'pi-times')"
-              [value]="artist.isPublic ? I18N.IS_PUBLIC_TRUE : I18N.IS_PUBLIC_FALSE"
-              [severity]="artist.isPublic ? 'success' : 'danger'"
+            <p-select
+              formControlName="isPublic"
+              [options]="publicOptions"
+              optionLabel="label"
+              optionValue="value"
+              class="w-full"
+              appendTo="body"
             />
-            <input type="hidden" formControlName="isPublic" />
           </td>
 
           <!-- Verified - Display Only with Hidden Form Control -->
@@ -247,7 +249,7 @@
             <input type="hidden" formControlName="isReleased" />
           </td>
           <!-- Reference code - Editable -->
-          <td style="min-width: 12rem">
+          <td style="min-width: 24rem">
             <input pInputText type="text" formControlName="refCode" class="w-full" />
           </td>
 

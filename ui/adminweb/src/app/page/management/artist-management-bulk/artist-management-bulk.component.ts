@@ -1,3 +1,4 @@
+import { ArtistNationalityNamePipe } from './../../../pipe/artist-nationality.pipe';
 import { CreateArtistDto } from './../../../dto/artist-dto';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -29,7 +30,7 @@ import { ToastModule } from 'primeng/toast';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ToolbarModule } from 'primeng/toolbar';
 import { catchError, finalize, take, tap } from 'rxjs';
-import { ArtistNationality, UNDEFINED } from '../../../constant/constant';
+import { ARTIST_NATIONALITIES, UNDEFINED } from '../../../constant/constant';
 import { ArtistDto, DeleteArtistDto, UpdateArtistDto } from '../../../dto/artist-dto';
 import { ResponseDto } from '../../../dto/response-dto';
 import { ExceptionHandler, Message } from '../../../exception/exception-handler';
@@ -41,6 +42,7 @@ import { UrlValidator } from '../../../validator/url.validator';
 import { MultiSelectModule, MultiSelectFilterEvent } from 'primeng/multiselect';
 import { Tag } from '../../../model/tag';
 import { CommandResult } from '../../../model/command-result';
+import { Nationality } from '../../../model/nationality';
 
 interface Column {
   field: string;
@@ -51,6 +53,7 @@ interface Column {
 @Component({
   selector: 'app-artist-management-bulk',
   imports: [
+    ArtistNationalityNamePipe,
     CommonModule,
     TableModule,
     FormsModule,
@@ -125,15 +128,14 @@ export class ArtistManagementBulkComponent implements OnInit {
     EXPORT_TEMPLATE: $localize`:@@BUTTON_LABEL_EXPORT_TEMPLATE:Export Template`,
     IMPORT_SUCCESSFUL: $localize`:@@MESSAGE_IMPORT_SUCCESSFUL:CSV data has been imported successfully`,
     CREATE_ARTISTS: $localize`:@@TABLE_LABEL_CREATE_ARTISTS:Create Artists`,
-    DELETE_FROM_LIST: $localize`:@@BUTTON_LABEL_DELETE_FROM_LIST:Delete from List`
+    DELETE_FROM_LIST: $localize`:@@BUTTON_LABEL_DELETE_FROM_LIST:Delete from List`,
+    COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES:Public`,
+    COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO:Unlisted`
   };
 
   // Constants
   readonly UNDEFINED = UNDEFINED;
-  readonly artistNationalities: { code: string; name: string }[] = Object.keys(ArtistNationality).map((key) => ({
-    code: key,
-    name: `${ArtistNationality[key as keyof typeof ArtistNationality]}`
-  }));
+  readonly artistNationalities: Nationality[] = ARTIST_NATIONALITIES;
 
   // State
   readonly renderableImageUrls: string[] = [];
@@ -170,6 +172,11 @@ export class ArtistManagementBulkComponent implements OnInit {
     'backgroundUrl',
     'refCode',
     'tagsJson'
+  ];
+
+  publicOptions = [
+    { label: this.I18N.COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES, value: true },
+    { label: this.I18N.COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO, value: false }
   ];
 
   constructor(
@@ -605,6 +612,10 @@ export class ArtistManagementBulkComponent implements OnInit {
           title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
           content: $localize`:@@MESSAGE_ARTIST_CREATED_SUCCESSFUL:Artist was created successfully.`
         });
+        // Navigate to '/management/artist' after a short delay
+        setTimeout(() => {
+          this.router.navigate(['/management/artist']);
+        }, 1000); // Adjust delay as needed
       } else {
         const message = this.exceptionHandler.handle(errors[0]);
         this.addMessage(message, 'error');
@@ -777,6 +788,10 @@ export class ArtistManagementBulkComponent implements OnInit {
         const isSuccessful = response.data.items.every((item) => item.isSuccessful);
         if (isSuccessful) {
           this.showSuccessMessage(this.I18N.TITLE_SUCCESS, this.I18N.ARTISTS_UPDATED_SUCCESSFULLY);
+          // Navigate to '/management/artist' after a short delay
+          setTimeout(() => {
+            this.router.navigate(['/management/artist']);
+          }, 1000); // Adjust delay as needed
         } else {
           const errors = response.data.items.filter((item) => !item.isSuccessful).map((item) => item.errors[0]);
           const errorMessage = this.exceptionHandler.handle(errors[0]);
