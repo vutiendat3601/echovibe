@@ -1,0 +1,47 @@
+:host ::ng-deep .p-cell-editing {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+::ng-deep {
+  // Styling for tags dialog
+  .tags-dialog {
+    .p-dialog-content {
+      overflow: visible;
+      padding-bottom: 1rem;
+    }
+
+    .tags-multiselect {
+      // Limit the height of the chips container
+      .p-multiselect-label-container {
+        max-height: 90px;
+        overflow-y: auto;
+      }
+
+      // Style for tags panel
+      .p-multiselect-panel {
+        .p-multiselect-items {
+          // Ensure proper scrolling
+          max-height: 200px;
+
+          .p-multiselect-item {
+            padding: 0.5rem 1rem;
+          }
+        }
+      }
+    }
+  }
+
+  // Ensure multiselect panel is properly positioned
+  .p-multiselect-panel {
+    transform-origin: center top;
+    &.p-component-overlay {
+      z-index: 1100 !important;
+    }
+  }
+
+  // Fix for dialog content size
+  .p-dialog-content {
+    overflow-y: visible !important;
+  }
+}

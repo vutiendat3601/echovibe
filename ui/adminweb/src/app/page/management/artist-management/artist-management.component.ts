@@ -68,7 +68,7 @@ interface ExportColumn {
 interface ArtistAttribute {
   id: string | null;
   tags: Tag[];
-  tagFilterKeyword: string | null;
+  tagFilterKeyword: string;
   tagFilterFoundExactMatch: boolean;
 }
 
@@ -251,7 +251,7 @@ export class ArtistManagementComponent implements OnInit {
     this.isPublicFormControl.setValue(isPublic);
     artist.revisionNumber > -1 && this.refCodeFormControl.disable();
     this.tagsFormControl.setValue(tags.filter(({ isActive }) => isActive).map(({ name }) => name));
-    this.currentArtistAttribute = { id, tags, tagFilterFoundExactMatch: true, tagFilterKeyword: null };
+    this.currentArtistAttribute = { id, tags, tagFilterFoundExactMatch: true, tagFilterKeyword: '' };
 
     this.openArtistDialog('edit');
   }
@@ -324,11 +324,11 @@ export class ArtistManagementComponent implements OnInit {
 
   handleCreateTag(): void {
     if (this.currentArtistAttribute.tagFilterKeyword?.trim()) {
-      const tagName: string | null = this.currentArtistAttribute.tagFilterKeyword;
+      const tagName: string = this.currentArtistAttribute.tagFilterKeyword;
       const tags = this.currentArtistAttribute.tags;
       if (!tags.some(({ name }) => name === tagName)) {
         this.currentArtistAttribute.tags.push({ name: tagName, isActive: false });
-        this.currentArtistAttribute.tagFilterKeyword = null;
+        this.currentArtistAttribute.tagFilterKeyword = '';
         this.currentArtistAttribute.tagFilterFoundExactMatch = true;
       }
     }
@@ -491,7 +491,7 @@ export class ArtistManagementComponent implements OnInit {
     );
     this.tagsFormControl.valueChanges.subscribe(
       (values: string[]) =>
-        !this.backgroundUrlFormControl.errors &&
+        !this.tagsFormControl.errors &&
         (this.currentArtistAttribute.tags = this.currentArtistAttribute.tags.map((tag) => ({
           ...tag,
           isActive: values.includes(tag.name)
@@ -550,7 +550,7 @@ export class ArtistManagementComponent implements OnInit {
     return {
       id: null,
       tags: [],
-      tagFilterKeyword: null,
+      tagFilterKeyword: '',
       tagFilterFoundExactMatch: true
     };
   }
