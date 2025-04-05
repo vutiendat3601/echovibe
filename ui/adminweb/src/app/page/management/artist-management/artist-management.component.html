@@ -445,7 +445,7 @@
           <!-- Tag -->
           <p-multiselect
             class="flex-1"
-            [options]="this.currentArtistAttribute.tags"
+            [options]="currentArtistAttribute.tags"
             formControlName="tagsFormControl"
             i18n-placeholder="@@FORM_LABEL_ARTIST_TAG_EDIT"
             placeholder="Edit tags"
@@ -455,7 +455,7 @@
             display="chip"
             i18n-emptyFilterMessage="@@MESSAGE_NO_RESULT_FOUND"
             emptyFilterMessage="No results found."
-            [filterValue]="currentArtistAttribute.tagFilterKeyword || ''"
+            [filterValue]="currentArtistAttribute.tagFilterKeyword"
             (onFilter)="handleTagFilter($event)"
           >
             <ng-template #header>
