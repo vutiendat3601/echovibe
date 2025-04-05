@@ -61,6 +61,7 @@
     "FORM_SECTION_ARTIST_PROFILE_DETAIL": "Profile details",
     "FORM_SECTION_ARTIST_ATTRIBUTE": "Attribute",
     "FORM_SECTION_ARTIST_BACKGROUND": "Background",
+    "FORM_SECTION_ARTIST_THUMBNAIL": "Thumbnail",
     "CONFIRM_MESSAGE_ARTIST_DELETE": "Are you sure you want to delete the Artist?",
     "CONFIRM_MESSAGE_ARTIST_RELEASE": "Are you sure you want to release the selected Artist?",
     "CONFIRM_MESSAGE_ARTIST_BULK_REQUEST_DELETE": "Are you sure you want to delete the selected Artists?",

@@ -7,14 +7,7 @@
       severity="success"
       class="mr-2"
       [disabled]="isLoading()"
-    />
-    <p-button
-      severity="secondary"
-      i18n-label="@@BUTTON_LABEL_DELETE_FROM_LIST"
-      icon="pi pi-minus-circle"
-      outlined
-      class="mr-2"
-      [disabled]="!selectedArtists.length || isLoading()"
+      (onClick)="handleBulkSaveArtist()"
     />
 
     @if (action == 'import') {
@@ -59,19 +52,14 @@
   <ng-template #caption>
     <div class="flex items-center justify-between">
       @if (action === 'edit') {
-        <h5 class="m-0" i18n="@@TABLE_LABEL_UPDATE_ARTISTS">{{ I18N.UPDATE_ARTISTS }}</h5>
+        <h5 class="m-0" i18n="@@TABLE_LABEL_UPDATE_ARTISTS">Update Artists</h5>
       } @else if (action === 'import') {
-        <h5 class="m-0" i18n="@@TABLE_LABEL_CREATE_ARTISTS">{{ I18N.CREATE_ARTISTS }}</h5>
+        <h5 class="m-0" i18n="@@TABLE_LABEL_CREATE_ARTISTS">Create Artists</h5>
       }
     </div>
   </ng-template>
   <ng-template #header>
     <tr>
-      <!-- Checkbox -->
-      <th style="width: 4rem">
-        <p-tableHeaderCheckbox />
-      </th>
-
       <!-- Action Buttons -->
       <th style="min-width: 8rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_ACTIONS">Action</th>
 
@@ -79,7 +67,7 @@
       <th style="min-width: 12rem">ID</th>
 
       <!-- Thumbnail -->
-      <th style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_THUMBNAIL">Thumbnail</th>
+      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_THUMBNAIL">Thumbnail</th>
 
       <!-- Name -->
       <th pSortableColumn="name" style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NAME">
@@ -94,7 +82,7 @@
       </th>
 
       <!-- Public -->
-      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_PUBLIC">Public</th>
+      <th style="min-width: 14rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_PUBLIC">Public</th>
 
       <!-- Verified -->
       <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_VERIFIED">Verified</th>
@@ -125,27 +113,33 @@
     @if (artistAttribute.formGroup) {
       <ng-container [formGroup]="artistAttribute.formGroup">
         <tr>
-          <!-- Checkbox -->
-          <td style="width: 4rem">
-            <p-tableCheckbox [value]="artistAttribute" />
-          </td>
-
           <!-- Action -->
           <td>
             <!-- Remove from edit list -->
-            <p-button icon="pi pi-minus-circle" severity="danger" [rounded]="true" [outlined]="true" />
+            <p-button
+              icon="pi pi-minus-circle"
+              severity="danger"
+              [rounded]="true"
+              [outlined]="true"
+              (onClick)="handleRemoveRow(rowIndex)"
+            />
           </td>
 
           <!-- ID -->
           <td style="min-width: 12rem">{{ artistAttribute.id }}</td>
 
           <!-- Thumbnail -->
-          <td style="min-width: 16rem">
+          <td style="min-width: 12rem">
             <div class="flex items-center">
-              <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" />
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [outlined]="true"
+                (onClick)="handleEditThumbnail(artistAttribute)"
+              />
               <p-image
-                [preview]="false"
-                class="rounded cursor-pointer"
+                [preview]="true"
+                class="ml-2 rounded cursor-pointer"
                 imageClass="rounded object-cover w-20 h-20"
                 [src]="artistAttribute.thumbnailUrl"
                 [alt]="artistAttribute.name + '\'s thumbnail'"
@@ -153,47 +147,70 @@
               </p-image>
             </div>
 
-            <!-- Thumbnail URL Dialog -->
+            <!-- Update Thumbnail Dialog -->
             <p-dialog
-              [style]="{ width: '400px' }"
-              [header]="I18N.EDIT_THUMBNAIL"
+              [style]="{ width: 'clamp(400px, 90vw, 800px)' }"
+              i18n-header="@@DIALOG_LABEL_EDIT_THUMBNAIL"
+              header="Thumbnail"
               [modal]="true"
               [closable]="true"
               [dismissableMask]="true"
+              [(visible)]="artistAttribute.isThumbnailDialogShowed"
             >
-              <div class="flex flex-col gap-3">
-                <!-- Image Preview -->
-                <div class="w-full flex justify-center">
-                  <p-image
-                    [alt]="'Thumbnail Preview'"
-                    [preview]="false"
-                    class="rounded cursor-pointer"
-                    imageClass="rounded object-cover w-50 h-50"
+              <ng-container>
+                <p-panel i18n-header="@@FORM_SECTION_ARTIST_THUMBNAIL" header="Thumbnail">
+                  <div class="w-full flex justify-center">
+                    <p-image
+                      [src]="
+                        renderableImageUrls.includes(artistAttribute.formGroup?.get('thumbnailUrlFormControl')?.value)
+                          ? artistAttribute.formGroup.get('thumbnailUrlFormControl').value
+                          : 'asset/image/default-artist-thumbnail-image.png'
+                      "
+                      alt="Thumbnail Preview"
+                      [preview]="true"
+                      class="rounded cursor-pointer"
+                      imageClass="rounded object-cover w-64 h-64"
+                    />
+                  </div>
+                  <p-floatlabel variant="on" class="mt-2 w-full">
+                    <input
+                      id="thumbnailUrl"
+                      ng-invalid
+                      ng-dirty
+                      pInputText
+                      formControlName="thumbnailUrlFormControl"
+                      class="w-full"
+                    />
+                    <label i18n="@@FORM_LABEL_ARTIST_THUMBNAIL_URL" for="thumbnailUrl">Thumbnail link</label>
+                  </p-floatlabel>
+                </p-panel>
+              </ng-container>
+              <ng-template #footer>
+                <div>
+                  <p-button
+                    i18n-label="@@BUTTON_LABEL_CANCEL"
+                    label="Cancel"
+                    text
+                    severity="danger"
+                    (onClick)="handleThumbnailDialogClose(artistAttribute, false)"
+                  />
+                  <p-button
+                    i18n-label="@@BUTTON_LABEL_SAVE"
+                    label="Save"
+                    severity="success"
+                    (onClick)="handleThumbnailDialogClose(artistAttribute, true)"
                   />
                 </div>
-
-                <!-- Input Field for Thumbnail URL -->
-                <div class="w-full">
-                  <label for="thumbnailUrl" class="block mb-2">{{ I18N.THUMBNAIL_URL }}</label>
-                  <input id="thumbnailUrl" type="text" pInputText class="w-full" />
-                </div>
-              </div>
-
-              <!-- Save Button -->
-              <ng-template #footer>
-                <p-button [label]="I18N.CANCEL" severity="danger" />
-                <p-button [label]="I18N.SAVE" severity="success" />
               </ng-template>
             </p-dialog>
           </td>
 
-          <!-- Name - Editable -->
-          <!--   -->
+          <!-- Name -->
           <td style="min-width: 16rem">
             <input pInputText type="text" class="w-full" formControlName="nameFormControl" />
           </td>
 
-          <!-- Nationality - Editable -->
+          <!-- Nationality -->
           <td style="min-width: 16rem">
             <p-select
               [options]="artistNationalities"
@@ -222,8 +239,8 @@
             </p-select>
           </td>
 
-          <!-- Public - Display Only with Hidden Form Control -->
-          <td style="min-width: 12rem" class="text-center">
+          <!-- Public -->
+          <td style="min-width: 14rem" class="text-center">
             <p-select
               [options]="IS_PUBLIC_OPTIONS"
               optionLabel="name"
@@ -259,7 +276,12 @@
 
           <!-- Reference code - In case revision > -1, disable edit -->
           <td style="min-width: 24rem">
-            <input pInputText type="text" class="w-full" formControlName="refCodeFormControl" />
+            <input
+              pInputText
+              type="text"
+              class="w-full"
+              formControlName="refCodeFormControl"
+            />
           </td>
 
           <!-- Description -->
@@ -270,9 +292,49 @@
           <!-- Biography -->
           <td style="min-width: 32rem">
             <div class="flex items-center">
-              <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" />
+              <p-button
+                icon="pi pi-pencil"
+                class="mr-2"
+                [rounded]="true"
+                [outlined]="true"
+                (onClick)="handleEditBiography(artistAttribute)"
+              />
               <span [innerHTML]="artistAttribute.biography | safeHtmlPipe"></span>
             </div>
+            <p-dialog
+              [(visible)]="artistAttribute.isBiographyDialogShowed"
+              [style]="{ width: '600px' }"
+              i18n-header="@@DIALOG_LABEL_EDIT_BIOGRAPHY"
+              header="Biography"
+              [modal]="true"
+              [closable]="true"
+              [dismissableMask]="true"
+            >
+              <p-editor
+                id="biography"
+                formControlName="biographyFormControl"
+                i18n-placeholder="@@FORM_LABEL_ARTIST_BIOGRAPHY"
+                placeholder="Biography"
+                styleClass="mt-4"
+              />
+              <ng-template #footer>
+                <div>
+                  <p-button
+                    i18n-label="@@BUTTON_LABEL_CANCEL"
+                    label="Cancel"
+                    text
+                    severity="danger"
+                    (onClick)="handleBiographyDialogClose(artistAttribute, false)"
+                  />
+                  <p-button
+                    i18n-label="@@BUTTON_LABEL_SAVE"
+                    label="Save"
+                    severity="success"
+                    (onClick)="handleBiographyDialogClose(artistAttribute, true)"
+                  />
+                </div>
+              </ng-template>
+            </p-dialog>
           </td>
 
           <!-- Tag -->
@@ -331,17 +393,79 @@
           <!-- Background -->
           <td style="min-width: 10rem">
             <div class="flex items-center">
-              <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" />
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [outlined]="true"
+                (onClick)="handleEditBackground(artistAttribute)"
+              />
               @if (artistAttribute.backgroundUrl) {
                 <p-image
-                  [preview]="false"
-                  class="rounded cursor-pointer"
+                  [preview]="true"
+                  class="ml-2 rounded cursor-pointer"
                   imageClass="rounded object-cover h-20"
                   [src]="artistAttribute.backgroundUrl"
                   [alt]="artistAttribute.name + '\'s background.'"
                 />
               }
             </div>
+
+            <!-- Update Background Dialog -->
+            <p-dialog
+              [style]="{ width: 'clamp(400px, 90vw, 800px)' }"
+              i18n-header="@@DIALOG_LABEL_EDIT_BACKGROUND"
+              header="Background"
+              [modal]="true"
+              [closable]="true"
+              [dismissableMask]="true"
+              [(visible)]="artistAttribute.isBackgroundDialogShowed"
+            >
+              <ng-container>
+                <p-panel i18n-header="@@FORM_SECTION_ARTIST_BACKGROUND" header="Background">
+                  <div class="w-full flex justify-center">
+                    <p-image
+                      [src]="
+                        renderableImageUrls.includes(artistAttribute.backgroundUrl)
+                          ? artistAttribute.backgroundUrl
+                          : 'asset/image/default-artist-thumbnail-image.png'
+                      "
+                      [alt]="'Background Preview'"
+                      [preview]="true"
+                      class="rounded cursor-pointer"
+                      imageClass="rounded object-cover w-50 h-50"
+                    />
+                  </div>
+                  <p-floatlabel variant="on" class="mt-2 w-full">
+                    <input
+                      id="backgroundUrl"
+                      ng-invalid
+                      ng-dirty
+                      pInputText
+                      formControlName="backgroundUrlFormControl"
+                      class="w-full"
+                    />
+                    <label i18n="@@FORM_LABEL_ARTIST_BACKGROUND_URL" for="backgroundUrl">Background link</label>
+                  </p-floatlabel>
+                </p-panel>
+              </ng-container>
+              <ng-template #footer>
+                <div>
+                  <p-button
+                    i18n-label="@@BUTTON_LABEL_CANCEL"
+                    label="Cancel"
+                    text
+                    severity="danger"
+                    (onClick)="handleBackgroundDialogClose(artistAttribute, false)"
+                  />
+                  <p-button
+                    i18n-label="@@BUTTON_LABEL_SAVE"
+                    label="Save"
+                    severity="success"
+                    (onClick)="handleBackgroundDialogClose(artistAttribute, true)"
+                  />
+                </div>
+              </ng-template>
+            </p-dialog>
           </td>
         </tr>
       </ng-container>
@@ -358,127 +482,6 @@
     </tr>
   </ng-template>
 </p-table>
-
-<!-- Background URL Dialog -->
-<p-dialog
-  [style]="{ width: '400px' }"
-  [header]="I18N.EDIT_BACKGROUND"
-  [modal]="true"
-  [closable]="true"
-  [dismissableMask]="true"
->
-  <ng-container>
-    <!-- <form class="flex flex-col gap-3"> -->
-    <!-- Image Preview -->
-    <div class="w-full flex justify-center">
-      <p-image
-        [alt]="'Background Preview'"
-        [preview]="false"
-        class="rounded cursor-pointer"
-        imageClass="rounded object-cover w-50 h-50"
-      />
-    </div>
-
-    <!-- Input Field for Background URL -->
-    <div class="w-full">
-      <label for="backgroundUrl" class="block mb-2">{{ I18N.BACKGROUND_URL }}</label>
-      <input id="backgroundUrl" type="text" pInputText class="w-full" />
-    </div>
-    <!-- </form> -->
-
-    <!-- Save Button -->
-    <ng-template #footer>
-      <p-button [label]="I18N.CANCEL" severity="danger" />
-      <p-button [label]="I18N.SAVE" severity="success" />
-    </ng-template>
-  </ng-container>
-</p-dialog>
-
-<!-- Biography Dialog -->
-<p-dialog
-  [style]="{ width: '600px' }"
-  [header]="I18N.EDIT_BIOGRAPHY"
-  [modal]="true"
-  [closable]="true"
-  [dismissableMask]="true"
->
-  @if (currentArtistAttribute) {
-    <div class="flex flex-col gap-3">
-      <!-- Editor for Biography -->
-      <div class="w-full">
-        <p-editor id="biography" [style]="{ height: '200px' }"></p-editor>
-      </div>
-    </div>
-
-    <!-- Save and Cancel Buttons -->
-    <ng-template #footer>
-      <p-button [label]="I18N.CANCEL" severity="danger" />
-      <p-button [label]="I18N.SAVE" severity="success" />
-    </ng-template>
-  }
-</p-dialog>
-
-<!-- Tags Dialog -->
-<p-dialog
-  [style]="{ width: '500px' }"
-  [header]="I18N.EDIT_TAGS"
-  [modal]="true"
-  [closable]="true"
-  [dismissableMask]="true"
-  styleClass="tags-dialog"
->
-  <ng-container>
-    <!-- <form class="flex flex-col gap-3"> -->
-    <div class="w-full">
-      <p-multiSelect
-        optionLabel="name"
-        optionValue="name"
-        [placeholder]="'Select tags'"
-        styleClass="w-full tags-multiselect"
-        display="chip"
-        [emptyFilterMessage]="I18N.NO_RESULTS_FOUND"
-        [showToggleAll]="false"
-        [virtualScroll]="true"
-        [virtualScrollItemSize]="38"
-      >
-        <ng-template #header>
-          <div class="font-medium px-3 py-2">{{ I18N.TAGS }}</div>
-        </ng-template>
-        <ng-template #footer>
-          <ng-container>
-            <div [style]="{ padding: 'var(--p-multiselect-list-padding)' }">
-              <p-button severity="secondary" text size="small" styleClass="w-full">
-                <i class="pi pi-plus"></i>
-                <span>
-                  {{ I18N.ADD_TAG }}
-                  <span>''</span>
-                </span>
-              </p-button>
-            </div>
-          </ng-container>
-        </ng-template>
-        <ng-template let-tag #item>
-          <div class="flex items-center gap-2">
-            <p>{{ tag.name }}</p>
-          </div>
-        </ng-template>
-        <ng-template #dropdownicon>
-          <i class="pi pi-tags"></i>
-        </ng-template>
-        <ng-template #filtericon>
-          <i class="pi pi-hashtag"></i>
-        </ng-template>
-      </p-multiSelect>
-    </div>
-    <!-- </form> -->
-
-    <!-- Save Button -->
-    <ng-template #footer>
-      <p-button [label]="I18N.CANCEL" severity="danger" />
-      <p-button [label]="I18N.SAVE" severity="success" />
-    </ng-template>
-  </ng-container>
-</p-dialog>
 
 <p-confirmdialog />
 <p-toast position="top-right" />
