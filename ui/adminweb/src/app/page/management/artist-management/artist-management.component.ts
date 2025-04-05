@@ -117,13 +117,15 @@ interface ArtistAttribute {
   providers: [MessageService, ArtistService, ConfirmationService, UrlValidator]
 })
 export class ArtistManagementComponent implements OnInit {
+  readonly I18N = {
+    IS_PUBLIC_TRUE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES:Yes`,
+    IS_PUBLIC_FALSE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO:No`,
+    IS_VERIFIED_TRUE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_YES:Yes`,
+    IS_VERIFIED_FALSE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_NO:No`,
+    IS_RELEASED_TRUE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_YES:Yes`,
+    IS_RELEASED_FALSE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_NO:No`
+  };
   readonly UNDEFINED = UNDEFINED;
-  readonly I18N_IS_PUBLIC_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES:Yes`;
-  readonly I18N_IS_PUBLIC_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO:No`;
-  readonly I18N_IS_VERIFIED_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_YES:Yes`;
-  readonly I18N_IS_VERIFIED_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_NO:No`;
-  readonly I18N_IS_RELEASED_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_YES:Yes`;
-  readonly I18N_IS_RELEASED_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_NO:No`;
   private readonly changedArtistIds: Set<string> = new Set();
   currentArtistAttribute: ArtistAttribute = this.emptyArtistAttribute();
   readonly artistNationalities: Nationality[] = ARTIST_NATIONALITIES;

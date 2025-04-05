@@ -224,7 +224,7 @@
       <td style="min-width: 12rem">
         <p-tag
           [icon]="'pi ' + (artist.isPublic ? 'pi-check' : 'pi-times')"
-          [value]="artist.isPublic ? I18N_IS_PUBLIC_TRUE : I18N_IS_PUBLIC_FALSE"
+          [value]="artist.isPublic ? I18N.IS_PUBLIC_TRUE : I18N.IS_PUBLIC_FALSE"
           [severity]="artist.isPublic ? 'success' : 'danger'"
         />
       </td>
@@ -233,7 +233,7 @@
       <td style="min-width: 12rem">
         <p-tag
           [icon]="'pi ' + (artist.isVerified ? 'pi-check' : 'pi-times')"
-          [value]="artist.isVerified ? I18N_IS_VERIFIED_TRUE : I18N_IS_VERIFIED_FALSE"
+          [value]="artist.isVerified ? I18N.IS_VERIFIED_TRUE : I18N.IS_VERIFIED_FALSE"
           [severity]="artist.isVerified ? 'success' : 'danger'"
         />
       </td>
@@ -247,7 +247,7 @@
       <td style="min-width: 12rem">
         <p-tag
           [icon]="'pi ' + (artist.isReleased ? 'pi-check' : 'pi-times')"
-          [value]="artist.isReleased ? I18N_IS_RELEASED_TRUE : I18N_IS_RELEASED_FALSE"
+          [value]="artist.isReleased ? I18N.IS_RELEASED_TRUE : I18N.IS_RELEASED_FALSE"
           [severity]="artist.isReleased ? 'success' : 'danger'"
         />
       </td>
@@ -503,7 +503,7 @@
         @if (renderableImageUrls.includes(thumbnailUrlFormControl.value)) {
           <div>
             <p-image
-              styleClass="w-ful"
+              styleClass="w-full"
               [src]="backgroundUrlFormControl.value"
               imageClass="block m-auto w-full h-full object-cover rounded"
               [preview]="true"
@@ -540,6 +540,7 @@
           label="Cancel"
           icon="pi pi-times"
           text
+          severity="danger"
           (click)="handleHideArtistDialog()"
         />
         <p-button
@@ -548,6 +549,7 @@
           i18n-label="@@BUTTON_LABEL_SAVE"
           label="Save"
           icon="pi pi-check"
+          severity="success"
         />
       </div>
     </ng-template>

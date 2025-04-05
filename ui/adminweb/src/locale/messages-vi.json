@@ -64,6 +64,7 @@
     "FORM_SECTION_ARTIST_PROFILE_DETAIL": "Chi tiết hồ sơ",
     "FORM_SECTION_ARTIST_ATTRIBUTE": "Thuộc tính",
     "FORM_SECTION_ARTIST_BACKGROUND": "Ảnh nền",
+    "FORM_SECTION_ARTIST_THUMBNAIL": "Ảnh hồ sơ",
     "CONFIRM_MESSAGE_ARTIST_DELETE": "Bạn có chắc chắn xoá Nghệ sĩ này không?",
     "CONFIRM_MESSAGE_ARTIST_RELEASE": "Bạn có chắc chắn muốn xuất bản Nghệ sĩ này không?",
     "CONFIRM_MESSAGE_ARTIST_BULK_REQUEST_DELETE": "Bạn có chắc chắn muốn xoá các Nghệ sĩ này không?",
