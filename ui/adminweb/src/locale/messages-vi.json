@@ -30,6 +30,7 @@
     "BUTTON_LABEL_SAVE": "Lưu",
     "BUTTON_LABEL_CANCEL": "Huỷ",
     "BUTTON_LABEL_RELEASE": "Xuất bản",
+    "BUTTON_LABEL_CHOOSE_FILE": "Chọn file ...",
     "PAGE_LABEL_MANAGE_ARTIST": "Quản lý Nghệ sĩ",
     "INPUT_PLACEHOLDER_SEARCH": "Tìm kiếm ...",
     "COLUMN_LABEL_MANAGE_ARTIST_NAME": "Tên",
