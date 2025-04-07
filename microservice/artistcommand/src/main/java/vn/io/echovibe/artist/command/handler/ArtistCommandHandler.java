@@ -69,7 +69,7 @@ public class ArtistCommandHandler implements CommandHandler {
   public void handle(@NonNull SetArtistVerificationCommand setArtistVerificationCommand) {
     final ArtistAggregate artistAggregate =
         findArtistAggregateById(setArtistVerificationCommand.getId());
-    artistAggregate.setVerified(setArtistVerificationCommand.getIsPublic());
+    artistAggregate.setVerified(setArtistVerificationCommand.getIsVerified());
     eventSourcingHandler.save(artistAggregate);
   }
 
