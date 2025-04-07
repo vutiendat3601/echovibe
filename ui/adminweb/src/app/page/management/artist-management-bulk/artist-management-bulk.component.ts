@@ -25,7 +25,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { RatingModule } from 'primeng/rating';
 import { RippleModule } from 'primeng/ripple';
 import { SelectModule } from 'primeng/select';
-import { TableModule } from 'primeng/table';
+import { Table, TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
@@ -76,6 +76,7 @@ interface Artist {
   isVerified: boolean;
   refCode: string | null;
   tags: Tag[];
+  tagsString: string;
   tagFilterKeyword: string;
   tagFilterFoundExactMatch: boolean;
   isBackgroundDialogShowed: boolean;
@@ -151,7 +152,6 @@ export class ArtistManagementBulkComponent implements OnInit {
     }
   ];
 
-  // State
   readonly renderableImageUrls: string[] = [];
   readonly selectedArtists: Artist[] = [];
   readonly artists: WritableSignal<Artist[]> = signal<Artist[]>([]);
@@ -205,185 +205,13 @@ export class ArtistManagementBulkComponent implements OnInit {
       this.action = 'import';
     }
   }
-
-  private parseCsvFile(file: File): void {
-    const artists: Artist[] = [];
-    Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
-      quoteChar: '`',
-      delimiter: ',',
-      worker: true,
-      step: (results) => {
-        const artistImport = results.data as ArtistImportCsvColumn;
-        const artist: Artist = {
-          ...this.emptyArtist(),
-          name: artistImport['name'] || null,
-          isPublic: artistImport['ispublic'] === 'true',
-          description: artistImport['description'] || null,
-          biography: artistImport['biography'] || null,
-          nationalityIsoCode: artistImport['nationalityisocode'] || null,
-          thumbnailUrl: artistImport['thumbnailurl'] || null,
-          backgroundUrl: artistImport['backgroundurl'] || null,
-          refCode: artistImport['refcode'] || null,
-          tags: artistImport['tagsjson']
-            ? ((JSON.parse(artistImport['tagsjson']) || []) as string[]).map(
-                (tag) => ({ name: tag, isActive: true }) as Tag
-              )
-            : []
-        };
-        this.createArtistFormGroup(artist);
-        artists.push(artist);
-      },
-      complete: (_results) => {
-        this.artists.set(artists);
-        this.isLoading.set(false);
-      }
-    });
-  }
-  private listenAndProcessActiveRouteParams(): void {
-    this.activeRoute.queryParams.subscribe((queryParams: Params) => {
-      if (queryParams['ids']) {
-        const ids: string[] = (queryParams['ids'] as string).split(',');
-        this.loadArtists(ids);
-        this.action = 'edit';
-      }
-    });
-  }
-
-  private loadArtists(ids: string[]) {
-    this.artistService.getArtistByIds(ids).subscribe((respDto) => {
-      const artistDtos: ArtistDto[] = respDto.data.filter((artistDto) => artistDto != null);
-      const artists = artistDtos.map(
-        ({
-          id,
-          profile: { name, description, biography, thumbnailUrl, backgroundUrl, nationalityIsoCode },
-          isPublic,
-          isReleased,
-          refCode,
-          tags,
-          urn,
-          revisionNumber,
-          isVerified
-        }) => {
-          const artist: Artist = {
-            id,
-            name,
-            description,
-            biography,
-            thumbnailUrl,
-            backgroundUrl,
-            nationalityIsoCode,
-            isPublic,
-            isReleased,
-            refCode,
-            tags,
-            urn,
-            revisionNumber,
-            formGroup: null,
-            isVerified,
-            tagFilterFoundExactMatch: true,
-            tagFilterKeyword: '',
-            isBackgroundDialogShowed: false,
-            isThumbnailDialogShowed: false,
-            isBiographyDialogShowed: false
-          };
-          this.createArtistFormGroup(artist);
-          return artist;
-        }
-      );
-      this.artists.set(artists);
-    });
-  }
-
   handleRemoveRow(rowIndex: number): void {
     this.artists.update((artists) => artists.filter((_artist, index) => index !== rowIndex));
   }
 
-  private createArtistFormGroup(artist: Artist) {
-    const { name, thumbnailUrl, nationalityIsoCode, backgroundUrl, description, biography, tags, refCode, isPublic } =
-      artist;
-
-    // Name
-    const nameFormControl: FormControl = new FormControl<string>(name || '', [
-      Validators.required,
-      Validators.maxLength(250)
-    ]);
-    nameFormControl.valueChanges.subscribe((value: string) => !nameFormControl.errors && (artist.name = value));
-
-    // Nationality
-    const nationalityIsoCodeFormControl: FormControl = new FormControl<string>(nationalityIsoCode || UNDEFINED);
-    nationalityIsoCodeFormControl.valueChanges.subscribe(
-      (value: string) => !nationalityIsoCodeFormControl.errors && (artist.nationalityIsoCode = value)
-    );
-
-    // Thumbnail URL
-    const thumbnailUrlFormControl: FormControl = new FormControl<string>('', [Validators.pattern(URL_REGEX)]);
-    thumbnailUrlFormControl.valueChanges.subscribe(
-      (value: string) =>
-        !thumbnailUrlFormControl.errors && ((artist.thumbnailUrl = value), this.processImagePreview(value))
-    );
-    thumbnailUrlFormControl.setValue(thumbnailUrl, { emitEvent: false });
-
-    // Background URL
-    const backgroundUrlFormControl: FormControl = new FormControl<string>('', [Validators.pattern(URL_REGEX)]);
-    backgroundUrlFormControl.valueChanges.subscribe(
-      (value: string) =>
-        !backgroundUrlFormControl.errors && ((artist.backgroundUrl = value), this.processImagePreview(value))
-    );
-    backgroundUrlFormControl.setValue(backgroundUrl, { emitEvent: false });
-
-    // Description
-    const descriptionFormControl: FormControl = new FormControl<string>(description || '');
-    descriptionFormControl.valueChanges.subscribe(
-      (value: string) => !descriptionFormControl.errors && (artist.description = value)
-    );
-
-    // Biography
-    const biographyFormControl: FormControl = new FormControl<string>(biography || '');
-    biographyFormControl.valueChanges.subscribe(
-      (value: string) => !biographyFormControl.errors && (artist.biography = value)
-    );
-
-    // Reference code
-    const refCodeFormControl: FormControl = new FormControl<string>(refCode || '');
-    artist.revisionNumber > -1 && refCodeFormControl.disable();
-    refCodeFormControl.valueChanges.subscribe(
-      (value: string) => !refCodeFormControl.errors && (artist.refCode = value)
-    );
-
-    // Public
-    const isPublicFormControl: FormControl = new FormControl<boolean>(isPublic);
-    isPublicFormControl.valueChanges.subscribe(
-      (value: boolean) => !isPublicFormControl.errors && (artist.isPublic = value)
-    );
-
-    // Tags
-    const tagsFormControl: FormControl = new FormControl<Tag[]>(tags);
-    tagsFormControl.valueChanges.subscribe(
-      (values: string[]) =>
-        !tagsFormControl.errors &&
-        (artist.tags = artist.tags.map((tag) => ({
-          ...tag,
-          isActive: values.includes(tag.name)
-        })))
-    );
-    tagsFormControl.setValue(
-      tags.filter(({ isActive }) => isActive).map(({ name }) => name),
-      { emitEvent: false }
-    );
-
-    artist.formGroup = new FormGroup({
-      nameFormControl,
-      thumbnailUrlFormControl,
-      backgroundUrlFormControl,
-      nationalityIsoCodeFormControl,
-      descriptionFormControl,
-      biographyFormControl,
-      tagsFormControl,
-      refCodeFormControl,
-      isPublicFormControl
-    });
+  handleGlobalFilter(table: Table, event: Event) {
+    console.log((event.target as HTMLInputElement).value);
+    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 
   handleEditThumbnail(artist: Artist): void {
@@ -489,6 +317,91 @@ export class ArtistManagementBulkComponent implements OnInit {
     }
   }
 
+  private createArtistFormGroup(artist: Artist) {
+    const { name, thumbnailUrl, nationalityIsoCode, backgroundUrl, description, biography, tags, refCode, isPublic } =
+      artist;
+
+    // Name
+    const nameFormControl: FormControl = new FormControl<string>(name || '', [
+      Validators.required,
+      Validators.maxLength(250)
+    ]);
+    nameFormControl.valueChanges.subscribe((value: string) => !nameFormControl.errors && (artist.name = value));
+
+    // Nationality
+    const nationalityIsoCodeFormControl: FormControl = new FormControl<string>(nationalityIsoCode || UNDEFINED);
+    nationalityIsoCodeFormControl.valueChanges.subscribe(
+      (value: string) => !nationalityIsoCodeFormControl.errors && (artist.nationalityIsoCode = value)
+    );
+
+    // Thumbnail URL
+    const thumbnailUrlFormControl: FormControl = new FormControl<string>('', [Validators.pattern(URL_REGEX)]);
+    thumbnailUrlFormControl.valueChanges.subscribe(
+      (value: string) =>
+        !thumbnailUrlFormControl.errors && ((artist.thumbnailUrl = value), this.processImagePreview(value))
+    );
+    thumbnailUrlFormControl.setValue(thumbnailUrl, { emitEvent: false });
+
+    // Background URL
+    const backgroundUrlFormControl: FormControl = new FormControl<string>('', [Validators.pattern(URL_REGEX)]);
+    backgroundUrlFormControl.valueChanges.subscribe(
+      (value: string) =>
+        !backgroundUrlFormControl.errors && ((artist.backgroundUrl = value), this.processImagePreview(value))
+    );
+    backgroundUrlFormControl.setValue(backgroundUrl, { emitEvent: false });
+
+    // Description
+    const descriptionFormControl: FormControl = new FormControl<string>(description || '');
+    descriptionFormControl.valueChanges.subscribe(
+      (value: string) => !descriptionFormControl.errors && (artist.description = value)
+    );
+
+    // Biography
+    const biographyFormControl: FormControl = new FormControl<string>(biography || '');
+    biographyFormControl.valueChanges.subscribe(
+      (value: string) => !biographyFormControl.errors && (artist.biography = value)
+    );
+
+    // Reference code
+    const refCodeFormControl: FormControl = new FormControl<string>(refCode || '');
+    artist.revisionNumber > -1 && refCodeFormControl.disable();
+    refCodeFormControl.valueChanges.subscribe(
+      (value: string) => !refCodeFormControl.errors && (artist.refCode = value)
+    );
+
+    // Public
+    const isPublicFormControl: FormControl = new FormControl<boolean>(isPublic);
+    isPublicFormControl.valueChanges.subscribe(
+      (value: boolean) => !isPublicFormControl.errors && (artist.isPublic = value)
+    );
+
+    // Tags
+    const tagsFormControl: FormControl = new FormControl<Tag[]>(tags);
+    tagsFormControl.valueChanges.subscribe(
+      (values: string[]) =>
+        !tagsFormControl.errors &&
+        (artist.tags = artist.tags.map((tag) => ({
+          ...tag,
+          isActive: values.includes(tag.name)
+        })))
+    );
+    tagsFormControl.setValue(
+      tags.filter(({ isActive }) => isActive).map(({ name }) => name),
+      { emitEvent: false }
+    );
+
+    artist.formGroup = new FormGroup({
+      nameFormControl,
+      thumbnailUrlFormControl,
+      backgroundUrlFormControl,
+      nationalityIsoCodeFormControl,
+      descriptionFormControl,
+      biographyFormControl,
+      tagsFormControl,
+      refCodeFormControl,
+      isPublicFormControl
+    });
+  }
   private bulkUpdateArtist(updateArtistDtos: UpdateArtistDto[]): void {
     this.artistService.bulkUpdateArtist({ items: updateArtistDtos }).subscribe((respDto) => {
       respDto.data.items.forEach(({ isSuccessful, errors, id }) => {
@@ -521,6 +434,63 @@ export class ArtistManagementBulkComponent implements OnInit {
           this.addMessage(message, 'error');
         }
       });
+    });
+  }
+
+  private parseCsvFile(file: File): void {
+    const artists: Artist[] = [];
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      quoteChar: '`',
+      delimiter: ',',
+      worker: true,
+      step: (results) => {
+        const artistImport = results.data as ArtistImportCsvColumn;
+        const artist: Artist = {
+          ...this.emptyArtist(),
+          name: artistImport['name'] || null,
+          isPublic: artistImport['ispublic'] === 'true',
+          description: artistImport['description'] || null,
+          biography: artistImport['biography'] || null,
+          nationalityIsoCode: artistImport['nationalityisocode'] || null,
+          thumbnailUrl: artistImport['thumbnailurl'] || null,
+          backgroundUrl: artistImport['backgroundurl'] || null,
+          refCode: artistImport['refcode'] || null,
+          tags: artistImport['tagsjson']
+            ? ((JSON.parse(artistImport['tagsjson']) || []) as string[]).map(
+                (tag) => ({ name: tag, isActive: true }) as Tag
+              )
+            : []
+        };
+        this.createArtistFormGroup(artist);
+        artists.push(artist);
+      },
+      complete: (_results) => {
+        this.artists.set(artists);
+        this.isLoading.set(false);
+      }
+    });
+  }
+  private listenAndProcessActiveRouteParams(): void {
+    this.activeRoute.queryParams.subscribe((queryParams: Params) => {
+      if (queryParams['ids']) {
+        const ids: string[] = (queryParams['ids'] as string).split(',');
+        this.loadArtists(ids);
+        this.action = 'edit';
+      }
+    });
+  }
+
+  private loadArtists(ids: string[]) {
+    this.artistService.getArtistByIds(ids).subscribe((respDto) => {
+      const artistDtos: ArtistDto[] = respDto.data.filter((artistDto) => artistDto != null);
+      const artists = artistDtos.map((artistDto) => {
+        const artist: Artist = this.mapToArtist(artistDto);
+        this.createArtistFormGroup(artist);
+        return artist;
+      });
+      this.artists.set(artists);
     });
   }
 
@@ -561,9 +531,46 @@ export class ArtistManagementBulkComponent implements OnInit {
       isVerified: false,
       refCode: null,
       tags: [],
+      tagsString: '',
       tagFilterKeyword: '',
       tagFilterFoundExactMatch: true,
       formGroup: null,
+      isBackgroundDialogShowed: false,
+      isThumbnailDialogShowed: false,
+      isBiographyDialogShowed: false
+    };
+  }
+  private mapToArtist(artistDto: ArtistDto): Artist {
+    const {
+      id,
+      urn,
+      isPublic,
+      revisionNumber,
+      isReleased,
+      isVerified,
+      refCode,
+      tags,
+      profile: { name, description, biography, nationalityIsoCode, thumbnailUrl, backgroundUrl }
+    } = artistDto;
+    return {
+      id,
+      name,
+      description,
+      biography,
+      thumbnailUrl,
+      backgroundUrl,
+      nationalityIsoCode,
+      isPublic,
+      isReleased,
+      refCode,
+      tags,
+      tagsString: tags.map(({ name }) => name).join(', '),
+      urn,
+      revisionNumber,
+      formGroup: null,
+      isVerified,
+      tagFilterFoundExactMatch: true,
+      tagFilterKeyword: '',
       isBackgroundDialogShowed: false,
       isThumbnailDialogShowed: false,
       isBiographyDialogShowed: false

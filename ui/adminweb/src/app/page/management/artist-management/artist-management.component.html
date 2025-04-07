@@ -68,7 +68,7 @@
   [rows]="25"
   [columns]="columns"
   [paginator]="true"
-  [globalFilterFields]="['name', 'tagsString']"
+  [globalFilterFields]="['id', 'name', 'tagsString']"
   [tableStyle]="{ 'min-width': '75rem' }"
   [(selection)]="selectedArtists"
   [rowHover]="true"
@@ -212,10 +212,7 @@
         <span
           [class]="
             'fi fi-' +
-            (![UNDEFINED, null].includes(artist.nationalityIsoCode)
-              ? artist.nationalityIsoCode
-              : 'xx'
-            ).toLowerCase()
+            (![UNDEFINED, null].includes(artist.nationalityIsoCode) ? artist.nationalityIsoCode : 'xx').toLowerCase()
           "
         ></span>
         <span class="ml-2"> {{ artist.nationalityIsoCode | artistNationalityName }}</span>

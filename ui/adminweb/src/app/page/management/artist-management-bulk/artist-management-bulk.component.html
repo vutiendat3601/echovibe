@@ -36,12 +36,12 @@
 </p-toolbar>
 
 <p-table
-  #dt
+  #dataTable
   [value]="artists()"
   [rows]="25"
   [columns]="columns"
   [paginator]="true"
-  [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
+  [globalFilterFields]="['id', 'name', 'tagsString']"
   [tableStyle]="{ 'min-width': '75rem' }"
   [(selection)]="selectedArtists"
   [rowHover]="true"
@@ -58,6 +58,16 @@
       } @else if (action === 'import') {
         <h5 class="m-0" i18n="@@TABLE_LABEL_CREATE_ARTISTS">Create Artists</h5>
       }
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          (input)="handleGlobalFilter(dataTable, $event)"
+          i18n-placeholder="@@INPUT_PLACEHOLDER_SEARCH"
+          placeholder="Search ..."
+        />
+      </p-iconfield>
     </div>
   </ng-template>
   <ng-template #header>
