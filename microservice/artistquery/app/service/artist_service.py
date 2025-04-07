@@ -11,6 +11,17 @@ class ArtistService:
         self.artist_repository = artist_repository
         self.logger = logger
 
+    def get_all_artists(self,
+                        is_load_images: bool = False,
+                        is_load_revisions: bool = False) -> ArtistSchema:
+        artists = self.artist_repository.find_all_by_is_active_true(
+            is_load_images=is_load_images, is_load_revisions=is_load_revisions)
+
+        return [
+            map_to_artist_schema(artist, is_load_images, is_load_revisions)
+            for artist in artists
+        ]
+
     def get_artist_by_aggregate_id(
             self,
             aggregate_id: str,

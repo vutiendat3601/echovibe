@@ -58,7 +58,6 @@ class AppInitializer:
 {APP_NAME} {configuration.get_build_number()}
 Powered by FastAPI
 """)
-        print(allow_credentials)
         self.logger.info(allow_credentials)
         self.logger.info(
             f"Cross-origin resource sharing (CORS) configuration: allowedOriginPatterns={allow_origins[0]}, allowedMethods={allow_methods[0]}, allowedHeaders={allow_headers[0]}, allowCredentials={allow_credentials[0]}, maxAge={max_age}"
