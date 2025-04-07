@@ -34,8 +34,8 @@ CREATE TABLE artist (
 	is_active bool NOT NULL,
 	is_verified bool NOT NULL,
 	tags _text NOT NULL DEFAULT '{}', -- used for tsv trigger
-  tags_json jsonb NOT NULL,
-  tsv tsvector,
+    tags_json jsonb NOT NULL,
+    tsv tsvector,
 	event_type text NULL,
 	event_version numeric NULL,
 	event_timestamp timestamptz NULL,
@@ -179,7 +179,7 @@ CREATE TABLE artist_revision (
 	background_url text NULL,
 	background_file_key text NULL,
 	-- tags _text NOT NULL DEFAULT '{}',
-  tags_json jsonb NOT NULL,
+    tags_json jsonb NOT NULL,
 	event_type text NULL,
 	event_version numeric NULL,
 	event_timestamp timestamptz NULL,
@@ -194,11 +194,62 @@ CREATE TABLE artist_revision (
 ALTER TABLE artist_revision ADD CONSTRAINT fk_artist_revision__artist_id___artist__id
 FOREIGN KEY (artist_id) REFERENCES artist(id) ON DELETE CASCADE ON UPDATE CASCADE
 ;"""
-
+    search_artist_function_ddl = """
+    CREATE OR REPLACE FUNCTION search_artist(keyword text)
+    RETURNS TABLE (
+        tsv_criteria text,
+        id uuid,
+        aggregate_id varchar,
+        urn varchar,
+        "name" varchar,
+        description varchar,
+        biography text,
+        nationality_iso_code varchar,
+        thumbnail_file_key text,
+        thumbnail_url text,
+        background_file_key text,
+        background_url text,
+        is_public boolean,
+        is_verified boolean,
+        tags text[],
+        tsv tsvector
+    ) 
+    LANGUAGE PLPGSQL AS $function$
+    DECLARE
+        words text[];
+        tsv_criteria text;
+    BEGIN
+        SELECT string_to_array(keyword, ' ') INTO words;
+        SELECT array_to_string(words, ':* | ') INTO tsv_criteria;
+        SELECT tsv_criteria || ':*' INTO tsv_criteria;
+        RETURN QUERY
+        SELECT
+        tsv_criteria,
+        a.id uuid,
+        a.aggregate_id,
+        a.urn,
+        a."name",
+        a.description,
+        a.biography,
+        a.nationality_iso_code,
+        a.thumbnail_file_key,
+        a.thumbnail_url,
+        a.background_file_key,
+        a.background_url,
+        a.is_public,
+        a.is_verified,
+        a.tags,
+        a.tsv
+        FROM artist a
+        WHERE a.is_active AND a.tsv @@ to_tsquery('english', tsv_criteria);
+    END;
+    $function$
+    ;"""
     ddls = [
         create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
         create_artist_table_ddl, create_artist_profile_ddl,
-        create_artist_image_table_ddl, create_artist_revision_table_ddl
+        create_artist_image_table_ddl, create_artist_revision_table_ddl,
+        search_artist_function_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)

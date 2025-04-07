@@ -42,7 +42,7 @@ CREATE TABLE artist (
 	is_verified bool NOT NULL,
 	is_active bool NOT NULL,
 	tags _text NOT NULL DEFAULT '{}', -- used for tsv trigger
-  tsv tsvector,
+    tsv tsvector,
 	event_type text,
 	event_version int,
 	event_timestamp timestamptz,
@@ -137,7 +137,6 @@ DECLARE
     words text[];
     tsv_criteria text;
 BEGIN
-    --  SELECT string_to_array(keyword || ' ' || unaccent(keyword), ' ') INTO words;
     SELECT string_to_array(keyword, ' ') INTO words;
     SELECT array_to_string(words, ':* | ') INTO tsv_criteria;
     SELECT tsv_criteria || ':*' INTO tsv_criteria;
