@@ -1,0 +1,15 @@
+{{- define "springbootapp-common.upstreamsettingspolicy" -}}
+apiVersion: gateway.nginx.org/v1alpha1
+kind: UpstreamSettingsPolicy
+metadata:
+  name: "{{ .Values.deployment.name }}-upstreamsettingspolicy"
+spec:
+  targetRefs:
+  - group: core
+    kind: Service
+    name: "{{ .Values.deployment.name }}-svc"
+  keepAlive:
+    connections: {{ .Values.deployment.service.upstreamSettingsPolicy.keepAlive.connections | default 100 }}
+    time: {{ .Values.deployment.service.upstreamSettingsPolicy.keepAlive.time | default "1m" }}
+    timeout: {{ .Values.deployment.service.upstreamSettingsPolicy.keepAlive.timeout | default "1m" }}
+{{- end -}}

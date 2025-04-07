@@ -5,8 +5,5 @@ dependencies:
 - name: artistcommand
   repository: file://../microservice/artistcommand
   version: 1.0.0
-- name: trackcommand
-  repository: file://../microservice/trackcommand
-  version: 1.0.0
-digest: sha256:17101ae13ab83d7bde11b1a401665b76d6e83b73f34153dd0eb81cae264beac2
-generated: "2025-03-13T17:31:21.704932+07:00"
+digest: sha256:7c40592fe68413b3a7ad17cb136728703e74e0b79d8ece7fc349db6e83b4c997
+generated: "2025-04-07T11:16:53.564546257+07:00"
