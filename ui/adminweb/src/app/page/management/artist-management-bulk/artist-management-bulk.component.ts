@@ -234,7 +234,7 @@ export class ArtistManagementBulkComponent implements OnInit {
       if (isChanged) {
         artist.thumbnailUrl = !thumbnailUrlFormControl.errors && thumbnailUrlFormControl.value;
       } else {
-        thumbnailUrlFormControl.setValue(artist.thumbnailUrl, { emitEvent: false });
+        thumbnailUrlFormControl.setValue(artist.thumbnailUrl);
       }
     }
     artist.isThumbnailDialogShowed = false;
@@ -248,7 +248,7 @@ export class ArtistManagementBulkComponent implements OnInit {
       if (isChanged) {
         artist.backgroundUrl = !backgroundUrlFormControl.errors && backgroundUrlFormControl.value;
       } else {
-        backgroundUrlFormControl.setValue(artist.backgroundUrl, { emitEvent: false });
+        backgroundUrlFormControl.setValue(artist.backgroundUrl);
       }
     }
     artist.isThumbnailDialogShowed = false;
@@ -262,7 +262,7 @@ export class ArtistManagementBulkComponent implements OnInit {
       if (isChanged) {
         artist.biography = !biographyFormControl.errors && biographyFormControl.value;
       } else {
-        biographyFormControl.setValue(artist.biography, { emitEvent: false });
+        biographyFormControl.setValue(artist.biography);
       }
     }
     artist.isBiographyDialogShowed = false;
@@ -340,7 +340,7 @@ export class ArtistManagementBulkComponent implements OnInit {
       (value: string) =>
         !thumbnailUrlFormControl.errors && ((artist.thumbnailUrl = value), this.processImagePreview(value))
     );
-    thumbnailUrlFormControl.setValue(thumbnailUrl, { emitEvent: false });
+    thumbnailUrlFormControl.setValue(thumbnailUrl);
 
     // Background URL
     const backgroundUrlFormControl: FormControl = new FormControl<string>('', [Validators.pattern(URL_REGEX)]);
@@ -348,7 +348,7 @@ export class ArtistManagementBulkComponent implements OnInit {
       (value: string) =>
         !backgroundUrlFormControl.errors && ((artist.backgroundUrl = value), this.processImagePreview(value))
     );
-    backgroundUrlFormControl.setValue(backgroundUrl, { emitEvent: false });
+    backgroundUrlFormControl.setValue(backgroundUrl);
 
     // Description
     const descriptionFormControl: FormControl = new FormControl<string>(description || '');
