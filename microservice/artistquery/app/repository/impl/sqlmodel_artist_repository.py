@@ -113,3 +113,21 @@ class SqlmodelArtistRepository(ArtistRepository):
             raise e
         finally:
             session.close()
+
+    def find_all_by_is_active_true(
+            self,
+            is_load_images: bool = False,
+            is_load_revisions: bool = True) -> list[Artist]:
+        options = self._build_options(isLoadImages=is_load_images,
+                                      isLoadRevisions=is_load_revisions)
+        try:
+            with self.session_factory() as session:
+                statement = (select(Artist).options(*options).filter(
+                    Artist.is_active == True))
+                artists = session.exec(statement).all()
+                return artists
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()

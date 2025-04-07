@@ -35,3 +35,10 @@ class ArtistRepository(ABC):
     @abstractmethod
     def delete_by_aggregate_id(self, aggregate_id: str) -> None:
         """Delete Artist by aggregate_id"""
+
+    @abstractmethod
+    def find_all_by_is_active_true(
+            self,
+            is_load_images: bool = False,
+            is_load_revisions: bool = True) -> list[Artist]:
+        """Find all active Artists"""

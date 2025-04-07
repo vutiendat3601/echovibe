@@ -15,6 +15,18 @@ artist_router = APIRouter(prefix="/v1/artists", tags=["Artist"])
 artist_service: ArtistService = Provide[Container.artist_service]
 
 
+@artist_router.get(path="/all",
+                   response_model=ResponseSchema[list[ArtistSchema]])
+def get_all_artists(load_images: bool = Query(default=False,
+                                              alias="loadImages"),
+                    load_revisions: bool = Query(default=False,
+                                                 alias="loadRevisions")):
+    artist_schema = artist_service.get_all_artists(
+        is_load_images=load_images, is_load_revisions=load_revisions)
+    response = ok(data=artist_schema)
+    return JSONResponse(content=jsonable_encoder(response))
+
+
 @artist_router.get(path="/byId/{id}",
                    response_model=ResponseSchema[ArtistSchema])
 def get_artist_by_id(id: str,
@@ -59,14 +71,3 @@ def get_artist_by_ref_codes(
         is_load_revisions=load_revisions)
     response = ok(data=artist_schemas)
     return JSONResponse(content=jsonable_encoder(response))
-
-
-# @artist_router.get(path="/test")
-# def test():
-#     tag = TagSchema(name="Dat Vu", is_active=True)
-#     tags: list[TagSchema] = [tag]
-#     print("haha")
-#     # print(f"{tag.model_dump_json()}")
-#     resp = [tag.model_dump(by_alias=True) for tag in tags]
-#     # resp = f"[{", ".join([tag.model_dump_json() for tag in tags])}]"
-#     return resp
