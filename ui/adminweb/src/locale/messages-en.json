@@ -30,6 +30,7 @@
     "BUTTON_LABEL_SAVE": "Save",
     "BUTTON_LABEL_CANCEL": "Cancel",
     "BUTTON_LABEL_RELEASE": "Release",
+    "BUTTON_LABEL_CHOOSE_FILE": "Choose file ...",
     "PAGE_LABEL_MANAGE_ARTIST": "Manage Artists",
     "INPUT_PLACEHOLDER_SEARCH": "Search ...",
     "COLUMN_LABEL_MANAGE_ARTIST_NAME": "Name",

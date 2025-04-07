@@ -1,17 +1,10 @@
-import { map } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
-import {
-  FormArray,
-  FormBuilder,
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators
-} from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Params, Router, RouterModule } from '@angular/router';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import Papa from 'papaparse';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -19,6 +12,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { DialogModule } from 'primeng/dialog';
 import { EditorModule } from 'primeng/editor';
+import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ImageModule } from 'primeng/image';
@@ -46,14 +40,27 @@ import { Tag } from '../../../model/tag';
 import { SafeHtmlPipe } from '../../../pipe/safe-html.pipe';
 import { ArtistService } from '../../../service/artist.service';
 import { UrlValidator } from '../../../validator/url.validator';
+import { CreateArtistDto, UpdateArtistDto } from './../../../dto/artist-dto';
 import { ArtistNationalityNamePipe } from './../../../pipe/artist-nationality.pipe';
-import { UpdateArtistDto } from './../../../dto/artist-dto';
-import { CommandResult } from '../../../model/command-result';
+
+interface ArtistImportCsvColumn {
+  name: string;
+  ispublic: string;
+  description: string;
+  biography: string;
+  nationalityisocode: string;
+  thumbnailurl: string;
+  backgroundurl: string;
+  refcode: string;
+  tagsjson: string;
+}
+
 interface Column {
   field: string;
   header: string;
   customExportHeader?: string;
 }
+
 type ActionType = 'import' | 'edit';
 
 interface ArtistAttribute {
@@ -111,14 +118,18 @@ interface ArtistAttribute {
     SafeHtmlPipe,
     RouterModule,
     ToggleSwitchModule,
-    MultiSelectModule
+    MultiSelectModule,
+    FileUploadModule,
+    ProgressSpinnerModule
   ],
   templateUrl: './artist-management-bulk.component.html',
   styleUrl: './artist-management-bulk.component.scss',
   providers: [MessageService, ArtistService, ConfirmationService, UrlValidator]
 })
 export class ArtistManagementBulkComponent implements OnInit {
-  // I18N Constants
+  private readonly MAX_NUMBER_OF_ROWS = 50;
+  private readonly ARTIST_IMPORT_CSV_CHUNK_PREFIX = 'importArtistCsv_chunk_';
+
   readonly I18N = {
     IS_PUBLIC_TRUE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES:Yes`,
     IS_PUBLIC_FALSE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO:No`,
@@ -148,10 +159,7 @@ export class ArtistManagementBulkComponent implements OnInit {
   readonly artistAttributes: WritableSignal<ArtistAttribute[]> = signal<ArtistAttribute[]>([]);
   readonly columns: Column[] = [];
   readonly isLoading = signal(false);
-  currentArtistAttribute: ArtistAttribute | null = null;
   action: ActionType = 'import';
-  artistForms: FormArray;
-  ids: string[] = [];
 
   constructor(
     private readonly activeRoute: ActivatedRoute,
@@ -161,11 +169,8 @@ export class ArtistManagementBulkComponent implements OnInit {
     private readonly http: HttpClient,
     private readonly artistMapper: ArtistMapper,
     private readonly exceptionHandler: ExceptionHandler,
-    private readonly router: Router,
     readonly formBuilder: FormBuilder
-  ) {
-    this.artistForms = this.formBuilder.array<FormGroup>([]);
-  }
+  ) {}
 
   ngOnInit(): void {
     this.listenAndProcessActiveRouteParams();
@@ -194,6 +199,51 @@ export class ArtistManagementBulkComponent implements OnInit {
     }
   }
 
+  handleCsvSelected(event: FileSelectEvent): void {
+    const file = event.files[0];
+    if (file) {
+      this.isLoading.set(true);
+      this.artistAttributes.set([]);
+      this.parseCsvFile(file);
+      this.action = 'import';
+    }
+  }
+
+  private parseCsvFile(file: File): void {
+    const artistAttributes: ArtistAttribute[] = [];
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      quoteChar: '`',
+      delimiter: ',',
+      worker: true,
+      step: (results) => {
+        const artistImport = results.data as ArtistImportCsvColumn;
+        const artistAttribute: ArtistAttribute = {
+          ...this.emptyArtistAttribute(),
+          name: artistImport['name'] || null,
+          isPublic: artistImport['ispublic'] === 'true',
+          description: artistImport['description'] || null,
+          biography: artistImport['biography'] || null,
+          nationalityIsoCode: artistImport['nationalityisocode'] || null,
+          thumbnailUrl: artistImport['thumbnailurl'] || null,
+          backgroundUrl: artistImport['backgroundurl'] || null,
+          refCode: artistImport['refcode'] || null,
+          tags: artistImport['tagsjson']
+            ? ((JSON.parse(artistImport['tagsjson']) || []) as string[]).map(
+                (tag) => ({ name: tag, isActive: true }) as Tag
+              )
+            : []
+        };
+        this.createArtistFormGroup(artistAttribute);
+        artistAttributes.push(artistAttribute);
+      },
+      complete: (_results) => {
+        this.artistAttributes.set(artistAttributes);
+        this.isLoading.set(false);
+      }
+    });
+  }
   private listenAndProcessActiveRouteParams(): void {
     this.activeRoute.queryParams.subscribe((queryParams: Params) => {
       if (queryParams['ids']) {
@@ -281,25 +331,25 @@ export class ArtistManagementBulkComponent implements OnInit {
     thumbnailUrlFormControl.valueChanges.subscribe(
       (value: string) => !thumbnailUrlFormControl.errors && this.processImagePreview(value)
     );
-    thumbnailUrlFormControl.setValue(thumbnailUrl);
+    thumbnailUrlFormControl.setValue(thumbnailUrl, { emitEvent: false });
 
     // Background URL
     const backgroundUrlFormControl: FormControl = new FormControl<string>('', [Validators.pattern(URL_REGEX)]);
     backgroundUrlFormControl.valueChanges.subscribe(
       (value: string) => !backgroundUrlFormControl.errors && this.processImagePreview(value)
     );
-    backgroundUrlFormControl.setValue(backgroundUrl);
+    backgroundUrlFormControl.setValue(backgroundUrl, { emitEvent: false });
 
-    // Description URL
+    // Description
     const descriptionFormControl: FormControl = new FormControl<string>(description || '');
     descriptionFormControl.valueChanges.subscribe(
       (value: string) => !descriptionFormControl.errors && (artistAttribute.description = value)
     );
 
-    // Biography URL
-    const biographyUrlFormControl: FormControl = new FormControl<string>(biography || '');
-    biographyUrlFormControl.valueChanges.subscribe(
-      (value: string) => !biographyUrlFormControl.errors && (artistAttribute.biography = value)
+    // Biography
+    const biographyFormControl: FormControl = new FormControl<string>(biography || '');
+    biographyFormControl.valueChanges.subscribe(
+      (value: string) => !biographyFormControl.errors && (artistAttribute.biography = value)
     );
 
     // Reference code
@@ -325,7 +375,10 @@ export class ArtistManagementBulkComponent implements OnInit {
           isActive: values.includes(tag.name)
         })))
     );
-    tagsFormControl.setValue(tags.filter(({ isActive }) => isActive).map(({ name }) => name));
+    tagsFormControl.setValue(
+      tags.filter(({ isActive }) => isActive).map(({ name }) => name),
+      { emitEvent: false }
+    );
 
     artistAttribute.formGroup = new FormGroup({
       nameFormControl,
@@ -333,7 +386,7 @@ export class ArtistManagementBulkComponent implements OnInit {
       backgroundUrlFormControl,
       nationalityIsoCodeFormControl,
       descriptionFormControl,
-      biographyUrlFormControl,
+      biographyFormControl,
       tagsFormControl,
       refCodeFormControl,
       isPublicFormControl
@@ -360,7 +413,7 @@ export class ArtistManagementBulkComponent implements OnInit {
       if (isChanged) {
         artistAttribute.thumbnailUrl = !thumbnailUrlFormControl.errors && thumbnailUrlFormControl.value;
       } else {
-        thumbnailUrlFormControl.setValue(artistAttribute.thumbnailUrl);
+        thumbnailUrlFormControl.setValue(artistAttribute.thumbnailUrl, { emitEvent: false });
       }
     }
     artistAttribute.isThumbnailDialogShowed = false;
@@ -374,7 +427,7 @@ export class ArtistManagementBulkComponent implements OnInit {
       if (isChanged) {
         artistAttribute.backgroundUrl = !backgroundUrlFormControl.errors && backgroundUrlFormControl.value;
       } else {
-        backgroundUrlFormControl.setValue(artistAttribute.backgroundUrl);
+        backgroundUrlFormControl.setValue(artistAttribute.backgroundUrl, { emitEvent: false });
       }
     }
     artistAttribute.isThumbnailDialogShowed = false;
@@ -388,13 +441,14 @@ export class ArtistManagementBulkComponent implements OnInit {
       if (isChanged) {
         artistAttribute.biography = !biographyFormControl.errors && biographyFormControl.value;
       } else {
-        biographyFormControl.setValue(artistAttribute.biography);
+        biographyFormControl.setValue(artistAttribute.biography, { emitEvent: false });
       }
     }
     artistAttribute.isBiographyDialogShowed = false;
   }
 
   handleBulkSaveArtist(): void {
+    this.isLoading.set(true);
     if (this.action === 'edit') {
       const updateArtistDtos: UpdateArtistDto[] = this.artistAttributes().map(
         ({
@@ -419,12 +473,50 @@ export class ArtistManagementBulkComponent implements OnInit {
       );
       this.bulkUpdateArtist(updateArtistDtos);
     } else if (this.action === 'import') {
-      // TODO: Handle import action
+      const createArtistDtos: CreateArtistDto[] = this.artistAttributes().map(
+        ({
+          name,
+          isPublic,
+          description,
+          biography,
+          nationalityIsoCode,
+          thumbnailUrl,
+          backgroundUrl,
+          refCode,
+          tags
+        }: ArtistAttribute) =>
+          ({
+            refCode,
+            isPublic,
+            tags,
+            profile: { name, description, biography, nationalityIsoCode, thumbnailUrl, backgroundUrl }
+          }) as CreateArtistDto
+      );
+      this.bulkCreateArtist(createArtistDtos);
     }
   }
 
   private bulkUpdateArtist(updateArtistDtos: UpdateArtistDto[]): void {
     this.artistService.bulkUpdateArtist({ items: updateArtistDtos }).subscribe((respDto) => {
+      this.isLoading.set(false);
+      respDto.data.items.forEach(({ isSuccessful, errors, id }) => {
+        if (isSuccessful) {
+          this.addMessage({
+            title: $localize`:@@TITLE_SUCCESS:Success`,
+            content: `ID: ${id}. ` + $localize`:@@MESSAGE_ARTIST_UPDATED_SUCCESSFUL:`
+          });
+        } else {
+          const message = this.exceptionHandler.handle(errors[0]);
+          message.content = `ID: ${id}. ` + message.content;
+          this.addMessage(message, 'error');
+        }
+      });
+    });
+  }
+
+  private bulkCreateArtist(createArtistDtos: CreateArtistDto[]): void {
+    this.artistService.bulkCreateArtist({ items: createArtistDtos }).subscribe((respDto) => {
+      this.isLoading.set(false);
       respDto.data.items.forEach(({ isSuccessful, errors, id }) => {
         if (isSuccessful) {
           this.addMessage({

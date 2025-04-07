@@ -11,16 +11,6 @@
     />
 
     @if (action == 'import') {
-      <!-- CSV Import Button -->
-      <p-button
-        i18n-label="@@BUTTON_LABEL_UPLOAD_CSV"
-        icon="pi pi-file-arrow-up"
-        severity="secondary"
-        class="mr-2"
-        (onClick)="fileInput.click()"
-      />
-      <input #fileInput type="file" accept=".csv" style="display: none" />
-
       <!-- CSV Template Button -->
       <p-button
         i18n-label="@@BUTTON_LABEL_EXPORT_TEMPLATE"
@@ -29,6 +19,18 @@
         severity="secondary"
         class="mr-2"
       />
+      <!-- CSV Import Button -->
+      <p-fileupload
+        #fu
+        mode="basic"
+        i18n-chooseLabel="@@BUTTON_LABEL_CHOOSE_FILE"
+        chooseLabel="Choose file ..."
+        chooseIcon="pi pi-upload"
+        name="demo[]"
+        accept=".csv"
+        maxFileSize="1000000"
+        (onSelect)="handleCsvSelected($event)"
+      />
     }
   </ng-template>
 </p-toolbar>
@@ -36,7 +38,7 @@
 <p-table
   #dt
   [value]="artistAttributes()"
-  [rows]="5"
+  [rows]="25"
   [columns]="columns"
   [paginator]="true"
   [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
@@ -46,7 +48,7 @@
   dataKey="id"
   currentPageReportTemplate="Showing {first} to {last} of {totalRecords} artists"
   [showCurrentPageReport]="true"
-  [rowsPerPageOptions]="[5, 10, 50, 100]"
+  [rowsPerPageOptions]="[5, 10, 25]"
   [loading]="isLoading()"
 >
   <ng-template #caption>
@@ -219,6 +221,7 @@
               appendTo="body"
               class="w-full"
               formControlName="nationalityIsoCodeFormControl"
+              showClear
             >
               <ng-template #selectedItem let-selectedNationality>
                 <span
@@ -276,12 +279,7 @@
 
           <!-- Reference code - In case revision > -1, disable edit -->
           <td style="min-width: 24rem">
-            <input
-              pInputText
-              type="text"
-              class="w-full"
-              formControlName="refCodeFormControl"
-            />
+            <input pInputText type="text" class="w-full" formControlName="refCodeFormControl" />
           </td>
 
           <!-- Description -->
@@ -485,4 +483,3 @@
 
 <p-confirmdialog />
 <p-toast position="top-right" />
-<router-outlet></router-outlet>
