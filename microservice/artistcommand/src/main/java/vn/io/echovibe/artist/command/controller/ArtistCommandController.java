@@ -141,7 +141,7 @@ public class ArtistCommandController {
                 sav ->
                     SetArtistVerificationCommand.builder()
                         .id(sav.id())
-                        .isPublic(sav.isPublic())
+                        .isVerified(sav.isVerified())
                         .build())
             .collect(Collectors.toList());
     final BulkResult bulkResult = commandDispatcher.send(setArtistVisibilityCommands);

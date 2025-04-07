@@ -15,5 +15,5 @@ import vn.io.echovibe.core.command.Command;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SetArtistVerificationCommand extends Command {
-  private Boolean isPublic;
+  private Boolean isVerified;
 }
