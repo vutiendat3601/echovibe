@@ -17,15 +17,24 @@ class SqlmodelArtistRepository(ArtistRepository):
         self.logger = logger
         self.session_factory = session_factory
 
-    def _build_options(self,
-                       isLoadImages: bool = False,
-                       isLoadRevisions: bool = True):
-        options = [selectinload(Artist.profile)]
-        if (isLoadImages):
-            options.append(selectinload(Artist.images))
-        if (isLoadRevisions):
-            options.append(selectinload(Artist.revisions))
-        return options
+    def find_all_by_is_active_true(
+            self,
+            is_load_images: bool = False,
+            is_load_revisions: bool = True) -> list[Artist]:
+        options = self._build_options(isLoadImages=is_load_images,
+                                      isLoadRevisions=is_load_revisions)
+        try:
+            with self.session_factory() as session:
+                statement = (select(Artist).options(*options).filter(
+                    Artist.is_active == True).order_by(
+                        Artist.updated_at.desc()))
+                artists = session.exec(statement).all()
+                return artists
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
 
     def find_by_aggregate_id_and_is_active_true(
             self,
@@ -114,20 +123,12 @@ class SqlmodelArtistRepository(ArtistRepository):
         finally:
             session.close()
 
-    def find_all_by_is_active_true(
-            self,
-            is_load_images: bool = False,
-            is_load_revisions: bool = True) -> list[Artist]:
-        options = self._build_options(isLoadImages=is_load_images,
-                                      isLoadRevisions=is_load_revisions)
-        try:
-            with self.session_factory() as session:
-                statement = (select(Artist).options(*options).filter(
-                    Artist.is_active == True))
-                artists = session.exec(statement).all()
-                return artists
-        except SQLAlchemyError as e:
-            self.logger.error(f"{e}")
-            raise e
-        finally:
-            session.close()
+    def _build_options(self,
+                       isLoadImages: bool = False,
+                       isLoadRevisions: bool = True):
+        options = [selectinload(Artist.profile)]
+        if (isLoadImages):
+            options.append(selectinload(Artist.images))
+        if (isLoadRevisions):
+            options.append(selectinload(Artist.revisions))
+        return options
