@@ -76,7 +76,7 @@
       <th style="min-width: 8rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_ACTIONS">Action</th>
 
       <!-- ID -->
-      <th style="min-width: 12rem">ID</th>
+      <th style="min-width: 12rem" [hidden]="['import'].includes(action)">ID</th>
 
       <!-- Thumbnail -->
       <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_THUMBNAIL">Thumbnail</th>
@@ -138,7 +138,7 @@
           </td>
 
           <!-- ID -->
-          <td style="min-width: 12rem">{{ artist.id }}</td>
+          <td style="min-width: 12rem" [hidden]="['import'].includes(action)">{{ artist.id }}</td>
 
           <!-- Thumbnail -->
           <td style="min-width: 12rem">
