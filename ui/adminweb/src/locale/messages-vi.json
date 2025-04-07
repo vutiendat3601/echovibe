@@ -51,7 +51,7 @@
     "COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_NO": "Chưa xác thực",
     "COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_YES": "Đã xuất bản",
     "COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_NO": "Chưa xuất bản",
-    "VALUE_UNDEFINED": "Undefined",
+    "VALUE_UNDEFINED": "Không xác định",
     "FORM_LABEL_ARTIST_NAME": "Tên",
     "FORM_LABEL_ARTIST_NATIONALITY": "Quốc tịch",
     "FORM_LABEL_ARTIST_REF_CODE": "Mã tham chiếu",

@@ -37,7 +37,7 @@
 
 <p-table
   #dt
-  [value]="artistAttributes()"
+  [value]="artists()"
   [rows]="25"
   [columns]="columns"
   [paginator]="true"
@@ -46,7 +46,7 @@
   [(selection)]="selectedArtists"
   [rowHover]="true"
   dataKey="id"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} artists"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Artists"
   [showCurrentPageReport]="true"
   [rowsPerPageOptions]="[5, 10, 25]"
   [loading]="isLoading()"
@@ -111,9 +111,9 @@
       <th style="min-width: 20rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_BACKGROUND">Background</th>
     </tr>
   </ng-template>
-  <ng-template #body let-artistAttribute let-rowIndex="rowIndex">
-    @if (artistAttribute.formGroup) {
-      <ng-container [formGroup]="artistAttribute.formGroup">
+  <ng-template #body let-artist let-rowIndex="rowIndex">
+    @if (artist.formGroup) {
+      <ng-container [formGroup]="artist.formGroup">
         <tr>
           <!-- Action -->
           <td>
@@ -128,7 +128,7 @@
           </td>
 
           <!-- ID -->
-          <td style="min-width: 12rem">{{ artistAttribute.id }}</td>
+          <td style="min-width: 12rem">{{ artist.id }}</td>
 
           <!-- Thumbnail -->
           <td style="min-width: 12rem">
@@ -137,14 +137,14 @@
                 icon="pi pi-pencil"
                 [rounded]="true"
                 [outlined]="true"
-                (onClick)="handleEditThumbnail(artistAttribute)"
+                (onClick)="handleEditThumbnail(artist)"
               />
               <p-image
                 [preview]="true"
                 class="ml-2 rounded cursor-pointer"
                 imageClass="rounded object-cover w-20 h-20"
-                [src]="artistAttribute.thumbnailUrl"
-                [alt]="artistAttribute.name + '\'s thumbnail'"
+                [src]="artist.thumbnailUrl"
+                [alt]="artist.name + '\'s thumbnail'"
               >
               </p-image>
             </div>
@@ -157,15 +157,15 @@
               [modal]="true"
               [closable]="true"
               [dismissableMask]="true"
-              [(visible)]="artistAttribute.isThumbnailDialogShowed"
+              [(visible)]="artist.isThumbnailDialogShowed"
             >
               <ng-container>
                 <p-panel i18n-header="@@FORM_SECTION_ARTIST_THUMBNAIL" header="Thumbnail">
                   <div class="w-full flex justify-center">
                     <p-image
                       [src]="
-                        renderableImageUrls.includes(artistAttribute.formGroup?.get('thumbnailUrlFormControl')?.value)
-                          ? artistAttribute.formGroup.get('thumbnailUrlFormControl').value
+                        renderableImageUrls.includes(artist.formGroup?.get('thumbnailUrlFormControl')?.value)
+                          ? artist.formGroup.get('thumbnailUrlFormControl').value
                           : 'asset/image/default-artist-thumbnail-image.png'
                       "
                       alt="Thumbnail Preview"
@@ -194,13 +194,13 @@
                     label="Cancel"
                     text
                     severity="danger"
-                    (onClick)="handleThumbnailDialogClose(artistAttribute, false)"
+                    (onClick)="handleThumbnailDialogClose(artist, false)"
                   />
                   <p-button
                     i18n-label="@@BUTTON_LABEL_SAVE"
                     label="Save"
                     severity="success"
-                    (onClick)="handleThumbnailDialogClose(artistAttribute, true)"
+                    (onClick)="handleThumbnailDialogClose(artist, true)"
                   />
                 </div>
               </ng-template>
@@ -257,23 +257,23 @@
           <!-- Verified - read-only -->
           <td style="min-width: 12rem" class="text-center">
             <p-tag
-              [icon]="'pi ' + (artistAttribute.isVerified ? 'pi-check' : 'pi-times')"
-              [value]="artistAttribute.isVerified ? I18N.IS_VERIFIED_TRUE : I18N.IS_VERIFIED_FALSE"
-              [severity]="artistAttribute.isVerified ? 'success' : 'danger'"
+              [icon]="'pi ' + (artist.isVerified ? 'pi-check' : 'pi-times')"
+              [value]="artist.isVerified ? I18N.IS_VERIFIED_TRUE : I18N.IS_VERIFIED_FALSE"
+              [severity]="artist.isVerified ? 'success' : 'danger'"
             />
           </td>
 
           <!-- Revision - read-only -->
           <td style="min-width: 8rem">
-            {{ artistAttribute.revisionNumber }}
+            {{ artist.revisionNumber }}
           </td>
 
           <!-- Released - Display Only with Hidden Form Control -->
           <td style="min-width: 12rem" class="text-center">
             <p-tag
-              [icon]="'pi ' + (artistAttribute.isReleased ? 'pi-check' : 'pi-times')"
-              [value]="artistAttribute.isReleased ? I18N.IS_RELEASED_TRUE : I18N.IS_RELEASED_FALSE"
-              [severity]="artistAttribute.isReleased ? 'success' : 'danger'"
+              [icon]="'pi ' + (artist.isReleased ? 'pi-check' : 'pi-times')"
+              [value]="artist.isReleased ? I18N.IS_RELEASED_TRUE : I18N.IS_RELEASED_FALSE"
+              [severity]="artist.isReleased ? 'success' : 'danger'"
             />
           </td>
 
@@ -295,12 +295,12 @@
                 class="mr-2"
                 [rounded]="true"
                 [outlined]="true"
-                (onClick)="handleEditBiography(artistAttribute)"
+                (onClick)="handleEditBiography(artist)"
               />
-              <span [innerHTML]="artistAttribute.biography | safeHtmlPipe"></span>
+              <span [innerHTML]="artist.biography | safeHtmlPipe"></span>
             </div>
             <p-dialog
-              [(visible)]="artistAttribute.isBiographyDialogShowed"
+              [(visible)]="artist.isBiographyDialogShowed"
               [style]="{ width: '600px' }"
               i18n-header="@@DIALOG_LABEL_EDIT_BIOGRAPHY"
               header="Biography"
@@ -322,13 +322,13 @@
                     label="Cancel"
                     text
                     severity="danger"
-                    (onClick)="handleBiographyDialogClose(artistAttribute, false)"
+                    (onClick)="handleBiographyDialogClose(artist, false)"
                   />
                   <p-button
                     i18n-label="@@BUTTON_LABEL_SAVE"
                     label="Save"
                     severity="success"
-                    (onClick)="handleBiographyDialogClose(artistAttribute, true)"
+                    (onClick)="handleBiographyDialogClose(artist, true)"
                   />
                 </div>
               </ng-template>
@@ -339,7 +339,7 @@
           <td style="min-width: 16rem">
             <p-multiselect
               class="flex-1"
-              [options]="artistAttribute.tags"
+              [options]="artist.tags"
               formControlName="tagsFormControl"
               i18n-placeholder="@@FORM_LABEL_ARTIST_TAG_EDIT"
               placeholder="Edit tags"
@@ -349,26 +349,26 @@
               display="chip"
               i18n-emptyFilterMessage="@@MESSAGE_NO_RESULT_FOUND"
               emptyFilterMessage="No results found."
-              [filterValue]="artistAttribute.tagFilterKeyword"
-              (onFilter)="handleTagFilter($event, artistAttribute)"
+              [filterValue]="artist.tagFilterKeyword"
+              (onFilter)="handleTagFilter($event, artist)"
             >
               <ng-template #header>
                 <div class="font-medium px-3 py-2">Tag</div>
               </ng-template>
               <ng-template #footer>
-                @if (!artistAttribute.tagFilterFoundExactMatch) {
+                @if (!artist.tagFilterFoundExactMatch) {
                   <div [style]="{ padding: 'var(--p-multiselect-list-padding)' }">
                     <p-button
                       severity="secondary"
                       text
                       size="small"
                       styleClass="w-full"
-                      (onClick)="handleCreateTag(artistAttribute)"
+                      (onClick)="handleCreateTag(artist)"
                     >
                       <i class="pi pi-plus"></i>
                       <span>
                         Add tag
-                        <span>'{{ artistAttribute.tagFilterKeyword }}'</span>
+                        <span>'{{ artist.tagFilterKeyword }}'</span>
                       </span>
                     </p-button>
                   </div>
@@ -395,15 +395,15 @@
                 icon="pi pi-pencil"
                 [rounded]="true"
                 [outlined]="true"
-                (onClick)="handleEditBackground(artistAttribute)"
+                (onClick)="handleEditBackground(artist)"
               />
-              @if (artistAttribute.backgroundUrl) {
+              @if (artist.backgroundUrl) {
                 <p-image
                   [preview]="true"
                   class="ml-2 rounded cursor-pointer"
                   imageClass="rounded object-cover h-20"
-                  [src]="artistAttribute.backgroundUrl"
-                  [alt]="artistAttribute.name + '\'s background.'"
+                  [src]="artist.backgroundUrl"
+                  [alt]="artist.name + '\'s background.'"
                 />
               }
             </div>
@@ -416,15 +416,15 @@
               [modal]="true"
               [closable]="true"
               [dismissableMask]="true"
-              [(visible)]="artistAttribute.isBackgroundDialogShowed"
+              [(visible)]="artist.isBackgroundDialogShowed"
             >
               <ng-container>
                 <p-panel i18n-header="@@FORM_SECTION_ARTIST_BACKGROUND" header="Background">
                   <div class="w-full flex justify-center">
                     <p-image
                       [src]="
-                        renderableImageUrls.includes(artistAttribute.backgroundUrl)
-                          ? artistAttribute.backgroundUrl
+                        renderableImageUrls.includes(artist.backgroundUrl)
+                          ? artist.backgroundUrl
                           : 'asset/image/default-artist-thumbnail-image.png'
                       "
                       [alt]="'Background Preview'"
@@ -453,13 +453,13 @@
                     label="Cancel"
                     text
                     severity="danger"
-                    (onClick)="handleBackgroundDialogClose(artistAttribute, false)"
+                    (onClick)="handleBackgroundDialogClose(artist, false)"
                   />
                   <p-button
                     i18n-label="@@BUTTON_LABEL_SAVE"
                     label="Save"
                     severity="success"
-                    (onClick)="handleBackgroundDialogClose(artistAttribute, true)"
+                    (onClick)="handleBackgroundDialogClose(artist, true)"
                   />
                 </div>
               </ng-template>

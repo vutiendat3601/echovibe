@@ -63,19 +63,20 @@
 
 <!-- List of Artists -->
 <p-table
-  #dt
+  #dataTable
   [value]="artists()"
-  [rows]="5"
+  [rows]="25"
   [columns]="columns"
   [paginator]="true"
-  [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
+  [globalFilterFields]="['name', 'tagsString']"
   [tableStyle]="{ 'min-width': '75rem' }"
   [(selection)]="selectedArtists"
   [rowHover]="true"
   dataKey="id"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Artists"
   [showCurrentPageReport]="true"
-  [rowsPerPageOptions]="[5, 10, 50, 100]"
+  [rowsPerPageOptions]="[5, 10, 25]"
+  [loading]="isLoading()"
 >
   <ng-template #caption>
     <div class="flex items-center justify-between">
@@ -85,7 +86,7 @@
         <input
           pInputText
           type="text"
-          (input)="handleGlobalFilter(dt, $event)"
+          (input)="handleGlobalFilter(dataTable, $event)"
           i18n-placeholder="@@INPUT_PLACEHOLDER_SEARCH"
           placeholder="Search ..."
         />
@@ -198,26 +199,26 @@
           [preview]="true"
           class="rounded"
           imageClass="rounded object-cover w-20 h-20"
-          [src]="artist.profile.thumbnailUrl"
-          [alt]="artist.profile.name + '\'s thumbnail'"
+          [src]="artist.thumbnailUrl"
+          [alt]="artist.name + '\'s thumbnail'"
         />
       </td>
 
       <!-- Name -->
-      <td style="min-width: 12rem">{{ artist.profile.name }}</td>
+      <td style="min-width: 12rem">{{ artist.name }}</td>
 
       <!-- Nationality -->
       <td style="min-width: 12rem">
         <span
           [class]="
             'fi fi-' +
-            (![UNDEFINED, null].includes(artist.profile.nationalityIsoCode)
-              ? artist.profile.nationalityIsoCode
+            (![UNDEFINED, null].includes(artist.nationalityIsoCode)
+              ? artist.nationalityIsoCode
               : 'xx'
             ).toLowerCase()
           "
         ></span>
-        <span class="ml-2"> {{ artist.profile.nationalityIsoCode | artistNationalityName }}</span>
+        <span class="ml-2"> {{ artist.nationalityIsoCode | artistNationalityName }}</span>
       </td>
 
       <!-- Public -->
@@ -258,10 +259,10 @@
       </td>
 
       <!-- Description -->
-      <td style="min-width: 20rem">{{ artist.profile.description }}</td>
+      <td style="min-width: 20rem">{{ artist.description }}</td>
 
       <!-- Biography -->
-      <td style="min-width: 32rem" [innerHTML]="artist.profile.biography | safeHtmlPipe"></td>
+      <td style="min-width: 32rem" [innerHTML]="artist.biography | safeHtmlPipe"></td>
 
       <!-- Tag -->
       <td style="min-width: 16rem">
@@ -278,8 +279,8 @@
           [preview]="true"
           styleClass="rounded object-cover h-20"
           class="rounded"
-          [src]="artist.profile.backgroundUrl"
-          [alt]="artist.profile.name + '\'s background.'"
+          [src]="artist.backgroundUrl"
+          [alt]="artist.name + '\'s background.'"
         />
       </td>
     </tr>
@@ -445,7 +446,7 @@
           <!-- Tag -->
           <p-multiselect
             class="flex-1"
-            [options]="currentArtistAttribute.tags"
+            [options]="currentArtist.tags"
             formControlName="tagsFormControl"
             i18n-placeholder="@@FORM_LABEL_ARTIST_TAG_EDIT"
             placeholder="Edit tags"
@@ -455,20 +456,20 @@
             display="chip"
             i18n-emptyFilterMessage="@@MESSAGE_NO_RESULT_FOUND"
             emptyFilterMessage="No results found."
-            [filterValue]="currentArtistAttribute.tagFilterKeyword"
+            [filterValue]="currentArtist.tagFilterKeyword"
             (onFilter)="handleTagFilter($event)"
           >
             <ng-template #header>
               <div class="font-medium px-3 py-2">Tag</div>
             </ng-template>
             <ng-template #footer>
-              @if (!currentArtistAttribute.tagFilterFoundExactMatch) {
+              @if (!currentArtist.tagFilterFoundExactMatch) {
                 <div [style]="{ padding: 'var(--p-multiselect-list-padding)' }">
                   <p-button severity="secondary" text size="small" styleClass="w-full" (onClick)="handleCreateTag()">
                     <i class="pi pi-plus"></i>
                     <span>
                       Add tag
-                      <span>'{{ currentArtistAttribute.tagFilterKeyword }}'</span>
+                      <span>'{{ currentArtist.tagFilterKeyword }}'</span>
                     </span>
                   </p-button>
                 </div>
