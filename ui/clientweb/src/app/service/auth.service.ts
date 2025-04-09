@@ -1,9 +1,9 @@
-import { ResourceAccessClaim } from './../model/resource-access';
-import { Injectable } from '@angular/core';
+import { Inject, Injectable, LOCALE_ID } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { BehaviorSubject, filter, Observable, Subject } from 'rxjs';
 import { authorizationCodePkceFlowConfig } from '../../auth.config';
 import { UserProfile } from '../model/user-profile';
+import { ResourceAccessClaim } from './../model/resource-access';
 
 @Injectable({
   providedIn: 'root'
@@ -11,16 +11,20 @@ import { UserProfile } from '../model/user-profile';
 export class AuthService {
   private readonly userProfileSubject: Subject<UserProfile> = new BehaviorSubject<UserProfile>({});
 
-  constructor(private readonly oauthService: OAuthService) {
+  constructor(
+    private readonly oauthService: OAuthService,
+    @Inject(LOCALE_ID) private readonly locale: string
+  ) {
     this.initialize();
   }
 
   private initialize(): void {
+    authorizationCodePkceFlowConfig.redirectUri = `${window.location.origin}/${this.locale}/auth/oidc/callback`;
     this.oauthService.configure(authorizationCodePkceFlowConfig);
     this.oauthService
       .loadDiscoveryDocumentAndLogin()
       .then((hasTokens) => hasTokens && setTimeout(() => this.loadUserProfile(), 1_000));
-    // this.oauthService.setupAutomaticSilentRefresh(); // This command keep fetching Auth Server every a few ms
+    this.oauthService.setupAutomaticSilentRefresh();
     this.oauthService.events
       .pipe(filter((event) => ['token_received', 'token_refreshed'].includes(event.type)))
       .subscribe((_) => setTimeout(() => this.loadUserProfile(), 1_000));
