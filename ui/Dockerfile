@@ -4,7 +4,7 @@ COPY ./ ./
 
 RUN npm install -g @angular/cli
 
-RUN cd adminweb && ng build
+RUN cd adminweb && npm install && ng build
 
 FROM nginx:stable-alpine3.20-perl
 
