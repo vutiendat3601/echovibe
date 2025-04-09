@@ -2,7 +2,7 @@ name: Containerize UI web application and push to Docker Hub
 on:
   pull_request:
     paths:
-      - "./ui/**"
+      - "ui/**"
     branches:
       - develop
     types:
