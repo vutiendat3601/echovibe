@@ -6,6 +6,4 @@ import { Component } from '@angular/core';
   templateUrl: './playlist-management.component.html',
   styleUrl: './playlist-management.component.scss'
 })
-export class PlaylistManagementComponent {
-
-}
+export class PlaylistManagementComponent {}

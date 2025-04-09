@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
+import { AdminRoleGuard } from './app/guard/admin-role.guard';
 import { LayoutComponent } from './app/layout/component/layout/layout.component';
 import { NotFoundComponent } from './app/page/not-found/not-found.component';
-import { AdminRoleGuard } from './app/guard/admin-role.guard';
 
 export const routes: Routes = [
   {
