@@ -9,8 +9,7 @@ describe('PlaylistManagementComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PlaylistManagementComponent]
-    })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(PlaylistManagementComponent);
     component = fixture.componentInstance;

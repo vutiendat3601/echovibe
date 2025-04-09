@@ -10,14 +10,14 @@ export class UrlValidator {
 
   checkUrl(url: string): Observable<boolean> {
     return this.http.head(url, { observe: 'response' }).pipe(
-      map(response => response.status === 200),
+      map((response) => response.status === 200),
       catchError(() => [false])
     );
   }
 
   checkUrlImage(url: string): Observable<boolean> {
     return this.http.head(url, { observe: 'response' }).pipe(
-      map(response => response.status === 200 && !!response.headers.get('content-type')?.startsWith('image')),
+      map((response) => response.status === 200 && !!response.headers.get('content-type')?.startsWith('image')),
       catchError(() => [false])
     );
   }

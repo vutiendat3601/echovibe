@@ -5,7 +5,6 @@
   "projects": {
     "echovibe-adminweb": {
       "i18n": {
-        "sourceLocale": "en-US",
         "locales": {
           "en": "src/locale/messages-en.json",
           "vi": "src/locale/messages-vi.json"

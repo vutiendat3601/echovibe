@@ -9,8 +9,7 @@ describe('RecommendationSystemManagementComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RecommendationSystemComponent]
-    })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(RecommendationSystemComponent);
     component = fixture.componentInstance;
