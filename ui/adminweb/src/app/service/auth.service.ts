@@ -22,7 +22,7 @@ export class AuthService {
     authorizationCodePkceFlowConfig.redirectUri = `${window.location.origin}/${this.locale}/auth/oidc/callback`;
     this.oauthService.configure(authorizationCodePkceFlowConfig);
     this.oauthService
-      .loadDiscoveryDocumentAndTryLogin()
+      .loadDiscoveryDocumentAndLogin()
       .then((hasTokens) => hasTokens && setTimeout(() => this.loadUserProfile(), 1_000));
     this.oauthService.setupAutomaticSilentRefresh();
     this.oauthService.events

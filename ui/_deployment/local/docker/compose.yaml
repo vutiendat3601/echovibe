@@ -1,0 +1,10 @@
+name: echovibe-ui
+services:
+  ui-i1:
+    build:
+      context: "../../../"
+      dockerfile: "Dockerfile.local"
+    container_name: "echovibe-ui-i1"
+    hostname: "echovibe-ui-i1"
+    ports:
+      - "80:80"
