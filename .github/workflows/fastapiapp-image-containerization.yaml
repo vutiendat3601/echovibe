@@ -1,6 +1,9 @@
 name: Containerize FastAPI App and push to Docker Hub
 on:
   pull_request:
+    paths:
+      - "./microservice/artistquery/**"
+      - "./microservice/product/**"
     branches:
       - develop
     types:
