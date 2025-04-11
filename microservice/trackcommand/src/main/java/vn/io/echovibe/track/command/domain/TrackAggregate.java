@@ -2,22 +2,22 @@ package vn.io.echovibe.track.command.domain;
 
 import static vn.io.echovibe.core.constant.BusinessRuleConstant.BR_01;
 import static vn.io.echovibe.track.common.constant.TrackBusinessRuleConstant.TRACK_BR_01;
+import static vn.io.echovibe.track.common.constant.TrackBusinessRuleConstant.TRACK_BR_03;
 import static vn.io.echovibe.track.common.constant.TrackConstant.TRACK_URN_PREFIX;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import vn.io.echovibe.core.domain.AggregateRoot;
 import vn.io.echovibe.core.exception.BusinessRuleViolationException;
 import vn.io.echovibe.track.command.model.CreateTrackCommand;
-import vn.io.echovibe.track.command.model.UpdateTrackDetailCommand;
+import vn.io.echovibe.track.command.model.UpdateTrackCommand;
 import vn.io.echovibe.track.common.event.TrackCreatedEvent;
 import vn.io.echovibe.track.common.event.TrackDeletedEvent;
-import vn.io.echovibe.track.common.event.TrackDetailUpdatedEvent;
 import vn.io.echovibe.track.common.event.TrackReleasedEvent;
-import vn.io.echovibe.track.common.event.TrackVisibilitySetEvent;
+import vn.io.echovibe.track.common.event.TrackUpdatedEvent;
+import vn.io.echovibe.track.common.model.Tag;
 import vn.io.echovibe.track.common.model.TrackDetail;
 
 @Getter
@@ -35,47 +35,46 @@ public class TrackAggregate extends AggregateRoot {
 
   private List<String> artistIds;
 
-  private List<String> tags;
+  private List<Tag> tags;
+
+  private Integer revisionNumber = -1;
+
+  private String refCode;
 
   public TrackAggregate(CreateTrackCommand createTrackCommand) {
     final String urn = TRACK_URN_PREFIX + createTrackCommand.getId();
-    // TODO: Call RESTful API to validate artistIds
     final TrackCreatedEvent trackCreatedEvent =
         TrackCreatedEvent.builder()
             .id(createTrackCommand.getId())
             .urn(urn)
+            .revisionNumber(-1)
+            .tags(createTrackCommand.getTags())
             .detail(createTrackCommand.getDetail())
             .artistIds(createTrackCommand.getArtistIds())
             .isReleased(false)
-            .isPublic(false)
-            .isActive(true)
-            .artistIds(createTrackCommand.getArtistIds())
+            .isPublic(createTrackCommand.getIsPublic())
+            .refCode(createTrackCommand.getRefCode())
             .build();
     raiseEvent(trackCreatedEvent);
   }
 
-  public void setIsPublic(Boolean isPublic) {
-    if (Objects.nonNull(isPublic) && isPublic.equals(this.isPublic)) {
-      throw new BusinessRuleViolationException(
-          BR_01,
-          "Track's visiblity has no changes: aggregateId=%s, isPublic=%s".formatted(id, isPublic));
-    }
-    final TrackVisibilitySetEvent trackVisibilityChangedEvent =
-        TrackVisibilitySetEvent.builder().id(id).isPublic(isPublic).build();
-    raiseEvent(trackVisibilityChangedEvent);
-  }
-
-  public void update(UpdateTrackDetailCommand updateTrackDetailCommand) {
-    final TrackDetail updateDetail = updateTrackDetailCommand.getDetail();
-
+  public void update(UpdateTrackCommand updateTrackCommand) {
+    final TrackDetail updateDetail = updateTrackCommand.getDetail();
     boolean hasChange = false;
+
     final TrackDetail updatedDetail =
         TrackDetail.builder()
             .name(this.detail.getName())
             .description(this.detail.getDescription())
             .thumbnailFileKey(this.detail.getThumbnailFileKey())
             .thumbnailUrl(this.detail.getThumbnailUrl())
-            .refCode(this.detail.getRefCode())
+            .build();
+    final TrackUpdatedEvent trackUpdatedEvent =
+        TrackUpdatedEvent.builder()
+            .id(updateTrackCommand.getId())
+            .detail(updatedDetail)
+            .refCode(refCode)
+            .isPublic(isPublic)
             .build();
 
     // name
@@ -88,26 +87,32 @@ public class TrackAggregate extends AggregateRoot {
       hasChange = true;
       updatedDetail.setName(updateDetail.getDescription());
     }
+
     // thumbnailUrl
     if (!Objects.equals(updateDetail.getThumbnailUrl(), updatedDetail.getThumbnailUrl())) {
       hasChange = true;
       updatedDetail.setThumbnailUrl(updateDetail.getThumbnailUrl());
     }
+
     // refCode
-    if (!Objects.equals(updateDetail.getRefCode(), updatedDetail.getRefCode())) {
+    if (!Objects.equals(updateTrackCommand.getRefCode(), trackUpdatedEvent.getRefCode())) {
+      if (this.revisionNumber > -1) {
+        throw new BusinessRuleViolationException(
+            TRACK_BR_03,
+            "Can't update Track's refCode once it has been released at least once: aggregateId=%s"
+                .formatted(updateTrackCommand.getId()));
+      }
       hasChange = true;
-      updatedDetail.setRefCode(updateDetail.getRefCode());
+      trackUpdatedEvent.setRefCode(updateTrackCommand.getRefCode());
     }
 
     if (!hasChange) {
       throw new BusinessRuleViolationException(
-          BR_01,
-          "Track's detail has no changes: aggregateId=%s"
-              .formatted(updateTrackDetailCommand.getId()));
+          BR_01, "Track has no changes: aggregateId=%s".formatted(updateTrackCommand.getId()));
     }
 
-    final TrackDetailUpdatedEvent trackDetailUpdatedEvent =
-        TrackDetailUpdatedEvent.builder().id(id).detail(updatedDetail).build();
+    final TrackUpdatedEvent trackDetailUpdatedEvent =
+        TrackUpdatedEvent.builder().id(id).detail(updatedDetail).build();
     raiseEvent(trackDetailUpdatedEvent);
   }
 
@@ -129,7 +134,7 @@ public class TrackAggregate extends AggregateRoot {
   }
 
   public void delete() {
-    final Boolean isSoftDeleted = Optional.ofNullable(isReleased).orElse(false);
+    final Boolean isSoftDeleted = revisionNumber > -1;
     final TrackDeletedEvent trackDeletedEvent =
         TrackDeletedEvent.builder().id(id).isSoftDeleted(isSoftDeleted).isActive(false).build();
     raiseEvent(trackDeletedEvent);
@@ -143,26 +148,30 @@ public class TrackAggregate extends AggregateRoot {
     this.isActive = trackCreatedEvent.getIsActive();
     this.isReleased = trackCreatedEvent.getIsReleased();
     this.tags = trackCreatedEvent.getTags();
+    this.artistIds = trackCreatedEvent.getArtistIds();
+    this.refCode = trackCreatedEvent.getRefCode();
+    this.revisionNumber = trackCreatedEvent.getRevisionNumber();
   }
 
-  void apply(TrackDetailUpdatedEvent trackUpdatedEvent) {
+  void apply(TrackUpdatedEvent trackUpdatedEvent) {
     this.id = trackUpdatedEvent.getId();
+    this.isPublic = trackUpdatedEvent.getIsPublic();
+    this.refCode = trackUpdatedEvent.getRefCode();
     this.detail = trackUpdatedEvent.getDetail();
+    this.tags = trackUpdatedEvent.getTags();
   }
 
   void apply(TrackReleasedEvent trackReleasedEvent) {
     this.id = trackReleasedEvent.getId();
     this.detail = trackReleasedEvent.getDetail();
     this.isReleased = trackReleasedEvent.getIsReleased();
+    this.isPublic = trackReleasedEvent.getIsPublic();
+    this.tags = trackReleasedEvent.getTags();
+    this.revisionNumber = trackReleasedEvent.getRevisionNumber();
   }
 
   void apply(TrackDeletedEvent trackDeletedEvent) {
     this.id = trackDeletedEvent.getId();
     this.isActive = trackDeletedEvent.getIsActive();
-  }
-
-  void apply(TrackVisibilitySetEvent trackVisibilityChangedEvent) {
-    this.id = trackVisibilityChangedEvent.getId();
-    this.isPublic = trackVisibilityChangedEvent.getIsPublic();
   }
 }

@@ -22,3 +22,6 @@ app:
   web:
     auth:
       openIdConnectCertsUrl: https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs
+    client:
+        artistquery:
+          baseUrl: http://localhost:6110

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.core.event.Event;
+import vn.io.echovibe.track.common.model.Tag;
 import vn.io.echovibe.track.common.model.TrackDetail;
 
 @NoArgsConstructor
@@ -21,9 +22,15 @@ public class TrackReleasedEvent extends Event {
 
   private TrackDetail detail;
 
+  @Builder.Default private Integer revisionNumber = -1;
+
   @Builder.Default private Boolean isReleased = false;
 
   @Builder.Default private Boolean isPublic = false;
 
-  @Builder.Default private List<String> tags = new LinkedList<>();
+  @Builder.Default private List<Tag> tags = new LinkedList<>();
+
+  {
+    type = getClass().getSimpleName();
+  }
 }

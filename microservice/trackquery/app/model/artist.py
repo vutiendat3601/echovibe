@@ -1,0 +1,115 @@
+from sqlmodel import SQLModel, Field, Column, Relationship
+from typing import Optional
+import uuid
+from datetime import datetime, timezone
+from sqlalchemy.dialects.postgresql import ARRAY, ENUM, JSONB
+from sqlalchemy import TEXT
+from app.enum.artist_image_type import ArtistImageType
+
+
+class Artist(SQLModel, table=True):
+    __tablename__ = "artist"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    aggregate_id: str = Field(..., max_length=16, unique=True)
+    ref_code: str | None = Field(None, max_length=100, unique=True)
+    urn: str = Field(..., max_length=255, unique=True)
+    is_public: bool = Field(default=False)
+    is_released: bool = Field(default=False)
+    is_verified: bool = Field(default=False)
+    is_active: bool = Field(default=True)
+    tags: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
+    tags_json: list[dict[str, any]] = Field([], sa_column=Column(JSONB))
+    profile: Optional["ArtistProfile"] = Relationship(back_populates="artist")
+    images: list["ArtistImage"] = Relationship(back_populates="artist")
+    revision_number: int = Field(default=-1)
+    revisions: list["ArtistRevision"] = Relationship(back_populates="artist")
+    event_type: str | None = Field(None)
+    event_version: int | None = Field(None)
+    event_timestamp: datetime = Field(None)
+    created_at: datetime = Field(default=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default=datetime.now(timezone.utc))
+    created_by: str | None = Field(None)
+    updated_by: str | None = Field(None)
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class ArtistProfile(SQLModel, table=True):
+    __tablename__ = "artist_profile"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    artist_id: uuid.UUID = Field(foreign_key="artist.id")
+    artist: Artist = Relationship(back_populates="profile")
+    aggregate_id: str = Field(..., max_length=16, unique=True)
+    ref_code: str | None = Field(..., max_length=100, unique=True)
+    name: str = Field(..., max_length=255)
+    description: str | None = Field(None, max_length=250)
+    biography: str | None = Field(None)
+    nationality_iso_code: str | None = Field(None)
+    thumbnail_file_key: str | None = Field(None)
+    thumbnail_url: str | None = Field(None)
+    background_file_key: str | None = Field(None)
+    background_url: str | None = Field(None)
+    artist: Optional["Artist"] = Relationship(back_populates="profile")
+    is_active: bool = Field(default=True)
+    event_type: str | None = Field(None)
+    event_version: int | None = Field(None)
+    event_timestamp: datetime | None = Field(None)
+    created_at: datetime = Field(default=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default=datetime.now(timezone.utc))
+    created_by: str | None = Field(None)
+    updated_by: str | None = Field(None)
+
+
+class ArtistImage(SQLModel, table=True):
+    __tablename__ = "artist_image"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    artist_id: uuid.UUID = Field(foreign_key="artist.id")
+    artist: Artist = Relationship(back_populates="images")
+    aggregate_id: str = Field(..., max_length=16)
+    ref_code: str | None = Field(None, max_length=100)
+    file_url: str | None = Field(None, max_length=255)
+    file_key: str | None = Field(None, max_length=255)
+    is_active: bool = Field(default=True)
+    type: ArtistImageType = Field(ENUM(ArtistImageType))
+    event_type: str | None = Field(None)
+    event_version: int | None = Field(None)
+    event_timestamp: datetime | None = Field(None)
+    created_at: datetime = Field(default=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default=datetime.now(timezone.utc))
+    created_by: str | None = Field(None)
+    updated_by: str | None = Field(None)
+
+
+class ArtistRevision(SQLModel, table=True):
+    __tablename__ = "artist_revision"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    artist_id: uuid.UUID = Field(foreign_key="artist.id")
+    artist: Artist = Relationship(back_populates="revisions")
+    aggregate_id: str = Field(..., max_length=16)
+    number: int = Field(default=0)
+    ref_code: str | None = Field(None, max_length=100)
+    name: str = Field(..., max_length=255)
+    urn: str = Field(..., max_length=255)
+    is_public: bool = Field(default=False)
+    is_released: bool = Field(default=False)
+    is_verified: bool = Field(default=False)
+    is_active: bool = Field(default=True)
+    description: str | None = Field(None, max_length=250)
+    biography: str | None = Field(None)
+    nationality_iso_code: str | None = Field(None)
+    thumbnail_url: str | None = Field(None)
+    thumbnail_file_key: str | None = Field(None)
+    background_url: str | None = Field(None)
+    background_file_key: str | None = Field(None)
+    tags_json: list[dict[str, any]] = Field([], sa_column=Column(JSONB))
+    event_type: str | None = Field(None)
+    event_version: int | None = Field(None)
+    event_timestamp: datetime | None = Field(None)
+    created_at: datetime = Field(default=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default=datetime.now(timezone.utc))
+    created_by: str | None = Field(None)
+    updated_by: str | None = Field(None)
+
+    class Config:
+        arbitrary_types_allowed = True
