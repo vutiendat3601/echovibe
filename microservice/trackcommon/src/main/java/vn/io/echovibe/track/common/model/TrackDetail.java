@@ -19,6 +19,4 @@ public class TrackDetail {
   private String thumbnailFileKey;
 
   private String thumbnailUrl;
-
-  private String refCode;
 }
