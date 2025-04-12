@@ -11,6 +11,9 @@ dependencies:
   - name: artistquery
     version: "1.0.0"
     repository: file://../microservice/artistquery
+  - name: trackquery
+    version: "1.0.0"
+    repository: file://../microservice/trackquery
   - name: product
     version: "1.0.0"
     repository: file://../microservice/product
