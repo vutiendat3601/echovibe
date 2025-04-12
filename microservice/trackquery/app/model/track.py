@@ -40,6 +40,7 @@ class TrackDetail(SQLModel, table=True):
     track_id: uuid.UUID = Field(foreign_key="track.id")
     track: Track = Relationship(back_populates="detail")
     aggregate_id: str = Field(..., max_length=16, unique=True)
+    official_released_date: str | None = Field(None, max_length=16)
     ref_code: str | None = Field(..., max_length=100, unique=True)
     name: str = Field(..., max_length=255)
     description: str | None = Field(None, max_length=250)

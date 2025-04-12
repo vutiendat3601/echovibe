@@ -9,6 +9,8 @@ class TrackDetailSchema(BaseModel):
     thumbnail_file_key: str | None = Field(default=None,
                                            alias="thumbnailFileKey")
     thumbnail_url: str | None = Field(default=None, alias="thumbnailUrl")
+    official_released_date: str | None = Field(default=None,
+                                               alias="officialReleasedDate")
 
     class Config:
         populate_by_name = True

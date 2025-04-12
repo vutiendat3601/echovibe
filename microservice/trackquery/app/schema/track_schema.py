@@ -8,6 +8,8 @@ class TrackDetailSchema(BaseModel):
     name: str
     description: str | None = Field(default=None, alias="description")
     thumbnail_url: str | None = Field(default=None, alias="thumbnailUrl")
+    official_released_date: str | None = Field(default=None,
+                                               alias="officialReleasedDate")
 
     class Config:
         populate_by_name = True
@@ -35,6 +37,8 @@ class TrackRevisionSchema(BaseModel):
     is_active: bool = Field(True, alias="isActive")
     description: str | None = Field(None, alias="description")
     thumbnail_url: str | None = Field(None, alias="thumbnailUrl")
+    official_released_date: str | None = Field(default=None,
+                                               alias="officialReleasedDate")
     tags: list[TagSchema] = Field([], alias="tags")
     created_at: datetime = Field(alias="createdAt")
     created_by: str | None = Field(None, alias="createdBy")
