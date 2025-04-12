@@ -180,7 +180,7 @@ export class ArtistManagementComponent implements OnInit {
   isDialogFormSubmitted: boolean = false;
   isDialogShowed: boolean = false;
   action: ActionType = 'new';
-  readonly isLoading = signal(true);
+  readonly isLoading = signal<boolean>(true);
 
   constructor(
     private readonly messageService: MessageService,
@@ -248,7 +248,6 @@ export class ArtistManagementComponent implements OnInit {
   handleExportCsv(): void {}
 
   handleGlobalFilter(table: Table, event: Event) {
-    console.log((event.target as HTMLInputElement).value);
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 

@@ -5,7 +5,7 @@ export const authorizationCodePkceFlowConfig: AuthConfig = {
   // Url of the Identity Provider
   issuer: environment.oauthServerIssuer,
   // URL of the SPA to redirect the user to after login
-  redirectUri: `${window.location.origin}/en/auth/oidc/callback`,
+  redirectUri: `${window.location.origin}/auth/oidc/callback`,
   // The SPA's id. The SPA is registerd with this id at the auth-server
   // clientId: 'server.code',
   clientId: environment.oauthClientId,

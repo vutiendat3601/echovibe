@@ -4,6 +4,7 @@ import { BehaviorSubject, filter, Observable, Subject } from 'rxjs';
 import { authorizationCodePkceFlowConfig } from '../../auth.config';
 import { UserProfile } from '../model/user-profile';
 import { ResourceAccessClaim } from './../model/resource-access';
+import { environment } from '../../environment/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +20,9 @@ export class AuthService {
   }
 
   private initialize(): void {
-    authorizationCodePkceFlowConfig.redirectUri = `${window.location.origin}/${this.locale}/auth/oidc/callback`;
+    if (environment.production) {
+      authorizationCodePkceFlowConfig.redirectUri = `${window.location.origin}/${this.locale}/auth/oidc/callback`;
+    }
     this.oauthService.configure(authorizationCodePkceFlowConfig);
     this.oauthService
       .loadDiscoveryDocumentAndLogin()
