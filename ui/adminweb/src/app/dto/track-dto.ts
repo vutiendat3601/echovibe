@@ -1,7 +1,7 @@
-import { ArtistImage, ArtistProfile, ArtistRevision } from '../model/artist';
 import { Tag } from '../model/tag';
+import { TrackDetail, TrackImage, TrackRevision } from '../model/track';
 
-export interface CreateArtistProfileDto {
+export interface CreateTrackDetailDto {
   name: string | null;
   description: string | null;
   biography: string | null;
@@ -10,32 +10,32 @@ export interface CreateArtistProfileDto {
   nationalityIsoCode: string | null;
 }
 
-export interface CreateArtistDto {
-  profile: CreateArtistProfileDto;
+export interface CreateTrackDto {
+  detail: CreateTrackDetailDto;
   refCode: string | null;
   isPublic: boolean;
   tags: Tag[];
 }
 
-export interface DeleteArtistDto {
+export interface DeleteTrackDto {
   id: string;
 }
 
-export interface ReleaseArtistDto {
+export interface ReleaseTrackDto {
   id: string;
 }
 
-export interface ArtistDto {
+export interface TrackDto {
   id: string;
   urn: string;
   refCode: string | null;
-  profile: ArtistProfile;
+  detail: TrackDetail;
   isPublic: boolean;
   isReleased: boolean;
   isVerified: boolean;
-  images: ArtistImage[] | null;
+  images: TrackImage[] | null;
   revisionNumber: number;
-  revisions: ArtistRevision[] | null;
+  revisions: TrackRevision[] | null;
   tags: Tag[];
   createdAt: string;
   updatedAt: string;
@@ -43,10 +43,10 @@ export interface ArtistDto {
   updatedBy: string | null;
 }
 
-export interface UpdateArtistDto {
+export interface UpdateTrackDto {
   id: string;
   refCode: string | null;
   isPublic: boolean;
   tags: Tag[];
-  profile: ArtistProfile;
+  detail: TrackDetail;
 }

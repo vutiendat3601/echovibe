@@ -22,7 +22,12 @@ export default [
   },
   {
     path: 'track',
-    component: TrackManagementComponent
+    children: [
+      {
+        path: '',
+        component: TrackManagementComponent
+      }
+    ]
   },
   {
     path: 'playlist',

@@ -32,6 +32,7 @@
     "BUTTON_LABEL_RELEASE": "Release",
     "BUTTON_LABEL_CHOOSE_FILE": "Choose file ...",
     "PAGE_LABEL_MANAGE_ARTIST": "Manage Artists",
+    "PAGE_LABEL_MANAGE_TRACK": "Manage Tracks",
     "INPUT_PLACEHOLDER_SEARCH": "Search ...",
     "COLUMN_LABEL_MANAGE_ARTIST_NAME": "Name",
     "COLUMN_LABEL_MANAGE_ARTIST_THUMBNAIL": "Thumbnail",
