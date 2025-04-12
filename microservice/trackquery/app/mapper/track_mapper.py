@@ -21,10 +21,7 @@ def map_to_revision_schema(track_revision: TrackRevision):
         is_released=track_revision.is_released,
         is_active=track_revision.is_active,
         description=track_revision.description,
-        biography=track_revision.biography,
-        nationality_iso_code=track_revision.nationality_iso_code,
         thumbnail_url=track_revision.thumbnail_url,
-        background_url=track_revision.background_url,
         tags=[TagSchema(**tag) for tag in track_revision.tags_json],
         created_at=track_revision.created_at,
         created_by=track_revision.created_by)
@@ -34,9 +31,8 @@ def map_to_track_schema(track: Track,
                         is_load_images: bool = False,
                         is_load_revisions: bool = False):
     # TODO: map thumbnail_file_key to thumbnail_url in case thumbnail_url is null.
-    # TODO: map background_file_key to background_url in case background_url is null.
     detail = track.detail
-    profile_schema: TrackDetailSchema = TrackDetailSchema(
+    detail_schema: TrackDetailSchema = TrackDetailSchema(
         name=detail.name,
         description=detail.description,
         thumbnail_url=detail.thumbnail_url)
@@ -54,7 +50,7 @@ def map_to_track_schema(track: Track,
                        is_public=track.is_public,
                        is_released=track.is_released,
                        tags=[TagSchema(**tag) for tag in track.tags_json],
-                       profile=profile_schema,
+                       detail=detail_schema,
                        images=images,
                        revision_number=track.revision_number,
                        revisions=revisions,
