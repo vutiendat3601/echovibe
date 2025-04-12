@@ -21,8 +21,8 @@ class SqlmodelTrackRepository(TrackRepository):
             self,
             is_load_images: bool = False,
             is_load_revisions: bool = True) -> list[Track]:
-        options = self._build_options(isLoadImages=is_load_images,
-                                      isLoadRevisions=is_load_revisions)
+        options = self._build_options(is_load_images=is_load_images,
+                                      is_load_revisions=is_load_revisions)
         try:
             with self.session_factory() as session:
                 statement = (select(Track).options(*options).filter(
@@ -40,8 +40,8 @@ class SqlmodelTrackRepository(TrackRepository):
             aggregate_id: str,
             is_load_images: bool = False,
             is_load_revisions: bool = True) -> Track | None:
-        options = self._build_options(isLoadImages=is_load_images,
-                                      isLoadRevisions=is_load_revisions)
+        options = self._build_options(is_load_images=is_load_images,
+                                      is_load_revisions=is_load_revisions)
         try:
             with self.session_factory() as session:
                 statement = (select(Track).options(*options).filter(
@@ -92,14 +92,14 @@ class SqlmodelTrackRepository(TrackRepository):
         finally:
             session.close()
 
-    def save_Track(self, Track: Track) -> Track:
+    def save_Track(self, track: Track) -> Track:
         try:
             with self.session_factory() as session:
-                session.add(Track)
+                session.add(track)
                 session.commit()
-                session.refresh(Track)
+                session.refresh(track)
                 session.expunge_all()
-                return Track
+                return track
         except SQLAlchemyError as e:
             session.rollback()
             self.logger.error(f"{e}")
@@ -123,11 +123,11 @@ class SqlmodelTrackRepository(TrackRepository):
             session.close()
 
     def _build_options(self,
-                       isLoadImages: bool = False,
-                       isLoadRevisions: bool = True):
-        options = [selectinload(Track.profile)]
-        if (isLoadImages):
+                       is_load_images: bool = False,
+                       is_load_revisions: bool = True):
+        options = [selectinload(Track.detail)]
+        if (is_load_images):
             options.append(selectinload(Track.images))
-        if (isLoadRevisions):
+        if (is_load_revisions):
             options.append(selectinload(Track.revisions))
         return options

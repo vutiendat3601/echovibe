@@ -170,8 +170,6 @@ CREATE TABLE track_revision (
 	description varchar(255) NULL,
 	thumbnail_url text NULL,
 	thumbnail_file_key text NULL,
-	background_url text NULL,
-	background_file_key text NULL,
 	-- tags _text NOT NULL DEFAULT '{}',
     tags_json jsonb NOT NULL,
 	event_type text NULL,
@@ -188,59 +186,11 @@ CREATE TABLE track_revision (
 ALTER TABLE track_revision ADD CONSTRAINT fk_track_revision__track_id___track__id
 FOREIGN KEY (track_id) REFERENCES track(id) ON DELETE CASCADE ON UPDATE CASCADE
 ;"""
-    search_track_function_ddl = """
-    CREATE OR REPLACE FUNCTION search_track(keyword text)
-    RETURNS TABLE (
-        tsv_criteria text,
-        id uuid,
-        aggregate_id varchar,
-        urn varchar,
-        "name" varchar,
-        description varchar,
-        thumbnail_file_key text,
-        thumbnail_url text,
-        background_file_key text,
-        background_url text,
-        is_public boolean,
-        tags text[],
-        tsv tsvector
-    )
-    LANGUAGE PLPGSQL AS $function$
-    DECLARE
-        words text[];
-        tsv_criteria text;
-    BEGIN
-        SELECT string_to_array(keyword, ' ') INTO words;
-        SELECT array_to_string(words, ':* | ') INTO tsv_criteria;
-        SELECT tsv_criteria || ':*' INTO tsv_criteria;
-        RETURN QUERY
-        SELECT
-        tsv_criteria,
-        a.id uuid,
-        a.aggregate_id,
-        a.urn,
-        a."name",
-        a.description,
-        a.biography,
-        a.nationality_iso_code,
-        a.thumbnail_file_key,
-        a.thumbnail_url,
-        a.background_file_key,
-        a.background_url,
-        a.is_public,
-        a.is_verified,
-        a.tags,
-        a.tsv
-        FROM track a
-        WHERE a.is_active AND a.tsv @@ to_tsquery('english', tsv_criteria);
-    END;
-    $function$
-    ;"""
+
     ddls = [
         create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
         create_track_table_ddl, create_track_detail_ddl,
-        create_track_image_table_ddl, create_track_revision_table_ddl,
-        search_track_function_ddl
+        create_track_image_table_ddl, create_track_revision_table_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)

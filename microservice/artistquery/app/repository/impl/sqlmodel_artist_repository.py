@@ -21,8 +21,8 @@ class SqlmodelArtistRepository(ArtistRepository):
             self,
             is_load_images: bool = False,
             is_load_revisions: bool = True) -> list[Artist]:
-        options = self._build_options(isLoadImages=is_load_images,
-                                      isLoadRevisions=is_load_revisions)
+        options = self._build_options(is_load_images=is_load_images,
+                                      is_load_revisions=is_load_revisions)
         try:
             with self.session_factory() as session:
                 statement = (select(Artist).options(*options).filter(
@@ -41,8 +41,8 @@ class SqlmodelArtistRepository(ArtistRepository):
             aggregate_id: str,
             is_load_images: bool = False,
             is_load_revisions: bool = True) -> Artist | None:
-        options = self._build_options(isLoadImages=is_load_images,
-                                      isLoadRevisions=is_load_revisions)
+        options = self._build_options(is_load_images=is_load_images,
+                                      is_load_revisions=is_load_revisions)
         try:
             with self.session_factory() as session:
                 statement = (select(Artist).options(*options).filter(
@@ -124,11 +124,11 @@ class SqlmodelArtistRepository(ArtistRepository):
             session.close()
 
     def _build_options(self,
-                       isLoadImages: bool = False,
-                       isLoadRevisions: bool = True):
+                       is_load_images: bool = False,
+                       is_load_revisions: bool = True):
         options = [selectinload(Artist.profile)]
-        if (isLoadImages):
+        if (is_load_images):
             options.append(selectinload(Artist.images))
-        if (isLoadRevisions):
+        if (is_load_revisions):
             options.append(selectinload(Artist.revisions))
         return options
