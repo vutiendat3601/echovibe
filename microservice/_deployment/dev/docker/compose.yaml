@@ -94,6 +94,40 @@ services:
     #   depends_on:
     #     - "trackcommand-mongo-i1"
     #   restart: "on-failure:3"
+  trackquery-pg-i1:
+    image: "postgres:17.2-bookworm"
+    container_name: "echovibe-trackquery-pg-i1"
+    hostname: "echovibe-trackquery-pg-i1"
+    environment:
+      - POSTGRES_DB=echovibe_trackquery
+      - POSTGRES_USER=echovibe_trackquery
+      - POSTGRES_PASSWORD=echovibe_trackquery
+    ports:
+      - "16130:5432"
+    networks:
+      - "default"
+    volumes:
+      - "./trackquery-pg/:/var/lib/postgresql/data"
+    restart: "on-failure:3"
+  # trackquery-i1:
+  #   image: "vutiendat3601/echovibe-trackquery:latest"
+  #   container_name: "echovibe-trackquery-i1"
+  #   hostname: "echovibe-trackquery-i1"
+  #   environment:
+  #     - "KAFKA_BROKER_BOOTSTRAP_SERVER_URLS=infras.echovibe.io.vn:9092"
+  #     - "DATABASE_VENDOR=postgresql+psycopg"
+  #     - "DATABASE_HOST=echovibe-trackquery-pg-i1"
+  #     - "DATABASE_PORT=5432"
+  #     - "DATABASE_USERNAME=echovibe_trackquery"
+  #     - "DATABASE_PASSWORD=echovibe_trackquery"
+  #     - "DATABASE_NAME=echovibe_trackquery"
+  #   ports:
+  #     - "6130:6130"
+  #   networks:
+  #     - "default"
+  #   depends_on:
+  #     - "artistquery-pg-i1"
+  #   restart: "on-failure:3"
   product-pg-i1:
     image: "postgres:17.2-bookworm"
     container_name: "echovibe-product-pg-i1"
