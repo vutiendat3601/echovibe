@@ -37,10 +37,10 @@ class AppInitializer:
         self.logger = self.container.logger()
         self.database = self.container.database()
 
-        self.app = FastAPI(title="Echo Vibe - Artist Query APIs",
+        self.app = FastAPI(title="Echo Vibe - Track Query APIs",
                            version="1.0.0",
                            lifespan=lifespan,
-                           openapi_url="/v1/artists/openapi")
+                           openapi_url="/v1/tracks/openapi")
         allow_origins: list[
             str] = configuration.get_web_cors_alllowed_origin_patterns(),
         allow_methods: list[str] = configuration.get_web_cors_allowed_methods(),

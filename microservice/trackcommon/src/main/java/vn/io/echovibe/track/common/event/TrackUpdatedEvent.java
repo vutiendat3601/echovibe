@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.core.event.Event;
 import vn.io.echovibe.track.common.model.Tag;
+import vn.io.echovibe.track.common.model.TrackArtist;
 import vn.io.echovibe.track.common.model.TrackDetail;
 
 @NoArgsConstructor
@@ -23,6 +24,8 @@ public class TrackUpdatedEvent extends Event {
   private Boolean isPublic;
 
   private List<Tag> tags;
+
+  private List<TrackArtist> trackArtists;
 
   {
     type = getClass().getSimpleName();

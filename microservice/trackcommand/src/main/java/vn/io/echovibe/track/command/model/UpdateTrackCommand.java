@@ -9,6 +9,7 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.core.command.Command;
 import vn.io.echovibe.track.common.model.Tag;
+import vn.io.echovibe.track.common.model.TrackArtist;
 import vn.io.echovibe.track.common.model.TrackDetail;
 
 @SuperBuilder
@@ -25,4 +26,6 @@ public class UpdateTrackCommand extends Command {
   private String refCode;
 
   private List<Tag> tags;
+
+  private List<TrackArtist> trackArtists;
 }
