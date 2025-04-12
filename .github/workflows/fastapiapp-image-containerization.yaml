@@ -24,6 +24,9 @@ jobs:
       - name: Build artistquery image
         working-directory: ./microservice/artistquery
         run: ./release.sh
+      - name: Build trackquery image
+        working-directory: ./microservice/artistquery
+        run: ./release.sh
       - name: Build product image
         working-directory: ./microservice/product
         run: ./release.sh

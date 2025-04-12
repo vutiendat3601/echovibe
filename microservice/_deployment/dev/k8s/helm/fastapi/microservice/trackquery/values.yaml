@@ -1,0 +1,33 @@
+deployment:
+  name: trackquery
+  containerPort: 6130
+  replicaCount: 1
+  image: 
+    repository: vutiendat3601/echovibe-trackquery
+    tag: latest
+    pullPolicy: Always
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 6130
+    protocol: TCP
+    hostname: api.echovibe.io.vn
+    exposePathPrefix: /query/v1/tracks
+    replacePrefixMatch: /v1/tracks
+    upstreamSettingsPolicy:
+      keepAlive:
+        connections: 32
+        time: "5s"
+        timeout: "5s"
+kafka:
+  enabled: true
+openidconnect:
+  enabled: false
+database:
+  enabled: true
+  vendor: "postgresql+psycopg"
+  username: echovibe_trackquery
+  password: echovibe_trackquery
+  host: infras.echovibe.io.vn
+  port: 16130
+  name: echovibe_trackquery
