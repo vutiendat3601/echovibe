@@ -14,8 +14,7 @@ track_router = APIRouter(prefix="/v1/tracks", tags=["Track"])
 track_service: TrackService = Provide[Container.track_service]
 
 
-@track_router.get(path="/all",
-                  response_model=ResponseSchema[list[TrackSchema]])
+@track_router.get(path="/all", response_model=ResponseSchema[list[TrackSchema]])
 def get_all_tracks(load_images: bool = Query(default=False, alias="loadImages"),
                    load_revisions: bool = Query(default=False,
                                                 alias="loadRevisions")):
@@ -25,8 +24,7 @@ def get_all_tracks(load_images: bool = Query(default=False, alias="loadImages"),
     return JSONResponse(content=jsonable_encoder(response))
 
 
-@track_router.get(path="/byId/{id}",
-                  response_model=ResponseSchema[TrackSchema])
+@track_router.get(path="/byId/{id}", response_model=ResponseSchema[TrackSchema])
 def get_track_by_id(id: str,
                     load_images: bool = Query(default=False,
                                               alias="loadImages"),

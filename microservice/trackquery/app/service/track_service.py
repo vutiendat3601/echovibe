@@ -42,7 +42,7 @@ class TrackService:
             aggregate_ids: list[str],
             is_load_images: bool = False,
             is_load_revisions: bool = False) -> list[TrackSchema | None]:
-        tracks: list[Track] = self.track_repository.find_by_aggregate_ids_and_is_active_true(
+        tracks = self.track_repository.find_by_aggregate_ids_and_is_active_true(
             aggregate_ids=aggregate_ids,
             is_load_images=is_load_images,
             is_load_revisions=is_load_revisions)
