@@ -88,6 +88,7 @@ class TrackEventHandler:
             release_detail = track_released_event.detail
             track.urn = track_released_event.urn
             track.detail.name = release_detail.name
+            track.detail.official_released_date = release_detail.official_released_date
             track.detail.description = release_detail.description
             track.detail.thumbnail_file_key = release_detail.thumbnail_file_key
             track.detail.thumbnail_url = release_detail.thumbnail_url
@@ -152,7 +153,18 @@ class TrackEventHandler:
         if track is not None:
             if track.detail is None:
                 track.detail = TrackDetail()
-            track.detail.name = track_updated_event.detail.name
+            track_detail = track_updated_event.detail
+            track.detail.name = track_detail.name
+            track.is_released = track_updated_event.is_released
+            track.is_public = track_updated_event.is_public
+            track.detail.description = track_detail.description
+            track.detail.thumbnail_file_key = track_detail.thumbnail_file_key
+            track.detail.thumbnail_url = track_detail.thumbnail_url
+            track.detail.official_released_date = track_detail.official_released_date
+            track.event_type = track_updated_event.type
+            track.event_timestamp = track_updated_event.timestamp
+            track.event_version = track_updated_event.version
+            track.updated_at = updated_at
             track.tags = [
                 tag.name for tag in track_updated_event.tags if tag.is_active
             ]
@@ -160,15 +172,6 @@ class TrackEventHandler:
                 tag.model_dump(by_alias=True)
                 for tag in track_updated_event.tags
             ]
-            track.is_released = track_updated_event.is_released
-            track.is_public = track_updated_event.is_public
-            track.detail.description = track_updated_event.detail.description
-            track.detail.thumbnail_file_key = track_updated_event.detail.thumbnail_file_key
-            track.detail.thumbnail_url = track_updated_event.detail.thumbnail_url
-            track.event_type = track_updated_event.type
-            track.event_timestamp = track_updated_event.timestamp
-            track.event_version = track_updated_event.version
-            track.updated_at = updated_at
             self.track_repository.save_Track(track)
         self.logger.info(
             f"Processed {TrackUpdatedEvent.__name__}: id={track_updated_event.id}, version={track_updated_event.version}, timestamp={track_updated_event.timestamp}"

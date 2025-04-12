@@ -122,6 +122,7 @@ public class TrackCommandController {
         .name(trackDetailDto.name())
         .description(trackDetailDto.description())
         .thumbnailUrl(trackDetailDto.thumbnailUrl())
+        .officialReleasedDate(trackDetailDto.officialReleasedDate())
         .build();
   }
 

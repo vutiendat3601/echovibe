@@ -19,6 +19,8 @@ import vn.io.echovibe.track.common.model.TrackDetail;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateTrackCommand extends Command {
+  private String officialReleasedDate;
+
   private String refCode;
 
   private Boolean isPublic;

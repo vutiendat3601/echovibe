@@ -25,7 +25,7 @@ public class TrackReleasedEvent extends Event {
 
   @Builder.Default private Integer revisionNumber = -1;
 
-  @Builder.Default private Boolean isReleased = false;
+  @Builder.Default private Boolean isReleased = true;
 
   @Builder.Default private Boolean isPublic = false;
 

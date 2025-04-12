@@ -12,4 +12,6 @@ import vn.io.echovibe.core.command.Command;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ReleaseTrackCommand extends Command {}
+public class ReleaseTrackCommand extends Command {
+  private String officialReleasedDate;
+}

@@ -16,6 +16,8 @@ public class TrackDetail {
 
   private String description;
 
+  private String officialReleasedDate;
+
   private String thumbnailFileKey;
 
   private String thumbnailUrl;

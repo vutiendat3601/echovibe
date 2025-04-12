@@ -96,6 +96,13 @@ public class TrackAggregate extends AggregateRoot {
       updatedDetail.setThumbnailUrl(updateDetail.getThumbnailUrl());
     }
 
+    // officialReleasedDate
+    if (!Objects.equals(
+        updateDetail.getOfficialReleasedDate(), updatedDetail.getOfficialReleasedDate())) {
+      hasChange = true;
+      updatedDetail.setOfficialReleasedDate(updateDetail.getOfficialReleasedDate());
+    }
+
     // refCode
     if (!Objects.equals(updateTrackCommand.getRefCode(), trackUpdatedEvent.getRefCode())) {
       if (this.revisionNumber > -1) {
