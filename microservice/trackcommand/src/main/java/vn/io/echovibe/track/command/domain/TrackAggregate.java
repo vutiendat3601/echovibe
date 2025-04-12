@@ -76,6 +76,7 @@ public class TrackAggregate extends AggregateRoot {
             .detail(updatedDetail)
             .refCode(refCode)
             .isPublic(isPublic)
+            .isReleased(false)
             .build();
 
     // name
@@ -160,6 +161,8 @@ public class TrackAggregate extends AggregateRoot {
     raiseEvent(trackDeletedEvent);
   }
 
+  // ### TrackAggregate event apply functions #################################
+
   void apply(TrackCreatedEvent trackCreatedEvent) {
     this.id = trackCreatedEvent.getId();
     this.urn = trackCreatedEvent.getUrn();
@@ -178,6 +181,7 @@ public class TrackAggregate extends AggregateRoot {
     this.isPublic = trackUpdatedEvent.getIsPublic();
     this.refCode = trackUpdatedEvent.getRefCode();
     this.detail = trackUpdatedEvent.getDetail();
+    this.isReleased = trackUpdatedEvent.getIsReleased();
     this.tags = trackUpdatedEvent.getTags();
     this.trackArtists = trackUpdatedEvent.getTrackArtists();
   }

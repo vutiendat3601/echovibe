@@ -27,6 +27,8 @@ public class TrackUpdatedEvent extends Event {
 
   private List<TrackArtist> trackArtists;
 
+  private Boolean isReleased;
+
   {
     type = getClass().getSimpleName();
   }
