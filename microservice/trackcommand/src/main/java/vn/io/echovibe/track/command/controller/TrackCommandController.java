@@ -136,7 +136,9 @@ public class TrackCommandController {
 
   private static List<TrackArtist> mapToTrackArtists(List<TrackArtistDto> trackArtistDtos) {
     if (Objects.nonNull(trackArtistDtos)) {
-      trackArtistDtos.stream().map(tad -> mapToTrackArtist(tad)).collect(Collectors.toList());
+      return trackArtistDtos.stream()
+          .map(tad -> mapToTrackArtist(tad))
+          .collect(Collectors.toList());
     }
     return null;
   }
@@ -145,9 +147,9 @@ public class TrackCommandController {
     return Tag.builder().name(tagDto.name()).isActive(tagDto.isActive()).build();
   }
 
-  private static List<Tag> mapToTags(@NonNull List<TagDto> tagDtos) {
+  private static List<Tag> mapToTags(List<TagDto> tagDtos) {
     if (Objects.nonNull(tagDtos)) {
-      tagDtos.stream().map(tagDto -> mapToTag(tagDto)).collect(Collectors.toList());
+      return tagDtos.stream().map(tagDto -> mapToTag(tagDto)).collect(Collectors.toList());
     }
     return null;
   }
