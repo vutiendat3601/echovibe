@@ -1,8 +1,8 @@
 from fastapi import APIRouter
-from app.router.artist_router import artist_router
+from app.router.track_router import track_router
 
 apiRouter = APIRouter()
-routers = [artist_router]
+routers = [track_router]
 
 for router in routers:
     apiRouter.include_router(router)

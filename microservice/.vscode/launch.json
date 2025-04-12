@@ -31,6 +31,21 @@
       }
     },
     {
+      "name": "trackquery",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "cwd": "${workspaceFolder}/trackquery",
+      "args": [
+        "app.main:app",
+        "--reload",
+        "--port=6130"
+      ],
+      "jinja": true,
+      "envFile": "${workspaceFolder}/trackquery/.env",
+      "justMyCode": false
+    },
+    {
       "type": "java",
       "name": "TrackCommandApplication",
       "request": "launch",

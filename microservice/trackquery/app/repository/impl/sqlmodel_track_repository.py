@@ -2,13 +2,13 @@ from sqlmodel import Session, select, delete
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import selectinload
 from contextlib import AbstractContextManager
-from app.model.artist import Artist
+from app.model.track import Track
 from typing import Callable
 from app.core.logger import Logger
-from app.repository.artist_repository import ArtistRepository
+from app.repository.track_repository import TrackRepository
 
 
-class SqlmodelArtistRepository(ArtistRepository):
+class SqlmodelTrackRepository(TrackRepository):
 
     def __init__(
         self, logger: Logger,
@@ -20,16 +20,15 @@ class SqlmodelArtistRepository(ArtistRepository):
     def find_all_by_is_active_true(
             self,
             is_load_images: bool = False,
-            is_load_revisions: bool = True) -> list[Artist]:
+            is_load_revisions: bool = True) -> list[Track]:
         options = self._build_options(isLoadImages=is_load_images,
                                       isLoadRevisions=is_load_revisions)
         try:
             with self.session_factory() as session:
-                statement = (select(Artist).options(*options).filter(
-                    Artist.is_active == True).order_by(
-                        Artist.updated_at.desc()))
-                artists = session.exec(statement).all()
-                return artists
+                statement = (select(Track).options(*options).filter(
+                    Track.is_active == True).order_by(Track.updated_at.desc()))
+                tracks = session.exec(statement).all()
+                return tracks
         except SQLAlchemyError as e:
             self.logger.error(f"{e}")
             raise e
@@ -40,16 +39,16 @@ class SqlmodelArtistRepository(ArtistRepository):
             self,
             aggregate_id: str,
             is_load_images: bool = False,
-            is_load_revisions: bool = True) -> Artist | None:
+            is_load_revisions: bool = True) -> Track | None:
         options = self._build_options(isLoadImages=is_load_images,
                                       isLoadRevisions=is_load_revisions)
         try:
             with self.session_factory() as session:
-                statement = (select(Artist).options(*options).filter(
-                    Artist.is_active == True,
-                    Artist.aggregate_id == aggregate_id))
-                artist = session.exec(statement).first()
-                return artist
+                statement = (select(Track).options(*options).filter(
+                    Track.is_active == True,
+                    Track.aggregate_id == aggregate_id))
+                track = session.exec(statement).first()
+                return track
         except SQLAlchemyError as e:
             self.logger.error(f"{e}")
             raise e
@@ -60,15 +59,15 @@ class SqlmodelArtistRepository(ArtistRepository):
             self,
             aggregate_ids: list[str],
             is_load_images: bool = False,
-            is_load_revisions: bool = True) -> list[Artist]:
+            is_load_revisions: bool = True) -> list[Track]:
         try:
             with self.session_factory() as session:
                 options = self._build_options(is_load_images, is_load_revisions)
-                statement = (select(Artist).options(*options).filter(
-                    Artist.is_active == True,
-                    Artist.aggregate_id.in_(aggregate_ids)))
-                artists = session.exec(statement).all()
-                return artists
+                statement = (select(Track).options(*options).filter(
+                    Track.is_active == True,
+                    Track.aggregate_id.in_(aggregate_ids)))
+                tracks = session.exec(statement).all()
+                return tracks
         except SQLAlchemyError as e:
             self.logger.error(f"{e}")
             raise e
@@ -79,28 +78,28 @@ class SqlmodelArtistRepository(ArtistRepository):
             self,
             ref_codes: list[str],
             is_load_images: bool = False,
-            is_load_revisions: bool = True) -> list[Artist]:
+            is_load_revisions: bool = True) -> list[Track]:
         options = self._build_options(is_load_images, is_load_revisions)
         try:
             with self.session_factory() as session:
-                statement = (select(Artist).options(*options).filter(
-                    Artist.is_active == True, Artist.ref_code.in_(ref_codes)))
-                artists = session.exec(statement).all()
-                return artists
+                statement = (select(Track).options(*options).filter(
+                    Track.is_active == True, Track.ref_code.in_(ref_codes)))
+                tracks = session.exec(statement).all()
+                return tracks
         except SQLAlchemyError as e:
             self.logger.error(f"{e}")
             raise e
         finally:
             session.close()
 
-    def save_artist(self, artist: Artist) -> Artist:
+    def save_Track(self, Track: Track) -> Track:
         try:
             with self.session_factory() as session:
-                session.add(artist)
+                session.add(Track)
                 session.commit()
-                session.refresh(artist)
+                session.refresh(Track)
                 session.expunge_all()
-                return artist
+                return Track
         except SQLAlchemyError as e:
             session.rollback()
             self.logger.error(f"{e}")
@@ -111,8 +110,8 @@ class SqlmodelArtistRepository(ArtistRepository):
     def delete_by_aggregate_id(self, aggregate_id: str) -> None:
         try:
             with self.session_factory() as session:
-                statement = (delete(Artist).where(
-                    Artist.aggregate_id == aggregate_id))
+                statement = (delete(Track).where(
+                    Track.aggregate_id == aggregate_id))
                 session.exec(statement)
                 session.commit()
                 session.expunge_all()
@@ -126,9 +125,9 @@ class SqlmodelArtistRepository(ArtistRepository):
     def _build_options(self,
                        isLoadImages: bool = False,
                        isLoadRevisions: bool = True):
-        options = [selectinload(Artist.profile)]
+        options = [selectinload(Track.profile)]
         if (isLoadImages):
-            options.append(selectinload(Artist.images))
+            options.append(selectinload(Track.images))
         if (isLoadRevisions):
-            options.append(selectinload(Artist.revisions))
+            options.append(selectinload(Track.revisions))
         return options
