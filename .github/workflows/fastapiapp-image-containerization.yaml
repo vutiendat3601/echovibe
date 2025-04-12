@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - "microservice/artistquery/**"
+      - "microservice/trackquery/**"
       - "microservice/product/**"
     branches:
       - develop
