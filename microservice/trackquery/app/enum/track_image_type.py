@@ -1,7 +1,6 @@
 from enum import Enum
 
 
-class ArtistImageType(Enum):
+class TrackImageType(Enum):
     THUMBNAIL = "THUMBNAIL"
-    BACKGROUND = "BACKGROUND"
     OTHER = "OTHER"

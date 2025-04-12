@@ -33,5 +33,5 @@ datasource:
   password:
 client:
   artistquery:
-    enabled: false
+    enabled: true
     baseUrl: https://api.echovibe.io.vn/query
