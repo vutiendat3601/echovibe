@@ -112,7 +112,7 @@ class TrackEventHandler:
             revision_attributes = {
                 **track_released_event.model_dump(),
                 "id": None,
-                "Track_id": track.id,
+                "track_id": track.id,
                 "aggregate_id": track.aggregate_id,
                 "name": track.detail.name,
                 "tags_json": [
