@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.io.echovibe.core.event.Event;
 import vn.io.echovibe.track.common.model.Tag;
+import vn.io.echovibe.track.common.model.TrackArtist;
 import vn.io.echovibe.track.common.model.TrackDetail;
 
 @NoArgsConstructor
@@ -34,7 +35,7 @@ public class TrackCreatedEvent extends Event {
 
   @Builder.Default private List<Tag> tags = new LinkedList<>();
 
-  @Builder.Default private List<String> artistIds = new LinkedList<>();
+  @Builder.Default private List<TrackArtist> trackArtists = new LinkedList<>();
 
   {
     type = getClass().getSimpleName();

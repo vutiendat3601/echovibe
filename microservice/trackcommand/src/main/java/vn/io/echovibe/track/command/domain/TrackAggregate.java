@@ -18,6 +18,7 @@ import vn.io.echovibe.track.common.event.TrackDeletedEvent;
 import vn.io.echovibe.track.common.event.TrackReleasedEvent;
 import vn.io.echovibe.track.common.event.TrackUpdatedEvent;
 import vn.io.echovibe.track.common.model.Tag;
+import vn.io.echovibe.track.common.model.TrackArtist;
 import vn.io.echovibe.track.common.model.TrackDetail;
 
 @Getter
@@ -33,7 +34,7 @@ public class TrackAggregate extends AggregateRoot {
 
   private Boolean isActive;
 
-  private List<String> artistIds;
+  private List<TrackArtist> trackArtists;
 
   private List<Tag> tags;
 
@@ -50,7 +51,7 @@ public class TrackAggregate extends AggregateRoot {
             .revisionNumber(-1)
             .tags(createTrackCommand.getTags())
             .detail(createTrackCommand.getDetail())
-            .artistIds(createTrackCommand.getArtistIds())
+            .trackArtists(createTrackCommand.getTrackArtists())
             .isReleased(false)
             .isPublic(createTrackCommand.getIsPublic())
             .refCode(createTrackCommand.getRefCode())
@@ -106,14 +107,30 @@ public class TrackAggregate extends AggregateRoot {
       trackUpdatedEvent.setRefCode(updateTrackCommand.getRefCode());
     }
 
+    // isPublic
+    if (!Objects.equals(updateTrackCommand.getIsPublic(), trackUpdatedEvent.getIsPublic())) {
+      hasChange = true;
+      trackUpdatedEvent.setIsPublic(updateTrackCommand.getIsPublic());
+    }
+
+    // tags
+    if (!Objects.equals(updateTrackCommand.getTags(), tags)) {
+      hasChange = true;
+      trackUpdatedEvent.setTags(updateTrackCommand.getTags());
+    }
+
+    // trackArtists
+    if (!Objects.equals(updateTrackCommand.getTrackArtists(), trackArtists)) {
+      hasChange = true;
+      trackUpdatedEvent.setTrackArtists(updateTrackCommand.getTrackArtists());
+    }
+
     if (!hasChange) {
       throw new BusinessRuleViolationException(
           BR_01, "Track has no changes: aggregateId=%s".formatted(updateTrackCommand.getId()));
     }
 
-    final TrackUpdatedEvent trackDetailUpdatedEvent =
-        TrackUpdatedEvent.builder().id(id).detail(updatedDetail).build();
-    raiseEvent(trackDetailUpdatedEvent);
+    raiseEvent(trackUpdatedEvent);
   }
 
   public void release() {
@@ -128,6 +145,9 @@ public class TrackAggregate extends AggregateRoot {
             .detail(detail)
             .isPublic(isPublic)
             .isReleased(true)
+            .revisionNumber(++revisionNumber)
+            .refCode(refCode)
+            .trackArtists(trackArtists)
             .tags(tags)
             .build();
     raiseEvent(trackReleasedEvent);
@@ -148,7 +168,7 @@ public class TrackAggregate extends AggregateRoot {
     this.isActive = trackCreatedEvent.getIsActive();
     this.isReleased = trackCreatedEvent.getIsReleased();
     this.tags = trackCreatedEvent.getTags();
-    this.artistIds = trackCreatedEvent.getArtistIds();
+    this.trackArtists = trackCreatedEvent.getTrackArtists();
     this.refCode = trackCreatedEvent.getRefCode();
     this.revisionNumber = trackCreatedEvent.getRevisionNumber();
   }
@@ -159,6 +179,7 @@ public class TrackAggregate extends AggregateRoot {
     this.refCode = trackUpdatedEvent.getRefCode();
     this.detail = trackUpdatedEvent.getDetail();
     this.tags = trackUpdatedEvent.getTags();
+    this.trackArtists = trackUpdatedEvent.getTrackArtists();
   }
 
   void apply(TrackReleasedEvent trackReleasedEvent) {
@@ -167,6 +188,8 @@ public class TrackAggregate extends AggregateRoot {
     this.isReleased = trackReleasedEvent.getIsReleased();
     this.isPublic = trackReleasedEvent.getIsPublic();
     this.tags = trackReleasedEvent.getTags();
+    this.trackArtists = trackReleasedEvent.getTrackArtists();
+    this.refCode = trackReleasedEvent.getRefCode();
     this.revisionNumber = trackReleasedEvent.getRevisionNumber();
   }
 

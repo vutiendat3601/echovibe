@@ -5,10 +5,12 @@ import static vn.io.echovibe.core.constant.Constant.REQUEST_PROCESSED_SUCCESS;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +21,8 @@ import vn.io.echovibe.core.util.IdentityUtils;
 import vn.io.echovibe.track.command.dto.CreateTrackDto;
 import vn.io.echovibe.track.command.dto.DeleteTrackDto;
 import vn.io.echovibe.track.command.dto.ReleaseTrackDto;
+import vn.io.echovibe.track.command.dto.TagDto;
+import vn.io.echovibe.track.command.dto.TrackArtistDto;
 import vn.io.echovibe.track.command.dto.TrackDetailDto;
 import vn.io.echovibe.track.command.dto.UpdateTrackDto;
 import vn.io.echovibe.track.command.model.CreateTrackCommand;
@@ -26,6 +30,7 @@ import vn.io.echovibe.track.command.model.DeleteTrackCommand;
 import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
 import vn.io.echovibe.track.command.model.UpdateTrackCommand;
 import vn.io.echovibe.track.common.model.Tag;
+import vn.io.echovibe.track.common.model.TrackArtist;
 import vn.io.echovibe.track.common.model.TrackDetail;
 import vn.io.echovibe.web.dto.BulkDto;
 import vn.io.echovibe.web.dto.ResponseDto;
@@ -46,24 +51,16 @@ public class TrackCommandController {
         bulkCreateTrackDtos.items().stream()
             .map(
                 ctd -> {
-                  final TrackDetailDto trackDetailDto = ctd.detail();
-                  final TrackDetail detail =
-                      TrackDetail.builder()
-                          .name(trackDetailDto.name())
-                          .description(trackDetailDto.description())
-                          .thumbnailUrl(trackDetailDto.thumbnailUrl())
-                          .build();
+                  final TrackDetail detail = mapToTrackDetail(ctd.detail());
+                  final List<TrackArtist> trackArtists = mapToTrackArtists(ctd.trackArtists());
+                  final List<Tag> tags = mapToTags(ctd.tags());
                   return CreateTrackCommand.builder()
                       .id(IdentityUtils.generateAggregateId())
                       .detail(detail)
                       .refCode(ctd.refCode())
                       .isPublic(ctd.isPublic())
-                      .tags(
-                          ctd.tags().stream()
-                              .map(tagDto -> new Tag(tagDto.name(), tagDto.isActive()))
-                              .collect(Collectors.toList()))
-                      .artistIds(ctd.artistIds())
-                      .artistRefCodes(ctd.artistRefCodes())
+                      .tags(tags)
+                      .trackArtists(trackArtists)
                       .build();
                 })
             .collect(Collectors.toList());
@@ -79,21 +76,16 @@ public class TrackCommandController {
         bulkUpdateTrackDtos.items().stream()
             .map(
                 utd -> {
-                  final TrackDetailDto trackDetailDto = utd.detail();
+                  final TrackDetail detail = mapToTrackDetail(utd.detail());
+                  final List<TrackArtist> trackArtists = mapToTrackArtists(utd.trackArtists());
+                  final List<Tag> tags = mapToTags(utd.tags());
                   return UpdateTrackCommand.builder()
                       .id(utd.id())
-                      .detail(
-                          TrackDetail.builder()
-                              .name(trackDetailDto.name())
-                              .description(trackDetailDto.description())
-                              .thumbnailUrl(trackDetailDto.thumbnailUrl())
-                              .build())
+                      .detail(detail)
                       .refCode(utd.refCode())
                       .isPublic(utd.isPublic())
-                      .tags(
-                          utd.tags().stream()
-                              .map(tagDto -> new Tag(tagDto.name(), tagDto.isActive()))
-                              .collect(Collectors.toList()))
+                      .trackArtists(trackArtists)
+                      .tags(tags)
                       .build();
                 })
             .collect(Collectors.toList());
@@ -123,5 +115,40 @@ public class TrackCommandController {
             .collect(Collectors.toList());
     final BulkResult bulkResult = commandDispatcher.send(releaseTrackCommands);
     return ResponseEntity.ok(ResponseDto.ok(REQUEST_PROCESSED_SUCCESS, bulkResult));
+  }
+
+  private static TrackDetail mapToTrackDetail(@NonNull TrackDetailDto trackDetailDto) {
+    return TrackDetail.builder()
+        .name(trackDetailDto.name())
+        .description(trackDetailDto.description())
+        .thumbnailUrl(trackDetailDto.thumbnailUrl())
+        .build();
+  }
+
+  private static TrackArtist mapToTrackArtist(@NonNull TrackArtistDto trackArtistDto) {
+    return TrackArtist.builder()
+        .artistId(trackArtistDto.artistId())
+        .artistRefCode(trackArtistDto.artistRefCode())
+        .isMainArtist(trackArtistDto.isMainArtist())
+        .isActive(trackArtistDto.isActive())
+        .build();
+  }
+
+  private static List<TrackArtist> mapToTrackArtists(List<TrackArtistDto> trackArtistDtos) {
+    if (Objects.nonNull(trackArtistDtos)) {
+      trackArtistDtos.stream().map(tad -> mapToTrackArtist(tad)).collect(Collectors.toList());
+    }
+    return null;
+  }
+
+  private static Tag mapToTag(@NonNull TagDto tagDto) {
+    return Tag.builder().name(tagDto.name()).isActive(tagDto.isActive()).build();
+  }
+
+  private static List<Tag> mapToTags(@NonNull List<TagDto> tagDtos) {
+    if (Objects.nonNull(tagDtos)) {
+      tagDtos.stream().map(tagDto -> mapToTag(tagDto)).collect(Collectors.toList());
+    }
+    return null;
   }
 }

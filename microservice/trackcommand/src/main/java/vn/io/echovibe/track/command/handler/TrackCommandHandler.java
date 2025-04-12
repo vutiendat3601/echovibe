@@ -18,6 +18,7 @@ import vn.io.echovibe.track.command.model.CreateTrackCommand;
 import vn.io.echovibe.track.command.model.DeleteTrackCommand;
 import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
 import vn.io.echovibe.track.command.model.UpdateTrackCommand;
+import vn.io.echovibe.track.common.model.TrackArtist;
 import vn.io.echovibe.web.dto.ResponseDto;
 
 @RequiredArgsConstructor
@@ -28,10 +29,50 @@ public class TrackCommandHandler implements CommandHandler {
 
   @Override
   public void handle(@NonNull CreateTrackCommand createTrackCommand) {
-    final List<String> artistIds = createTrackCommand.getArtistIds();
+    processTrackArtists(createTrackCommand.getTrackArtists());
+    final TrackAggregate trackAggregate = new TrackAggregate(createTrackCommand);
+    eventSourcingHandler.save(trackAggregate);
+  }
 
-    // Validate Artist by ids
-    if (Objects.nonNull(artistIds) && !CollectionUtils.isEmpty(artistIds)) {
+  @Override
+  public void handle(@NonNull UpdateTrackCommand updateTrackCommand) {
+    processTrackArtists(updateTrackCommand.getTrackArtists());
+    final TrackAggregate trackAggregate = findTrackAggregateById(updateTrackCommand.getId());
+    trackAggregate.update(updateTrackCommand);
+    eventSourcingHandler.save(trackAggregate);
+  }
+
+  @Override
+  public void handle(@NonNull ReleaseTrackCommand releaseTrackCommand) {
+    final TrackAggregate trackAggregate = findTrackAggregateById(releaseTrackCommand.getId());
+    trackAggregate.release();
+    eventSourcingHandler.save(trackAggregate);
+  }
+
+  @Override
+  public void handle(@NonNull DeleteTrackCommand deleteTrackCommand) {
+    final TrackAggregate trackAggregate = findTrackAggregateById(deleteTrackCommand.getId());
+    trackAggregate.delete();
+    eventSourcingHandler.save(trackAggregate);
+  }
+
+  private TrackAggregate findTrackAggregateById(@NonNull String id) {
+    final TrackAggregate trackAggregate = eventSourcingHandler.findById(id);
+    final boolean isActive = Optional.ofNullable(trackAggregate.getIsActive()).orElse(true);
+    if (!isActive) {
+      throw new AggregateNotFoundException("Artist not found: aggregateId=%s".formatted(id));
+    }
+    return trackAggregate;
+  }
+
+  private void processTrackArtists(@NonNull List<TrackArtist> trackArtists) {
+    final List<String> artistIds =
+        trackArtists.stream()
+            .map(TrackArtist::getArtistId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+
+    if (!CollectionUtils.isEmpty(artistIds)) {
       final ResponseDto<List<ArtistDto>> respDto =
           artistQueryClient.getArtistByIds(artistIds).getBody();
       if (Objects.isNull(respDto) || CollectionUtils.isEmpty(respDto.data())) {
@@ -54,8 +95,12 @@ public class TrackCommandHandler implements CommandHandler {
     }
 
     // Validate Artist by refCodes
-    final List<String> artistRefCodes = createTrackCommand.getArtistRefCodes();
-    if (Objects.nonNull(artistRefCodes) && !CollectionUtils.isEmpty(artistRefCodes)) {
+    final List<String> artistRefCodes =
+        trackArtists.stream()
+            .map(TrackArtist::getArtistRefCode)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+    if (!CollectionUtils.isEmpty(artistRefCodes)) {
       final ResponseDto<List<ArtistDto>> respDto =
           artistQueryClient.getArtistByRefCodes(artistRefCodes).getBody();
       if (Objects.isNull(respDto) || CollectionUtils.isEmpty(respDto.data())) {
@@ -74,41 +119,16 @@ public class TrackCommandHandler implements CommandHandler {
           throw new AggregateNotFoundException(
               "Artist not found: artistRefCodes=%s".formatted(notFoundArtistRefCodes));
         } else {
-          artistDtos.stream().map(ArtistDto::id).forEach(artistId -> artistIds.add(artistId));
+          final Map<String, TrackArtist> trackArtistsMap =
+              trackArtists.stream()
+                  .collect(Collectors.toMap(TrackArtist::getArtistRefCode, ta -> ta));
+          artistDtos.stream()
+              .filter(artistDto -> !artistIds.contains(artistDto.id()))
+              .forEach(
+                  artistDto ->
+                      trackArtistsMap.get(artistDto.refCode()).setArtistId(artistDto.id()));
         }
       }
     }
-    final TrackAggregate trackAggregate = new TrackAggregate(createTrackCommand);
-    eventSourcingHandler.save(trackAggregate);
-  }
-
-  @Override
-  public void handle(@NonNull UpdateTrackCommand updateTrackCommand) {
-    final TrackAggregate trackAggregate = findTrackAggregateById(updateTrackCommand.getId());
-    trackAggregate.update(updateTrackCommand);
-    eventSourcingHandler.save(trackAggregate);
-  }
-
-  @Override
-  public void handle(@NonNull ReleaseTrackCommand publishArtistCommand) {
-    final TrackAggregate trackAggregate = findTrackAggregateById(publishArtistCommand.getId());
-    trackAggregate.release();
-    eventSourcingHandler.save(trackAggregate);
-  }
-
-  @Override
-  public void handle(@NonNull DeleteTrackCommand deleteTrackCommand) {
-    final TrackAggregate trackAggregate = findTrackAggregateById(deleteTrackCommand.getId());
-    trackAggregate.delete();
-    eventSourcingHandler.save(trackAggregate);
-  }
-
-  private TrackAggregate findTrackAggregateById(@NonNull String id) {
-    final TrackAggregate trackAggregate = eventSourcingHandler.findById(id);
-    final boolean isActive = Optional.ofNullable(trackAggregate.getIsActive()).orElse(true);
-    if (!isActive) {
-      throw new AggregateNotFoundException("Artist not found: aggregateId=%s".formatted(id));
-    }
-    return trackAggregate;
   }
 }

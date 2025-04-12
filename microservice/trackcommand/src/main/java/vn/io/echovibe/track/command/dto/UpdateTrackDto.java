@@ -8,4 +8,5 @@ public record UpdateTrackDto(
     String refCode,
     Boolean isPublic,
     List<TagDto> tags,
-    TrackDetailDto detail) {}
+    TrackDetailDto detail,
+    List<TrackArtistDto> trackArtists) {}
