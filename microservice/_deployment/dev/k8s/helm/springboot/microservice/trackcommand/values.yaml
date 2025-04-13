@@ -35,3 +35,6 @@ client:
   artistquery:
     enabled: true
     baseUrl: https://api.echovibe.io.vn/query
+  trackquery:
+    enabled: true
+    baseUrl: https://api.echovibe.io.vn/query
