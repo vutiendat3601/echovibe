@@ -1,5 +1,7 @@
 package vn.io.echovibe.track.command.handler;
 
+import static vn.io.echovibe.track.common.constant.TrackBusinessRuleConstant.TRACK_BR_02;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -11,13 +13,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import vn.io.echovibe.artist.common.dto.ArtistDto;
 import vn.io.echovibe.client.rest.ArtistQueryClient;
+import vn.io.echovibe.client.rest.TrackQueryClient;
 import vn.io.echovibe.core.event.EventSourcingHandler;
 import vn.io.echovibe.core.exception.AggregateNotFoundException;
+import vn.io.echovibe.core.exception.BusinessRuleViolationException;
 import vn.io.echovibe.track.command.domain.TrackAggregate;
 import vn.io.echovibe.track.command.model.CreateTrackCommand;
 import vn.io.echovibe.track.command.model.DeleteTrackCommand;
 import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
 import vn.io.echovibe.track.command.model.UpdateTrackCommand;
+import vn.io.echovibe.track.common.dto.TrackDto;
 import vn.io.echovibe.track.common.model.TrackArtist;
 import vn.io.echovibe.web.dto.ResponseDto;
 
@@ -26,9 +31,11 @@ import vn.io.echovibe.web.dto.ResponseDto;
 public class TrackCommandHandler implements CommandHandler {
   private final EventSourcingHandler<TrackAggregate> eventSourcingHandler;
   private final ArtistQueryClient artistQueryClient;
+  private final TrackQueryClient trackQueryClient;
 
   @Override
   public void handle(@NonNull CreateTrackCommand createTrackCommand) {
+    validateRefCode(createTrackCommand.getRefCode());
     processTrackArtists(createTrackCommand.getTrackArtists());
     final TrackAggregate trackAggregate = new TrackAggregate(createTrackCommand);
     eventSourcingHandler.save(trackAggregate);
@@ -128,6 +135,18 @@ public class TrackCommandHandler implements CommandHandler {
                   artistDto ->
                       trackArtistsMap.get(artistDto.refCode()).setArtistId(artistDto.id()));
         }
+      }
+    }
+  }
+
+  private void validateRefCode(@NonNull String refCode) {
+    if (Objects.nonNull(refCode)) {
+      final ResponseDto<List<TrackDto>> respDto =
+          trackQueryClient.getTrackByRefCodes(refCode).getBody();
+      if (Objects.isNull(respDto) || CollectionUtils.isEmpty(respDto.data())) {
+        throw new RuntimeException("Internal Server Error");
+      } else if (Objects.nonNull(respDto.data().get(0))) {
+        throw new BusinessRuleViolationException(TRACK_BR_02);
       }
     }
   }

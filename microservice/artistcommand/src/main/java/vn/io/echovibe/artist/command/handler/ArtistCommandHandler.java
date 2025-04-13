@@ -30,16 +30,7 @@ public class ArtistCommandHandler implements CommandHandler {
 
   @Override
   public void handle(@NonNull CreateArtistCommand createArtistCommand) {
-    final String refCode = createArtistCommand.getRefCode();
-    if (Objects.nonNull(refCode)) {
-      final ResponseDto<List<ArtistDto>> respDto =
-          artistQueryClient.getArtistByRefCodes(refCode).getBody();
-      if (Objects.isNull(respDto) || CollectionUtils.isEmpty(respDto.data())) {
-        throw new RuntimeException("Internal Server Error");
-      } else if (Objects.nonNull(respDto.data().get(0))) {
-        throw new BusinessRuleViolationException(ARTIST_BR_02);
-      }
-    }
+    validateRefCode(createArtistCommand.getRefCode());
     final ArtistAggregate artistAggregate = new ArtistAggregate(createArtistCommand);
     eventSourcingHandler.save(artistAggregate);
   }
@@ -80,5 +71,17 @@ public class ArtistCommandHandler implements CommandHandler {
       throw new AggregateNotFoundException("Artist not found: aggregateId=%s".formatted(id));
     }
     return artistAggregate;
+  }
+
+  private void validateRefCode(@NonNull String refCode) {
+    if (Objects.nonNull(refCode)) {
+      final ResponseDto<List<ArtistDto>> respDto =
+          artistQueryClient.getArtistByRefCodes(refCode).getBody();
+      if (Objects.isNull(respDto) || CollectionUtils.isEmpty(respDto.data())) {
+        throw new RuntimeException("Internal Server Error");
+      } else if (Objects.nonNull(respDto.data().get(0))) {
+        throw new BusinessRuleViolationException(ARTIST_BR_02);
+      }
+    }
   }
 }
