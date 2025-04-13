@@ -49,15 +49,10 @@ export class TrackService {
 
   bulkDeleteTrack(bulkDeleteTrackDtos: BulkDto<DeleteTrackDto>): Observable<ResponseDto<BulkResult>> {
     const actionTime = new Date();
-    return this.http
-      .post<ResponseDto<BulkResult>>(`${environment.trackCommandBaseUrl}/bulk-delete`, bulkDeleteTrackDtos)
-      .pipe(
-        tap((respDto) =>
-          respDto.data.items.forEach(
-            ({ id, isSuccessful }) => id && isSuccessful && this.changedTrackIds.set(id, actionTime)
-          )
-        )
-      );
+    return this.http.post<ResponseDto<BulkResult>>(
+      `${environment.trackCommandBaseUrl}/bulk-delete`,
+      bulkDeleteTrackDtos
+    );
   }
 
   bulkReleaseTrack(bulkReleaseTrackDtos: BulkDto<ReleaseTrackDto>): Observable<ResponseDto<BulkResult>> {

@@ -206,7 +206,7 @@ export class ArtistManagementComponent implements OnInit {
       ({ id }) =>
         ({
           id
-        }) as ReleaseArtistDto
+        }) as DeleteArtistDto
     );
     this.confirmationService.confirm({
       message: $localize`:@@CONFIRM_MESSAGE_ARTIST_BULK_REQUEST_DELETE:Are you sure you want to delete the selected Artists?`,
@@ -419,6 +419,8 @@ export class ArtistManagementComponent implements OnInit {
     this.artistService.bulkDeleteArtist({ items: deleteArtistDtos }).subscribe((respDto) => {
       const { isSuccessful, errors } = respDto.data.items[0];
       if (isSuccessful) {
+        const deletedArtistIds = deleteArtistDtos.map(({ id }) => id);
+        this.artists.update((artists) => artists.filter(({ id }) => id && !deletedArtistIds.includes(id)));
         this.addMessage({
           title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
           content: $localize`:@@MESSAGE_ARTIST_BULK_REQUEST_DETELE_SUCCESSFUL:Bulk delete artist was processed successfully.`
