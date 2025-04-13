@@ -1,6 +1,7 @@
 dependencies {
   implementation(project(":web"))
   implementation(project(":artistcommon"))
+  implementation(project(":trackcommon"))
   compileOnly("org.springframework.cloud:spring-cloud-starter-openfeign")
   compileOnly("org.springframework.boot:spring-boot-starter-web")
   compileOnly("com.nimbusds:nimbus-jose-jwt")

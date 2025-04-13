@@ -25,3 +25,5 @@ app:
     client:
         artistquery:
           baseUrl: http://localhost:6110
+        trackquery:
+          baseUrl: http://localhost:6130
