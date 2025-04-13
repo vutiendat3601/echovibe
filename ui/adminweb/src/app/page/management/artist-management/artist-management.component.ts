@@ -58,7 +58,7 @@ interface Column {
   exportHeader: string | null;
 }
 
-export interface Artist {
+interface Artist {
   id: string | null;
   urn: string | null;
   name: string | null;
@@ -176,7 +176,6 @@ export class ArtistManagementComponent implements OnInit {
   readonly renderableImageUrls: string[] = [];
   readonly selectedArtists: Artist[] = [];
   readonly artists: WritableSignal<Artist[]> = signal<Artist[]>([]);
-  private fetchArtistTimeoutId: number = -1;
   isDialogFormSubmitted: boolean = false;
   isDialogShowed: boolean = false;
   action: ActionType = 'new';
@@ -192,7 +191,7 @@ export class ArtistManagementComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.listenAndProcessArtistEvent();
+    this.listenAndProcessArtistEvents();
     this.listenAndProcessFormControlValueChange();
     this.loadData();
   }
@@ -437,7 +436,7 @@ export class ArtistManagementComponent implements OnInit {
       if (isSuccessful) {
         this.addMessage({
           title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
-          content: $localize`:@@MESSAGE_ARTIST_RELEASED_SUCCESSFUL:Bulk delete Artist request was processed successfully.`
+          content: $localize`:@@MESSAGE_ARTIST_RELEASED_SUCCESSFUL:Bulk release Artist request was processed successfully.`
         });
       } else {
         const message = this.exceptionHandler.handle(errors[0]);
@@ -467,44 +466,6 @@ export class ArtistManagementComponent implements OnInit {
       this.artists.set(respDto.data.map((artistDto) => this.mapToArtist(artistDto)));
       this.isLoading.set(false);
     });
-  }
-
-  private refreshData(): void {
-    if (this.changedArtistIds.size && this.fetchArtistTimeoutId < 0) {
-      const updateArtists = () => {
-        const fetchNewArtists = this.artistService.getArtistByIds([...this.changedArtistIds]).pipe(
-          map((respDto) => {
-            const artistDtos: [ArtistDto | null] = respDto.data;
-            const updatedArtists: Artist[] = artistDtos
-              .filter((artistDto) => artistDto != null)
-              .map((artistDto) => this.mapToArtist(artistDto));
-            const updatedArtistsMap: Map<string, Artist> = new Map(
-              updatedArtists.map((updatedArtist) => [updatedArtist.id as string, updatedArtist])
-            );
-            this.artists.update((artists) => {
-              const renderedIds: string[] = [...updatedArtistsMap.keys()];
-
-              return [
-                ...updatedArtists.filter(({ id }) => id && !renderedIds.includes(id)),
-                ...artists.map((artist) => (artist.id && updatedArtistsMap.get(artist.id)) || artist)
-              ];
-            });
-            updatedArtists.forEach(({ id }) => id && this.changedArtistIds.has(id) && this.changedArtistIds.delete(id));
-            return !this.changedArtistIds.size;
-          })
-        );
-
-        this.fetchArtistTimeoutId = window.setTimeout(
-          () => {
-            fetchNewArtists.subscribe((isAllFetched) =>
-              isAllFetched ? (this.fetchArtistTimeoutId = -1) : updateArtists()
-            );
-          },
-          this.changedArtistIds.size >= 5 ? 5_000 : 1_000
-        );
-      };
-      updateArtists();
-    }
   }
 
   private listenAndProcessFormControlValueChange() {
@@ -569,29 +530,20 @@ export class ArtistManagementComponent implements OnInit {
     );
   }
 
-  private listenAndProcessArtistEvent() {
-    this.artistService.artistCreatedEvent.subscribe((newArtistId) => {
-      if (newArtistId) {
-        this.changedArtistIds.add(newArtistId);
-        this.refreshData();
-      }
-    });
-    this.artistService.artistUpdatedEvent.subscribe((id) => {
-      if (id) {
-        this.changedArtistIds.add(id);
-        this.refreshData();
-      }
-    });
-    this.artistService.artistReleasedEvent.subscribe((id) => {
-      if (id) {
-        this.changedArtistIds.add(id);
-        this.refreshData();
-      }
-    });
-    this.artistService.artistDeletedEvent.subscribe((id) => {
-      if (id) {
-        this.artists.update((artists) => artists.filter((artist) => artist.id != id));
-      }
+  private listenAndProcessArtistEvents() {
+    this.artistService.changedArtistsEvent.subscribe((artistDtos) => {
+      const updatedArtistsMap: Map<string, Artist> = new Map(
+        artistDtos.map((artistDto) => [artistDto.id, this.mapToArtist(artistDto)])
+      );
+      const renderedIds: string[] = this.artists()
+        .filter((id) => id)
+        .map(({ id }) => id) as string[];
+      this.artists.update((artists) => {
+        return [
+          ...Array.from(updatedArtistsMap.values()).filter(({ id }) => id && !renderedIds.includes(id)),
+          ...artists.map((artist) => (artist.id && updatedArtistsMap.get(artist.id)) || artist)
+        ];
+      });
     });
   }
 

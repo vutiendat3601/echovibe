@@ -404,6 +404,7 @@ export class ArtistManagementBulkComponent implements OnInit {
   }
   private bulkUpdateArtist(updateArtistDtos: UpdateArtistDto[]): void {
     this.artistService.bulkUpdateArtist({ items: updateArtistDtos }).subscribe((respDto) => {
+      this.isLoading.set(false);
       respDto.data.items.forEach(({ isSuccessful, errors, id }) => {
         if (isSuccessful) {
           this.addMessage({

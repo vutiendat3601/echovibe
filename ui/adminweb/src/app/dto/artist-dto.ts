@@ -1,7 +1,7 @@
-import { ArtistImage, ArtistProfile, ArtistRevision } from '../model/artist';
+import { ArtistImage, ArtistRevision } from '../model/artist';
 import { Tag } from '../model/tag';
 
-export interface CreateArtistProfileDto {
+export interface ArtistProfileDto {
   name: string | null;
   description: string | null;
   biography: string | null;
@@ -11,7 +11,7 @@ export interface CreateArtistProfileDto {
 }
 
 export interface CreateArtistDto {
-  profile: CreateArtistProfileDto;
+  profile: ArtistProfileDto;
   refCode: string | null;
   isPublic: boolean;
   tags: Tag[];
@@ -29,7 +29,7 @@ export interface ArtistDto {
   id: string;
   urn: string;
   refCode: string | null;
-  profile: ArtistProfile;
+  profile: ArtistProfileDto;
   isPublic: boolean;
   isReleased: boolean;
   isVerified: boolean;
@@ -48,5 +48,5 @@ export interface UpdateArtistDto {
   refCode: string | null;
   isPublic: boolean;
   tags: Tag[];
-  profile: ArtistProfile;
+  profile: ArtistProfileDto;
 }
