@@ -73,7 +73,7 @@ class TrackEventHandler:
         if track_created_event.detail.thumbnail_url is not None:
             track.images.append(
                 TrackImage(file_url=track_created_event.detail.thumbnail_url,
-                           Track_ref_code=track_created_event.ref_code,
+                           ref_code=track_created_event.ref_code,
                            type=TrackImageType.THUMBNAIL,
                            aggregate_id=track_created_event.id,
                            event_type=track_created_event.type,
