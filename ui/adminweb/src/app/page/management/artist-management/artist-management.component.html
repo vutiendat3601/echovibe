@@ -346,7 +346,7 @@
                     </ng-template>
                     <ng-template let-nationality #item>
                       <span [class]="'fi fi-' + nationality.code.toLowerCase()"></span>
-                      <span class="ml-2"> {{ nationality.code | artistNationalityName }}</span>
+                      <span class="ml-2">{{ nationality.code | artistNationalityName }}</span>
                     </ng-template>
                   </p-select>
                   <label i18n="@@FORM_LABEL_ARTIST_NATIONALITY" for="nationality">Nationality</label>

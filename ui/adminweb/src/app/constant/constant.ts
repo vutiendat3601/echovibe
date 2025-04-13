@@ -1,3 +1,6 @@
+import { DatePickerTypeView } from 'primeng/datepicker';
+import { Nationality } from '../model/nationality';
+
 export const ROLE_ADMIN: string = 'admin';
 export const ROLE_ARTIST_MANAGER: string = 'artistmanager';
 export const URL_REGEX: RegExp =
@@ -257,7 +260,7 @@ export enum ArtistNationality {
   ZW = 'Zimbabwe'
 }
 
-export const ARTIST_NATIONALITIES = Object.keys(ArtistNationality).map((key) => ({
+export const ARTIST_NATIONALITIES: Nationality[] = Object.keys(ArtistNationality).map((key) => ({
   code: key,
   name: `${ArtistNationality[key as keyof typeof ArtistNationality]}`
 }));

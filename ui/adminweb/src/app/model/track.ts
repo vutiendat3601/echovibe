@@ -2,6 +2,7 @@ export interface TrackDetail {
   name: string | null;
   description: string | null;
   thumbnailUrl: string | null;
+  officialReleasedDate: string | null;
 }
 
 export interface TrackImage {
