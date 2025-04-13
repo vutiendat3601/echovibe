@@ -42,7 +42,8 @@ def map_to_track_schema(track: Track,
     detail_schema: TrackDetailSchema = TrackDetailSchema(
         name=detail.name,
         description=detail.description,
-        thumbnail_url=detail.thumbnail_url)
+        thumbnail_url=detail.thumbnail_url,
+        official_released_date=detail.official_released_date)
     track_artists: list[TrackArtistSchema] = [
         map_to_track_artist_schema(track_artist)
         for track_artist in track.track_artists

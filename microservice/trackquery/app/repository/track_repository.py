@@ -36,7 +36,7 @@ class TrackRepository(ABC):
         """Find Track by Reference Codes"""
 
     @abstractmethod
-    def save_Track(self, Track: Track) -> Track:
+    def save_track(self, Track: Track) -> Track:
         """Save Track"""
 
     @abstractmethod

@@ -1,4 +1,5 @@
 global:
+  environment: development
   namespace: microservice
   gatewayName: microservice
   kafkaBrokerUrls: infras.echovibe.io.vn:9092

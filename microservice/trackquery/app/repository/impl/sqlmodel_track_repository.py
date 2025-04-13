@@ -92,7 +92,7 @@ class SqlmodelTrackRepository(TrackRepository):
         finally:
             session.close()
 
-    def save_Track(self, track: Track) -> Track:
+    def save_track(self, track: Track) -> Track:
         try:
             with self.session_factory() as session:
                 session.add(track)

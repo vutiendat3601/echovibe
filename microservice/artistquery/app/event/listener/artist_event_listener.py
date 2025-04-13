@@ -27,13 +27,21 @@ artist_repository: ArtistRepository = Provide[Container.artist_repository]
 
 logger: Logger = Provide[Container.logger]
 
+environement = configuration.get_environment()
+
 kafka_consumer_properties = {
-    "bootstrap_servers": kafka_broker_bootstrap_server_urls,
-    "group_id": APP_NAME,
-    "key_deserializer": lambda k: json.loads(k.decode()) if k else None,
-    "value_deserializer": lambda v: json.loads(v.decode()) if v else None,
-    "enable_auto_commit": False,
-    "request_timeout_ms": 30_000
+    "bootstrap_servers":
+        kafka_broker_bootstrap_server_urls,
+    "group_id":
+        f"{APP_NAME}{('' if environement == 'production' else '-' + environement)}",
+    "key_deserializer":
+        lambda k: json.loads(k.decode()) if k else None,
+    "value_deserializer":
+        lambda v: json.loads(v.decode()) if v else None,
+    "enable_auto_commit":
+        False,
+    "request_timeout_ms":
+        30_000
 }
 
 

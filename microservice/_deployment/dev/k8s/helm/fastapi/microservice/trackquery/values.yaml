@@ -1,5 +1,6 @@
 deployment:
   name: trackquery
+  environment: development
   containerPort: 6130
   replicaCount: 1
   image: 

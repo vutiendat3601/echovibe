@@ -1,4 +1,5 @@
-global: 
+global:
+  environment: development
   namespace: microservice
   gatewayName: microservice
   springProfilesActive: default
