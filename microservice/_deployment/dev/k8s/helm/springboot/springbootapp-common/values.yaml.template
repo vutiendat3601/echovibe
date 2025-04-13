@@ -4,6 +4,7 @@ global:
   kafkaBrokerUrls: infras.echovibe.io.vn:9092
   openIdConnectCertsUrl: https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs
   springProfilesActive: default
+  environment: development
 deployment:
   name: springbootapp
   image: 

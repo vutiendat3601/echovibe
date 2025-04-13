@@ -16,6 +16,7 @@
 
 ### Environment Variable
 #### Application
+`ENVIRONMENT`\
 `APP_HOST`\
 `APP_PORT`\
 `APP_WEB_CORS_ALLOWEDORIGINPATTERNS`\

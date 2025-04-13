@@ -84,7 +84,7 @@ class TrackEventHandler:
                            created_by=track_created_event.created_by,
                            updated_by=track_created_event.created_by))
 
-        self.track_repository.save_Track(track)
+        self.track_repository.save_track(track)
         self.logger.info(
             f"Processed {TrackCreatedEvent.__name__}: id={track_created_event.id}, version={track_created_event.version}"
         )
@@ -153,7 +153,7 @@ class TrackEventHandler:
             revision = TrackRevision(**revision_attributes)
             track.revisions.append(revision)
 
-            self.track_repository.save_Track(track)
+            self.track_repository.save_track(track)
         self.logger.info(
             f"Processed {TrackReleasedEvent.__name__}: id={track_released_event.id}, version={track_released_event.version}"
         )
@@ -213,7 +213,7 @@ class TrackEventHandler:
                     existed_track_artist.updated_at = updated_at
                     existed_track_artist.updated_by = track_updated_event.created_by
 
-            self.track_repository.save_Track(track)
+            self.track_repository.save_track(track)
         self.logger.info(
             f"Processed {TrackUpdatedEvent.__name__}: id={track_updated_event.id}, version={track_updated_event.version}, timestamp={track_updated_event.timestamp}"
         )
@@ -230,7 +230,7 @@ class TrackEventHandler:
                 track.event_version = track_deleted_event.version
                 track.event_timestamp = track_deleted_event.timestamp
                 track.updated_at = updated_at
-                self.track_repository.save_Track(track)
+                self.track_repository.save_track(track)
         else:
             self.track_repository.delete_by_aggregate_id(track_deleted_event.id)
         self.logger.info(
