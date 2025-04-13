@@ -74,7 +74,7 @@ public class TrackCommandHandler implements CommandHandler {
 
     if (!CollectionUtils.isEmpty(artistIds)) {
       final ResponseDto<List<ArtistDto>> respDto =
-          artistQueryClient.getArtistByIds(artistIds).getBody();
+          artistQueryClient.getArtistByIds(String.join(",", artistIds)).getBody();
       if (Objects.isNull(respDto) || CollectionUtils.isEmpty(respDto.data())) {
         throw new RuntimeException("Internal Server Error");
       } else {
@@ -102,7 +102,7 @@ public class TrackCommandHandler implements CommandHandler {
             .collect(Collectors.toList());
     if (!CollectionUtils.isEmpty(artistRefCodes)) {
       final ResponseDto<List<ArtistDto>> respDto =
-          artistQueryClient.getArtistByRefCodes(artistRefCodes).getBody();
+          artistQueryClient.getArtistByRefCodes(String.join(",", artistRefCodes)).getBody();
       if (Objects.isNull(respDto) || CollectionUtils.isEmpty(respDto.data())) {
         throw new RuntimeException("Internal Server Error");
       } else {

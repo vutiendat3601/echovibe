@@ -4,9 +4,9 @@ from app.repository.impl.sqlmodel_track_repository import TrackRepository
 from app.event.schema.track_event_schema import (TrackCreatedEvent,
                                                  TrackReleasedEvent,
                                                  TrackUpdatedEvent,
-                                                 TrackDeletedEvent,
-                                                 TrackVerificationSetEvent)
-from app.model.track import (Track, TrackDetail, TrackImage, TrackRevision)
+                                                 TrackDeletedEvent)
+from app.model.track import (Track, TrackDetail, TrackArtist, TrackImage,
+                             TrackRevision)
 from app.enum.track_image_type import TrackImageType
 
 
@@ -34,6 +34,18 @@ class TrackEventHandler:
             "updated_by": track_created_event.created_by
         }
         track_detail = TrackDetail(**track_detail_attributes)
+        track_artists = [
+            TrackArtist(aggregate_id=track_created_event.id,
+                        artist_aggregate_id=track_artist.artist_id,
+                        event_type=track_created_event.type,
+                        event_version=track_created_event.version,
+                        event_timestamp=track_created_event.timestamp,
+                        created_at=created_at,
+                        updated_at=created_at,
+                        created_by=track_created_event.created_by,
+                        updated_by=track_created_event.created_by)
+            for track_artist in track_created_event.track_artists
+        ]
         track_attributes = {
             **track_created_event.model_dump(), "id": None,
             "tags": [
@@ -44,6 +56,7 @@ class TrackEventHandler:
                 for tag in track_created_event.tags
             ],
             "images": [],
+            "track_artists": track_artists,
             "detail": track_detail,
             "aggregate_id": track_created_event.id,
             "event_type": track_created_event.type,
@@ -165,6 +178,7 @@ class TrackEventHandler:
             track.event_timestamp = track_updated_event.timestamp
             track.event_version = track_updated_event.version
             track.updated_at = updated_at
+            track.ref_code = track_updated_event.ref_code
             track.tags = [
                 tag.name for tag in track_updated_event.tags if tag.is_active
             ]
@@ -172,6 +186,33 @@ class TrackEventHandler:
                 tag.model_dump(by_alias=True)
                 for tag in track_updated_event.tags
             ]
+
+            for track_artist in track_updated_event.track_artists:
+                existed_track_artist: TrackArtist = next(
+                    (item for item in track.track_artists
+                     if item.artist_aggregate_id == track_artist.artist_id),
+                    None)
+                if existed_track_artist is None:
+                    track.track_artists.append(
+                        TrackArtist(
+                            aggregate_id=track_updated_event.id,
+                            artist_aggregate_id=track_artist.artist_id,
+                            event_type=track_updated_event.type,
+                            event_version=track_updated_event.version,
+                            event_timestamp=track_updated_event.timestamp,
+                            created_at=updated_at,
+                            updated_at=updated_at,
+                            created_by=track_updated_event.created_by,
+                            updated_by=track_updated_event.created_by))
+                else:
+                    existed_track_artist.is_active = track_artist.is_active
+                    existed_track_artist.is_main_artist = track_artist.is_main_artist
+                    existed_track_artist.event_type = track_updated_event.type
+                    existed_track_artist.event_version = track_updated_event.version
+                    existed_track_artist.event_timestamp = track_updated_event.timestamp
+                    existed_track_artist.updated_at = updated_at
+                    existed_track_artist.updated_by = track_updated_event.created_by
+
             self.track_repository.save_Track(track)
         self.logger.info(
             f"Processed {TrackUpdatedEvent.__name__}: id={track_updated_event.id}, version={track_updated_event.version}, timestamp={track_updated_event.timestamp}"

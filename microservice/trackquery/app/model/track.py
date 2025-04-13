@@ -19,6 +19,7 @@ class Track(SQLModel, table=True):
     tags: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
     tags_json: list[dict[str, any]] = Field([], sa_column=Column(JSONB))
     detail: Optional["TrackDetail"] = Relationship(back_populates="track")
+    track_artists: list["TrackArtist"] = Relationship(back_populates="track")
     images: list["TrackImage"] = Relationship(back_populates="track")
     revision_number: int = Field(default=-1)
     revisions: list["TrackRevision"] = Relationship(back_populates="track")
@@ -39,7 +40,7 @@ class TrackDetail(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     track_id: uuid.UUID = Field(foreign_key="track.id")
     track: Track = Relationship(back_populates="detail")
-    aggregate_id: str = Field(..., max_length=16, unique=True)
+    aggregate_id: str = Field(..., max_length=12, unique=True)
     official_released_date: str | None = Field(None, max_length=16)
     ref_code: str | None = Field(..., max_length=100, unique=True)
     name: str = Field(..., max_length=255)
@@ -47,6 +48,27 @@ class TrackDetail(SQLModel, table=True):
     thumbnail_file_key: str | None = Field(None)
     thumbnail_url: str | None = Field(None)
     is_active: bool = Field(default=True)
+    event_type: str | None = Field(None)
+    event_version: int | None = Field(None)
+    event_timestamp: datetime | None = Field(None)
+    created_at: datetime = Field(default=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default=datetime.now(timezone.utc))
+    created_by: str | None = Field(None)
+    updated_by: str | None = Field(None)
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class TrackArtist(SQLModel, table=True):
+    __tablename__ = "track_artist"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    track_id: uuid.UUID = Field(foreign_key="track.id")
+    track: Track = Relationship(back_populates="track_artists")
+    aggregate_id: str = Field(..., max_length=12, unique=True)
+    artist_aggregate_id: str = Field(..., max_length=16)
+    is_active: bool = Field(default=True)
+    is_main_artist: bool = Field(default=False)
     event_type: str | None = Field(None)
     event_version: int | None = Field(None)
     event_timestamp: datetime | None = Field(None)

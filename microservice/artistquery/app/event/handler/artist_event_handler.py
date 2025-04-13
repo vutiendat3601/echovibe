@@ -199,6 +199,7 @@ class ArtistEventHandler:
             artist.event_timestamp = artist_updated_event.timestamp
             artist.event_version = artist_updated_event.version
             artist.updated_at = updated_at
+            artist.ref_code = artist_updated_event.ref_code
             self.artist_repository.save_artist(artist)
         self.logger.info(
             f"Processed {ArtistUpdatedEvent.__name__}: id={artist_updated_event.id}, version={artist_updated_event.version}, timestamp={artist_updated_event.timestamp}"

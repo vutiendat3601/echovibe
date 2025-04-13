@@ -16,6 +16,16 @@ class TrackDetailSchema(BaseModel):
         extra = "allow"
 
 
+class TrackArtistSchema(BaseModel):
+    artist_id: str = Field(default=None, alias="artistId")
+    is_active: bool = Field(default=True, alias="isActive")
+    is_main_artist: bool = Field(default=False, alias="isMainArtist")
+
+    class Config:
+        populate_by_name = True
+        extra = "allow"
+
+
 class TrackImageSchema(BaseModel):
     url: str | None = Field(alias="url")
     type: TrackImageType = Field(alias="type")
@@ -60,6 +70,8 @@ class TrackSchema(BaseModel):
     images: list[TrackImageSchema] | None = Field(default=None, alias="images")
     revisions: list[TrackRevisionSchema] | None = Field(default=None,
                                                         alias="revisions")
+    track_artists: list[TrackArtistSchema] | None = Field(default=[],
+                                                          alias="trackArtists")
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
     created_by: str | None = Field(default=None, alias="createdBy")

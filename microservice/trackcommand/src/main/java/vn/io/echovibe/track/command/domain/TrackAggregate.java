@@ -76,6 +76,7 @@ public class TrackAggregate extends AggregateRoot {
             .detail(updatedDetail)
             .refCode(refCode)
             .isPublic(isPublic)
+            .tags(tags)
             .isReleased(false)
             .build();
 
@@ -122,13 +123,14 @@ public class TrackAggregate extends AggregateRoot {
     }
 
     // tags
-    if (!Objects.equals(updateTrackCommand.getTags(), tags)) {
+    if (!Objects.equals(updateTrackCommand.getTags(), trackUpdatedEvent.getTags())) {
       hasChange = true;
       trackUpdatedEvent.setTags(updateTrackCommand.getTags());
     }
 
     // trackArtists
-    if (!Objects.equals(updateTrackCommand.getTrackArtists(), trackArtists)) {
+    if (!Objects.equals(
+        updateTrackCommand.getTrackArtists(), trackUpdatedEvent.getTrackArtists())) {
       hasChange = true;
       trackUpdatedEvent.setTrackArtists(updateTrackCommand.getTrackArtists());
     }

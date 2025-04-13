@@ -33,7 +33,7 @@ public class ArtistCommandHandler implements CommandHandler {
     final String refCode = createArtistCommand.getRefCode();
     if (Objects.nonNull(refCode)) {
       final ResponseDto<List<ArtistDto>> respDto =
-          artistQueryClient.getArtistByRefCodes(List.of(refCode)).getBody();
+          artistQueryClient.getArtistByRefCodes(refCode).getBody();
       if (Objects.isNull(respDto) || CollectionUtils.isEmpty(respDto.data())) {
         throw new RuntimeException("Internal Server Error");
       } else if (Objects.nonNull(respDto.data().get(0))) {

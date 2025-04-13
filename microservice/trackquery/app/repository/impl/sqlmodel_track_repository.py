@@ -125,7 +125,10 @@ class SqlmodelTrackRepository(TrackRepository):
     def _build_options(self,
                        is_load_images: bool = False,
                        is_load_revisions: bool = True):
-        options = [selectinload(Track.detail)]
+        options = [
+            selectinload(Track.detail),
+            selectinload(Track.track_artists)
+        ]
         if (is_load_images):
             options.append(selectinload(Track.images))
         if (is_load_revisions):

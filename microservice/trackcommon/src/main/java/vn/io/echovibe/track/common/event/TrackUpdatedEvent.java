@@ -1,7 +1,9 @@
 package vn.io.echovibe.track.common.event;
 
+import java.util.LinkedList;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,13 +23,13 @@ public class TrackUpdatedEvent extends Event {
 
   private String refCode;
 
-  private Boolean isPublic;
+  @Builder.Default private Boolean isPublic = false;
 
-  private List<Tag> tags;
+  @Builder.Default private List<Tag> tags = new LinkedList<>();
 
-  private List<TrackArtist> trackArtists;
+  @Builder.Default private List<TrackArtist> trackArtists = new LinkedList<>();
 
-  private Boolean isReleased;
+  @Builder.Default private Boolean isReleased = false;
 
   {
     type = getClass().getSimpleName();
