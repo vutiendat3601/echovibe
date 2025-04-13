@@ -83,4 +83,16 @@ spec:
             secretKeyRef:
               name: "{{ .Values.deployment.name }}-secret"
               key: APP_WEB_CLIENT_ARTISTQUERY_BASEURL
+
+        # TrackQuery client
+        - name: APP_WEB_CLIENT_TRACKQUERY_ENABLED
+          valueFrom: 
+            secretKeyRef:
+              name: "{{ .Values.deployment.name }}-secret"
+              key: APP_WEB_CLIENT_TRACKQUERY_ENABLED
+        - name: APP_WEB_CLIENT_TRACKQUERY_BASEURL
+          valueFrom:
+            secretKeyRef:
+              name: "{{ .Values.deployment.name }}-secret"
+              key: APP_WEB_CLIENT_TRACKQUERY_BASEURL
 {{- end -}}

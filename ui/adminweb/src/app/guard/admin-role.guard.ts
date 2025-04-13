@@ -1,6 +1,13 @@
 import { EMPTY_RESOURCE_ACCESS } from './../model/resource-access';
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, GuardResult, MaybeAsync, Router, RouterStateSnapshot } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  CanActivate,
+  GuardResult,
+  MaybeAsync,
+  Router,
+  RouterStateSnapshot
+} from '@angular/router';
 import { ROLE_ADMIN } from '../constant/constant';
 import { AuthService } from '../service/auth.service';
 import { ResourceAccessClaim } from '../model/resource-access';

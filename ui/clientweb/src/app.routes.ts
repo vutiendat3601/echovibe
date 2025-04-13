@@ -7,7 +7,10 @@ export const routes: Routes = [
     // canActivate: [UserRoleGuard],
     path: '',
     component: LayoutComponent,
-    children: [{ path: 'artist', loadChildren: () => import('./app/page/artist/artist.routes') }]
+    children: [
+      { path: 'artist', loadChildren: () => import('./app/page/artist/artist.routes') },
+      { path: 'search', loadChildren: () => import('./app/page/search/search.routes') }
+    ]
   },
   { path: 'auth', loadChildren: () => import('./app/page/auth/auth.routes') },
   { path: 'not-found', component: NotFoundComponent },

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import vn.io.echovibe.web.context.JwtSecurityHolder;
 
 @Slf4j
 @Component
@@ -22,8 +23,13 @@ public class RequestInfoInterceptor implements HandlerInterceptor {
     final String path = request.getServletPath();
     final String method = request.getMethod();
     log.info(
-        "Request info: correlationId=%s, method=%s, path=%s"
-            .formatted(correlationId, method, path));
+        "Request info: correlationId=%s, method=%s, path=%s, userId=%s, username=%s"
+            .formatted(
+                correlationId,
+                method,
+                path,
+                JwtSecurityHolder.getSubject(),
+                JwtSecurityHolder.getUsername()));
     return true;
   }
 }

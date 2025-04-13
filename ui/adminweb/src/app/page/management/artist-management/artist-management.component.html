@@ -63,19 +63,20 @@
 
 <!-- List of Artists -->
 <p-table
-  #dt
+  #dataTable
   [value]="artists()"
-  [rows]="5"
+  [rows]="25"
   [columns]="columns"
   [paginator]="true"
-  [globalFilterFields]="['name', 'country.name', 'representative.name', 'status']"
+  [globalFilterFields]="['id', 'name', 'tagsString']"
   [tableStyle]="{ 'min-width': '75rem' }"
   [(selection)]="selectedArtists"
   [rowHover]="true"
   dataKey="id"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Artists"
   [showCurrentPageReport]="true"
-  [rowsPerPageOptions]="[5, 10, 50, 100]"
+  [rowsPerPageOptions]="[5, 10, 25]"
+  [loading]="isLoading()"
 >
   <ng-template #caption>
     <div class="flex items-center justify-between">
@@ -85,7 +86,7 @@
         <input
           pInputText
           type="text"
-          (input)="handleGlobalFilter(dt, $event)"
+          (input)="handleGlobalFilter(dataTable, $event)"
           i18n-placeholder="@@INPUT_PLACEHOLDER_SEARCH"
           placeholder="Search ..."
         />
@@ -198,33 +199,30 @@
           [preview]="true"
           class="rounded"
           imageClass="rounded object-cover w-20 h-20"
-          [src]="artist.profile.thumbnailUrl"
-          [alt]="artist.profile.name + '\'s thumbnail'"
+          [src]="artist.thumbnailUrl"
+          [alt]="artist.name + '\'s thumbnail'"
         />
       </td>
 
       <!-- Name -->
-      <td style="min-width: 12rem">{{ artist.profile.name }}</td>
+      <td style="min-width: 12rem">{{ artist.name }}</td>
 
       <!-- Nationality -->
       <td style="min-width: 12rem">
         <span
           [class]="
             'fi fi-' +
-            (![UNDEFINED, null].includes(artist.profile.nationalityIsoCode)
-              ? artist.profile.nationalityIsoCode
-              : 'xx'
-            ).toLowerCase()
+            (![UNDEFINED, null].includes(artist.nationalityIsoCode) ? artist.nationalityIsoCode : 'xx').toLowerCase()
           "
         ></span>
-        <span class="ml-2"> {{ artist.profile.nationalityIsoCode | artistNationalityName }}</span>
+        <span class="ml-2"> {{ artist.nationalityIsoCode | artistNationalityName }}</span>
       </td>
 
       <!-- Public -->
       <td style="min-width: 12rem">
         <p-tag
           [icon]="'pi ' + (artist.isPublic ? 'pi-check' : 'pi-times')"
-          [value]="artist.isPublic ? I18N_IS_PUBLIC_TRUE : I18N_IS_PUBLIC_FALSE"
+          [value]="artist.isPublic ? I18N.IS_PUBLIC_TRUE : I18N.IS_PUBLIC_FALSE"
           [severity]="artist.isPublic ? 'success' : 'danger'"
         />
       </td>
@@ -233,7 +231,7 @@
       <td style="min-width: 12rem">
         <p-tag
           [icon]="'pi ' + (artist.isVerified ? 'pi-check' : 'pi-times')"
-          [value]="artist.isVerified ? I18N_IS_VERIFIED_TRUE : I18N_IS_VERIFIED_FALSE"
+          [value]="artist.isVerified ? I18N.IS_VERIFIED_TRUE : I18N.IS_VERIFIED_FALSE"
           [severity]="artist.isVerified ? 'success' : 'danger'"
         />
       </td>
@@ -247,7 +245,7 @@
       <td style="min-width: 12rem">
         <p-tag
           [icon]="'pi ' + (artist.isReleased ? 'pi-check' : 'pi-times')"
-          [value]="artist.isReleased ? I18N_IS_RELEASED_TRUE : I18N_IS_RELEASED_FALSE"
+          [value]="artist.isReleased ? I18N.IS_RELEASED_TRUE : I18N.IS_RELEASED_FALSE"
           [severity]="artist.isReleased ? 'success' : 'danger'"
         />
       </td>
@@ -258,10 +256,10 @@
       </td>
 
       <!-- Description -->
-      <td style="min-width: 20rem">{{ artist.profile.description }}</td>
+      <td style="min-width: 20rem">{{ artist.description }}</td>
 
       <!-- Biography -->
-      <td style="min-width: 32rem" [innerHTML]="artist.profile.biography | safeHtmlPipe"></td>
+      <td style="min-width: 32rem" [innerHTML]="artist.biography | safeHtmlPipe"></td>
 
       <!-- Tag -->
       <td style="min-width: 16rem">
@@ -278,8 +276,8 @@
           [preview]="true"
           styleClass="rounded object-cover h-20"
           class="rounded"
-          [src]="artist.profile.backgroundUrl"
-          [alt]="artist.profile.name + '\'s background.'"
+          [src]="artist.backgroundUrl"
+          [alt]="artist.name + '\'s background.'"
         />
       </td>
     </tr>
@@ -348,7 +346,7 @@
                     </ng-template>
                     <ng-template let-nationality #item>
                       <span [class]="'fi fi-' + nationality.code.toLowerCase()"></span>
-                      <span class="ml-2"> {{ nationality.code | artistNationalityName }}</span>
+                      <span class="ml-2">{{ nationality.code | artistNationalityName }}</span>
                     </ng-template>
                   </p-select>
                   <label i18n="@@FORM_LABEL_ARTIST_NATIONALITY" for="nationality">Nationality</label>
@@ -445,7 +443,7 @@
           <!-- Tag -->
           <p-multiselect
             class="flex-1"
-            [options]="this.currentArtistAttribute.tags"
+            [options]="currentArtist.tags"
             formControlName="tagsFormControl"
             i18n-placeholder="@@FORM_LABEL_ARTIST_TAG_EDIT"
             placeholder="Edit tags"
@@ -455,20 +453,20 @@
             display="chip"
             i18n-emptyFilterMessage="@@MESSAGE_NO_RESULT_FOUND"
             emptyFilterMessage="No results found."
-            [filterValue]="currentArtistAttribute.tagFilterKeyword || ''"
+            [filterValue]="currentArtist.tagFilterKeyword"
             (onFilter)="handleTagFilter($event)"
           >
             <ng-template #header>
               <div class="font-medium px-3 py-2">Tag</div>
             </ng-template>
             <ng-template #footer>
-              @if (!currentArtistAttribute.tagFilterFoundExactMatch) {
+              @if (!currentArtist.tagFilterFoundExactMatch) {
                 <div [style]="{ padding: 'var(--p-multiselect-list-padding)' }">
                   <p-button severity="secondary" text size="small" styleClass="w-full" (onClick)="handleCreateTag()">
                     <i class="pi pi-plus"></i>
                     <span>
                       Add tag
-                      <span>'{{ currentArtistAttribute.tagFilterKeyword }}'</span>
+                      <span>'{{ currentArtist.tagFilterKeyword }}'</span>
                     </span>
                   </p-button>
                 </div>
@@ -503,7 +501,7 @@
         @if (renderableImageUrls.includes(thumbnailUrlFormControl.value)) {
           <div>
             <p-image
-              styleClass="w-ful"
+              styleClass="w-full"
               [src]="backgroundUrlFormControl.value"
               imageClass="block m-auto w-full h-full object-cover rounded"
               [preview]="true"
@@ -540,6 +538,7 @@
           label="Cancel"
           icon="pi pi-times"
           text
+          severity="danger"
           (click)="handleHideArtistDialog()"
         />
         <p-button
@@ -548,6 +547,7 @@
           i18n-label="@@BUTTON_LABEL_SAVE"
           label="Save"
           icon="pi pi-check"
+          severity="success"
         />
       </div>
     </ng-template>

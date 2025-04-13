@@ -1,7 +1,7 @@
 {
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.compile.nullAnalysis.mode": "automatic",
-  "java.jdt.ls.java.home": "~/Library/Java/JavaVirtualMachines/corretto-21.0.5/Contents/Home",
+  "java.jdt.ls.java.home": "/Users/vutiendat3601/.sdkman/candidates/java/current",
   "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx2G -Xms100m -Xlog:disable",
   "[python]": {
     "editor.defaultFormatter": "eeyore.yapf",
@@ -10,7 +10,7 @@
   },
   "yapf.args": [
     "--style",
-    "./product/.style.yapf"
+    "./.style.yapf"
   ],
   "editor.autoIndent": "none"
 }

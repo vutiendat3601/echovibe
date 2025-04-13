@@ -7,4 +7,10 @@ public interface TrackBusinessRuleConstant {
       new BusinessRule(
           "BR-TRACK-01",
           "The track cannot be released again once it has been successfully released.");
+  BusinessRule TRACK_BR_02 =
+      new BusinessRule("BR-TRACK-02", "Each track has a unique reference code.");
+  BusinessRule TRACK_BR_03 =
+      new BusinessRule(
+          "BR-TRACK-03",
+          "The 'refCode' cannot be changed once it has been released at least once.");
 }

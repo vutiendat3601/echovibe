@@ -4,7 +4,6 @@ import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { PopoverModule } from 'primeng/popover';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -15,11 +14,14 @@ import { EditorModule } from 'primeng/editor';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ImageModule } from 'primeng/image';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelectFilterEvent, MultiSelectModule } from 'primeng/multiselect';
 import { PanelModule } from 'primeng/panel';
+import { PopoverModule } from 'primeng/popover';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { RatingModule } from 'primeng/rating';
 import { RippleModule } from 'primeng/ripple';
@@ -32,8 +34,6 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { map } from 'rxjs';
 import { ARTIST_NATIONALITIES, UNDEFINED, URL_REGEX } from '../../../constant/constant';
 import { ResponseDto } from '../../../dto/response-dto';
-import { ArtistMapper } from '../../../mapper/artist-mapper';
-import { Artist } from '../../../model/artist';
 import { CommandResult } from '../../../model/command-result';
 import { Tag } from '../../../model/tag';
 import { ArtistNationalityNamePipe } from '../../../pipe/artist-nationality.pipe';
@@ -49,26 +49,36 @@ import {
 } from './../../../dto/artist-dto';
 import { ExceptionHandler, Message } from './../../../exception/exception-handler';
 import { Nationality } from './../../../model/nationality';
-import { InputGroupModule } from 'primeng/inputgroup';
-import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 
 type ActionType = 'new' | 'edit';
 
 interface Column {
   field: string;
   header: string;
-  customExportHeader?: string;
+  exportHeader: string | null;
 }
 
-interface ExportColumn {
-  title: string;
-  dataKey: string;
-}
-
-interface ArtistAttribute {
+interface Artist {
   id: string | null;
+  urn: string | null;
+  name: string | null;
+  isPublic: boolean;
+  description: string | null;
+  biography: string | null;
+  nationalityIsoCode: string | null;
+  thumbnailUrl: string | null;
+  backgroundUrl: string | null;
+  revisionNumber: number;
+  isReleased: boolean;
+  isVerified: boolean;
+  refCode: string | null;
   tags: Tag[];
-  tagFilterKeyword: string | null;
+  tagsString?: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+  createdBy: string | null;
+  updatedBy: string | null;
+  tagFilterKeyword: string;
   tagFilterFoundExactMatch: boolean;
 }
 
@@ -117,15 +127,29 @@ interface ArtistAttribute {
   providers: [MessageService, ArtistService, ConfirmationService, UrlValidator]
 })
 export class ArtistManagementComponent implements OnInit {
+  readonly I18N = {
+    IS_PUBLIC_TRUE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES:Yes`,
+    IS_PUBLIC_FALSE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO:No`,
+    IS_VERIFIED_TRUE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_YES:Yes`,
+    IS_VERIFIED_FALSE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_NO:No`,
+    IS_RELEASED_TRUE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_YES:Yes`,
+    IS_RELEASED_FALSE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_NO:No`
+  };
   readonly UNDEFINED = UNDEFINED;
-  readonly I18N_IS_PUBLIC_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES:Yes`;
-  readonly I18N_IS_PUBLIC_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO:No`;
-  readonly I18N_IS_VERIFIED_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_YES:Yes`;
-  readonly I18N_IS_VERIFIED_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_VERIFIED_NO:No`;
-  readonly I18N_IS_RELEASED_TRUE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_YES:Yes`;
-  readonly I18N_IS_RELEASED_FALSE: string = $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_NO:No`;
+  readonly columns: Column[] = [
+    {
+      field: 'id',
+      header: 'ID',
+      exportHeader: 'ID'
+    },
+    {
+      field: 'name',
+      header: $localize`:@@COLUMN_LABEL_MANAGE_ARTIST_NAME:Name`,
+      exportHeader: null
+    }
+  ];
   private readonly changedArtistIds: Set<string> = new Set();
-  currentArtistAttribute: ArtistAttribute = this.emptyArtistAttribute();
+  currentArtist: Artist = this.emptyArtist();
   readonly artistNationalities: Nationality[] = ARTIST_NATIONALITIES;
   readonly nameFormControl: FormControl = new FormControl<string>('', [Validators.required, Validators.maxLength(250)]);
   readonly descriptionFormControl: FormControl = new FormControl<string>('');
@@ -152,24 +176,22 @@ export class ArtistManagementComponent implements OnInit {
   readonly renderableImageUrls: string[] = [];
   readonly selectedArtists: Artist[] = [];
   readonly artists: WritableSignal<Artist[]> = signal<Artist[]>([]);
-  private fetchArtistTimeoutId: number = -1;
   isDialogFormSubmitted: boolean = false;
   isDialogShowed: boolean = false;
   action: ActionType = 'new';
-  readonly columns: Column[] = [];
+  readonly isLoading = signal<boolean>(true);
 
   constructor(
     private readonly messageService: MessageService,
     private readonly confirmationService: ConfirmationService,
     private readonly artistService: ArtistService,
     private readonly http: HttpClient,
-    private readonly artistMapper: ArtistMapper,
     private readonly exceptionHandler: ExceptionHandler,
     private readonly router: Router
   ) {}
 
   ngOnInit(): void {
-    this.listenAndProcessArtistEvent();
+    this.listenAndProcessArtistEvents();
     this.listenAndProcessFormControlValueChange();
     this.loadData();
   }
@@ -180,9 +202,12 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   handleDeleteSelectedArtists(): void {
-    const deleteArtistDtos: DeleteArtistDto[] = this.selectedArtists.map(({ id }) => ({
-      id
-    }));
+    const deleteArtistDtos: DeleteArtistDto[] = this.selectedArtists.map(
+      ({ id }) =>
+        ({
+          id
+        }) as DeleteArtistDto
+    );
     this.confirmationService.confirm({
       message: $localize`:@@CONFIRM_MESSAGE_ARTIST_BULK_REQUEST_DELETE:Are you sure you want to delete the selected Artists?`,
       header: $localize`:@@DIALOG_LABEL_CONFIRM_DELETE:Confirm delete`,
@@ -192,9 +217,12 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   handleReleaseSelectedArtists(): void {
-    const releaseArtistDtos: ReleaseArtistDto[] = this.selectedArtists.map(({ id }) => ({
-      id
-    }));
+    const releaseArtistDtos: ReleaseArtistDto[] = this.selectedArtists.map(
+      ({ id }) =>
+        ({
+          id
+        }) as ReleaseArtistDto
+    );
     this.confirmationService.confirm({
       message: $localize`:@@CONFIRM_MESSAGE_ARTIST_BULK_REQUEST_RELEASE:Are you sure you want to release the selected Artists?`,
       header: $localize`:@@DIALOG_LABEL_CONFIRM_RELEASE:Confirm release`,
@@ -223,7 +251,7 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   handleNewArtist(): void {
-    this.currentArtistAttribute = this.emptyArtistAttribute();
+    this.currentArtist = this.emptyArtist();
     this.refCodeFormControl.enable();
     if (this.action === 'edit' || this.isDialogFormSubmitted) {
       // These two cases: [The action is edit before, the Artist (create, edit) was saved]
@@ -234,13 +262,9 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   handleEditArtist(artist: Artist): void {
-    const {
-      id,
-      profile: { name, description, biography, thumbnailUrl, backgroundUrl, nationalityIsoCode },
-      refCode,
-      isPublic,
-      tags
-    } = artist;
+    this.currentArtist = artist;
+    const { name, description, biography, thumbnailUrl, backgroundUrl, nationalityIsoCode, refCode, isPublic, tags } =
+      this.currentArtist;
     this.nameFormControl.setValue(name);
     this.descriptionFormControl.setValue(description);
     this.biographyFormControl.setValue(biography);
@@ -249,10 +273,8 @@ export class ArtistManagementComponent implements OnInit {
     this.thumbnailUrlFormControl.setValue(thumbnailUrl);
     this.refCodeFormControl.setValue(refCode);
     this.isPublicFormControl.setValue(isPublic);
-    artist.revisionNumber > -1 && this.refCodeFormControl.disable();
     this.tagsFormControl.setValue(tags.filter(({ isActive }) => isActive).map(({ name }) => name));
-    this.currentArtistAttribute = { id, tags, tagFilterFoundExactMatch: true, tagFilterKeyword: null };
-
+    artist.revisionNumber > -1 && this.refCodeFormControl.disable();
     this.openArtistDialog('edit');
   }
 
@@ -260,33 +282,33 @@ export class ArtistManagementComponent implements OnInit {
     if (this.action === 'new') {
       const createArtistDto: CreateArtistDto = {
         profile: {
-          name: this.nameFormControl.value,
-          description: this.descriptionFormControl.value,
-          biography: this.biographyFormControl.value,
-          nationalityIsoCode: this.nationalityIsoCodeFormControl.value || null,
-          thumbnailUrl: this.thumbnailUrlFormControl.value || null,
-          backgroundUrl: this.backgroundUrlFormControl.value || null
+          name: this.currentArtist.name,
+          description: this.currentArtist.description,
+          biography: this.currentArtist.biography,
+          nationalityIsoCode: this.currentArtist.nationalityIsoCode,
+          thumbnailUrl: this.currentArtist.thumbnailUrl,
+          backgroundUrl: this.currentArtist.backgroundUrl
         },
-        refCode: this.refCodeFormControl.value,
-        isPublic: this.isPublicFormControl.value,
-        tags: this.currentArtistAttribute.tags
+        refCode: this.currentArtist.refCode,
+        isPublic: this.currentArtist.isPublic,
+        tags: this.currentArtist.tags
       };
       this.createArtist(createArtistDto);
     } else if (this.action === 'edit') {
-      if (this.currentArtistAttribute.id) {
+      if (this.currentArtist.id) {
         const updateArtistDto: UpdateArtistDto = {
-          id: this.currentArtistAttribute.id,
+          id: this.currentArtist.id,
           profile: {
-            name: this.nameFormControl.value,
-            description: this.descriptionFormControl.value,
-            biography: this.biographyFormControl.value,
-            nationalityIsoCode: this.nationalityIsoCodeFormControl.value || this.UNDEFINED,
-            thumbnailUrl: this.thumbnailUrlFormControl.value,
-            backgroundUrl: this.backgroundUrlFormControl.value
+            name: this.currentArtist.name,
+            description: this.currentArtist.description,
+            biography: this.currentArtist.biography,
+            nationalityIsoCode: this.currentArtist.nationalityIsoCode,
+            thumbnailUrl: this.currentArtist.thumbnailUrl,
+            backgroundUrl: this.currentArtist.backgroundUrl
           },
-          refCode: this.refCodeFormControl.value,
-          isPublic: this.isPublicFormControl.value,
-          tags: this.currentArtistAttribute.tags
+          refCode: this.currentArtist.refCode,
+          isPublic: this.currentArtist.isPublic,
+          tags: this.currentArtist.tags
         };
         this.updateArtist(updateArtistDto);
       }
@@ -312,24 +334,24 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   handleTagFilter(event: MultiSelectFilterEvent) {
-    const tags = this.currentArtistAttribute.tags;
+    const tags = this.currentArtist.tags;
     const tagName = event.filter;
-    this.currentArtistAttribute.tagFilterKeyword = tagName;
+    this.currentArtist.tagFilterKeyword = tagName;
     if (tagName?.trim()) {
-      this.currentArtistAttribute.tagFilterFoundExactMatch = tags.some(({ name }) => name === tagName);
+      this.currentArtist.tagFilterFoundExactMatch = tags.some(({ name }) => name === tagName);
     } else {
-      this.currentArtistAttribute.tagFilterFoundExactMatch = true;
+      this.currentArtist.tagFilterFoundExactMatch = true;
     }
   }
 
   handleCreateTag(): void {
-    if (this.currentArtistAttribute.tagFilterKeyword?.trim()) {
-      const tagName: string | null = this.currentArtistAttribute.tagFilterKeyword;
-      const tags = this.currentArtistAttribute.tags;
+    if (this.currentArtist.tagFilterKeyword?.trim()) {
+      const tagName: string = this.currentArtist.tagFilterKeyword;
+      const tags = this.currentArtist.tags;
       if (!tags.some(({ name }) => name === tagName)) {
-        this.currentArtistAttribute.tags.push({ name: tagName, isActive: false });
-        this.currentArtistAttribute.tagFilterKeyword = null;
-        this.currentArtistAttribute.tagFilterFoundExactMatch = true;
+        this.currentArtist.tags.push({ name: tagName, isActive: false });
+        this.currentArtist.tagFilterKeyword = '';
+        this.currentArtist.tagFilterFoundExactMatch = true;
       }
     }
   }
@@ -397,6 +419,8 @@ export class ArtistManagementComponent implements OnInit {
     this.artistService.bulkDeleteArtist({ items: deleteArtistDtos }).subscribe((respDto) => {
       const { isSuccessful, errors } = respDto.data.items[0];
       if (isSuccessful) {
+        const deletedArtistIds = deleteArtistDtos.map(({ id }) => id);
+        this.artists.update((artists) => artists.filter(({ id }) => id && !deletedArtistIds.includes(id)));
         this.addMessage({
           title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
           content: $localize`:@@MESSAGE_ARTIST_BULK_REQUEST_DETELE_SUCCESSFUL:Bulk delete artist was processed successfully.`
@@ -414,7 +438,7 @@ export class ArtistManagementComponent implements OnInit {
       if (isSuccessful) {
         this.addMessage({
           title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
-          content: $localize`:@@MESSAGE_ARTIST_RELEASED_SUCCESSFUL:Bulk delete Artist request was processed successfully.`
+          content: $localize`:@@MESSAGE_ARTIST_RELEASED_SUCCESSFUL:Bulk release Artist request was processed successfully.`
         });
       } else {
         const message = this.exceptionHandler.handle(errors[0]);
@@ -439,89 +463,89 @@ export class ArtistManagementComponent implements OnInit {
   }
 
   private loadData() {
-    this.artistService.getMockArtists().subscribe((respDto: ResponseDto<[ArtistDto | null]>) => {
-      this.artists.set(respDto.data.filter((artistDto) => artistDto != null).map(this.artistMapper.mapToArtist));
+    this.isLoading.set(true);
+    this.artistService.getAllArtists().subscribe((respDto: ResponseDto<[ArtistDto]>) => {
+      this.artists.set(respDto.data.map((artistDto) => this.mapToArtist(artistDto)));
+      this.isLoading.set(false);
     });
   }
 
-  private refreshData(): void {
-    if (this.changedArtistIds.size && this.fetchArtistTimeoutId < 0) {
-      const updateArtists = () => {
-        const fetchNewArtists = this.artistService.getArtistByIds([...this.changedArtistIds]).pipe(
-          map((respDto) => {
-            const artistDtos: [ArtistDto | null] = respDto.data;
-            const updatedArtists: Artist[] = artistDtos
-              .filter((artistDto) => artistDto != null)
-              .map(this.artistMapper.mapToArtist);
-            const updatedArtistsMap: Map<string, Artist> = new Map(
-              updatedArtists.map((updatedArtist) => [updatedArtist.id, updatedArtist])
-            );
-            this.artists.update((artists) => {
-              const renderedIds: string[] = [...updatedArtistsMap.keys()];
-
-              return [
-                ...updatedArtists.filter(({ id }) => !renderedIds.includes(id)),
-                ...artists.map((artist) => updatedArtistsMap.get(artist.id) || artist)
-              ];
-            });
-            updatedArtists.forEach(({ id }) => this.changedArtistIds.has(id) && this.changedArtistIds.delete(id));
-            return !this.changedArtistIds.size;
-          })
-        );
-
-        this.fetchArtistTimeoutId = window.setTimeout(
-          () => {
-            fetchNewArtists.subscribe((isAllFetched) =>
-              isAllFetched ? (this.fetchArtistTimeoutId = -1) : updateArtists()
-            );
-          },
-          this.changedArtistIds.size >= 5 ? 5_000 : 1_000
-        );
-      };
-      updateArtists();
-    }
-  }
-
   private listenAndProcessFormControlValueChange() {
+    // Name
+    this.nameFormControl.valueChanges.subscribe(
+      (value: string) => !this.nameFormControl.errors && (this.currentArtist.name = value)
+    );
+
+    // Description
+    this.descriptionFormControl.valueChanges.subscribe(
+      (value: string) => !this.descriptionFormControl.errors && (this.currentArtist.description = value)
+    );
+
+    // Biography
+    this.biographyFormControl.valueChanges.subscribe(
+      (value: string) => !this.biographyFormControl.errors && (this.currentArtist.biography = value)
+    );
+
+    // Nationality
+    this.nationalityIsoCodeFormControl.valueChanges.subscribe(
+      (value: string | null) =>
+        !this.nationalityIsoCodeFormControl.errors && (this.currentArtist.nationalityIsoCode = value)
+    );
+
+    // Public
+    this.isPublicFormControl.valueChanges.subscribe(
+      (value: boolean) => !this.isPublicFormControl.errors && (this.currentArtist.isPublic = value)
+    );
+
+    // Verified
+    this.isVerifiedFormControl.valueChanges.subscribe(
+      (value: boolean) => !this.isVerifiedFormControl.errors && (this.currentArtist.isVerified = value)
+    );
+
+    // RefCode
+    this.refCodeFormControl.valueChanges.subscribe(
+      (value: string | null) => !this.refCodeFormControl.errors && (this.currentArtist.refCode = value)
+    );
+
+    // ThumbnailUrl
     this.thumbnailUrlFormControl.valueChanges.subscribe(
-      (value: string) => !this.thumbnailUrlFormControl.errors && this.processImagePreview(value)
+      (value: string) =>
+        !this.thumbnailUrlFormControl.errors &&
+        ((this.currentArtist.thumbnailUrl = value), this.processImagePreview(value))
     );
+
+    // BackgroundUrl
     this.backgroundUrlFormControl.valueChanges.subscribe(
-      (value: string) => !this.backgroundUrlFormControl.errors && this.processImagePreview(value)
+      (value: string) =>
+        !this.backgroundUrlFormControl.errors &&
+        ((this.currentArtist.backgroundUrl = value), this.processImagePreview(value))
     );
+
+    // Tags
     this.tagsFormControl.valueChanges.subscribe(
       (values: string[]) =>
-        !this.backgroundUrlFormControl.errors &&
-        (this.currentArtistAttribute.tags = this.currentArtistAttribute.tags.map((tag) => ({
+        !this.tagsFormControl.errors &&
+        (this.currentArtist.tags = this.currentArtist.tags.map((tag) => ({
           ...tag,
           isActive: values.includes(tag.name)
         })))
     );
   }
 
-  private listenAndProcessArtistEvent() {
-    this.artistService.artistCreatedEvent.subscribe((newArtistId) => {
-      if (newArtistId) {
-        this.changedArtistIds.add(newArtistId);
-        this.refreshData();
-      }
-    });
-    this.artistService.artistUpdatedEvent.subscribe((id) => {
-      if (id) {
-        this.changedArtistIds.add(id);
-        this.refreshData();
-      }
-    });
-    this.artistService.artistReleasedEvent.subscribe((id) => {
-      if (id) {
-        this.changedArtistIds.add(id);
-        this.refreshData();
-      }
-    });
-    this.artistService.artistDeletedEvent.subscribe((id) => {
-      if (id) {
-        this.artists.update((artists) => artists.filter((artist) => artist.id != id));
-      }
+  private listenAndProcessArtistEvents() {
+    this.artistService.changedArtistsEvent.subscribe((artistDtos) => {
+      const updatedArtistsMap: Map<string, Artist> = new Map(
+        artistDtos.map((artistDto) => [artistDto.id, this.mapToArtist(artistDto)])
+      );
+      const renderedIds: string[] = this.artists()
+        .filter((id) => id)
+        .map(({ id }) => id) as string[];
+      this.artists.update((artists) => {
+        return [
+          ...Array.from(updatedArtistsMap.values()).filter(({ id }) => id && !renderedIds.includes(id)),
+          ...artists.map((artist) => (artist.id && updatedArtistsMap.get(artist.id)) || artist)
+        ];
+      });
     });
   }
 
@@ -546,11 +570,68 @@ export class ArtistManagementComponent implements OnInit {
     }
   }
 
-  private emptyArtistAttribute(): ArtistAttribute {
+  private emptyArtist(): Artist {
     return {
       id: null,
+      urn: null,
+      name: null,
+      isPublic: false,
+      description: null,
+      biography: null,
+      nationalityIsoCode: null,
+      thumbnailUrl: null,
+      backgroundUrl: null,
+      revisionNumber: -1,
+      isReleased: false,
+      isVerified: false,
+      refCode: null,
+      createdAt: null,
+      updatedAt: null,
+      createdBy: null,
+      updatedBy: null,
       tags: [],
-      tagFilterKeyword: null,
+      tagFilterKeyword: '',
+      tagFilterFoundExactMatch: true
+    };
+  }
+
+  private mapToArtist(artistDto: ArtistDto): Artist {
+    const {
+      id,
+      urn,
+      isPublic,
+      revisionNumber,
+      isReleased,
+      isVerified,
+      refCode,
+      tags,
+      createdAt,
+      updatedAt,
+      createdBy,
+      updatedBy,
+      profile: { name, description, biography, nationalityIsoCode, thumbnailUrl, backgroundUrl }
+    } = artistDto;
+    return {
+      id,
+      urn,
+      isPublic,
+      revisionNumber,
+      isReleased,
+      name,
+      description,
+      biography,
+      nationalityIsoCode,
+      thumbnailUrl,
+      backgroundUrl,
+      isVerified,
+      refCode,
+      tags,
+      tagsString: tags.map(({ name }) => name).join(', '),
+      createdAt,
+      updatedAt,
+      createdBy,
+      updatedBy,
+      tagFilterKeyword: '',
       tagFilterFoundExactMatch: true
     };
   }

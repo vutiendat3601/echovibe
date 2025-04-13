@@ -24,8 +24,8 @@ def search(keyword: str,
     if SearchType.ARTIST in types:
         artist_detail_schemas = search_service.search_artist(
             keyword, page, size)
-    artist_search_result = SearchResult(items=artist_detail_schemas)
+    search_artist_result = SearchResult(items=artist_detail_schemas)
     search_schema: SearchSchema = SearchSchema(keyword=keyword,
-                                               artist=artist_search_result)
+                                               artist=search_artist_result)
     response_scheme = ok(data=search_schema)
     return JSONResponse(content=jsonable_encoder(response_scheme))

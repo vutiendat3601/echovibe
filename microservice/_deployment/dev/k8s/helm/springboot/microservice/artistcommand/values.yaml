@@ -14,6 +14,11 @@ deployment:
     hostname: api.echovibe.io.vn
     exposePathPrefix: /command/v1/artists
     replacePrefixMatch: /v1/artists
+    upstreamSettingsPolicy:
+      keepAlive:
+        connections: 32
+        time: "5s"
+        timeout: "5s"
 openidconnect:
   enabled: true
 kafka:
@@ -29,4 +34,7 @@ datasource:
 client:
   artistquery:
     enabled: true
+    baseUrl: https://api.echovibe.io.vn/query
+  trackquery:
+    enabled: false
     baseUrl: https://api.echovibe.io.vn/query

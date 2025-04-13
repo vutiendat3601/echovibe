@@ -1,6 +1,8 @@
 name: Containerize Spring Boot App and push to Docker Hub
 on:
   pull_request:
+    paths:
+      - "microservice/**"
     branches:
       - develop
     types:

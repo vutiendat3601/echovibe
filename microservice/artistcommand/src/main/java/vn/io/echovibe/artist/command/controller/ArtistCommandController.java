@@ -49,7 +49,16 @@ public class ArtistCommandController {
         bulkCreateArtistDtos.items().stream()
             .map(
                 cad -> {
-                  final ArtistProfileDto createArtistProfileDto = cad.profile();
+                  final ArtistProfileDto artistProfileDto = cad.profile();
+                  final ArtistProfile profile =
+                      ArtistProfile.builder()
+                          .name(artistProfileDto.name())
+                          .biography(artistProfileDto.biography())
+                          .description(artistProfileDto.description())
+                          .thumbnailUrl(artistProfileDto.thumbnailUrl())
+                          .backgroundUrl(artistProfileDto.backgroundUrl())
+                          .nationalityIsoCode(artistProfileDto.nationalityIsoCode())
+                          .build();
                   return CreateArtistCommand.builder()
                       .id(IdentityUtils.generateAggregateId())
                       .refCode(cad.refCode())
@@ -58,15 +67,7 @@ public class ArtistCommandController {
                           cad.tags().stream()
                               .map(tagDto -> new Tag(tagDto.name(), tagDto.isActive()))
                               .collect(Collectors.toList()))
-                      .profile(
-                          ArtistProfile.builder()
-                              .name(createArtistProfileDto.name())
-                              .biography(createArtistProfileDto.biography())
-                              .description(createArtistProfileDto.description())
-                              .thumbnailUrl(createArtistProfileDto.thumbnailUrl())
-                              .backgroundUrl(createArtistProfileDto.backgroundUrl())
-                              .nationalityIsoCode(createArtistProfileDto.nationalityIsoCode())
-                              .build())
+                      .profile(profile)
                       .build();
                 })
             .collect(Collectors.toList());
@@ -135,16 +136,16 @@ public class ArtistCommandController {
   @PostMapping("bulk-set-verification")
   public ResponseEntity<ResponseDto<BulkResult>> bulkSetArtistVerification(
       @Valid @RequestBody BulkDto<SetArtistVisibilityDto> bulkSetArtistVisibilityDtos) {
-    final List<SetArtistVerificationCommand> setArtistVisibilityCommands =
+    final List<SetArtistVerificationCommand> setArtistVerificationCommands =
         bulkSetArtistVisibilityDtos.items().stream()
             .map(
                 sav ->
                     SetArtistVerificationCommand.builder()
                         .id(sav.id())
-                        .isPublic(sav.isPublic())
+                        .isVerified(sav.isVerified())
                         .build())
             .collect(Collectors.toList());
-    final BulkResult bulkResult = commandDispatcher.send(setArtistVisibilityCommands);
+    final BulkResult bulkResult = commandDispatcher.send(setArtistVerificationCommands);
     return ResponseEntity.ok(ResponseDto.ok(REQUEST_PROCESSED_SUCCESS, bulkResult));
   }
 }

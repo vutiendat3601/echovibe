@@ -4,6 +4,7 @@ global:
   kafkaBrokerUrls: infras.echovibe.io.vn:9092
   openIdConnectCertsUrl: https://auth.echovibe.io.vn/realms/echovibe/protocol/openid-connect/certs
   springProfilesActive: default
+  environment: development
 deployment:
   name: springbootapp
   image: 
@@ -20,6 +21,11 @@ deployment:
     hostname: api.echovibe.io.vn
     exposePathPrefix: /command/v1/artists
     replacePrefixMatch: /v1/artists
+    upstreamSettingsPolicy:
+      keepAlive:
+        connections: 32
+        time: "5s"
+        timeout: "5s"
 kafka:
   enabled: false
 openidconnect:
@@ -34,5 +40,8 @@ datasource:
   password:
 client:
   artistquery:
+    enabled: true
+    baseUrl: https://api.echovibe.io.vn/query
+  trackquery:
     enabled: true
     baseUrl: https://api.echovibe.io.vn/query

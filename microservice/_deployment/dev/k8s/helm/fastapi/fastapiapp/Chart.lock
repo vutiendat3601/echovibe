@@ -5,8 +5,11 @@ dependencies:
 - name: artistquery
   repository: file://../microservice/artistquery
   version: 1.0.0
+- name: trackquery
+  repository: file://../microservice/trackquery
+  version: 1.0.0
 - name: product
   repository: file://../microservice/product
   version: 1.0.0
-digest: sha256:b884b87f73482db83f220ad4e5847e2debe203e54457b62aafedf797ae155697
-generated: "2025-03-10T17:58:52.949068+07:00"
+digest: sha256:9cada8e9b88269e78becff67f905e7a651ddd6c7b5c1337a3d708cb02cd6caa5
+generated: "2025-04-12T13:47:20.285189+07:00"

@@ -17,4 +17,8 @@ public class TrackDeletedEvent extends Event {
   @Builder.Default private Boolean isActive = false;
 
   @Builder.Default private Boolean isSoftDeleted = true;
+
+  {
+    type = getClass().getSimpleName();
+  }
 }

@@ -1,0 +1,6 @@
+dependencies:
+- name: fastapiapp-common
+  repository: file://../../fastapiapp-common
+  version: 1.0.0
+digest: sha256:97e45b960ca1155a391ceacdfb77894cfba52e4293b59f77cb200209e8d7ffc6
+generated: "2025-04-12T13:48:01.759191+07:00"

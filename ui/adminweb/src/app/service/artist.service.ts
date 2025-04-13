@@ -11,73 +11,59 @@ import { ResponseDto } from './../dto/response-dto';
   providedIn: 'root'
 })
 export class ArtistService {
-  private readonly artistCreatedSubject = new BehaviorSubject<string | null>(null);
-  private readonly artistUpdatedSubject = new BehaviorSubject<string | null>(null);
-  private readonly artistReleasedSubject = new BehaviorSubject<string | null>(null);
-  private readonly artistDeletedSubject = new BehaviorSubject<string | null>(null);
+  private readonly changedArtistsSubject = new BehaviorSubject<ArtistDto[]>([]);
+  private readonly changedArtistIds: Map<string, Date> = new Map();
 
-  constructor(private readonly http: HttpClient) {}
-
-  get artistCreatedEvent(): Observable<string | null> {
-    return this.artistCreatedSubject;
+  constructor(private readonly http: HttpClient) {
+    this.refreshDataInterval(3_000);
   }
 
-  get artistUpdatedEvent(): Observable<string | null> {
-    return this.artistUpdatedSubject;
-  }
-
-  get artistReleasedEvent(): Observable<string | null> {
-    return this.artistReleasedSubject;
-  }
-
-  get artistDeletedEvent(): Observable<string | null> {
-    return this.artistDeletedSubject;
+  get changedArtistsEvent(): Observable<ArtistDto[]> {
+    return this.changedArtistsSubject;
   }
 
   bulkCreateArtist(bulkCreateArtistDtos: BulkDto<CreateArtistDto>): Observable<ResponseDto<BulkResult>> {
+    const actionTime = new Date();
     return this.http
       .post<ResponseDto<BulkResult>>(`${environment.artistCommandBaseUrl}/bulk-create`, bulkCreateArtistDtos)
       .pipe(
         tap((respDto) =>
-          respDto.data.items
-            .filter(({ id, isSuccessful }) => id && isSuccessful)
-            .forEach(({ id }) => this.artistCreatedSubject.next(id))
+          respDto.data.items.forEach(
+            ({ id, isSuccessful }) => id && isSuccessful && this.changedArtistIds.set(id, actionTime)
+          )
         )
       );
   }
 
   bulkUpdateArtist(bulkUpdateArtistDtos: BulkDto<UpdateArtistDto>): Observable<ResponseDto<BulkResult>> {
+    const actionTime = new Date();
     return this.http
       .post<ResponseDto<BulkResult>>(`${environment.artistCommandBaseUrl}/bulk-update`, bulkUpdateArtistDtos)
       .pipe(
         tap((respDto) =>
-          respDto.data.items
-            .filter(({ id, isSuccessful }) => id && isSuccessful)
-            .forEach(({ id }) => this.artistUpdatedSubject.next(id))
+          respDto.data.items.forEach(
+            ({ id, isSuccessful }) => id && isSuccessful && this.changedArtistIds.set(id, actionTime)
+          )
         )
       );
   }
 
   bulkDeleteArtist(bulkDeleteArtistDtos: BulkDto<DeleteArtistDto>): Observable<ResponseDto<BulkResult>> {
-    return this.http
-      .post<ResponseDto<BulkResult>>(`${environment.artistCommandBaseUrl}/bulk-delete`, bulkDeleteArtistDtos)
-      .pipe(
-        tap((respDto) =>
-          respDto.data.items
-            .filter(({ id, isSuccessful }) => id && isSuccessful)
-            .forEach(({ id }) => this.artistDeletedSubject.next(id))
-        )
-      );
+    return this.http.post<ResponseDto<BulkResult>>(
+      `${environment.artistCommandBaseUrl}/bulk-delete`,
+      bulkDeleteArtistDtos
+    );
   }
 
   bulkReleaseArtist(bulkReleaseArtistDtos: BulkDto<ReleaseArtistDto>): Observable<ResponseDto<BulkResult>> {
+    const actionTime = new Date();
     return this.http
       .post<ResponseDto<BulkResult>>(`${environment.artistCommandBaseUrl}/bulk-release`, bulkReleaseArtistDtos)
       .pipe(
         tap((respDto) =>
-          respDto.data.items
-            .filter(({ id, isSuccessful }) => id && isSuccessful)
-            .forEach(({ id }) => this.artistReleasedSubject.next(id))
+          respDto.data.items.forEach(
+            ({ id, isSuccessful }) => id && isSuccessful && this.changedArtistIds.set(id, actionTime)
+          )
         )
       );
   }
@@ -104,25 +90,30 @@ export class ArtistService {
 
   // ### Mock datas, need to remove when finish ################################
 
-  getMockArtists(): Observable<ResponseDto<[ArtistDto | null]>> {
-    return this.getArtistByRefCodes(
-      [
-        'spt_5dfZ5uSmzR7VQK0udbAVpf',
-        'spt_2Bwp23pD4UVsSkchHDZw4F',
-        'spt_0r63ReVRjxrS4ATbLrdcrL',
-        'spt_1CWwyDPjCowRTO4p6A7r6g',
-        'spt_5HZtdKfC4xU0wvhEyYDWiY',
-        'spt_57g2v7gJZepcwsuwssIfZs',
-        'spt_2aQnC3DbZB9GbauvhAw7ve',
-        'spt_1L1VfizWn4DkFt602yD80U',
-        'spt_3y0Tmt0epaxAHy6L89dGGC',
-        'spt_0l3YAI1xmZKCZBzduST5ft',
-        'spt_5lAfakPZgxFKgiJD6xAF1G',
-        'spt_3diftVOq7aEIebXKkC34oR',
-        'spt_2NRcG7E1j2sSi8vnUzCcpi'
-      ],
-      true,
-      true
+  getAllArtists(loadImages: boolean = false, loadRevisions: boolean = false): Observable<ResponseDto<[ArtistDto]>> {
+    return this.http.get<ResponseDto<[ArtistDto]>>(
+      `${environment.artistQueryBaseUrl}/all?loadImages=${loadImages}&loadRevisions=${loadRevisions}`
     );
+  }
+
+  private refreshDataInterval(intervalMs: number = 3_000): void {
+    setInterval(() => {
+      if (this.changedArtistIds.size) {
+        if (!environment.production) {
+          console.log('Changed Artists: ', this.changedArtistIds);
+        }
+
+        this.getArtistByIds([...this.changedArtistIds.keys()], true, true).subscribe((respDto) => {
+          const artists = respDto.data.filter((artist) => artist !== null);
+          if (artists.length) {
+            artists.forEach(
+              ({ id, updatedAt }) =>
+                (this.changedArtistIds.get(id) || new Date()) < new Date(updatedAt) && this.changedArtistIds.delete(id)
+            );
+            this.changedArtistsSubject.next(artists);
+          }
+        });
+      }
+    }, intervalMs);
   }
 }

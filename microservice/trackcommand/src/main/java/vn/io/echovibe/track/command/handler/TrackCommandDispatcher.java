@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import vn.io.echovibe.core.command.Command;
@@ -18,11 +22,27 @@ import vn.io.echovibe.core.exception.CommandHandlerFunctionNotFound;
 import vn.io.echovibe.core.exception.Error;
 import vn.io.echovibe.core.model.BulkResult;
 import vn.io.echovibe.core.model.CommandResult;
+import vn.io.echovibe.track.command.model.CreateTrackCommand;
+import vn.io.echovibe.track.command.model.DeleteTrackCommand;
+import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
+import vn.io.echovibe.track.command.model.UpdateTrackCommand;
 
+@Slf4j
 @SuppressWarnings({"rawtypes", "unchecked"})
+@RequiredArgsConstructor
 @Service
 public class TrackCommandDispatcher implements CommandDispatcher {
   private final Map<Class<? extends Command>, CommandHandlerFunction> handlerMap = new HashMap<>();
+
+  private final CommandHandler commandHandler;
+
+  @EventListener(ApplicationReadyEvent.class)
+  void onApplicationReadyEvent() {
+    registerHandler(CreateTrackCommand.class, commandHandler::handle);
+    registerHandler(UpdateTrackCommand.class, commandHandler::handle);
+    registerHandler(DeleteTrackCommand.class, commandHandler::handle);
+    registerHandler(ReleaseTrackCommand.class, commandHandler::handle);
+  }
 
   @Override
   public <T extends Command> void registerHandler(
@@ -70,6 +90,7 @@ public class TrackCommandDispatcher implements CommandDispatcher {
         commandResult.setMessage(message);
         commandResult.setIsSuccessful(false);
       } catch (Exception e) {
+        log.error(Optional.ofNullable(e.getCause()).orElse(e).getMessage(), e);
         message =
             "Command '%s' was processed unsuccessfully: %s"
                 .formatted(commandType, Optional.ofNullable(e.getCause()).orElse(e).getMessage());

@@ -14,6 +14,7 @@ services:
       - "16810:5432"
     networks:
       - "default"
+    restart: "on-failure:3"
   keycloak-i1:
     image: "keycloak/keycloak:26.1.2-0"
     ports:
@@ -37,6 +38,7 @@ services:
     command: [ "start" ]
     networks:
       - "default"
+    restart: "on-failure:3"
   keycloak-proxy-i1:
     build:
       context: "./nginx-proxy/"
@@ -48,6 +50,7 @@ services:
       - "default"
     volumes:
       - "./nginx-proxy/log/:/app/log/"
+    restart: "on-failure:3"
 
 networks:
   default:

@@ -1,6 +1,10 @@
 name: Containerize FastAPI App and push to Docker Hub
 on:
   pull_request:
+    paths:
+      - "microservice/artistquery/**"
+      - "microservice/trackquery/**"
+      - "microservice/product/**"
     branches:
       - develop
     types:
@@ -21,7 +25,9 @@ jobs:
       - name: Build artistquery image
         working-directory: ./microservice/artistquery
         run: ./release.sh
+      - name: Build trackquery image
+        working-directory: ./microservice/trackquery
+        run: ./release.sh
       - name: Build product image
         working-directory: ./microservice/product
         run: ./release.sh
-      

@@ -7,7 +7,6 @@ import { DefaultOAuthInterceptor, provideOAuthClient } from 'angular-oauth2-oidc
 import { providePrimeNG } from 'primeng/config';
 import { routes } from './app.routes';
 import { oauthModuleConfig } from './auth.config';
-import { DomSanitizer } from '@angular/platform-browser';
 
 export const appConfig: ApplicationConfig = {
   providers: [

@@ -1,92 +1,503 @@
-<!-- <p-toolbar styleClass="mb-6">
+<!-- Toolbar -->
+<p-toolbar styleClass="mb-6">
   <ng-template #start>
     <p-button
-      label="New"
+      i18n-label="@@BUTTON_LABEL_CREATE"
+      label="Create"
       icon="pi pi-plus"
       severity="secondary"
       class="mr-2"
-      (onClick)="openNew()"
+      (onClick)="handleNewTrack()"
     />
+    <!-- (onClick)="handleEditSelectedArtists()" -->
     <p-button
+      class="ml-2"
       severity="secondary"
+      i18n-label="@@BUTTON_LABEL_EDIT"
+      label="Delete"
+      icon="pi pi-pencil"
+      outlined
+      [disabled]="!selectedTracks.length"
+    />
+
+    <p-button
+      class="ml-2"
+      severity="secondary"
+      i18n-label="@@BUTTON_LABEL_RELEASE"
+      label="Delete"
+      icon="pi pi-bolt"
+      outlined
+      [disabled]="!selectedTracks.length"
+      (onClick)="handleReleaseSelectedArtists()"
+    />
+
+    <p-button
+      class="ml-2"
+      severity="secondary"
+      i18n-label="@@BUTTON_LABEL_DELETE"
       label="Delete"
       icon="pi pi-trash"
       outlined
-      (onClick)="deleteSelectedArtists()"
-      [disabled]="!selectedArtists || !selectedArtists.length"
+      [disabled]="!selectedTracks.length"
+      (onClick)="handleDeleteSelectedTracks()"
     />
   </ng-template>
 
+  <!-- (onClick)="handleImportCsv()" -->
   <ng-template #end>
-    <p-button label="Export" icon="pi pi-upload" severity="secondary" (onClick)="exportCsv()" />
+    <p-button
+      severity="secondary"
+      i18n-label="@@BUTTON_LABEL_IMPORT_CSV"
+      label="Import CSV"
+      icon="pi pi-file-import"
+      class="mr-2"
+    />
+
+    <!-- (onClick)="handleExportCsv()" -->
+    <p-button label="Export" icon="pi pi-upload" severity="secondary" [disabled]="!selectedTracks.length" />
   </ng-template>
 </p-toolbar>
 
+<!-- List of Tracks -->
 <p-table
-  #dt
-  [value]="artists()"
-  [rows]="10"
+  #dataTable
+  [value]="tracks()"
+  [rows]="25"
   [columns]="columns"
   [paginator]="true"
-  [globalFilterFields]="['name', 'createdBy', 'updatedBy']"
+  [globalFilterFields]="['id', 'name', 'tagsString']"
   [tableStyle]="{ 'min-width': '75rem' }"
-  [(selection)]="selectedArtists"
+  [(selection)]="selectedTracks"
   [rowHover]="true"
   dataKey="id"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Tracks"
   [showCurrentPageReport]="true"
-  [rowsPerPageOptions]="[10, 20, 30]"
+  [rowsPerPageOptions]="[5, 10, 25]"
+  [loading]="isLoading()"
 >
   <ng-template #caption>
     <div class="flex items-center justify-between">
-      <h5 class="m-0">Manage Artists</h5>
+      <h5 class="m-0" i18n="@@PAGE_LABEL_MANAGE_ARTIST">Manage Tracks</h5>
       <p-iconfield>
         <p-inputicon styleClass="pi pi-search" />
-        <input
-          pInputText
-          type="text"
-          (input)="onGlobalFilter(dt, $event)"
-          placeholder="Search..."
-        />
+        <!-- (input)="handleGlobalFilter(dataTable, $event)" -->
+        <input pInputText type="text" i18n-placeholder="@@INPUT_PLACEHOLDER_SEARCH" placeholder="Search ..." />
       </p-iconfield>
     </div>
   </ng-template>
   <ng-template #header>
     <tr>
-      <th><p-tableHeaderCheckbox /></th>
-      <th>ID</th>
-      <th pSortableColumn="name" style="min-width: 12rem">Name<p-sortIcon field="name" /></th>
-      <th style="min-width: 10rem">Profile picture</th>
-      <th pSortableColumn="price" style="min-width: 16rem">Description</th>
-      <th pSortableColumn="createdBy" style="min-width: 8rem">Created by</th>
-      <th pSortableColumn="updatedBy" style="min-width: 8rem">Updated by</th>
-      <th pSortableColumn="createdAt" style="min-width: 8rem">Created at</th>
-      <th pSortableColumn="updatedAt" style="min-width: 8rem">Updated at</th>
+      <!-- Checkbox -->
+      <th style="width: 4rem">
+        <p-tableHeaderCheckbox />
+      </th>
+
+      <!-- Action Buttons -->
+      <th style="min-width: 12rem">Action</th>
+
+      <!-- ID -->
+      <th style="width: 8rem">ID</th>
+
+      <!-- Thumbnail -->
+      <th style="min-width: 8rem" i18n="@@COLUMN_LABEL_MANAGE_TRACK_THUMBNAIL">Thumbnail</th>
+
+      <!-- Name -->
+      <th pSortableColumn="name" style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_TRACK_NAME">
+        Name
+        <p-sortIcon field="name" />
+      </th>
+
+      <!-- Artist -->
+      <!-- i18n="@@COLUMN_LABEL_MANAGE_TRACK_ARTIST_LIST" -->
+      <th style="min-width: 12rem">
+        Artist
+        <p-sortIcon field="trackArtists" />
+      </th>
+
+      <!-- Public -->
+      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_TRACK_PUBLIC">Public</th>
+
+      <!-- Official released date -->
+      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_TRACK_OFFICIAL_RELEASED_DATE">Official released date</th>
+
+      <!-- Revision -->
+      <th style="min-width: 8rem" i18n="@@COLUMN_LABEL_MANAGE_TRACK_REVISION">Revision</th>
+
+      <!-- Released -->
+      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_TRACK_RELEASED">Released</th>
+
+      <!-- Reference code -->
+      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_TRACK_REFERENCE_CODE">Reference code</th>
+
+      <!-- Description -->
+      <th style="min-width: 20rem" i18n="@@COLUMN_LABEL_MANAGE_TRACK_DESCRIPTION">Description</th>
+
+      <!-- Tag -->
+      <th style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_TRACK_TAG">Tag</th>
     </tr>
   </ng-template>
-  <ng-template #body let-artist>
+  <ng-template #body let-track>
     <tr>
-      <td style="width: 3rem">
-        <p-tableCheckbox [value]="artist" />
+      <!-- Checkbox -->
+      <td style="width: 4rem">
+        <p-tableCheckbox [value]="track" />
       </td>
-      <td style="min-width: 12rem">{{ artist.id }}</td>
-      <td style="min-width: 16rem">{{ artist.name }}</td>
-      <td>
-        <img
-          [src]="'https://i.scdn.co/image/ab67616d00001e02fc307e330d771ad864a28130'"
-          [alt]="artist.name"
-          style="width: 64px"
-          class="rounded"
+
+      <!-- Action Buttons -->
+      <td style="min-width: 12rem">
+        <!-- Edit -->
+        <p-button
+          severity="success"
+          icon="pi pi-pencil"
+          [rounded]="true"
+          [outlined]="true"
+          (onClick)="handleEditTrack(track)"
+        />
+
+        <!-- Release -->
+        <p-button
+          class="ml-2"
+          icon="pi pi-bolt"
+          severity="success"
+          [rounded]="true"
+          [outlined]="true"
+          (onClick)="handleReleaseTrack(track)"
+        />
+
+        <!-- Delete -->
+        <p-button
+          class="ml-2"
+          icon="pi pi-trash"
+          severity="danger"
+          [rounded]="true"
+          [outlined]="true"
+          (onClick)="handleDeleteArtist(track)"
         />
       </td>
-      <td>{{ artist.description }}</td>
-      <td>{{ artist.createdBy }}</td>
-      <td>{{ artist.updatedBy }}</td>
+
+      <!-- ID -->
       <td>
-        <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" [outlined]="true" />
-        <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [outlined]="true" />
+        <p style="width: 8rem">{{ track.id }}</p>
+      </td>
+
+      <!-- Thumbnail -->
+      <td style="min-width: 8rem">
+        <p-image
+          [preview]="true"
+          class="rounded"
+          imageClass="rounded object-cover w-20 h-20"
+          [src]="track.thumbnailUrl"
+          [alt]="track.name + '\'s thumbnail'"
+        />
+      </td>
+
+      <!-- Name -->
+      <td style="min-width: 12rem">{{ track.name }}</td>
+
+      <!-- Artist -->
+      <td style="min-width: 16rem">
+        <div class="flex items-center gap-x-1">
+          @for (trackArtist of track.trackArtists; track trackArtist.artistId) {
+            @if (trackArtist.isActive) {
+              <p-tag [value]="trackArtist.artistName" [severity]="trackArtist.isMainArtist ? 'success' : 'info'" />
+            }
+          }
+        </div>
+      </td>
+
+      <!-- Public -->
+      <td style="min-width: 12rem">
+        <p-tag
+          [icon]="'pi ' + (track.isPublic ? 'pi-check' : 'pi-times')"
+          [value]="track.isPublic ? I18N.IS_PUBLIC_TRUE : I18N.IS_PUBLIC_FALSE"
+          [severity]="track.isPublic ? 'success' : 'danger'"
+        />
+      </td>
+
+      <!-- Official released date -->
+      <td style="min-width: 12rem">{{ track.officialReleasedDate }}</td>
+
+      <!-- Revision -->
+      <td style="min-width: 8rem">
+        {{ track.revisionNumber }}
+      </td>
+
+      <!-- Released -->
+      <td style="min-width: 12rem">
+        <p-tag
+          [icon]="'pi ' + (track.isReleased ? 'pi-check' : 'pi-times')"
+          [value]="track.isReleased ? I18N.IS_RELEASED_TRUE : I18N.IS_RELEASED_FALSE"
+          [severity]="track.isReleased ? 'success' : 'danger'"
+        />
+      </td>
+
+      <!-- Reference code -->
+      <td style="min-width: 12rem">
+        {{ track.refCode }}
+      </td>
+
+      <!-- Description -->
+      <td style="min-width: 20rem">{{ track.description }}</td>
+
+      <!-- Tag -->
+      <td style="min-width: 16rem">
+        <div class="flex items-center gap-x-1">
+          @for (tag of track.tags; track tag.name) {
+            <p-tag [value]="tag.name" [severity]="'info'" />
+          }
+        </div>
       </td>
     </tr>
   </ng-template>
-</p-table> -->
-<h1>This is Track Management page</h1>
+  <!-- <p-confirm-popup key="btn-delete-at-row"/> -->
+</p-table>
+
+<!-- (ngSubmit)="handleSaveArtist()" -->
+<form [formGroup]="trackFormGroup" (ngSubmit)="handleSaveTrack()">
+  <p-dialog
+    [(visible)]="isDialogShowed"
+    [style]="{ width: 'clamp(400px, 90vw, 800px)' }"
+    i18n-header="@@DIALOG_LABEL_ARTIST_DETAIL"
+    header="Artist details"
+    [modal]="true"
+  >
+    <ng-template #content>
+      <!-- Profile details -->
+      <p-panel i18n-header="@@FORM_SECTION_ARTIST_PROFILE_DETAIL" header="Profile details">
+        <div class="flex items-center-start gap-4">
+          <div class="w-64 h-64">
+            <!-- Thumbnail -->
+            <p-image
+              [src]="
+                renderableImageUrls.includes(thumbnailUrlFormControl.value)
+                  ? thumbnailUrlFormControl.value
+                  : 'asset/image/default-track-thumbnail-image.png'
+              "
+              styleClass="w-full h-full"
+              imageClass="block m-auto w-full h-full object-cover rounded"
+              [preview]="true"
+            />
+          </div>
+          <div class="flex-1">
+            <!-- Name -->
+            <div class="flex-1">
+              <p-floatlabel variant="on" class="w-full">
+                <input id="name" ng-invalid ng-dirty pInputText formControlName="nameFormControl" class="w-full" />
+                <label i18n="@@FORM_LABEL_ARTIST_NAME" for="name">Name</label>
+              </p-floatlabel>
+              @if (nameFormControl.invalid && nameFormControl.dirty) {
+                <small id="name-help" class="inline-block px-2">
+                  Name is required, the length does not exceed 250 characters.
+                </small>
+              } @else {
+                <small id="name-help" class="inline-block px-2"></small>
+              }
+            </div>
+
+            <div class="flex justify-between mt-2 w-full">
+              <div class="flex-1">
+                <p-floatlabel variant="on">
+                  <!-- optionValue="format" -->
+                  <p-select
+                    id="officialReleasedDateFormat"
+                    [options]="OFFICIAL_RELEASED_DATE_FORMATS"
+                    formControlName="officialReleasedDateFormatFormControl"
+                    optionLabel="format"
+                    placeholder=""
+                    class="w-full"
+                  ></p-select>
+                  <!-- i18n="@@FORM_LABEL_ARTIST_NATIONALITY" -->
+                  <label for="officialReleasedDateFormat">Released date format</label>
+                </p-floatlabel>
+              </div>
+              <!-- Official released date format -->
+              <div class="ml-2 flex-1">
+                <p-floatlabel variant="on">
+                  <p-datepicker
+                    id="officialReleasedDate"
+                    formControlName="officialReleasedDateFormControl"
+                    [dateFormat]="officialReleasedDateFormat.datePickerFormat"
+                    [view]="officialReleasedDateFormat.view"
+                    styleClass="w-full"
+                  />
+                  <!-- i18n="@@FORM_LABEL_TRACK_OFFICIAL_RELEASED_DATE" -->
+                  <label for="officialReleasedDate">Released date</label>
+                </p-floatlabel>
+                @if (officialReleasedDateFormControl.invalid && officialReleasedDateFormControl.dirty) {
+                  <small id="officialReleasedDate-help" class="inline-block px-2"></small>
+                } @else {
+                  <small id="officialReleasedDate-help" class="inline-block px-2"></small>
+                }
+              </div>
+            </div>
+
+            <div class="mt-2">
+              <!-- Reference code -->
+              <p-floatlabel variant="on">
+                <input
+                  id="refCode"
+                  ng-invalid
+                  ng-dirty
+                  pInputText
+                  formControlName="refCodeFormControl"
+                  class="w-full"
+                />
+                <label i18n="@@FORM_LABEL_ARTIST_REF_CODE" for="refCode">Reference code</label>
+              </p-floatlabel>
+              @if (refCodeFormControl.invalid && (refCodeFormControl.dirty || refCodeFormControl.touched)) {
+                <small id="refCode-help" class="inline-block px-2">
+                  Reference code is optional, the length does not exceed 100 characters.
+                </small>
+              } @else {
+                <small id="refCode-help" class="inline-block px-2"></small>
+              }
+            </div>
+
+            <div class="mt-2">
+              <!-- Description -->
+              <p-floatlabel variant="on" class="w-full">
+                <textarea
+                  id="description"
+                  pTextarea
+                  rows="3"
+                  ng-invalid
+                  ng-dirty
+                  pInputText
+                  formControlName="descriptionFormControl"
+                  class="w-full"
+                ></textarea>
+                <label i18n="@@FORM_LABEL_ARTIST_DESCRIPTION" for="description">Description</label>
+              </p-floatlabel>
+              @if (descriptionFormControl.invalid && descriptionFormControl.dirty) {
+                <small id="description-help" class="inline-block px-2">
+                  Description is optional, the length does not exceed 250 characters.
+                </small>
+              } @else {
+                <small id="description-help" class="inline-block px-2"></small>
+              }
+            </div>
+
+            <!-- Thumbnail URL -->
+            <div class="mt-2">
+              <p-floatlabel variant="on" class="w-full">
+                <input
+                  id="thumbnailUrl"
+                  ng-invalid
+                  ng-dirty
+                  pInputText
+                  formControlName="thumbnailUrlFormControl"
+                  class="w-full"
+                />
+                <label i18n="@@FORM_LABEL_ARTIST_THUMBNAIL_URL" for="thumbnailUrl">Thumbnail link</label>
+              </p-floatlabel>
+              @if (
+                thumbnailUrlFormControl.invalid && (thumbnailUrlFormControl.dirty || thumbnailUrlFormControl.touched)
+              ) {
+                <small id="thumbnailUrl-help" class="inline-block px-2"
+                  >Please enter the correct URL link format.</small
+                >
+              } @else {
+                <small id="thumbnailUrl-help" class="inline-block px-2"></small>
+              }
+            </div>
+          </div>
+        </div>
+      </p-panel>
+
+      <p-panel styleClass="mt-4" i18n-header="@@FORM_SECTION_ARTIST_ATTRIBUTE" header="Control attributes">
+        <div class="flex items-center gap-4 w-full">
+          <!-- Public -->
+          <div>
+            <p-checkbox formControlName="isPublicFormControl" [binary]="true" inputId="isPublic" />
+            <label i18n="@@FORM_LABEL_ARTIST_IS_PUBLIC" for="isPublic" class="ml-2">Public</label>
+          </div>
+
+          <!-- Tag -->
+          <p-multiselect
+            class="flex-1"
+            [options]="currentTrack.tags"
+            formControlName="tagsFormControl"
+            i18n-placeholder="@@FORM_LABEL_ARTIST_TAG_EDIT"
+            placeholder="Edit tags"
+            optionLabel="name"
+            optionValue="name"
+            styleClass="w-full md:w-80"
+            display="chip"
+            i18n-emptyFilterMessage="@@MESSAGE_NO_RESULT_FOUND"
+            emptyFilterMessage="No results found."
+            [filterValue]="currentTrack.tagFilterKeyword"
+            (onFilter)="handleTagFilter($event)"
+          >
+            <ng-template #header>
+              <div class="font-medium px-3 py-2">Tag</div>
+            </ng-template>
+            <ng-template #footer>
+              @if (!currentTrack.tagFilterFoundExactMatch) {
+                <div [style]="{ padding: 'var(--p-multiselect-list-padding)' }">
+                  <p-button severity="secondary" text size="small" styleClass="w-full" (click)="handleCreateTag()">
+                    <i class="pi pi-plus"></i>
+                    <span>
+                      Add tag
+                      <span>'{{ currentTrack.tagFilterKeyword }}'</span>
+                    </span>
+                  </p-button>
+                </div>
+              }
+            </ng-template>
+            <ng-template let-tag #item>
+              <div class="flex items-center gap-2">
+                <p>{{ tag.name }}</p>
+              </div>
+            </ng-template>
+            <ng-template #dropdownicon>
+              <i class="pi pi-tags"></i>
+            </ng-template>
+            <ng-template #filtericon>
+              <i class="pi pi-hashtag"></i>
+            </ng-template>
+          </p-multiselect>
+        </div>
+      </p-panel>
+      <!-- Artist -->
+      <!-- i18n-header="@@FORM_SECTION_TRACK_ARTIST_LIST" -->
+      <!-- i18n-placeholder="@@FORM_LABEL_TRACK_ARTIST_LIST_EDIT" -->
+      <p-panel styleClass="mt-4" header="Artists">
+        <!-- emptyFilterMessage="No results found." -->
+        <p-multiselect
+          [options]="trackArtists"
+          formControlName="trackArtistsFormControl"
+          placeholder="Edit Artists"
+          optionLabel="artistName"
+          [loading]="isArtistsLoading()"
+          styleClass="w-full"
+          display="chip"
+          i18n-emptyFilterMessage="@@MESSAGE_NO_RESULT_FOUND"
+        >
+        </p-multiselect>
+      </p-panel>
+    </ng-template>
+    <ng-template #footer>
+      <div>
+        <p-button
+          i18n-label="@@BUTTON_LABEL_CANCEL"
+          label="Cancel"
+          icon="pi pi-times"
+          text
+          severity="danger"
+          (click)="handleHideTrackDialog()"
+        />
+        <p-button
+          type="submit"
+          [disabled]="!trackFormGroup.valid"
+          i18n-label="@@BUTTON_LABEL_SAVE"
+          label="Save"
+          icon="pi pi-check"
+          severity="success"
+        />
+      </div>
+    </ng-template>
+  </p-dialog>
+</form>
+
+<p-confirmdialog [style]="{ width: 'clamp(320px, 60vw, 540px)' }" />
+<p-toast position="top-right" />

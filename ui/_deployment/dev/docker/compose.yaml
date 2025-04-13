@@ -1,0 +1,12 @@
+name: echovibe-ui
+services:
+  ui-i1:
+    image: "vutiendat3601/echovibe-ui"
+    container_name: "echovibe-ui-i1"
+    hostname: "echovibe-ui-i1"
+    volumes:
+      - "./tls/admin.echovibe.io.vn/certificate.pem:/app/tls/admin.echovibe.io.vn/certificate.pem"
+      - "./tls/admin.echovibe.io.vn/private.pem:/app/tls/admin.echovibe.io.vn/private.pem"
+    ports:
+      - "80:80"
+      - "443:443"
