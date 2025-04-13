@@ -20,7 +20,6 @@
       [disabled]="!selectedTracks.length"
     />
 
-    <!-- (onClick)="handleReleaseSelectedArtists()" -->
     <p-button
       class="ml-2"
       severity="secondary"
@@ -29,9 +28,9 @@
       icon="pi pi-bolt"
       outlined
       [disabled]="!selectedTracks.length"
+      (onClick)="handleReleaseSelectedArtists()"
     />
 
-    <!-- (onClick)="handleDeleteSelectedArtists()" -->
     <p-button
       class="ml-2"
       severity="secondary"
@@ -40,6 +39,7 @@
       icon="pi pi-trash"
       outlined
       [disabled]="!selectedTracks.length"
+      (onClick)="handleDeleteSelectedTracks()"
     />
   </ng-template>
 

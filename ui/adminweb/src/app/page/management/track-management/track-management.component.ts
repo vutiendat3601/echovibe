@@ -289,12 +289,42 @@ export class TrackManagementComponent implements OnInit {
     this.openTrackDialog('edit');
   }
 
+  handleDeleteSelectedTracks(): void {
+    const deleteTrackDtos: DeleteTrackDto[] = this.selectedTracks.map(
+      ({ id }) =>
+        ({
+          id
+        }) as DeleteTrackDto
+    );
+    this.confirmationService.confirm({
+      message: $localize`:@@CONFIRM_MESSAGE_TRACK_BULK_REQUEST_DELETE:Are you sure you want to delete the selected Artists?`,
+      header: $localize`:@@DIALOG_LABEL_CONFIRM_DELETE:Confirm delete`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => this.bulkDeleteTrack(deleteTrackDtos)
+    });
+  }
+
   handleDeleteArtist({ id }: Artist): void {
     this.confirmationService.confirm({
       message: $localize`:@@CONFIRM_MESSAGE_TRACK_DELETE:Are you sure you want to delete the selected Track?`,
       header: $localize`:@@DIALOG_LABEL_CONFIRM_DELETE:Confirm delete`,
       icon: 'pi pi-exclamation-triangle',
-      accept: () => id && this.deleteArtist({ id })
+      accept: () => id && this.deleteTrack({ id })
+    });
+  }
+
+  handleReleaseSelectedArtists(): void {
+    const releaseTrackDtos: ReleaseTrackDto[] = this.selectedTracks.map(
+      ({ id }) =>
+        ({
+          id
+        }) as ReleaseTrackDto
+    );
+    this.confirmationService.confirm({
+      message: $localize`:@@CONFIRM_MESSAGE_ARTIST_BULK_REQUEST_RELEASE:Are you sure you want to release the selected Artists?`,
+      header: $localize`:@@DIALOG_LABEL_CONFIRM_RELEASE:Confirm release`,
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => this.bulkReleaseTrack(releaseTrackDtos)
     });
   }
 
@@ -330,10 +360,11 @@ export class TrackManagementComponent implements OnInit {
     }
   }
 
-  private deleteArtist(deleteTrackDto: DeleteTrackDto) {
+  private deleteTrack(deleteTrackDto: DeleteTrackDto) {
     this.trackService.bulkDeleteTrack({ items: [deleteTrackDto] }).subscribe((respDto) => {
       const { isSuccessful, errors } = respDto.data.items[0];
       if (isSuccessful) {
+        this.tracks.update((tracks) => tracks.filter(({ id }) => id !== deleteTrackDto.id));
         this.addMessage({
           title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
           content: $localize`:@@MESSAGE_TRACK_DETELED_SUCCESSFUL:Artist was deleted successfully.`
@@ -349,6 +380,11 @@ export class TrackManagementComponent implements OnInit {
     this.trackService.bulkDeleteTrack({ items: deleteTrackDtos }).subscribe((respDto) => {
       const { isSuccessful, errors } = respDto.data.items[0];
       if (isSuccessful) {
+        const deletedTrackIds = deleteTrackDtos.map(({ id }) => id);
+        this.tracks.update((tracks) => tracks.filter(({ id }) => id && !deletedTrackIds.includes(id)));
+        this.tracks.update((tracks) =>
+          tracks.filter(({ id }) => !deleteTrackDtos.some((deleteTrackDto) => deleteTrackDto.id === id))
+        );
         this.addMessage({
           title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
           content: $localize`:@@MESSAGE_TRACK_BULK_REQUEST_DETELE_SUCCESSFUL:Bulk delete artist was processed successfully.`
@@ -529,6 +565,21 @@ export class TrackManagementComponent implements OnInit {
         this.addMessage({
           title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
           content: $localize`:@@MESSAGE_TRACK_RELEASED_SUCCESSFUL:Bulk release Artist request was processed successfully.`
+        });
+      } else {
+        const message = this.exceptionHandler.handle(errors[0]);
+        this.addMessage(message, 'error');
+      }
+    });
+  }
+
+  private bulkReleaseTrack(releaseTrackDtos: ReleaseTrackDto[]) {
+    this.trackService.bulkReleaseTrack({ items: releaseTrackDtos }).subscribe((respDto) => {
+      const { isSuccessful, errors } = respDto.data.items[0];
+      if (isSuccessful) {
+        this.addMessage({
+          title: $localize`:@@MESSAGE_SUCCESSFUL:Successful`,
+          content: $localize`:@@MESSAGE_TRACK_BULK_REQUEST_RELEASE_SUCCESSFUL:Bulk release Track request was processed successfully.`
         });
       } else {
         const message = this.exceptionHandler.handle(errors[0]);
