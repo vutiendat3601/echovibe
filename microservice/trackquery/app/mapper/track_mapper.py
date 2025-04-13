@@ -1,7 +1,14 @@
-from app.model.track import (Track, TrackImage, TrackRevision)
+from app.model.track import (Track, TrackImage, TrackArtist, TrackRevision)
 from app.schema.track_schema import (TrackSchema, TrackDetailSchema,
-                                     TrackImageSchema, TrackRevisionSchema)
+                                     TrackArtistSchema, TrackImageSchema,
+                                     TrackRevisionSchema)
 from app.schema.tag_schema import TagSchema
+
+
+def map_to_track_artist_schema(track_artist: TrackArtist):
+    return TrackArtistSchema(artist_id=track_artist.artist_aggregate_id,
+                             is_active=track_artist.is_active,
+                             is_main_artist=track_artist.is_main_artist)
 
 
 def map_to_image_schema(track_image: TrackImage):
@@ -36,6 +43,10 @@ def map_to_track_schema(track: Track,
         name=detail.name,
         description=detail.description,
         thumbnail_url=detail.thumbnail_url)
+    track_artists: list[TrackArtistSchema] = [
+        map_to_track_artist_schema(track_artist)
+        for track_artist in track.track_artists
+    ]
     images: list[TrackImageSchema] | None = None
     if is_load_images:
         images = [map_to_image_schema(image) for image in track.images]
@@ -51,6 +62,7 @@ def map_to_track_schema(track: Track,
                        is_released=track.is_released,
                        tags=[TagSchema(**tag) for tag in track.tags_json],
                        detail=detail_schema,
+                       track_artists=track_artists,
                        images=images,
                        revision_number=track.revision_number,
                        revisions=revisions,

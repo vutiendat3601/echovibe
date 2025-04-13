@@ -3,6 +3,16 @@ from app.event.schema.event_schema import EventSchema
 from app.schema.tag_schema import TagSchema
 
 
+class TrackArtistSchema(BaseModel):
+    artist_id: str = Field(default=None, alias="artistId")
+    is_active: bool = Field(default=True, alias="isActive")
+    is_main_artist: bool = Field(default=False, alias="isMainArtist")
+
+    class Config:
+        populate_by_name = True
+        extra = "allow"
+
+
 class TrackDetailSchema(BaseModel):
     name: str
     description: str | None = Field(default=None, alias="description")
@@ -25,6 +35,8 @@ class TrackCreatedEvent(EventSchema):
     is_public: bool = Field(default=False, alias="isPublic")
     is_active: bool = Field(default=True, alias="isActive")
     tags: list[TagSchema] = Field(default=[], alias="tags")
+    track_artists: list[TrackArtistSchema] = Field(default=[],
+                                                   alias="trackArtists")
 
     class Config:
         populate_by_name = True
@@ -51,7 +63,9 @@ class TrackUpdatedEvent(EventSchema):
     is_public: bool = Field(default=False, alias="isPublic")
     is_released: bool = Field(default=False, alias="isReleased")
     tags: list[TagSchema] = Field(default=[], alias="tags")
-
+    track_artists: list[TrackArtistSchema] = Field(default=[],
+                                                   alias="trackArtists")
+    ref_code: str | None = Field(default=None, alias="refCode")
     class Config:
         populate_by_name = True
         extra = "allow"

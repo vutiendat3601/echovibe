@@ -1,4 +1,4 @@
-"""create tables: track, track_detail, track_image, track_revision
+"""create tables: track, track_detail, track_image, track_revision, track_artist
 
 Revision ID: 1b898650e836
 Revises: 
@@ -189,10 +189,34 @@ ALTER TABLE track_revision ADD CONSTRAINT fk_track_revision__track_id___track__i
 FOREIGN KEY (track_id) REFERENCES track(id) ON DELETE CASCADE ON UPDATE CASCADE
 ;"""
 
+    create_track_artist_table_ddl = """
+CREATE TABLE track_artist (
+    id uuid NOT NULL,
+    track_id uuid NOT NULL,
+	aggregate_id varchar(12) NOT NULL,
+    artist_aggregate_id varchar(12) NOT NULL,
+    is_active bool NOT NULL DEFAULT true,
+    is_main_artist bool NOT NULL DEFAULT false,
+    event_type text NULL,
+    event_version numeric NULL,
+    event_timestamp timestamptz NULL,
+    created_at timestamptz NOT NULL,
+    updated_at timestamptz NOT NULL,
+    created_by varchar(255) NULL,
+    updated_by varchar(255) NULL,
+    CONSTRAINT track_artist_pkey PRIMARY KEY (id)
+);
+
+-- Foreign key: 
+ALTER TABLE track_artist ADD CONSTRAINT fk_track_artist__track_id___track__id
+FOREIGN KEY (track_id) REFERENCES track(id) ON DELETE CASCADE ON UPDATE CASCADE
+;"""
+
     ddls = [
         create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
         create_track_table_ddl, create_track_detail_ddl,
-        create_track_image_table_ddl, create_track_revision_table_ddl
+        create_track_image_table_ddl, create_track_revision_table_ddl,
+        create_track_artist_table_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)
@@ -207,12 +231,13 @@ def downgrade() -> None:
     drop_track_detail_table_ddl = "DROP TABLE IF EXISTS track_detail;"
     drop_track_image_table_ddl = "DROP TABLE IF EXISTS track_image;"
     drop_track_table_ddl = "DROP TABLE IF EXISTS track;"
-
+    drop_track_artist_table_ddl = "DROP TABLE IF EXISTS track_artist;"
     ddls = [
         drop_uuid_ossp_extension_ddl, drop_unaccent_extension_ddl,
         drop_track_set_tsv_trigger_ddl, drop_track_set_tsv_function_ddl,
         drop_track_revision_table_ddl, drop_track_detail_table_ddl,
-        drop_track_image_table_ddl, drop_track_table_ddl
+        drop_track_image_table_ddl, drop_track_table_ddl,
+        drop_track_artist_table_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)

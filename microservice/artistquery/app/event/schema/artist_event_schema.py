@@ -57,6 +57,7 @@ class ArtistUpdatedEvent(EventSchema):
     is_public: bool = Field(default=False, alias="isPublic")
     is_released: bool = Field(default=False, alias="isReleased")
     tags: list[TagSchema] = Field(default=[], alias="tags")
+    ref_code: str | None = Field(default=None, alias="refCode")
 
     class Config:
         populate_by_name = True
