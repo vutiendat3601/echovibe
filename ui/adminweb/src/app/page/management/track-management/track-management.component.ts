@@ -157,8 +157,8 @@ export class TrackManagementComponent implements OnInit {
     IS_RELEASED_FALSE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_NO:No`
   };
   readonly OFFICIAL_RELEASED_DATE_FORMATS: DateFormat[] = [
-    { name: 'Full date', format: 'dd/MM/yyyy', datePickerFormat: 'dd/mm/yy', view: 'date' },
-    { name: 'Month with year', format: 'MM/yyyy', datePickerFormat: 'mm/yy', view: 'month' },
+    { name: 'Full date', format: 'yyyy-MM-dd', datePickerFormat: 'yy-mm-dd', view: 'date' },
+    { name: 'Month with year', format: 'yyyy-MM', datePickerFormat: 'yy-mm', view: 'month' },
     { name: 'Only year', format: 'yyyy', datePickerFormat: 'yy', view: 'year' }
   ];
   readonly filteredTrackArtists: TrackArtist[] = [];
@@ -524,7 +524,7 @@ export class TrackManagementComponent implements OnInit {
       (value: DateFormat) => !this.officialReleasedDateFormControl.errors && (this.officialReleasedDateFormat = value)
     );
 
-    // Official eleased date
+    // Official released date
     this.officialReleasedDateFormControl.valueChanges.subscribe(
       (value: Date) =>
         !this.officialReleasedDateFormControl.errors &&
