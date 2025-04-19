@@ -27,7 +27,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { RatingModule } from 'primeng/rating';
 import { RippleModule } from 'primeng/ripple';
 import { SelectModule } from 'primeng/select';
-import { TableModule } from 'primeng/table';
+import { Table, TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { TextareaModule } from 'primeng/textarea';
 import { ToastModule } from 'primeng/toast';
@@ -268,6 +268,10 @@ export class TrackManagementComponent implements OnInit {
         this.updateTrack(updateArtistDto);
       }
     }
+  }
+
+  handleGlobalFilter(table: Table, event: Event) {
+    table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 
   handleNewTrack(): void {
@@ -709,13 +713,13 @@ export class TrackManagementComponent implements OnInit {
       updatedAt,
       createdBy,
       updatedBy,
-      detail: { name, description, thumbnailUrl }
+      detail: { name, description, thumbnailUrl, officialReleasedDate }
     } = trackDto;
     return {
       id,
       urn,
       isPublic,
-      officialReleasedDate: null,
+      officialReleasedDate,
       revisionNumber,
       isReleased,
       name,
@@ -730,6 +734,7 @@ export class TrackManagementComponent implements OnInit {
       updatedBy,
       tagFilterKeyword: '',
       tagFilterFoundExactMatch: true,
+
       trackArtists: trackDto.trackArtists.map((trackArtist) => ({
         artistId: trackArtist.artistId,
         artistRefCode: trackArtist.artistRefCode,

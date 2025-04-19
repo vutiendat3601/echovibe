@@ -81,8 +81,14 @@
       <h5 class="m-0" i18n="@@PAGE_LABEL_MANAGE_ARTIST">Manage Tracks</h5>
       <p-iconfield>
         <p-inputicon styleClass="pi pi-search" />
-        <!-- (input)="handleGlobalFilter(dataTable, $event)" -->
-        <input pInputText type="text" i18n-placeholder="@@INPUT_PLACEHOLDER_SEARCH" placeholder="Search ..." />
+
+        <input
+          pInputText
+          type="text"
+          i18n-placeholder="@@INPUT_PLACEHOLDER_SEARCH"
+          placeholder="Search ..."
+          (input)="handleGlobalFilter(dataTable, $event)"
+        />
       </p-iconfield>
     </div>
   </ng-template>
