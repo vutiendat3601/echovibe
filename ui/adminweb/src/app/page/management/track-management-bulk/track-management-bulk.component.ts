@@ -1,4 +1,3 @@
-import { filter } from 'rxjs';
 import { ArtistService } from './../../../service/artist.service';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -34,7 +33,7 @@ import { ToastModule } from 'primeng/toast';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ToolbarModule } from 'primeng/toolbar';
 import { UNDEFINED, URL_REGEX } from '../../../constant/constant';
-import { CreateTrackDto, TrackDto, UpdateTrackDto } from '../../../dto/track-dto';
+import { CreateTrackDto, TrackArtistDto, TrackDto, UpdateTrackDto } from '../../../dto/track-dto';
 import { ExceptionHandler, Message } from '../../../exception/exception-handler';
 import { Tag } from '../../../model/tag';
 import { TrackService } from '../../../service/track.service';
@@ -43,16 +42,16 @@ import { ArtistDto } from '../../../dto/artist-dto';
 
 type ActionType = 'import' | 'edit';
 
-interface TrackImportCsvColumn {
+interface TrackCsvColumn {
   name: string;
   ispublic: string;
   description: string;
-  biography: string;
   nationalityisocode: string;
   thumbnailurl: string;
   backgroundurl: string;
   refcode: string;
   tagsjson: string;
+  artistrefcodes: string;
 }
 
 interface Column {
@@ -173,6 +172,7 @@ export class TrackManagementBulkComponent implements OnInit {
   readonly isArtistsLoading: WritableSignal<boolean> = signal<boolean>(true);
   readonly isLoading = signal(false);
   readonly artistsMap: Map<string, Artist> = new Map<string, Artist>();
+  readonly artistsRefCodeKeyMap: Map<string, Artist> = new Map<string, Artist>();
   action: ActionType = 'import';
 
   constructor(
@@ -254,24 +254,26 @@ export class TrackManagementBulkComponent implements OnInit {
     this.isLoading.set(true);
     if (this.action === 'edit') {
       const updateTrackDtos: UpdateTrackDto[] = this.tracks().map(
-        ({ id, name, isPublic, description, thumbnailUrl, refCode, tags }: Track) =>
+        ({ id, name, isPublic, description, thumbnailUrl, refCode, tags, trackArtists }: Track) =>
           ({
             id,
             refCode,
             isPublic,
             tags,
-            detail: { name, description, thumbnailUrl }
+            detail: { name, description, thumbnailUrl },
+            trackArtists: trackArtists.map((trackArtist) => ({ ...trackArtist }) as TrackArtistDto)
           }) as UpdateTrackDto
       );
       this.bulkUpdateTrack(updateTrackDtos);
     } else if (this.action === 'import') {
       const createTrackDtos: CreateTrackDto[] = this.tracks().map(
-        ({ name, isPublic, description, thumbnailUrl, refCode, tags }: Track) =>
+        ({ name, isPublic, description, thumbnailUrl, refCode, tags, trackArtists }: Track) =>
           ({
             refCode,
             isPublic,
             tags,
-            detail: { name, description, thumbnailUrl }
+            detail: { name, description, thumbnailUrl },
+            trackArtists: trackArtists.map((trackArtist) => ({ ...trackArtist }) as TrackArtistDto)
           }) as CreateTrackDto
       );
       this.bulkCreateTrack(createTrackDtos);
@@ -289,8 +291,12 @@ export class TrackManagementBulkComponent implements OnInit {
       this.trackArtists.push(...trackArtists);
 
       this.artistsMap.clear();
+      this.artistsRefCodeKeyMap.clear();
       const artists = artistDtos.map((artistDto) => this.mapToArtist(artistDto));
+
       artists.forEach((artist) => artist.id && this.artistsMap.set(artist.id, artist));
+      artists.forEach((artist) => artist.refCode && this.artistsRefCodeKeyMap.set(artist.refCode, artist));
+
       this.isArtistsLoading.set(false);
       this.listenAndProcessActiveRouteParams();
     });
@@ -399,7 +405,7 @@ export class TrackManagementBulkComponent implements OnInit {
   }
 
   private parseCsvFile(file: File): void {
-    const artists: Track[] = [];
+    const tracks: Track[] = [];
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
@@ -407,25 +413,34 @@ export class TrackManagementBulkComponent implements OnInit {
       delimiter: ',',
       worker: true,
       step: (results) => {
-        const artistImport = results.data as TrackImportCsvColumn;
-        // const track: Track = {
-        //   // ...this.emptyArtist(),
-        //   name: artistImport['name'] || null,
-        //   isPublic: artistImport['ispublic'] === 'true',
-        //   description: artistImport['description'] || null,
-        //   thumbnailUrl: artistImport['thumbnailurl'] || null,
-        //   refCode: artistImport['refcode'] || null,
-        //   tags: artistImport['tagsjson']
-        //     ? ((JSON.parse(artistImport['tagsjson']) || []) as string[]).map(
-        //         (tag) => ({ name: tag, isActive: true }) as Tag
-        //       )
-        //     : []
-        // };
-        // this.createTrackFormGroup(track);
-        // artists.push(track);
+        const trackImport = results.data as TrackCsvColumn;
+        const trackArtists = ((JSON.parse(trackImport['artistrefcodes']) || []) as string[]).map((artistRefCode) => ({
+          artistId: null,
+          artistRefCode,
+          artistName: this.artistsRefCodeKeyMap.get(artistRefCode)?.name || null,
+          isActive: true,
+          isMainArtist: false
+        }));
+        const track: Track = {
+          ...this.emptyTrack(),
+          name: trackImport['name'] || null,
+          isPublic: trackImport['ispublic'] === 'true',
+          description: trackImport['description'] || null,
+          thumbnailUrl: trackImport['thumbnailurl'] || null,
+          refCode: trackImport['refcode'] || null,
+          filteredTrackArtists: [...trackArtists],
+          trackArtists,
+          tags: trackImport['tagsjson']
+            ? ((JSON.parse(trackImport['tagsjson']) || []) as string[]).map(
+                (tag) => ({ name: tag, isActive: true }) as Tag
+              )
+            : []
+        };
+        this.createTrackFormGroup(track);
+        tracks.push(track);
       },
       complete: (_results) => {
-        this.tracks.set(artists);
+        this.tracks.set(tracks);
         this.isLoading.set(false);
       }
     });
@@ -458,6 +473,7 @@ export class TrackManagementBulkComponent implements OnInit {
           this.isLoading.set(false);
         });
       }
+      this.isLoading.set(false);
     });
   }
 
@@ -481,7 +497,32 @@ export class TrackManagementBulkComponent implements OnInit {
         });
     }
   }
-
+  private emptyTrack(): Track {
+    return {
+      id: null,
+      urn: null,
+      name: null,
+      isPublic: false,
+      officialReleasedDate: null,
+      description: null,
+      thumbnailUrl: null,
+      revisionNumber: -1,
+      isReleased: false,
+      refCode: null,
+      tags: [],
+      tagsString: '',
+      createdAt: null,
+      updatedAt: null,
+      createdBy: null,
+      updatedBy: null,
+      tagFilterKeyword: '',
+      tagFilterFoundExactMatch: true,
+      trackArtists: [],
+      filteredTrackArtists: [],
+      isThumbnailDialogShowed: false,
+      formGroup: null
+    };
+  }
   private mapToArtist(artistDto: ArtistDto): Artist {
     const {
       id,

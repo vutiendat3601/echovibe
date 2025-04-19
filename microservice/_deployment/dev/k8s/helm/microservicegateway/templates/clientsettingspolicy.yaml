@@ -1,0 +1,13 @@
+apiVersion: gateway.nginx.org/v1alpha1
+kind: ClientSettingsPolicy
+metadata:
+  name: microservice-clientsettingspolicy
+  namespace: {{ .Values.global.namespace }}
+spec:
+  body:
+    maxSize: 10m
+    timeout: 10m
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: "{{ .Values.gatewayName }}-gateway"

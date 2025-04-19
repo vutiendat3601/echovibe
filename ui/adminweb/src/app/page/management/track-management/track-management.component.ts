@@ -231,6 +231,10 @@ export class TrackManagementComponent implements OnInit {
     this.isDialogFormSubmitted = false;
   }
 
+  handleImportCsv(): void {
+    this.router.navigate(['/management/track/bulk']);
+  }
+
   handleSaveTrack(): void {
     if (this.action === 'new') {
       const createTrackDto: CreateTrackDto = {
