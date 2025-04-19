@@ -1,5 +1,4 @@
-import { ArtistService } from './../../../service/artist.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, formatDate } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -10,6 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
+import { DatePickerModule, DatePickerTypeView } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { EditorModule } from 'primeng/editor';
 import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
@@ -33,15 +33,22 @@ import { ToastModule } from 'primeng/toast';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ToolbarModule } from 'primeng/toolbar';
 import { UNDEFINED, URL_REGEX } from '../../../constant/constant';
+import { ArtistDto } from '../../../dto/artist-dto';
 import { CreateTrackDto, TrackArtistDto, TrackDto, UpdateTrackDto } from '../../../dto/track-dto';
 import { ExceptionHandler, Message } from '../../../exception/exception-handler';
 import { Tag } from '../../../model/tag';
 import { TrackService } from '../../../service/track.service';
 import { UrlValidator } from '../../../validator/url.validator';
-import { ArtistDto } from '../../../dto/artist-dto';
+import { ArtistService } from './../../../service/artist.service';
 
 type ActionType = 'import' | 'edit';
 
+interface DateFormat {
+  name: string;
+  datePickerFormat: string;
+  format: string;
+  view: DatePickerTypeView;
+}
 interface TrackCsvColumn {
   name: string;
   ispublic: string;
@@ -52,6 +59,7 @@ interface TrackCsvColumn {
   refcode: string;
   tagsjson: string;
   artistrefcodes: string;
+  officialreleaseddate: string;
 }
 
 interface Column {
@@ -101,6 +109,7 @@ interface Track {
   filteredTrackArtists: TrackArtist[];
   isThumbnailDialogShowed: boolean;
   formGroup: FormGroup | null;
+  officialReleasedDateFormat: DateFormat;
 }
 
 @Component({
@@ -135,7 +144,8 @@ interface Track {
     ToggleSwitchModule,
     MultiSelectModule,
     FileUploadModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    DatePickerModule
   ],
   templateUrl: './track-management-bulk.component.html',
   styleUrl: './track-management-bulk.component.scss',
@@ -150,8 +160,11 @@ export class TrackManagementBulkComponent implements OnInit {
     IS_RELEASED_TRUE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_YES:Yes`,
     IS_RELEASED_FALSE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_RELEASED_NO:No`
   };
-
-  // Constants
+  readonly OFFICIAL_RELEASED_DATE_FORMATS: DateFormat[] = [
+    { name: 'Full date', format: 'yyyy-MM-dd', datePickerFormat: 'yy-mm-dd', view: 'date' },
+    { name: 'Month with year', format: 'yyyy-MM', datePickerFormat: 'yy-mm', view: 'month' },
+    { name: 'Only year', format: 'yyyy', datePickerFormat: 'yy', view: 'year' }
+  ];
   readonly UNDEFINED = UNDEFINED;
   readonly IS_PUBLIC_OPTIONS: { name: string; value: boolean }[] = [
     {
@@ -254,25 +267,25 @@ export class TrackManagementBulkComponent implements OnInit {
     this.isLoading.set(true);
     if (this.action === 'edit') {
       const updateTrackDtos: UpdateTrackDto[] = this.tracks().map(
-        ({ id, name, isPublic, description, thumbnailUrl, refCode, tags, trackArtists }: Track) =>
+        ({ id, name, isPublic, description, thumbnailUrl, refCode, tags, trackArtists, officialReleasedDate }: Track) =>
           ({
             id,
             refCode,
             isPublic,
             tags,
-            detail: { name, description, thumbnailUrl },
+            detail: { name, description, thumbnailUrl, officialReleasedDate },
             trackArtists: trackArtists.map((trackArtist) => ({ ...trackArtist }) as TrackArtistDto)
           }) as UpdateTrackDto
       );
       this.bulkUpdateTrack(updateTrackDtos);
     } else if (this.action === 'import') {
       const createTrackDtos: CreateTrackDto[] = this.tracks().map(
-        ({ name, isPublic, description, thumbnailUrl, refCode, tags, trackArtists }: Track) =>
+        ({ name, isPublic, description, thumbnailUrl, refCode, tags, trackArtists, officialReleasedDate }: Track) =>
           ({
             refCode,
             isPublic,
             tags,
-            detail: { name, description, thumbnailUrl },
+            detail: { name, description, thumbnailUrl, officialReleasedDate },
             trackArtists: trackArtists.map((trackArtist) => ({ ...trackArtist }) as TrackArtistDto)
           }) as CreateTrackDto
       );
@@ -343,6 +356,23 @@ export class TrackManagementBulkComponent implements OnInit {
       (value: boolean) => !isPublicFormControl.errors && (track.isPublic = value)
     );
 
+    // Official released date format
+    const officialReleasedDateFormatFormControl: FormControl = new FormControl<DateFormat>(
+      track.officialReleasedDateFormat
+    );
+    officialReleasedDateFormatFormControl.valueChanges.subscribe(
+      (value: DateFormat) => !officialReleasedDateFormControl.errors && (track.officialReleasedDateFormat = value)
+    );
+
+    // Official released date
+    const officialReleasedDateFormControl: FormControl = new FormControl<Date>(new Date());
+    officialReleasedDateFormControl.valueChanges.subscribe(
+      (value: Date) =>
+        !officialReleasedDateFormControl.errors &&
+        ((track.officialReleasedDate = formatDate(value, track.officialReleasedDateFormat.format, 'en-US')),
+        console.log(track.officialReleasedDate))
+    );
+
     // Tags
     const tagsFormControl: FormControl = new FormControl<Tag[]>(tags);
     tagsFormControl.valueChanges.subscribe(
@@ -361,6 +391,8 @@ export class TrackManagementBulkComponent implements OnInit {
     track.formGroup = new FormGroup({
       trackArtistsFormControl,
       nameFormControl,
+      officialReleasedDateFormatFormControl,
+      officialReleasedDateFormControl,
       thumbnailUrlFormControl,
       descriptionFormControl,
       tagsFormControl,
@@ -421,6 +453,17 @@ export class TrackManagementBulkComponent implements OnInit {
           isActive: true,
           isMainArtist: false
         }));
+        let officialReleasedDateFormat = this.OFFICIAL_RELEASED_DATE_FORMATS[0];
+        const officialReleasedDate = trackImport['officialreleaseddate'];
+        if (officialReleasedDate) {
+          if (officialReleasedDate.length === 4) {
+            officialReleasedDateFormat = this.OFFICIAL_RELEASED_DATE_FORMATS[2];
+          } else if (officialReleasedDate.length === 7) {
+            officialReleasedDateFormat = this.OFFICIAL_RELEASED_DATE_FORMATS[1];
+          } else if (officialReleasedDate.length === 10) {
+            officialReleasedDateFormat = this.OFFICIAL_RELEASED_DATE_FORMATS[0];
+          }
+        }
         const track: Track = {
           ...this.emptyTrack(),
           name: trackImport['name'] || null,
@@ -428,8 +471,10 @@ export class TrackManagementBulkComponent implements OnInit {
           description: trackImport['description'] || null,
           thumbnailUrl: trackImport['thumbnailurl'] || null,
           refCode: trackImport['refcode'] || null,
+          officialReleasedDateFormat: officialReleasedDateFormat,
           filteredTrackArtists: [...trackArtists],
           trackArtists,
+          officialReleasedDate: officialReleasedDate,
           tags: trackImport['tagsjson']
             ? ((JSON.parse(trackImport['tagsjson']) || []) as string[]).map(
                 (tag) => ({ name: tag, isActive: true }) as Tag
@@ -520,7 +565,8 @@ export class TrackManagementBulkComponent implements OnInit {
       trackArtists: [],
       filteredTrackArtists: [],
       isThumbnailDialogShowed: false,
-      formGroup: null
+      formGroup: null,
+      officialReleasedDateFormat: this.OFFICIAL_RELEASED_DATE_FORMATS[0]
     };
   }
   private mapToArtist(artistDto: ArtistDto): Artist {
@@ -600,7 +646,8 @@ export class TrackManagementBulkComponent implements OnInit {
       })),
       filteredTrackArtists: [],
       isThumbnailDialogShowed: false,
-      formGroup: null
+      formGroup: null,
+      officialReleasedDateFormat: this.OFFICIAL_RELEASED_DATE_FORMATS[0]
     };
   }
 }

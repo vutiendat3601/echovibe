@@ -93,6 +93,12 @@
         <p-sortIcon field="trackArtists" />
       </th>
 
+      <!-- Official released date -->
+      <th pSortableColumn="officialReleasedDate" style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NAME">
+        Official released date
+        <p-sortIcon field="officialReleasedDate" />
+      </th>
+
       <!-- Public -->
       <th style="min-width: 14rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_PUBLIC">Public</th>
 
@@ -235,6 +241,35 @@
                 </div>
               </ng-template>
             </p-multiselect>
+          </td>
+
+          <td class="flex flex-col gap-y-2" style="min-width: 16rem">
+            <p-floatlabel variant="on">
+              <p-select
+                id="officialReleasedDateFormat"
+                [options]="OFFICIAL_RELEASED_DATE_FORMATS"
+                formControlName="officialReleasedDateFormatFormControl"
+                optionLabel="format"
+                placeholder=""
+                class="w-full"
+              ></p-select>
+              <label for="officialReleasedDateFormat">Released date format</label>
+            </p-floatlabel>
+            <!-- </div> -->
+            <!-- Official released date format -->
+            <!-- <div class="ml-2 flex-1"> -->
+            <p-floatlabel variant="on">
+              <p-datepicker
+                id="officialReleasedDate"
+                formControlName="officialReleasedDateFormControl"
+                [dateFormat]="track_.officialReleasedDateFormat.datePickerFormat"
+                [view]="track_.officialReleasedDateFormat.view"
+                styleClass="w-full"
+              />
+              <!-- i18n="@@FORM_LABEL_TRACK_OFFICIAL_RELEASED_DATE" -->
+              <label for="officialReleasedDate">Released date</label>
+            </p-floatlabel>
+            <!-- </div> -->
           </td>
 
           <!-- Public -->
