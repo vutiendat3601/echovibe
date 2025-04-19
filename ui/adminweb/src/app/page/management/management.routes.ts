@@ -4,6 +4,7 @@ import { ArtistManagementComponent } from './artist-management/artist-management
 import { PlaylistManagementComponent } from './playlist-management/playlist-management.component';
 import { TrackManagementComponent } from './track-management/track-management.component';
 import { ArtistManagementBulkComponent } from './artist-management-bulk/artist-management-bulk.component';
+import { TrackManagementBulkComponent } from './track-management-bulk/track-management-bulk.component';
 
 export default [
   {
@@ -26,9 +27,22 @@ export default [
       {
         path: '',
         component: TrackManagementComponent
+      },
+      {
+        path: 'bulk',
+        component: TrackManagementBulkComponent
       }
     ]
   },
+  // {
+  //   path: 'audio',
+  //   children: [
+  //     {
+  //       path: '',
+  //       component: AudioManagementComponent
+  //     }
+  //   ]
+  // },
   {
     path: 'playlist',
     component: PlaylistManagementComponent

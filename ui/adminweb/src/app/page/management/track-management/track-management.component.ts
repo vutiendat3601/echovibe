@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService, FilterService, MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -145,7 +145,7 @@ interface Track {
   ],
   templateUrl: './track-management.component.html',
   styleUrl: './track-management.component.scss',
-  providers: [MessageService, ConfirmationService, TrackService]
+  providers: [MessageService, ConfirmationService, TrackService, FilterService]
 })
 export class TrackManagementComponent implements OnInit {
   readonly I18N = {
@@ -161,6 +161,7 @@ export class TrackManagementComponent implements OnInit {
     { name: 'Month with year', format: 'MM/yyyy', datePickerFormat: 'mm/yy', view: 'month' },
     { name: 'Only year', format: 'yyyy', datePickerFormat: 'yy', view: 'year' }
   ];
+  readonly filteredTrackArtists: TrackArtist[] = [];
   readonly trackArtists: TrackArtist[] = [];
   readonly artistsMap: Map<string, Artist> = new Map<string, Artist>();
   readonly isArtistsLoading: WritableSignal<boolean> = signal<boolean>(true);
@@ -213,6 +214,7 @@ export class TrackManagementComponent implements OnInit {
     private readonly confirmationService: ConfirmationService,
     private readonly trackService: TrackService,
     private readonly artistService: ArtistService,
+    private readonly filterService: FilterService,
     private readonly http: HttpClient,
     private readonly exceptionHandler: ExceptionHandler,
     private readonly router: Router
@@ -284,9 +286,18 @@ export class TrackManagementComponent implements OnInit {
     this.refCodeFormControl.setValue(refCode);
     this.isPublicFormControl.setValue(isPublic);
     this.tagsFormControl.setValue(tags.filter(({ isActive }) => isActive).map(({ name }) => name));
-    this.trackArtistsFormControl.setValue(trackArtists);
+    this.trackArtistsFormControl.setValue([...trackArtists]);
     track.revisionNumber > -1 && this.refCodeFormControl.disable();
     this.openTrackDialog('edit');
+  }
+
+  handleEditSelectedArtists(): void {
+    if (this.selectedTracks.length === 1) {
+      this.handleEditTrack(this.selectedTracks[0]);
+    } else if (this.selectedTracks.length > 1) {
+      const ids = this.selectedTracks.map((track) => track.id).join(',');
+      this.router.navigate(['/management/track/bulk'], { queryParams: { ids } });
+    }
   }
 
   handleDeleteSelectedTracks(): void {
@@ -346,6 +357,28 @@ export class TrackManagementComponent implements OnInit {
     } else {
       this.currentTrack.tagFilterFoundExactMatch = true;
     }
+  }
+
+  handleArtistFilter(event: MultiSelectFilterEvent): void {
+    const keyword = (event.filter as string) || '';
+    if (!keyword.trim()) {
+      this.filteredTrackArtists.length = 0;
+      this.filteredTrackArtists.push(...this.trackArtists.slice(0, 50));
+      this.filteredTrackArtists.push(...this.currentTrack.trackArtists);
+    }
+    this.isArtistsLoading.set(true);
+    const filteredTrackArtists = this.trackArtists
+      .filter(
+        ({ artistName }) =>
+          this.filterService.filters['startsWith'](artistName, keyword) ||
+          this.filterService.filters['contains'](artistName, keyword)
+      )
+      .slice(0, 50);
+    filteredTrackArtists.push(...this.currentTrack.trackArtists);
+
+    this.filteredTrackArtists.length = 0;
+    this.filteredTrackArtists.push(...filteredTrackArtists);
+    this.isArtistsLoading.set(false);
   }
 
   handleCreateTag(): void {
@@ -415,6 +448,8 @@ export class TrackManagementComponent implements OnInit {
       this.trackArtists.length = 0;
       const trackArtists = respDto.data.map((artistDto) => this.mapToTrackArtist(artistDto));
       this.trackArtists.push(...trackArtists);
+      this.filteredTrackArtists.length = 0;
+      this.filteredTrackArtists.push(...trackArtists.slice(0, 100));
 
       this.artistsMap.clear();
       const artists = respDto.data.map((artistDto) => this.mapToArtist(artistDto));
@@ -640,6 +675,7 @@ export class TrackManagementComponent implements OnInit {
       isVerified
     };
   }
+
   private mapToTrackArtist(artistDto: ArtistDto): TrackArtist {
     const {
       id,

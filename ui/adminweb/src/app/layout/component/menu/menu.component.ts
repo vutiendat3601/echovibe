@@ -25,6 +25,11 @@ export class MenuComponent {
           },
           { label: $localize`:@@MENU_ITEM_LABEL_TRACK:Track`, icon: 'pi pi-tiktok', routerLink: ['/management/track'] },
           {
+            label: $localize`:@@MENU_ITEM_LABEL_AUDIO:Audio`,
+            icon: 'pi pi-headphones',
+            routerLink: ['/management/audio']
+          },
+          {
             label: $localize`:@@MENU_ITEM_LABEL_PLAYLIST:Playlist`,
             icon: 'pi pi-list',
             routerLink: ['/management/playlist']
