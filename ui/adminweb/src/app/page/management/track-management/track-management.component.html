@@ -44,7 +44,6 @@
     />
   </ng-template>
 
-  <!-- (onClick)="handleImportCsv()" -->
   <ng-template #end>
     <p-button
       severity="secondary"
@@ -52,6 +51,7 @@
       label="Import CSV"
       icon="pi pi-file-import"
       class="mr-2"
+      (onClick)="handleImportCsv()"
     />
 
     <!-- (onClick)="handleExportCsv()" -->
