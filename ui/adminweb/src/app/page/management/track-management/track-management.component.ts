@@ -287,6 +287,7 @@ export class TrackManagementComponent implements OnInit {
     this.isPublicFormControl.setValue(isPublic);
     this.tagsFormControl.setValue(tags.filter(({ isActive }) => isActive).map(({ name }) => name));
     this.trackArtistsFormControl.setValue([...trackArtists]);
+    this.filteredTrackArtists.push(...trackArtists);
     track.revisionNumber > -1 && this.refCodeFormControl.disable();
     this.openTrackDialog('edit');
   }
