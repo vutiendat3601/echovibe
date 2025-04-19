@@ -541,6 +541,7 @@ export class ArtistManagementBulkComponent implements OnInit {
       isBiographyDialogShowed: false
     };
   }
+  
   private mapToArtist(artistDto: ArtistDto): Artist {
     const {
       id,
