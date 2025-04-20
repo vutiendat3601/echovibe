@@ -59,11 +59,11 @@ class TrackDetail(SQLModel, table=True):
 class TrackArtist(SQLModel, table=True):
     __tablename__ = "track_artist"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    aggregate_id: str = Field(..., max_length=12, unique=True)
     track_id: uuid.UUID = Field(foreign_key="track.id")
     track: Track = Relationship(back_populates="track_artists")
     artist_id: uuid.UUID = Field(foreign_key="artist.id")
-    artist_aggregate_id: str = Field(..., max_length=16)
+    track_aggregate_id: str = Field(..., max_length=12)
+    artist_aggregate_id: str = Field(..., max_length=12)
     is_active: bool = Field(default=True)
     is_main_artist: bool = Field(default=False)
     event_type: str | None = Field(None)
