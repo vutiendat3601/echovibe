@@ -88,7 +88,7 @@ public class TrackAggregate extends AggregateRoot {
     // description
     if (!Objects.equals(updateDetail.getDescription(), updatedDetail.getDescription())) {
       hasChange = true;
-      updatedDetail.setName(updateDetail.getDescription());
+      updatedDetail.setDescription(updateDetail.getDescription());
     }
 
     // thumbnailUrl
