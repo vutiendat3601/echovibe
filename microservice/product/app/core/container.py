@@ -63,4 +63,5 @@ class Container(containers.DeclarativeContainer):
         ArtistEventHandler, artist_repository=artist_repository, logger=logger)
     track_event_handler = providers.Factory(TrackEventHandler,
                                             track_repository=track_repository,
+                                            artist_repository=artist_repository,
                                             logger=logger)
