@@ -1,14 +1,18 @@
 from pydantic import BaseModel, Field
+from app.schema.artist_schema import ArtistDetailSchema
 
 
 class TrackArtistSchema(BaseModel):
-    artist_id: str = Field(default=None, alias="artistId")
-    is_active: bool = Field(default=True, alias="isActive")
+    id: str = Field(alias="id")
+    urn: str = Field(alias="urn")
+    name: str = Field(alias="name")
+    thumbnail_url: str | None = Field(None, alias="thumbnailUrl")
+    is_public: bool = Field(default=False, alias="isPublic")
+    is_verified: bool = Field(default=False, alias="isVerified")
     is_main_artist: bool = Field(default=False, alias="isMainArtist")
 
     class Config:
         populate_by_name = True
-        extra = "allow"
 
 
 class TrackDetailSchema(BaseModel):
@@ -21,8 +25,7 @@ class TrackDetailSchema(BaseModel):
                                                alias="officialReleasedDate")
     is_public: bool = Field(default=False, alias="isPublic")
     tags: list[str] = Field(default=[], alias="tags")
-    track_artists: list[TrackArtistSchema] | None = Field(default=[],
-                                                          alias="trackArtists")
+    artists: list[TrackArtistSchema] = Field(default=[], alias="artists")
 
     class Config:
         populate_by_name = True
