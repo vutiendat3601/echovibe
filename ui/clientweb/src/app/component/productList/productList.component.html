@@ -1,0 +1,29 @@
+<div class="discography">
+  <div class="discography-header" style="display: flex; justify-content: space-between; align-items: center">
+    <h2>{{ title }}</h2>
+    <button (click)="onToggleShowAll()" class="see-more-btn font-bold">
+      {{ showAll ? 'Show Less' : 'Show All' }}
+    </button>
+  </div>
+  <div class="mb-3 flex gap-4">
+    <p-button label="Popular release" variant="outlined" severity="contrast" [style]="{ borderRadius: '15px' }" />
+    <p-button label="Albums" variant="outlined" severity="contrast" [style]="{ borderRadius: '15px' }" />
+    <p-button label="Singles and EPs" variant="outlined" severity="contrast" [style]="{ borderRadius: '15px' }" />
+  </div>
+  <div class="discography-list" style="display: flex; overflow-x: auto; gap: 10px">
+    <div *ngFor="let item of visibleItems" class="discography-card" style="width: 100%">
+      <img
+        [src]="item.thumbnail"
+        alt="{{ item.name }}"
+        [ngStyle]="{
+          width: '100%',
+          height: 'auto',
+          'border-radius': circularThumbnails ? '50%' : '8px',
+          'aspect-ratio': circularThumbnails ? '1/1' : 'auto'
+        }"
+      />
+      <h3 style="font-size: 14px; margin: 5px 0">{{ item.name }}</h3>
+      <p style="font-size: 12px; color: gray">{{ item.info }}</p>
+    </div>
+  </div>
+</div>
