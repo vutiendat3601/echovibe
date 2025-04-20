@@ -2,19 +2,14 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AudioService, Track, RepeatMode } from '../../../service/audio.service';
-import { OfflineAudioService } from '../../../service/offline-audio.service';
-import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { MessageService } from 'primeng/api';
-import { Toast } from 'primeng/toast';
 
 @Component({
   selector: 'app-now-playing-bar',
   standalone: true,
-  imports: [CommonModule, FormsModule, Toast],
+  imports: [CommonModule, FormsModule],
   templateUrl: './now-playing-bar.component.html',
-  styleUrl: './now-playing-bar.component.scss',
-  providers: [MessageService]
+  styleUrl: './now-playing-bar.component.scss'
 })
 export class NowPlayingBarComponent implements OnInit, OnDestroy {
   currentTrack: Track | null = null;
@@ -24,6 +19,11 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
   volumePercent: number = 100;
   progressPercent: number = 0;
 
+  // Media upload properties
+  showMediaInput: boolean = false;
+  m3u8Url: string = '';
+  streamName: string = '';
+
   // New properties for extended functionality
   isMuted: boolean = false;
   isShuffled: boolean = false;
@@ -31,130 +31,147 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
   showQueue: boolean = false;
   playlist: Track[] = [];
 
-  // Offline properties
-  offlineTracks: Track[] = [];
-
   private subscriptions: Subscription[] = [];
 
-  constructor(
-    private audioService: AudioService,
-    private offlineAudioService: OfflineAudioService,
-    private router: Router,
-    private messageService: MessageService
-  ) {}
+  constructor(private audioService: AudioService) { }
 
   ngOnInit(): void {
     // Subscribe to audio service observables
     this.subscriptions.push(
-      this.audioService.currentTrack$.subscribe((track) => {
+      this.audioService.currentTrack$.subscribe(track => {
         this.currentTrack = track;
       }),
 
-      this.audioService.isPlaying$.subscribe((isPlaying) => {
+      this.audioService.isPlaying$.subscribe(isPlaying => {
         this.isPlaying = isPlaying;
       }),
 
-      this.audioService.currentTime$.subscribe((time) => {
+      this.audioService.currentTime$.subscribe(time => {
         this.currentTime = time;
         if (this.duration > 0) {
           this.progressPercent = (this.currentTime / this.duration) * 100;
         }
       }),
 
-      this.audioService.duration$.subscribe((duration) => {
+      this.audioService.duration$.subscribe(duration => {
         this.duration = duration;
       }),
 
-      this.audioService.volume$.subscribe((volume) => {
+      this.audioService.volume$.subscribe(volume => {
         this.volumePercent = volume;
       }),
 
-      this.audioService.mute$.subscribe((muted) => {
+      this.audioService.mute$.subscribe(muted => {
         this.isMuted = muted;
       }),
 
-      this.audioService.shuffle$.subscribe((shuffled) => {
+      this.audioService.shuffle$.subscribe(shuffled => {
         this.isShuffled = shuffled;
       }),
 
-      this.audioService.repeatMode$.subscribe((mode) => {
+      this.audioService.repeatMode$.subscribe(mode => {
         this.repeatMode = mode;
       }),
 
-      this.audioService.playlist$.subscribe((playlist) => {
+      this.audioService.playlist$.subscribe(playlist => {
         this.playlist = playlist;
-      }),
-
-      this.offlineAudioService.offlineTracks$.subscribe((tracks) => {
-        this.offlineTracks = tracks;
       })
     );
   }
 
   // Playback controls
-  handleTogglePlay(): void {
+  togglePlay(): void {
     this.audioService.togglePlay();
   }
 
-  handleNext(): void {
+  next(): void {
     this.audioService.next();
   }
 
-  handlePrevious(): void {
+  previous(): void {
     this.audioService.previous();
   }
 
   // New control methods
-  handleToggleShuffle(): void {
+  toggleShuffle(): void {
     this.audioService.toggleShuffle();
   }
 
-  handleToggleRepeat(): void {
+  toggleRepeat(): void {
     this.audioService.toggleRepeat();
   }
 
-  handleToggleMute(): void {
+  toggleMute(): void {
     this.audioService.toggleMute();
   }
 
-  handleToggleQueue(): void {
+  toggleQueue(): void {
     this.showQueue = !this.showQueue;
   }
 
   // Track selection from queue
-  handlePlayTrack(track: Track): void {
+  playTrack(track: Track): void {
     this.audioService.setTrack(track);
     this.audioService.play();
   }
 
   // Remove track from queue
-  handleRemoveTrack(event: Event, trackId: string): void {
+  removeTrack(event: Event, trackId: string): void {
     event.stopPropagation();
     this.audioService.removeFromPlaylist(trackId);
   }
 
   // Position and volume controls
-  handleSetPosition(event: MouseEvent): void {
+  setPosition(event: MouseEvent): void {
     const progressBar = event.currentTarget as HTMLElement;
     const clickPosition = event.offsetX / progressBar.offsetWidth;
     const seekTime = this.duration * clickPosition;
     this.audioService.setCurrentTime(seekTime);
   }
 
-  handleSetVolume(event: MouseEvent): void {
+  setVolume(event: MouseEvent): void {
     const volumeBar = event.currentTarget as HTMLElement;
     const clickPosition = event.offsetX / volumeBar.offsetWidth;
     const volume = Math.round(clickPosition * 100);
     this.audioService.setVolume(volume);
   }
 
-  handleFormatTime(seconds: number): string {
+  formatTime(seconds: number): string {
     return this.audioService.formatTime(seconds);
   }
 
+  // File handling methods
+  toggleMediaInput(): void {
+    this.showMediaInput = !this.showMediaInput;
+    // Close queue panel when opening media input
+    if (this.showMediaInput && this.showQueue) {
+      this.showQueue = false;
+    }
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.audioService.loadAudioFile(file);
+      this.showMediaInput = false;
+    }
+  }
+
+  submitM3u8Url(): void {
+    if (this.m3u8Url) {
+      const name = this.streamName || 'Stream';
+      this.audioService.loadM3u8Url(this.m3u8Url, name);
+      this.m3u8Url = '';
+      this.streamName = '';
+      this.showMediaInput = false;
+    }
+  }
+
   // Helper methods for template
-  handleGetRepeatIcon(): string {
-    switch (this.repeatMode) {
+  getRepeatIcon(): string {
+    switch(this.repeatMode) {
       case RepeatMode.ONE:
         return 'pi-sync pi-sync-one';
       case RepeatMode.ALL:
@@ -164,7 +181,7 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  handleGetVolumeIcon(): string {
+  getVolumeIcon(): string {
     if (this.isMuted || this.volumePercent === 0) {
       return 'pi-volume-off';
     } else if (this.volumePercent < 50) {
@@ -174,21 +191,21 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  handleIsCurrentTrack(track: Track): boolean {
+  isCurrentTrack(track: Track): boolean {
     return !!this.currentTrack && this.currentTrack.id === track.id;
   }
 
   // Get the next up tracks (all tracks except the current one)
-  handleGetNextUpTracks(): Track[] {
+  getNextUpTracks(): Track[] {
     if (!this.currentTrack || this.playlist.length <= 1) {
       return [];
     }
 
-    return this.playlist.filter((track) => track.id !== this.currentTrack?.id);
+    return this.playlist.filter(track => track.id !== this.currentTrack?.id);
   }
 
   // Clear the entire queue
-  handleClearQueue(): void {
+  clearQueue(): void {
     if (confirm('Are you sure you want to clear the entire queue?')) {
       // Reset audio but keep the current track
       const currentTrack = this.currentTrack;
@@ -196,40 +213,8 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Offline methods
-  handleIsTrackSavedOffline(trackId: string | undefined): boolean {
-    if (!trackId) return false;
-    return this.offlineAudioService.isTrackSavedOffline(trackId);
-  }
-
-  async handleToggleOfflineSave(track: Track | null): Promise<void> {
-    if (!track) return;
-
-    try {
-      if (this.handleIsTrackSavedOffline(track.id)) {
-        // Remove from offline
-        const success = await this.offlineAudioService.removeTrackFromOffline(track.id);
-        if (success) {
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Song removed from offline library' });
-        } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to remove song from offline library' });
-        }
-      } else {
-        // Add to offline
-        const success = await this.offlineAudioService.saveTrackForOffline(track);
-        if (success) {
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Song saved for offline listening' });
-        } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to save song for offline listening' });
-        }
-      }
-    } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error saving song for offline listening' });
-    }
-  }
-
   ngOnDestroy(): void {
     // Unsubscribe from all subscriptions
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 }

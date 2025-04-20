@@ -83,15 +83,6 @@
   }
 }
 
-/* Active state for download button */
-.action-button.active {
-  color: #1db954;
-
-  &:hover {
-    color: #1ed760;
-  }
-}
-
 /* Playback controls section */
 .playback-controls {
   width: 40%;
@@ -285,6 +276,100 @@
   margin-left: -6px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   z-index: 100;
+}
+
+/* Media Input Dialog */
+.media-input-dialog {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 350px;
+  background-color: #282828;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  z-index: 1001;
+  overflow: hidden;
+}
+
+.media-input-content {
+  padding: 20px;
+
+  h3 {
+    margin: 0 0 16px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+}
+
+.media-input-section {
+  margin-bottom: 16px;
+
+  h4 {
+    font-size: 14px;
+    margin: 0 0 8px;
+    color: #b3b3b3;
+  }
+
+  input[type="file"] {
+    width: 100%;
+    color: #b3b3b3;
+    margin-bottom: 8px;
+    background-color: #333;
+    padding: 8px;
+    border-radius: 4px;
+    border: none;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    background-color: #333;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    color: #fff;
+    margin-bottom: 8px;
+
+    &::placeholder {
+      color: #727272;
+    }
+  }
+
+  button {
+    background-color: #1db954;
+    color: #000;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      background-color: #1ed760;
+    }
+  }
+}
+
+.media-input-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  button {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #444;
+    }
+  }
 }
 
 /* Queue Panel */
