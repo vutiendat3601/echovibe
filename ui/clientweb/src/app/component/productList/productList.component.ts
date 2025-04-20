@@ -29,7 +29,7 @@ export class productList {
     return this.showAll ? this.items : this.items.slice(0, this.defaultItemCount);
   }
 
-  handleOnToggleShowAll(): void {
+  onToggleShowAll(): void {
     this.toggleShowAll.emit();
   }
 }

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Artist, ArtistImage, ArtistRevision } from '../../../model/artist';
 import { ResponseDto } from '../../../dto/response-dto';
-import { ArtistDetailDto } from '../../../dto/artist-dto';
+import { ArtistDto } from '../../../dto/artist-dto';
 import { CommonModule } from '@angular/common';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { BadgeModule } from 'primeng/badge';
@@ -13,26 +13,10 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import { productList } from '../../../component/productList/productList.component';
 
-import { Tag } from '../../../model/tag';
-
-interface ArtistDetail {
-  id: string;
-  urn: string;
-  name: string;
-  description: string | null;
-  biography: string | null;
-  nationalityIsoCode: string | null;
-  thumbnailUrl: string | null;
-  backgroundUrl: string | null;
-  isPublic: boolean;
-  isVerified: boolean;
-  tags: string[];
-}
 
 @Component({
   selector: 'app-artist-detail',
   standalone: true,
-  imports: [CommonModule, ProgressBarModule, BadgeModule, CardModule, ButtonModule, FontAwesomeModule, productList],
   imports: [
     CommonModule,
     ProgressBarModule,
@@ -52,39 +36,6 @@ export class ArtistDetailComponent implements OnInit {
   showAll = false;
   showAllDiscography = false;
   discography = [
-
-    {
-      thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg',
-      name: 'Chúng Ta Của Hiện Tại',
-      info: 'Single • 2020'
-    },
-    {
-      thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg',
-      name: 'Có Chắc Yêu Là Đây',
-      info: 'Single • 2020'
-    },
-    {
-      thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg',
-      name: 'Hãy Trao Cho Anh',
-      info: 'Single • 2019'
-    },
-    { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Chạy Ngay Đi', info: 'Single • 2018' },
-    { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Lạc Trôi', info: 'Single • 2017' },
-    {
-      thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg',
-      name: 'Nơi Này Có Anh',
-      info: 'Single • 2017'
-    },
-    {
-      thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg',
-      name: 'Âm Thầm Bên Em',
-      info: 'Single • 2015'
-    },
-    {
-      thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg',
-      name: 'Cơn Mưa Ngang Qua',
-      info: 'Single • 2013'
-    }
     { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Chúng Ta Của Hiện Tại', info: 'Single • 2020' },
     { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Có Chắc Yêu Là Đây', info: 'Single • 2020' },
     { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Hãy Trao Cho Anh', info: 'Single • 2019' },
@@ -93,7 +44,6 @@ export class ArtistDetailComponent implements OnInit {
     { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Nơi Này Có Anh', info: 'Single • 2017' },
     { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Âm Thầm Bên Em', info: 'Single • 2015' },
     { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Cơn Mưa Ngang Qua', info: 'Single • 2013' },
-
   ];
   // Icons from FontAwesome
   faPlay = faPlay;
@@ -116,34 +66,6 @@ export class ArtistDetailComponent implements OnInit {
     this.showAllDiscography = !this.showAllDiscography;
   }
 
-  private mapToArtistDetail(artistDetailDto: ArtistDetailDto): ArtistDetail {
-    const {
-      id,
-      urn,
-      name,
-      description,
-      biography,
-      nationalityIsoCode,
-      thumbnailUrl,
-      backgroundUrl,
-      isPublic,
-      isVerified,
-      tags
-    } = artistDetailDto;
-    return {
-      id,
-      urn,
-      name,
-      description,
-      biography,
-      nationalityIsoCode,
-      thumbnailUrl,
-      backgroundUrl,
-      isPublic,
-      isVerified,
-      tags
-    };
-  }
   private loadData(): void {
     this.activeRoute.params.subscribe((params) => {
       if (params['id']) {
