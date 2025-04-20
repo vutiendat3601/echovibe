@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime, timezone
 from sqlalchemy.dialects.postgresql import ARRAY, ENUM, JSONB
 from sqlalchemy import TEXT
+from app.model.artist import Artist
 
 
 class Track(SQLModel, table=True):
@@ -36,6 +37,25 @@ class Track(SQLModel, table=True):
         arbitrary_types_allowed = True
 
 
+class TrackDetail(SQLModel, table=True):
+    __tablename__ = "mv_track_detail"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    aggregate_id: str = Field(..., max_length=16, unique=True)
+    urn: str = Field(..., max_length=255, unique=True)
+    name: str = Field(..., max_length=255)
+    description: str | None = Field(None, max_length=250)
+    is_public: bool = Field(default=False)
+    thumbnail_file_key: str | None = Field(None)
+    thumbnail_url: str | None = Field(None)
+    audio_m3u8_file_url: str | None = Field(None)
+    official_released_date: str | None = Field(None, max_length=16)
+    tags: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
+    artists_json: list[dict[str, any]] = Field([], sa_column=Column(JSONB))
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
 class TrackArtist(SQLModel, table=True):
     __tablename__ = "track_artist"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -53,25 +73,6 @@ class TrackArtist(SQLModel, table=True):
     updated_at: datetime = Field(default=datetime.now(timezone.utc))
     created_by: str | None = Field(None)
     updated_by: str | None = Field(None)
-
-    class Config:
-        arbitrary_types_allowed = True
-
-
-class TrackDetail(SQLModel, table=True):
-    __tablename__ = "mv_track_detail"
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    aggregate_id: str = Field(..., max_length=16, unique=True)
-    urn: str = Field(..., max_length=255, unique=True)
-    name: str = Field(..., max_length=255)
-    description: str | None = Field(None, max_length=250)
-    is_public: bool = Field(default=False)
-    thumbnail_file_key: str | None = Field(None)
-    thumbnail_url: str | None = Field(None)
-    audio_m3u8_file_url: str | None = Field(None)
-    official_released_date: str | None = Field(None, max_length=16)
-    tags: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
-    artists_json: list[dict[str, any]] = Field([], sa_column=Column(JSONB))
 
     class Config:
         arbitrary_types_allowed = True

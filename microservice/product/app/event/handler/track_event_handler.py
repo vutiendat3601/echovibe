@@ -1,7 +1,7 @@
 from app.core.logger import Logger
 from datetime import datetime, timezone
-from app.repository.impl.sqlmodel_track_repository import TrackRepository
-from app.repository.impl.sqlmodel_artist_repository import (ArtistRepository)
+from app.repository.track_repository import (TrackRepository)
+from app.repository.artist_repository import (ArtistRepository)
 from app.event.schema.track_event_schema import (TrackReleasedEvent,
                                                  TrackDeletedEvent)
 from app.model.track import (Track, TrackArtist)
@@ -11,8 +11,8 @@ class TrackEventHandler:
 
     def __init__(self, track_repository: TrackRepository,
                  artist_repository: ArtistRepository, logger: Logger):
-        self.track_repository = track_repository,
-        self.artist_repository = artist_repository,
+        self.track_repository = track_repository
+        self.artist_repository = artist_repository
         self.logger = logger
 
     def handle_track_released_event(self,
@@ -45,10 +45,9 @@ class TrackEventHandler:
         track.event_timestamp = track_released_event.timestamp
         track.created_at = updated_at
         track.updated_by = track_released_event.created_by
-        track.track_artists = []
         for track_artist in track_released_event.track_artists:
             artist = self.artist_repository.find_by_aggregate_id_and_is_active_true(
-                track_artist.id)
+                track_artist.artist_id)
             if artist is not None:
                 track.track_artists.append(
                     TrackArtist(
