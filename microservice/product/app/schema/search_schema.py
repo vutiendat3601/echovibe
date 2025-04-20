@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Generic, TypeVar
-from app.schema.artist_schema import ArtistDetailScheme
+from app.schema.artist_schema import ArtistDetailSchema
 
 T = TypeVar("T")
 
@@ -15,7 +15,7 @@ class SearchResult(BaseModel, Generic[T]):
 
 class SearchSchema(BaseModel):
     keyword: str = Field(alias="keyword")
-    artist: SearchResult[ArtistDetailScheme] | None = Field(default=None)
+    artist: SearchResult[ArtistDetailSchema] | None = Field(default=None)
 
     class Config:
         populate_by_name = True

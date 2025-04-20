@@ -4,7 +4,7 @@ from app.repository.artist_detail_repository import ArtistDetailRepository
 from app.core.exception import NotFoundException
 from app.mapper.artist_mapper import map_to_artist_detail_schema
 from app.core.logger import Logger
-from app.schema.artist_schema import ArtistDetailScheme
+from app.schema.artist_schema import ArtistDetailSchema
 
 
 class ArtistService:
@@ -15,7 +15,7 @@ class ArtistService:
         self.logger = logger
 
     def get_artist_by_aggregate_id(self,
-                                   aggregate_id: str) -> ArtistDetailScheme:
+                                   aggregate_id: str) -> ArtistDetailSchema:
         artist_detail = self.artist_detail_repository.find_by_aggregate_id(
             aggregate_id)
         if (artist_detail is None):
@@ -24,7 +24,7 @@ class ArtistService:
         return map_to_artist_detail_schema(artist_detail)
 
     def get_artist_by_aggregate_ids(
-            self, aggregate_ids: list[str]) -> list[ArtistDetailScheme | None]:
+            self, aggregate_ids: list[str]) -> list[ArtistDetailSchema | None]:
         artist_details = self.artist_detail_repository.find_by_aggregate_ids(
             aggregate_ids)
         artist_detail_schemas_map = dict(

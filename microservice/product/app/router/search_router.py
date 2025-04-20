@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query
 from dependency_injector.wiring import Provide
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from app.schema.artist_schema import (ArtistDetailScheme)
+from app.schema.artist_schema import (ArtistDetailSchema)
 from app.service.artist_service import ArtistService
 from app.core.container import Container
 from app.schema.schema import ResponseSchema, ok

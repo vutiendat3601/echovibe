@@ -1,0 +1,82 @@
+from app.core.logger import Logger
+from datetime import datetime, timezone
+from app.repository.impl.sqlmodel_track_repository import TrackRepository
+from app.repository.impl.sqlmodel_artist_repository import (ArtistRepository)
+from app.event.schema.track_event_schema import (TrackReleasedEvent,
+                                                 TrackDeletedEvent)
+from app.model.track import (Track, TrackArtist)
+
+
+class TrackEventHandler:
+
+    def __init__(self, track_repository: TrackRepository,
+                 artist_repository: ArtistRepository, logger: Logger):
+        self.track_repository = track_repository,
+        self.artist_repository = artist_repository,
+        self.logger = logger
+
+    def handle_track_released_event(self,
+                                    track_released_event: TrackReleasedEvent):
+        updated_at = datetime.now(timezone.utc)
+        track = self.track_repository.find_by_aggregate_id_and_is_active_true(
+            track_released_event.id)
+        if track is None:
+            track = Track()
+            track.aggregate_id = track_released_event.id
+            track.created_at = updated_at
+            track.created_by = track_released_event.created_by
+        release_detail = track_released_event.detail
+        track.urn = track_released_event.urn
+        track.ref_code = track_released_event.ref_code
+        track.name = release_detail.name
+        track.description = release_detail.description
+        track.official_released_date = release_detail.official_released_date
+        track.thumbnail_file_key = release_detail.thumbnail_file_key
+        track.thumbnail_url = release_detail.thumbnail_url
+        track.revision_number = track_released_event.revision_number
+        track.is_public = track_released_event.is_public
+        track.is_released = track_released_event.is_released
+        track.is_active = track_released_event.is_active
+        track.tags = [
+            tag.name for tag in track_released_event.tags if tag.is_active
+        ]
+        track.event_type = track_released_event.type
+        track.event_version = track_released_event.version
+        track.event_timestamp = track_released_event.timestamp
+        track.created_at = updated_at
+        track.updated_by = track_released_event.created_by
+        track.track_artists = []
+        for track_artist in track_released_event.track_artists:
+            artist = self.artist_repository.find_by_aggregate_id_and_is_active_true(
+                track_artist.id)
+            if artist is not None:
+                track.track_artists.append(
+                    TrackArtist(
+                        artist_id=artist.id,
+                        track_id=track.id,
+                        artist_aggregate_id=artist.aggregate_id,
+                        is_main_artist=track_artist.is_main_artist,
+                        is_active=track_artist.is_active,
+                    ))
+        self.track_repository.save_track(track)
+        self.logger.info(
+            f"Processed {TrackReleasedEvent.__name__}: id={track_released_event.id}, version={track_released_event.version}"
+        )
+
+    def handle_track_deleted_event(self,
+                                   track_deleted_event: TrackDeletedEvent):
+        if track_deleted_event.is_soft_deleted:
+            track = self.track_repository.find_by_aggregate_id_and_is_active_true(
+                track_deleted_event.id)
+            if track is not None:
+                track.is_active = track_deleted_event.is_active
+                track.event_type = track_deleted_event.type
+                track.event_version = track_deleted_event.version
+                track.event_timestamp = track_deleted_event.timestamp
+                track.updated_at = datetime.now(timezone.utc)
+                self.track_repository.save_track(track)
+        else:
+            self.track_repository.delete_by_aggregate_id(track_deleted_event.id)
+        self.logger.info(
+            f"Processed {TrackDeletedEvent.__name__}: id={track_deleted_event.id}, version={track_deleted_event.version}, timestamp={track_deleted_event.timestamp}"
+        )

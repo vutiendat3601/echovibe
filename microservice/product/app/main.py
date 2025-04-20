@@ -5,9 +5,10 @@ import asyncio
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from app.util.dependency_util import singleton
-from app.router.router import apiRouter
+from app.router.router import api_router
 from app.core.container import Container
 from app.event.listener.artist_event_listener import get_artist_event_listeners
+from app.event.listener.track_event_listener import get_track_event_listeners
 from app.core.configuration import configuration
 from app.constant.constant import APP_NAME
 
@@ -23,7 +24,9 @@ class AppInitializer:
         async def lifespan(_: FastAPI) -> AsyncGenerator[None, None]:
             self.logger.info("Starting Kafka consumers...")
             consumer_tasks = []
-            consumer_listeners: list[callable] = get_artist_event_listeners()
+            consumer_listeners: list[callable] = [
+                *get_artist_event_listeners(), *get_track_event_listeners()
+            ]
             for consumer_listener in consumer_listeners:
                 consumer_tasks.append(asyncio.create_task(consumer_listener()))
             yield
@@ -58,14 +61,13 @@ class AppInitializer:
 {APP_NAME} {configuration.get_build_number()}
 Powered by FastAPI
 """)
-        print(allow_credentials)
         self.logger.info(allow_credentials)
         self.logger.info(
             f"Cross-origin resource sharing (CORS) configuration: allowedOriginPatterns={allow_origins[0]}, allowedMethods={allow_methods[0]}, allowedHeaders={allow_headers[0]}, allowCredentials={allow_credentials[0]}, maxAge={max_age}"
         )
 
         # Set routes
-        self.app.include_router(apiRouter)
+        self.app.include_router(api_router)
         self.logger.info("App is initialized successfully.")
 
 

@@ -1,7 +1,9 @@
-name: "echovibe"
+name: "echovibe-product"
 services:
   product-pg-i1:
     image: "postgres:17.2-bookworm"
+    container_name: "echovibe-product-pg-i1"
+    hostname: "echovibe-product-pg-i1"
     environment:
       - POSTGRES_DB=echovibe_product
       - POSTGRES_USER=echovibe_product
