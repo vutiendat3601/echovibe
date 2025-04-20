@@ -471,7 +471,7 @@ export class TrackManagementBulkComponent implements OnInit {
           description: trackImport['description'] || null,
           thumbnailUrl: trackImport['thumbnailurl'] || null,
           refCode: trackImport['refcode'] || null,
-          officialReleasedDateFormat: officialReleasedDateFormat,
+          officialReleasedDateFormat,
           filteredTrackArtists: [...trackArtists],
           trackArtists,
           officialReleasedDate: officialReleasedDate,
