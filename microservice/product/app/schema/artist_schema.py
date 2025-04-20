@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class ArtistDetailSchema(BaseModel):
     id: str = Field(alias="id")
     urn: str = Field(alias="urn")
