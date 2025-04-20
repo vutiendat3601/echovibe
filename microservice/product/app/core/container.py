@@ -29,11 +29,11 @@ class Container(containers.DeclarativeContainer):
         SqlmodelArtistRepository,
         logger=logger,
         session_factory=database.provided.session)
-
     artist_detail_repository = providers.Factory(
         SqlmodelArtistDetailRepository,
         logger=logger,
         session_factory=database.provided.session)
+
     track_repository = providers.Factory(
         SqlmodelTrackRepository,
         logger=logger,
