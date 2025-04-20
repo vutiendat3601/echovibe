@@ -162,7 +162,7 @@ CREATE TABLE track (
 	revision_number int,
 	thumbnail_file_key text,
 	thumbnail_url text,
-    file_m3u8_url text,
+    audio_m3u8_file_url text,
     official_released_date varchar(16),
 	tags _text NOT NULL DEFAULT '{}', -- used for tsv trigger
 	is_active bool NOT NULL,
@@ -236,7 +236,7 @@ AS SELECT id,
     is_released,
     thumbnail_file_key,
     thumbnail_url,
-    file_m3u8_url,
+    audio_m3u8_file_url,
     official_released_date,
     tags,
     is_active,
@@ -277,7 +277,7 @@ EXECUTE FUNCTION refresh_mv_track_detail()
 
     search_track_function_ddl = """
 CREATE OR REPLACE FUNCTION public.search_track(keyword text)
- RETURNS TABLE(tsv_criteria text, id uuid, aggregate_id character varying, urn character varying, name character varying, description character varying, is_public boolean, is_released boolean, thumbnail_file_key text, thumbnail_url text, file_m3u8_url text, official_released_date character varying, tags text[], is_active boolean, tsv tsvector, artists_json jsonb)
+ RETURNS TABLE(tsv_criteria text, id uuid, aggregate_id character varying, urn character varying, name character varying, description character varying, is_public boolean, is_released boolean, thumbnail_file_key text, thumbnail_url text, audio_m3u8_file_url text, official_released_date character varying, tags text[], is_active boolean, tsv tsvector, artists_json jsonb)
  LANGUAGE plpgsql
 AS $function$
 DECLARE
@@ -312,7 +312,7 @@ RETURN QUERY
     td.is_released,
     td.thumbnail_file_key,
     td.thumbnail_url,
-    td.file_m3u8_url,
+    td.audio_m3u8_file_url,
     td.official_released_date,
     td.tags,
     td.is_active,

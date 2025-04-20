@@ -19,25 +19,7 @@ class ArtistProfileSchema(BaseModel):
         extra = "allow"
 
 
-class ArtistSchema(BaseModel):
-    id: str = Field()
-    urn: str = Field()
-    name: str = Field()
-    description: str | None = Field(default=None)
-    biography: str | None = Field(default=None)
-    is_public: bool = Field(serialization_alias="isPublic")
-    thumbnail_url: str | None = Field(default=None,
-                                      serialization_alias="thumbnailUrl")
-    background_url: str | None = Field(default=None,
-                                       serialization_alias="backgroundUrl")
-    tags: list[str] = Field(default=[], serialization_alias="tags")
-
-    class Config:
-        populate_by_name = True
-        extra = "allow"
-
-
-class ArtistDetailScheme(BaseModel):
+class ArtistDetailSchema(BaseModel):
     id: str = Field(alias="id")
     urn: str = Field(alias="urn")
     name: str = Field(alias="name")

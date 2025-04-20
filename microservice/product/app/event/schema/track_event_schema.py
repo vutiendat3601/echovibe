@@ -5,6 +5,7 @@ from app.schema.tag_schema import TagSchema
 
 class TrackArtistSchema(BaseModel):
     artist_id: str = Field(default=None, alias="artistId")
+    artist_ref_code: str | None = Field(default=None, alias="artistRefCode")
     is_active: bool = Field(default=True, alias="isActive")
     is_main_artist: bool = Field(default=False, alias="isMainArtist")
 
@@ -52,6 +53,8 @@ class TrackReleasedEvent(EventSchema):
     ref_code: str | None = Field(default=None, alias="refCode")
     revision_number: int = Field(alias="revisionNumber")
     tags: list[TagSchema] = Field(default=[], alias="tags")
+    track_artists: list[TrackArtistSchema] = Field(default=[],
+                                                   alias="trackArtists")
 
     class Config:
         populate_by_name = True
