@@ -6,12 +6,13 @@ import { filter, Subscription } from 'rxjs';
 import { TopBarComponent } from '../top-bar/top-bar.component';
 import { SideBarComponent } from '../side-bar/side-bar.component';
 import { FooterComponent } from '../footer/footer.component';
+import { NowPlayingBarComponent } from '../now-playing-bar/now-playing-bar.component';
 import { LayoutService } from '../../service/layout.service';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, TopBarComponent, SideBarComponent, RouterModule, FooterComponent],
+  imports: [CommonModule, TopBarComponent, SideBarComponent, RouterModule, FooterComponent, NowPlayingBarComponent],
   templateUrl: './layout.component.html'
 })
 export class LayoutComponent implements OnInit {
