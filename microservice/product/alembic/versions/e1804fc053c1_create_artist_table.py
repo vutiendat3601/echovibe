@@ -275,6 +275,13 @@ FOR EACH STATEMENT
 EXECUTE FUNCTION refresh_mv_track_detail()
 ;"""
 
+    track_artist_refresh_mv_track_detail_trigger_ddl = """
+CREATE TRIGGER track_artist_refresh_mv_track_detail_trigger
+AFTER INSERT OR UPDATE OR DELETE ON track_artist
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mv_track_detail()
+;"""
+
     search_track_function_ddl = """
 CREATE OR REPLACE FUNCTION public.search_track(keyword text)
  RETURNS TABLE(tsv_criteria text, id uuid, aggregate_id character varying, urn character varying, name character varying, description character varying, is_public boolean, is_released boolean, thumbnail_file_key text, thumbnail_url text, audio_m3u8_file_url text, official_released_date character varying, tags text[], is_active boolean, tsv tsvector, artists_json jsonb)
@@ -336,7 +343,9 @@ $function$
         create_track_table_ddl, create_track_artist_table_ddl,
         create_track_detail_materialized_view_ddl,
         refresh_mv_track_detail_view_function_ddl,
-        track_refresh_mv_track_detail_trigger_ddl, search_track_function_ddl
+        track_refresh_mv_track_detail_trigger_ddl,
+        track_artist_refresh_mv_track_detail_trigger_ddl,
+        search_track_function_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)
