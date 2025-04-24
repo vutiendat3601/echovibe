@@ -36,7 +36,7 @@ export class OfflineLibraryComponent implements OnInit, OnDestroy {
     );
   }
 
-  playTrack(track: Track): void {
+  handlePlayTrack(track: Track): void {
     this.audioService.playOfflineTrack(track).catch(error => {
       console.error('Error playing offline track:', error);
       // Handle playback error
@@ -44,18 +44,18 @@ export class OfflineLibraryComponent implements OnInit, OnDestroy {
     });
   }
 
-  async removeTrack(event: Event, track: Track): Promise<void> {
+  async handleRemoveTrack(event: Event, track: Track): Promise<void> {
     event.stopPropagation();
     if (confirm(`Remove "${track.name}" from your offline library?`)) {
       await this.offlineAudioService.removeTrackFromOffline(track.id);
     }
   }
 
-  onSearchChange(): void {
+  handleOnSearchChange(): void {
     this.filterAndSortTracks();
   }
 
-  onSortChange(): void {
+  handleOnSortChange(): void {
     this.filterAndSortTracks();
   }
 

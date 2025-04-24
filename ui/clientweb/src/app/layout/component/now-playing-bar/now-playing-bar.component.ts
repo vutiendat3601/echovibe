@@ -92,68 +92,68 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
   }
 
   // Playback controls
-  togglePlay(): void {
+  handleTogglePlay(): void {
     this.audioService.togglePlay();
   }
 
-  next(): void {
+  handleNext(): void {
     this.audioService.next();
   }
 
-  previous(): void {
+  handlePrevious(): void {
     this.audioService.previous();
   }
 
   // New control methods
-  toggleShuffle(): void {
+  handleToggleShuffle(): void {
     this.audioService.toggleShuffle();
   }
 
-  toggleRepeat(): void {
+  handleToggleRepeat(): void {
     this.audioService.toggleRepeat();
   }
 
-  toggleMute(): void {
+  handleToggleMute(): void {
     this.audioService.toggleMute();
   }
 
-  toggleQueue(): void {
+  handleToggleQueue(): void {
     this.showQueue = !this.showQueue;
   }
 
   // Track selection from queue
-  playTrack(track: Track): void {
+  handlePlayTrack(track: Track): void {
     this.audioService.setTrack(track);
     this.audioService.play();
   }
 
   // Remove track from queue
-  removeTrack(event: Event, trackId: string): void {
+  handleRemoveTrack(event: Event, trackId: string): void {
     event.stopPropagation();
     this.audioService.removeFromPlaylist(trackId);
   }
 
   // Position and volume controls
-  setPosition(event: MouseEvent): void {
+  handleSetPosition(event: MouseEvent): void {
     const progressBar = event.currentTarget as HTMLElement;
     const clickPosition = event.offsetX / progressBar.offsetWidth;
     const seekTime = this.duration * clickPosition;
     this.audioService.setCurrentTime(seekTime);
   }
 
-  setVolume(event: MouseEvent): void {
+  handleSetVolume(event: MouseEvent): void {
     const volumeBar = event.currentTarget as HTMLElement;
     const clickPosition = event.offsetX / volumeBar.offsetWidth;
     const volume = Math.round(clickPosition * 100);
     this.audioService.setVolume(volume);
   }
 
-  formatTime(seconds: number): string {
+  handleFormatTime(seconds: number): string {
     return this.audioService.formatTime(seconds);
   }
 
   // Helper methods for template
-  getRepeatIcon(): string {
+  handleGetRepeatIcon(): string {
     switch (this.repeatMode) {
       case RepeatMode.ONE:
         return 'pi-sync pi-sync-one';
@@ -164,7 +164,7 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  getVolumeIcon(): string {
+  handleGetVolumeIcon(): string {
     if (this.isMuted || this.volumePercent === 0) {
       return 'pi-volume-off';
     } else if (this.volumePercent < 50) {
@@ -174,12 +174,12 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  isCurrentTrack(track: Track): boolean {
+  handleIsCurrentTrack(track: Track): boolean {
     return !!this.currentTrack && this.currentTrack.id === track.id;
   }
 
   // Get the next up tracks (all tracks except the current one)
-  getNextUpTracks(): Track[] {
+  handleGetNextUpTracks(): Track[] {
     if (!this.currentTrack || this.playlist.length <= 1) {
       return [];
     }
@@ -188,7 +188,7 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
   }
 
   // Clear the entire queue
-  clearQueue(): void {
+  handleClearQueue(): void {
     if (confirm('Are you sure you want to clear the entire queue?')) {
       // Reset audio but keep the current track
       const currentTrack = this.currentTrack;
@@ -197,16 +197,16 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
   }
 
   // Offline methods
-  isTrackSavedOffline(trackId: string | undefined): boolean {
+  handleIsTrackSavedOffline(trackId: string | undefined): boolean {
     if (!trackId) return false;
     return this.offlineAudioService.isTrackSavedOffline(trackId);
   }
 
-  async toggleOfflineSave(track: Track | null): Promise<void> {
+  async handleToggleOfflineSave(track: Track | null): Promise<void> {
     if (!track) return;
 
     try {
-      if (this.isTrackSavedOffline(track.id)) {
+      if (this.handleIsTrackSavedOffline(track.id)) {
         // Remove from offline
         const success = await this.offlineAudioService.removeTrackFromOffline(track.id);
         if (success) {
