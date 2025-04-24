@@ -1,6 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import Hls from 'hls.js';
+import { OfflineAudioService } from './offline-audio.service';
 
 export interface Track {
   id: string;
@@ -11,6 +12,9 @@ export interface Track {
   imageUrl?: string;
   audioUrl: string;
   isM3u8?: boolean;
+  isOffline?: boolean;
+  offlineKey?: string;
+  dateAdded?: number; // timestamp for when the track was added offline
 }
 
 export enum RepeatMode {
@@ -53,10 +57,15 @@ export class AudioService {
   private repeatModeSubject = new BehaviorSubject<RepeatMode>(RepeatMode.OFF);
   repeatMode$ = this.repeatModeSubject.asObservable();
 
+  // Forward the offline tracks observable from OfflineAudioService
+  get offlineTracks$() {
+    return this.offlineAudioService.offlineTracks$;
+  }
+
   private originalPlaylist: Track[] = [];
   private shuffledOrder: number[] = [];
 
-  constructor() {
+  constructor(private offlineAudioService: OfflineAudioService) {
     this.initAudioEvents();
 
     const demoTrack: Track = {
@@ -66,7 +75,8 @@ export class AudioService {
       album: 'Demo Album',
       duration: 180,
       imageUrl: 'assets/image/default-artist-thumbnail-image.png',
-      audioUrl: 'https://raw.githubusercontent.com/vutiendat3601/cdn/_/aud/r001/3cc285667227ac0041e4eecae141c0c4/3cc285667227ac0041e4eecae141c0c4.m3u8',
+      audioUrl:
+        'https://raw.githubusercontent.com/vutiendat3601/cdn/_/aud/r001/3cc285667227ac0041e4eecae141c0c4/3cc285667227ac0041e4eecae141c0c4.m3u8',
       isM3u8: true
     };
 
@@ -120,7 +130,7 @@ export class AudioService {
     const currentTrack = this.currentTrackSubject.value;
     if (!currentTrack) return -1;
 
-    return this.playlistSubject.value.findIndex(t => t.id === currentTrack.id);
+    return this.playlistSubject.value.findIndex((t) => t.id === currentTrack.id);
   }
 
   toggleShuffle(): void {
@@ -143,7 +153,7 @@ export class AudioService {
     if (this.currentTrackSubject.value) {
       const currentIndex = this.getCurrentTrackIndex();
       if (currentIndex !== -1) {
-        this.shuffledOrder = this.shuffledOrder.filter(i => i !== currentIndex);
+        this.shuffledOrder = this.shuffledOrder.filter((i) => i !== currentIndex);
         this.shuffledOrder.unshift(currentIndex);
       }
     }
@@ -158,7 +168,7 @@ export class AudioService {
       this.playlistSubject.next([...this.originalPlaylist]);
 
       if (currentTrack) {
-        const newIndex = this.playlistSubject.value.findIndex(t => t.id === currentTrack.id);
+        const newIndex = this.playlistSubject.value.findIndex((t) => t.id === currentTrack.id);
         if (newIndex !== -1) {
           this.currentTrackSubject.next(this.playlistSubject.value[newIndex]);
         }
@@ -170,7 +180,7 @@ export class AudioService {
   }
 
   private applyShuffleOrder(): void {
-    const shuffledPlaylist = this.shuffledOrder.map(index => this.originalPlaylist[index]);
+    const shuffledPlaylist = this.shuffledOrder.map((index) => this.originalPlaylist[index]);
     this.playlistSubject.next(shuffledPlaylist);
   }
 
@@ -225,13 +235,12 @@ export class AudioService {
       this.hls = new Hls();
       this.hls.loadSource(track.audioUrl);
       this.hls.attachMedia(this.audio);
-      this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      });
+      this.hls.on(Hls.Events.MANIFEST_PARSED, () => {});
 
       this.hls.on(Hls.Events.ERROR, (event, data) => {
         console.error('HLS error:', data);
         if (data.fatal) {
-          switch(data.type) {
+          switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
               console.error('HLS network error');
               this.hls?.startLoad();
@@ -258,7 +267,7 @@ export class AudioService {
     const playPromise = this.audio.play();
 
     if (playPromise !== undefined) {
-      playPromise.catch(error => {
+      playPromise.catch((error) => {
         console.error('Playback failed:', error);
       });
     }
@@ -287,7 +296,7 @@ export class AudioService {
       this.volumeSubject.next(volume);
       this.audio.volume = volume / 100;
       this.muteSubject.next(volume === 0);
-      this.audio.muted = (volume === 0);
+      this.audio.muted = volume === 0;
     }
   }
 
@@ -331,7 +340,7 @@ export class AudioService {
 
     if (!currentTrack || playlist.length === 0) return;
 
-    const currentIndex = playlist.findIndex(track => track.id === currentTrack.id);
+    const currentIndex = playlist.findIndex((track) => track.id === currentTrack.id);
     const nextIndex = (currentIndex + 1) % playlist.length;
 
     this.setTrack(playlist[nextIndex]);
@@ -344,7 +353,7 @@ export class AudioService {
 
     if (!currentTrack || playlist.length === 0) return;
 
-    const currentIndex = playlist.findIndex(track => track.id === currentTrack.id);
+    const currentIndex = playlist.findIndex((track) => track.id === currentTrack.id);
 
     if (this.currentTimeSubject.value <= 3) {
       const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
@@ -362,17 +371,15 @@ export class AudioService {
 
     const isRemovingCurrent = currentTrack && currentTrack.id === trackId;
 
-    const trackIndex = currentPlaylist.findIndex(track => track.id === trackId);
+    const trackIndex = currentPlaylist.findIndex((track) => track.id === trackId);
     if (trackIndex === -1) return;
 
-    const updatedPlaylist = currentPlaylist.filter(track => track.id !== trackId);
+    const updatedPlaylist = currentPlaylist.filter((track) => track.id !== trackId);
 
     if (this.shuffleSubject.value) {
-      this.originalPlaylist = this.originalPlaylist.filter(track => track.id !== trackId);
+      this.originalPlaylist = this.originalPlaylist.filter((track) => track.id !== trackId);
 
-      this.shuffledOrder = this.shuffledOrder
-        .filter(i => i !== trackIndex)
-        .map(i => i > trackIndex ? i - 1 : i);
+      this.shuffledOrder = this.shuffledOrder.filter((i) => i !== trackIndex).map((i) => (i > trackIndex ? i - 1 : i));
     }
 
     this.playlistSubject.next(updatedPlaylist);
@@ -404,7 +411,7 @@ export class AudioService {
 
     const track: Track = {
       id: Date.now().toString(),
-      name: file.name.replace(/\.[^/.]+$/, ""),
+      name: file.name.replace(/\.[^/.]+$/, ''),
       artist: 'Local File',
       duration: 0,
       audioUrl: fileUrl,
@@ -431,5 +438,43 @@ export class AudioService {
     this.addToPlaylist(track);
     this.setTrack(track);
     this.play();
+  }
+
+  // Offline methods delegated to OfflineAudioService
+  isTrackSavedOffline(trackId: string): boolean {
+    return this.offlineAudioService.isTrackSavedOffline(trackId);
+  }
+
+  async saveTrackForOffline(track: Track): Promise<boolean> {
+    return this.offlineAudioService.saveTrackForOffline(track);
+  }
+
+  async removeTrackFromOffline(trackId: string): Promise<boolean> {
+    return this.offlineAudioService.removeTrackFromOffline(trackId);
+  }
+
+  // New method to play offline tracks
+  async playOfflineTrack(track: Track): Promise<void> {
+    try {
+      if (!track.offlineKey) {
+        throw new Error('Track has no offline key');
+      }
+
+      // Get offline audio URL
+      const offlineUrl = await this.offlineAudioService.getOfflineAudioUrl(track);
+
+      // Create a new track instance with the offline URL
+      const offlineTrack: Track = {
+        ...track,
+        audioUrl: offlineUrl
+      };
+
+      // Set and play the track
+      this.setTrack(offlineTrack);
+      this.play();
+    } catch (error) {
+      console.error('Error playing offline track:', error);
+      throw error;
+    }
   }
 }
