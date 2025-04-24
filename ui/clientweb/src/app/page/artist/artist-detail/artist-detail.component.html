@@ -2,11 +2,13 @@
 <p-card class="artist-card">
   <ng-template pTemplate="header">
     <div class="banner">
+      <!-- Artist banner image with overlay -->
       <img
         src="https://channel.mediacdn.vn/428462621602512896/2024/3/10/photo-1-17100649431111117303217.jpg"
         class="banner-img"
       />
       <div class="overlay">
+        <!-- Verified artist badge -->
         <div class="flex gap-1 items-center">
           <svg
             data-encore-id="verifiedBadge"
@@ -33,7 +35,9 @@
           </svg>
           <p>Verified Artist</p>
         </div>
+        <!-- Artist name -->
         <h1>Sơn Tùng M-TP</h1>
+        <!-- Listeners count -->
         <div class="sub-info">
           <span>1,696,710 monthly listeners</span>
         </div>
@@ -42,6 +46,7 @@
   </ng-template>
 
   <ng-template pTemplate="content">
+    <!-- Action buttons section (play, follow, more) -->
     <div class="flex flex-wrap gap-5 items-center">
       <p-button severity="success" rounded [style]="{ width: '55px', height: '55px' }">
         <fa-icon [icon]="faPlay" size="xl" class="pl-1"></fa-icon>
@@ -51,6 +56,8 @@
         <i class="pi pi-ellipsis-h" style="font-size: 1.5rem"></i>
       </button>
     </div>
+
+    <!-- Popular songs section -->
     <h2>Popular</h2>
     <div class="song-list">
       <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
@@ -117,10 +124,12 @@
         <span style="flex: 1; text-align: right">4:00</span>
       </div>
     </div>
+    <!-- See more/less button for songs -->
     <button (click)="toggleShowAll()" class="see-more-btn font-bold pt-2">
       {{ showAll ? 'See Less' : 'See More' }}
     </button>
 
+    <!-- Discography section using product-list component -->
     <product-list
       [title]="'Discography'"
       [items]="discography"
@@ -128,6 +137,8 @@
       (toggleShowAll)="toggleShowAllDiscography()"
     >
     </product-list>
+
+    <!-- Fans Also Like section using product-list component -->
     <product-list
       [title]="'Fans Also Like'"
       [items]="discography"
@@ -141,15 +152,21 @@
     <div class="artist-about">
       <h2>About</h2>
       <div class="about-content">
+        <!-- Artist background with image and biography -->
         <div class="about-bg">
-          <img src="https://channel.mediacdn.vn/428462621602512896/2024/3/10/photo-1-17100649431111117303217.jpg" alt="Artist Background" />
+          <img
+            src="https://channel.mediacdn.vn/428462621602512896/2024/3/10/photo-1-17100649431111117303217.jpg"
+            alt="Artist Background"
+          />
           <div class="about-info">
+            <!-- Biography section -->
             <h3>Biography</h3>
             <p>
               Sơn Tùng M-TP is a Vietnamese singer, songwriter, actor, and producer. He is one of the most influential
               artists in the Vietnamese pop music scene. His music combines elements of traditional Vietnamese music
               with contemporary pop, hip-hop, and R&B influences.
             </p>
+            <!-- Artist stats display -->
             <div class="about-stats">
               <div class="stat">
                 <span class="stat-number">5.8M</span>
