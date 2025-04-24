@@ -3,78 +3,81 @@ from app.event.schema.event_schema import EventSchema
 from app.schema.tag_schema import TagSchema
 
 
-class ArtistProfileSchema(BaseModel):
+class TrackArtistSchema(BaseModel):
+    artist_id: str = Field(default=None, alias="artistId")
+    artist_ref_code: str | None = Field(default=None, alias="artistRefCode")
+    is_active: bool = Field(default=True, alias="isActive")
+    is_main_artist: bool = Field(default=False, alias="isMainArtist")
+
+    class Config:
+        populate_by_name = True
+        extra = "allow"
+
+
+class TrackDetailSchema(BaseModel):
     name: str
     description: str | None = Field(default=None, alias="description")
-    biography: str | None = Field(default=None, alias="biography")
-    nationality_iso_code: str | None = Field(default=None,
-                                             alias="nationalityIsoCode")
     thumbnail_file_key: str | None = Field(default=None,
                                            alias="thumbnailFileKey")
     thumbnail_url: str | None = Field(default=None, alias="thumbnailUrl")
-    background_file_key: str | None = Field(default=None,
-                                            alias="backgroundFileKey")
-    background_url: str | None = Field(default=None, alias="backgroundUrl")
+    official_released_date: str | None = Field(default=None,
+                                               alias="officialReleasedDate")
 
     class Config:
         populate_by_name = True
         extra = "allow"
 
 
-class ArtistCreatedEvent(EventSchema):
+class TrackCreatedEvent(EventSchema):
     urn: str
     ref_code: str | None = Field(default=None, alias="refCode")
-    profile: ArtistProfileSchema
+    detail: TrackDetailSchema
     is_released: bool = Field(default=False, alias="isReleased")
     is_public: bool = Field(default=False, alias="isPublic")
     is_active: bool = Field(default=True, alias="isActive")
-    is_verified: bool = Field(default=True, alias="isVerified")
     tags: list[TagSchema] = Field(default=[], alias="tags")
+    track_artists: list[TrackArtistSchema] = Field(default=[],
+                                                   alias="trackArtists")
 
     class Config:
         populate_by_name = True
         extra = "allow"
 
 
-class ArtistReleasedEvent(EventSchema):
+class TrackReleasedEvent(EventSchema):
     urn: str
-    profile: ArtistProfileSchema
+    detail: TrackDetailSchema
     is_released: bool = Field(default=False, alias="isReleased")
-    is_verified: bool = Field(default=False, alias="isVerified")
     is_public: bool = Field(default=False, alias="isPublic")
     is_active: bool = Field(default=True, alias="isActive")
     ref_code: str | None = Field(default=None, alias="refCode")
     revision_number: int = Field(alias="revisionNumber")
     tags: list[TagSchema] = Field(default=[], alias="tags")
+    track_artists: list[TrackArtistSchema] = Field(default=[],
+                                                   alias="trackArtists")
 
     class Config:
         populate_by_name = True
         extra = "allow"
 
 
-class ArtistUpdatedEvent(EventSchema):
-    profile: ArtistProfileSchema
+class TrackUpdatedEvent(EventSchema):
+    detail: TrackDetailSchema
     is_public: bool = Field(default=False, alias="isPublic")
     is_released: bool = Field(default=False, alias="isReleased")
     tags: list[TagSchema] = Field(default=[], alias="tags")
+    track_artists: list[TrackArtistSchema] = Field(default=[],
+                                                   alias="trackArtists")
+    ref_code: str | None = Field(default=None, alias="refCode")
 
     class Config:
         populate_by_name = True
         extra = "allow"
 
 
-class ArtistDeletedEvent(EventSchema):
+class TrackDeletedEvent(EventSchema):
     is_active: bool = Field(default=True, alias="isActive")
     is_soft_deleted: bool = Field(alias="isSoftDeleted")
-
-    class Config:
-        populate_by_name = True
-        extra = "allow"
-
-
-class ArtistVerificationSetEvent(EventSchema):
-    is_verified: bool = Field(alias="isVerified")
-    is_released: bool = Field(default=False, alias="isReleased")
 
     class Config:
         populate_by_name = True

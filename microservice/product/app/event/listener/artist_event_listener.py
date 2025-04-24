@@ -12,9 +12,7 @@ from app.core.configuration import configuration
 from app.repository.impl.sqlmodel_artist_repository import ArtistRepository
 from app.core.container import Container
 from app.event.schema.artist_event_schema import (ArtistReleasedEvent,
-                                                  ArtistUpdatedEvent,
-                                                  ArtistDeletedEvent,
-                                                  ArtistVerificationSetEvent)
+                                                  ArtistDeletedEvent)
 
 kafka_broker_bootstrap_server_urls = configuration.get_kafka_broker_bootstrap_server_urls(
 )

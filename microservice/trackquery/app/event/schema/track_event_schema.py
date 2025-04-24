@@ -66,6 +66,7 @@ class TrackUpdatedEvent(EventSchema):
     track_artists: list[TrackArtistSchema] = Field(default=[],
                                                    alias="trackArtists")
     ref_code: str | None = Field(default=None, alias="refCode")
+
     class Config:
         populate_by_name = True
         extra = "allow"
@@ -74,15 +75,6 @@ class TrackUpdatedEvent(EventSchema):
 class TrackDeletedEvent(EventSchema):
     is_active: bool = Field(default=True, alias="isActive")
     is_soft_deleted: bool = Field(alias="isSoftDeleted")
-
-    class Config:
-        populate_by_name = True
-        extra = "allow"
-
-
-class TrackVerificationSetEvent(EventSchema):
-    is_verified: bool = Field(alias="isVerified")
-    is_released: bool = Field(default=False, alias="isReleased")
 
     class Config:
         populate_by_name = True

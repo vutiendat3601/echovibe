@@ -283,6 +283,18 @@ export class TrackManagementComponent implements OnInit {
 
   handleEditTrack(track: Track): void {
     this.currentTrack = track;
+    const officialReleasedDate = track.officialReleasedDate;
+    let officialReleasedDateFormat: DateFormat = this.OFFICIAL_RELEASED_DATE_FORMATS[0];
+    if (officialReleasedDate) {
+      if (officialReleasedDate.length === 4) {
+        officialReleasedDateFormat = this.OFFICIAL_RELEASED_DATE_FORMATS[2];
+      } else if (officialReleasedDate.length === 7) {
+        officialReleasedDateFormat = this.OFFICIAL_RELEASED_DATE_FORMATS[1];
+      } else if (officialReleasedDate.length === 10) {
+        officialReleasedDateFormat = this.OFFICIAL_RELEASED_DATE_FORMATS[0];
+      }
+    }
+
     const { name, description, thumbnailUrl, refCode, isPublic, tags, trackArtists } = this.currentTrack;
     this.nameFormControl.setValue(name);
     this.descriptionFormControl.setValue(description);
@@ -291,6 +303,10 @@ export class TrackManagementComponent implements OnInit {
     this.isPublicFormControl.setValue(isPublic);
     this.tagsFormControl.setValue(tags.filter(({ isActive }) => isActive).map(({ name }) => name));
     this.trackArtistsFormControl.setValue([...trackArtists]);
+    this.officialReleasedDateFormatFormControl.setValue(officialReleasedDateFormat);
+    this.officialReleasedDateFormControl.setValue(
+      track.officialReleasedDate ? new Date(track.officialReleasedDate) : new Date()
+    );
     this.filteredTrackArtists.push(...trackArtists);
     track.revisionNumber > -1 && this.refCodeFormControl.disable();
     this.openTrackDialog('edit');
@@ -540,7 +556,17 @@ export class TrackManagementComponent implements OnInit {
   private listenAndProcessTrackEvents() {
     this.trackService.changedTracksEvent.subscribe((trackDtos) => {
       const updatedTracksMap: Map<string, Track> = new Map(
-        trackDtos.map((trackDto) => [trackDto.id, this.mapToTrack(trackDto)])
+        trackDtos.map((trackDto) => {
+          const track = this.mapToTrack(trackDto);
+          track.trackArtists.forEach((ta) => {
+            const artist = this.artistsMap.get(ta.artistId!);
+            if (artist) {
+              ta.artistName = artist.name;
+              ta.artistRefCode = artist.refCode;
+            }
+          });
+          return [trackDto.id, track];
+        })
       );
       const renderedIds: string[] = this.tracks()
         .filter((id) => id)
@@ -709,13 +735,13 @@ export class TrackManagementComponent implements OnInit {
       updatedAt,
       createdBy,
       updatedBy,
-      detail: { name, description, thumbnailUrl }
+      detail: { name, description, thumbnailUrl, officialReleasedDate }
     } = trackDto;
     return {
       id,
       urn,
       isPublic,
-      officialReleasedDate: null,
+      officialReleasedDate,
       revisionNumber,
       isReleased,
       name,
