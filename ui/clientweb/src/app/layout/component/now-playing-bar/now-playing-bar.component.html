@@ -13,6 +13,12 @@
         <button class="action-button" title="Like">
           <i class="pi pi-heart-fill"></i>
         </button>
+        <button *ngIf="currentTrack" class="action-button"
+                [class.active]="isTrackSavedOffline(currentTrack.id)"
+                [title]="isTrackSavedOffline(currentTrack.id) ? 'Remove from Offline' : 'Save for Offline'"
+                (click)="toggleOfflineSave(currentTrack)">
+          <i class="pi" [ngClass]="isTrackSavedOffline(currentTrack.id) ? 'pi-cloud-download' : 'pi-download'"></i>
+        </button>
       </div>
     </div>
 
@@ -50,9 +56,6 @@
 
     <!-- Volume controls section -->
     <div class="volume-controls">
-      <button class="control-button" title="Add Media" (click)="toggleMediaInput()">
-        <i class="pi pi-plus"></i>
-      </button>
       <button class="control-button" [class.active]="showQueue" title="Queue" (click)="toggleQueue()">
         <i class="pi pi-list"></i>
       </button>
@@ -64,29 +67,6 @@
           <div class="volume-level" [style.width.%]="volumePercent"></div>
           <div class="volume-handle" [style.left.%]="volumePercent"></div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Media Input Dialog -->
-  <div class="media-input-dialog" *ngIf="showMediaInput">
-    <div class="media-input-content">
-      <h3>Add Media</h3>
-
-      <div class="media-input-section">
-        <h4>Upload Audio File</h4>
-        <input type="file" accept="audio/*,.m3u8" (change)="onFileSelected($event)">
-      </div>
-
-      <div class="media-input-section">
-        <h4>Enter M3U8 Stream URL</h4>
-        <input type="text" [(ngModel)]="m3u8Url" placeholder="https://example.com/stream.m3u8">
-        <input type="text" [(ngModel)]="streamName" placeholder="Stream Name (optional)">
-        <button (click)="submitM3u8Url()">Add Stream</button>
-      </div>
-
-      <div class="media-input-actions">
-        <button (click)="toggleMediaInput()">Close</button>
       </div>
     </div>
   </div>
@@ -103,7 +83,6 @@
     <div class="queue-list">
       <div *ngIf="playlist.length === 0" class="queue-empty">
         <p>Your queue is empty</p>
-        <button (click)="toggleMediaInput()">Add Media</button>
       </div>
 
       <!-- Now Playing Section -->
@@ -163,9 +142,9 @@
       <button class="clear-queue-button" (click)="clearQueue()" *ngIf="playlist.length > 0">
         Clear Queue
       </button>
-      <button class="add-media-button" (click)="toggleMediaInput()">
-        <i class="pi pi-plus"></i> Add Media
-      </button>
     </div>
   </div>
+
+  <!-- Offline save toast -->
+  <p-toast />
 </div>

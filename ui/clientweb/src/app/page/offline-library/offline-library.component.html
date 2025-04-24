@@ -1,0 +1,69 @@
+<div class="offline-library-container">
+  <div class="offline-library-header">
+    <h1>Offline Library</h1>
+    <div class="filter-controls">
+      <div class="search-box">
+        <i class="pi pi-search"></i>
+        <input type="text"
+               [(ngModel)]="searchTerm"
+               (input)="onSearchChange()"
+               placeholder="Search offline tracks...">
+        <button *ngIf="searchTerm"
+                class="clear-search"
+                (click)="searchTerm = ''; onSearchChange()">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <div class="sort-control">
+        <label for="sortOption">Sort by:</label>
+        <select id="sortOption" [(ngModel)]="sortOption" (change)="onSortChange()">
+          <option value="dateAdded">Date Added</option>
+          <option value="name">Name</option>
+          <option value="artist">Artist</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="offline-library-content">
+    <div *ngIf="isLoading" class="loading-state">
+      <div class="loader"></div>
+      <p>Loading your offline library...</p>
+    </div>
+
+    <div *ngIf="!isLoading && filteredTracks.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <i class="pi pi-cloud-download"></i>
+      </div>
+      <h3>Your offline library is empty</h3>
+      <p>Save songs for offline listening by clicking the download icon in the now playing bar.</p>
+    </div>
+
+    <div *ngIf="!isLoading && filteredTracks.length > 0" class="track-list">
+      <div class="track-list-header">
+        <div class="track-number">#</div>
+        <div class="track-title">Title</div>
+        <div class="track-artist">Artist</div>
+        <div class="track-added">Date Added</div>
+        <div class="track-actions"></div>
+      </div>
+
+      <div *ngFor="let track of filteredTracks; let i = index"
+           class="track-item"
+           (click)="playTrack(track)">
+        <div class="track-number">{{ i + 1 }}</div>
+        <div class="track-title">
+          <img [src]="track.imageUrl || 'assets/image/default-artist-thumbnail-image.png'" alt="Track image">
+          <div class="track-name">{{ track.name }}</div>
+        </div>
+        <div class="track-artist">{{ track.artist }}</div>
+        <div class="track-added">{{ track.dateAdded | date:'MMM d, y' }}</div>
+        <div class="track-actions">
+          <button class="track-action" title="Remove from offline library" (click)="removeTrack($event, track)">
+            <i class="pi pi-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
