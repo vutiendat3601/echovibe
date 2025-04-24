@@ -14,10 +14,10 @@
           <i class="pi pi-heart-fill"></i>
         </button>
         <button *ngIf="currentTrack" class="action-button"
-                [class.active]="isTrackSavedOffline(currentTrack.id)"
-                [title]="isTrackSavedOffline(currentTrack.id) ? 'Remove from Offline' : 'Save for Offline'"
-                (click)="toggleOfflineSave(currentTrack)">
-          <i class="pi" [ngClass]="isTrackSavedOffline(currentTrack.id) ? 'pi-cloud-download' : 'pi-download'"></i>
+                [class.active]="handleIsTrackSavedOffline(currentTrack.id)"
+                [title]="handleIsTrackSavedOffline(currentTrack.id) ? 'Remove from Offline' : 'Save for Offline'"
+                (click)="handleToggleOfflineSave(currentTrack)">
+          <i class="pi" [ngClass]="handleIsTrackSavedOffline(currentTrack.id) ? 'pi-cloud-download' : 'pi-download'"></i>
         </button>
       </div>
     </div>
@@ -25,45 +25,45 @@
     <!-- Playback controls section -->
     <div class="playback-controls">
       <div class="control-buttons">
-        <button class="control-button" title="Shuffle" [class.active]="isShuffled" (click)="toggleShuffle()">
+        <button class="control-button" title="Shuffle" [class.active]="isShuffled" (click)="handleToggleShuffle()">
           <i class="pi pi-sort-alt"></i>
         </button>
-        <button class="control-button" title="Previous" (click)="previous()">
+        <button class="control-button" title="Previous" (click)="handlePrevious()">
           <i class="pi pi-step-backward"></i>
         </button>
-        <button class="control-button play-button" (click)="togglePlay()">
+        <button class="control-button play-button" (click)="handleTogglePlay()">
           <i class="pi" [ngClass]="isPlaying ? 'pi-pause' : 'pi-play'"></i>
         </button>
-        <button class="control-button" title="Next" (click)="next()">
+        <button class="control-button" title="Next" (click)="handleNext()">
           <i class="pi pi-step-forward"></i>
         </button>
-        <button class="control-button" [class.active]="repeatMode !== 'off'" title="Repeat" (click)="toggleRepeat()">
-          <i class="pi" [class]="getRepeatIcon()"></i>
+        <button class="control-button" [class.active]="repeatMode !== 'off'" title="Repeat" (click)="handleToggleRepeat()">
+          <i class="pi" [class]="handleGetRepeatIcon()"></i>
         </button>
       </div>
 
       <div class="playback-timeline">
-        <div class="time-elapsed">{{ formatTime(currentTime) }}</div>
+        <div class="time-elapsed">{{ handleFormatTime(currentTime) }}</div>
         <div class="progress-container">
-          <div class="progress-bar" (click)="setPosition($event)">
+          <div class="progress-bar" (click)="handleSetPosition($event)">
             <div class="progress" [style.width.%]="progressPercent"></div>
             <div class="progress-handle" [style.left.%]="progressPercent"></div>
           </div>
         </div>
-        <div class="time-total">{{ formatTime(duration) }}</div>
+        <div class="time-total">{{ handleFormatTime(duration) }}</div>
       </div>
     </div>
 
     <!-- Volume controls section -->
     <div class="volume-controls">
-      <button class="control-button" [class.active]="showQueue" title="Queue" (click)="toggleQueue()">
+      <button class="control-button" [class.active]="showQueue" title="Queue" (click)="handleToggleQueue()">
         <i class="pi pi-list"></i>
       </button>
-      <button class="control-button" title="Volume" (click)="toggleMute()">
-        <i class="pi" [ngClass]="getVolumeIcon()"></i>
+      <button class="control-button" title="Volume" (click)="handleToggleMute()">
+        <i class="pi" [ngClass]="handleGetVolumeIcon()"></i>
       </button>
       <div class="volume-slider">
-        <div class="volume-bar" (click)="setVolume($event)">
+        <div class="volume-bar" (click)="handleSetVolume($event)">
           <div class="volume-level" [style.width.%]="volumePercent"></div>
           <div class="volume-handle" [style.left.%]="volumePercent"></div>
         </div>
@@ -75,7 +75,7 @@
   <div class="queue-panel" [class.show]="showQueue">
     <div class="queue-header">
       <h3>Play Queue</h3>
-      <button class="close-button" (click)="toggleQueue()">
+      <button class="close-button" (click)="handleToggleQueue()">
         <i class="pi pi-times"></i>
       </button>
     </div>
@@ -105,20 +105,20 @@
             </div>
           </div>
           <div class="queue-item-actions">
-            <div class="queue-item-duration">{{ formatTime(currentTrack.duration) }}</div>
+            <div class="queue-item-duration">{{ handleFormatTime(currentTrack.duration) }}</div>
           </div>
         </div>
       </div>
 
       <!-- Next Up Section -->
-      <div *ngIf="getNextUpTracks().length > 0" class="queue-section">
+      <div *ngIf="handleGetNextUpTracks().length > 0" class="queue-section">
         <div class="queue-section-header">
           <h4>Next Up</h4>
         </div>
 
-        <div *ngFor="let track of getNextUpTracks()"
+        <div *ngFor="let track of handleGetNextUpTracks()"
              class="queue-item"
-             (click)="playTrack(track)">
+             (click)="handlePlayTrack(track)">
           <div class="queue-item-info">
             <div class="queue-item-image">
               <img [src]="track.imageUrl || 'assets/image/default-artist-thumbnail-image.png'" alt="Album art">
@@ -129,8 +129,8 @@
             </div>
           </div>
           <div class="queue-item-actions">
-            <div class="queue-item-duration">{{ formatTime(track.duration) }}</div>
-            <button class="queue-item-remove" (click)="removeTrack($event, track.id)">
+            <div class="queue-item-duration">{{ handleFormatTime(track.duration) }}</div>
+            <button class="queue-item-remove" (click)="handleRemoveTrack($event, track.id)">
               <i class="pi pi-times"></i>
             </button>
           </div>
@@ -139,7 +139,7 @@
     </div>
 
     <div class="queue-footer">
-      <button class="clear-queue-button" (click)="clearQueue()" *ngIf="playlist.length > 0">
+      <button class="clear-queue-button" (click)="handleClearQueue()" *ngIf="playlist.length > 0">
         Clear Queue
       </button>
     </div>

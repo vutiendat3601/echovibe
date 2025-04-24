@@ -25,7 +25,6 @@ export class UserRoleGuard implements CanActivate {
   canActivate(_route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): MaybeAsync<GuardResult> {
     if (this.authService.isAuthenticated) {
       const resourceAccess: ResourceAccessClaim = this.authService.resourceAccess;
-      console.log('resourceAccess[echovibe]', resourceAccess['echovibe']);
       if ((resourceAccess['echovibe'] || EMPTY_RESOURCE_ACCESS).roles.some((role) => this.USER_ROLES.includes(role))) {
         return true;
       }
