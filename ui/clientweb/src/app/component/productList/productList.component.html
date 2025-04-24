@@ -1,17 +1,24 @@
 <div class="discography">
+  <!-- Header section with title and show all/less toggle button -->
   <div class="discography-header" style="display: flex; justify-content: space-between; align-items: center">
     <h2>{{ title }}</h2>
-    <button (click)="onToggleShowAll()" class="see-more-btn font-bold">
+    <button (click)="handleOnToggleShowAll()" class="see-more-btn font-bold">
       {{ showAll ? 'Show Less' : 'Show All' }}
     </button>
   </div>
+
+  <!-- Filter options for product categories -->
   <div class="mb-3 flex gap-4">
     <p-button label="Popular release" variant="outlined" severity="contrast" [style]="{ borderRadius: '15px' }" />
     <p-button label="Albums" variant="outlined" severity="contrast" [style]="{ borderRadius: '15px' }" />
     <p-button label="Singles and EPs" variant="outlined" severity="contrast" [style]="{ borderRadius: '15px' }" />
   </div>
+
+  <!-- Product items display container with horizontal scrolling -->
   <div class="discography-list" style="display: flex; overflow-x: auto; gap: 10px">
+    <!-- Individual product card, repeating for each item in the visibleItems array -->
     <div *ngFor="let item of visibleItems" class="discography-card" style="width: 100%">
+      <!-- Product thumbnail image with conditional styling for circular/rectangular display -->
       <img
         [src]="item.thumbnail"
         alt="{{ item.name }}"
@@ -22,7 +29,9 @@
           'aspect-ratio': circularThumbnails ? '1/1' : 'auto'
         }"
       />
+      <!-- Product name heading -->
       <h3 style="font-size: 14px; margin: 5px 0">{{ item.name }}</h3>
+      <!-- Product additional information -->
       <p style="font-size: 12px; color: gray">{{ item.info }}</p>
     </div>
   </div>

@@ -2,21 +2,23 @@
   <div class="offline-library-header">
     <h1>Offline Library</h1>
     <div class="filter-controls">
+      <!-- Search box with icon and clear button -->
       <div class="search-box">
         <i class="pi pi-search"></i>
         <input type="text"
                [(ngModel)]="searchTerm"
-               (input)="onSearchChange()"
+               (input)="handleOnSearchChange()"
                placeholder="Search offline tracks...">
         <button *ngIf="searchTerm"
                 class="clear-search"
-                (click)="searchTerm = ''; onSearchChange()">
+                (click)="searchTerm = ''; handleOnSearchChange()">
           <i class="pi pi-times"></i>
         </button>
       </div>
+      <!-- Sort dropdown control -->
       <div class="sort-control">
         <label for="sortOption">Sort by:</label>
-        <select id="sortOption" [(ngModel)]="sortOption" (change)="onSortChange()">
+        <select id="sortOption" [(ngModel)]="sortOption" (change)="handleOnSortChange()">
           <option value="dateAdded">Date Added</option>
           <option value="name">Name</option>
           <option value="artist">Artist</option>
@@ -26,11 +28,13 @@
   </div>
 
   <div class="offline-library-content">
+    <!-- Loading state with spinner -->
     <div *ngIf="isLoading" class="loading-state">
       <div class="loader"></div>
       <p>Loading your offline library...</p>
     </div>
 
+    <!-- Empty state shown when no tracks are available -->
     <div *ngIf="!isLoading && filteredTracks.length === 0" class="empty-state">
       <div class="empty-icon">
         <i class="pi pi-cloud-download"></i>
@@ -39,7 +43,9 @@
       <p>Save songs for offline listening by clicking the download icon in the now playing bar.</p>
     </div>
 
+    <!-- Track listing table shown when tracks are available -->
     <div *ngIf="!isLoading && filteredTracks.length > 0" class="track-list">
+      <!-- Table header row -->
       <div class="track-list-header">
         <div class="track-number">#</div>
         <div class="track-title">Title</div>
@@ -50,16 +56,20 @@
 
       <div *ngFor="let track of filteredTracks; let i = index"
            class="track-item"
-           (click)="playTrack(track)">
+           (click)="handlePlayTrack(track)">
         <div class="track-number">{{ i + 1 }}</div>
+        <!-- Track title and thumbnail column -->
         <div class="track-title">
           <img [src]="track.imageUrl || 'assets/image/default-artist-thumbnail-image.png'" alt="Track image">
           <div class="track-name">{{ track.name }}</div>
         </div>
+        <!-- Artist column -->
         <div class="track-artist">{{ track.artist }}</div>
+        <!-- Date added column with formatting -->
         <div class="track-added">{{ track.dateAdded | date:'MMM d, y' }}</div>
+        <!-- Actions column with remove button -->
         <div class="track-actions">
-          <button class="track-action" title="Remove from offline library" (click)="removeTrack($event, track)">
+          <button class="track-action" title="Remove from offline library" (click)="handleRemoveTrack($event, track)">
             <i class="pi pi-trash"></i>
           </button>
         </div>

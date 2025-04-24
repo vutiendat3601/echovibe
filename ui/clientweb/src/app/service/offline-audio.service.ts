@@ -31,7 +31,7 @@ export class OfflineAudioService {
         db.createObjectStore('playlists', { keyPath: 'id' });
         db.createObjectStore('segments', { keyPath: 'id' });
         db.createObjectStore('keys', { keyPath: 'id' });
-      },
+      }
     });
 
     this.loadOfflineTracks();
@@ -62,6 +62,32 @@ export class OfflineAudioService {
     } catch (error) {
       console.error('Error saving offline tracks to storage:', error);
     }
+  }
+
+  private parseSegmentUrls(
+    m3u8Content: string,
+    baseUrl: string
+  ): { segmentItems: { url: string; name: string }[]; keyUri: string | null } {
+    const lines = m3u8Content.split('\n');
+    const segmentItems: { url: string; name: string }[] = [];
+    let keyUri: string | null = null;
+
+    for (const line of lines) {
+      if (line.startsWith('#EXT-X-KEY')) {
+        const match = /URI="([^"]+)"/.exec(line);
+        if (match) keyUri = match[1];
+      }
+
+      if (line.trim().length > 0 && !line.startsWith('#') && (line.endsWith('.ts') || line.includes('.ts?'))) {
+        const fullUrl = line.startsWith('http') ? line : baseUrl + line.trim();
+        segmentItems.push({
+          url: fullUrl,
+          name: line.trim()
+        });
+      }
+    }
+
+    return { segmentItems, keyUri };
   }
 
   getAllOfflineTracks(): Observable<Track[]> {
@@ -210,39 +236,9 @@ export class OfflineAudioService {
     }
 
     const blob = new Blob([content], {
-      type: 'application/vnd.apple.mpegurl',
+      type: 'application/vnd.apple.mpegurl'
     });
     return URL.createObjectURL(blob);
-  }
-
-  private parseSegmentUrls(
-    m3u8Content: string,
-    baseUrl: string
-  ): { segmentItems: { url: string; name: string }[]; keyUri: string | null } {
-    const lines = m3u8Content.split('\n');
-    const segmentItems: { url: string; name: string }[] = [];
-    let keyUri: string | null = null;
-
-    for (const line of lines) {
-      if (line.startsWith('#EXT-X-KEY')) {
-        const match = /URI="([^"]+)"/.exec(line);
-        if (match) keyUri = match[1];
-      }
-
-      if (
-        line.trim().length > 0 &&
-        !line.startsWith('#') &&
-        (line.endsWith('.ts') || line.includes('.ts?'))
-      ) {
-        const fullUrl = line.startsWith('http') ? line : baseUrl + line.trim();
-        segmentItems.push({
-          url: fullUrl,
-          name: line.trim(),
-        });
-      }
-    }
-
-    return { segmentItems, keyUri };
   }
 
   async getOfflineAudioUrl(track: Track): Promise<string> {
@@ -272,7 +268,7 @@ export class OfflineAudioService {
   async removeTrackFromOffline(trackId: string): Promise<boolean> {
     try {
       const currentTracks = this.offlineTracksSubject.value;
-      const trackToRemove = currentTracks.find(track => track.id === trackId);
+      const trackToRemove = currentTracks.find((track) => track.id === trackId);
 
       if (!trackToRemove) {
         return false; // Track not found in offline list
@@ -324,7 +320,7 @@ export class OfflineAudioService {
       }
 
       // Update the tracks list
-      const updatedTracks = currentTracks.filter(track => track.id !== trackId);
+      const updatedTracks = currentTracks.filter((track) => track.id !== trackId);
       this.offlineTracksSubject.next(updatedTracks);
       this.saveOfflineTracksToStorage(updatedTracks);
 
