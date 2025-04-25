@@ -1,4 +1,4 @@
-import { ArtistDto } from './artist-dto';
+import { ArtistDetailDto } from './artist-dto';
 
 export interface SearchResultDto<T> {
   items: T[];
@@ -6,5 +6,5 @@ export interface SearchResultDto<T> {
 
 export interface SearchDto {
   keyword: string;
-  artist: SearchResultDto<ArtistDto>;
+  artist: SearchResultDto<ArtistDetailDto>;
 }

@@ -1,9 +1,22 @@
 import { SearchService } from './../../../service/search.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ArtistService } from '../../../service/artist.service';
-import { ArtistMapper } from '../../../mapper/artist-mapper';
 import { Artist } from '../../../model/artist';
+import { ArtistDetailDto } from '../../../dto/artist-dto';
+
+interface ArtistDetail {
+  id: string;
+  urn: string;
+  name: string;
+  description: string | null;
+  biography: string | null;
+  nationalityIsoCode: string | null;
+  thumbnailUrl: string | null;
+  backgroundUrl: string | null;
+  isPublic: boolean;
+  isVerified: boolean;
+  tags: string[];
+}
 
 @Component({
   selector: 'app-search-detail',
@@ -14,16 +27,44 @@ import { Artist } from '../../../model/artist';
 export class SearchDetailComponent implements OnInit {
   private readonly PAGE_SIZE: number = 100;
   pageNumber: number = 0;
-  readonly artists: Artist[] = [];
+  readonly artistDetails: ArtistDetail[] = [];
   artistsJson: string | null = null;
   constructor(
     private readonly activeRoute: ActivatedRoute,
-    private readonly searchService: SearchService,
-    private readonly artistMapper: ArtistMapper
+    private readonly searchService: SearchService
   ) {}
 
   ngOnInit(): void {
     this.loadData();
+  }
+
+  private mapToArtistDetail(artistDetailDto: ArtistDetailDto): ArtistDetail {
+    const {
+      id,
+      urn,
+      name,
+      description,
+      biography,
+      nationalityIsoCode,
+      thumbnailUrl,
+      backgroundUrl,
+      isPublic,
+      isVerified,
+      tags
+    } = artistDetailDto;
+    return {
+      id,
+      urn,
+      name,
+      description,
+      biography,
+      nationalityIsoCode,
+      thumbnailUrl,
+      backgroundUrl,
+      isPublic,
+      isVerified,
+      tags
+    };
   }
 
   private loadData(): void {
@@ -32,9 +73,9 @@ export class SearchDetailComponent implements OnInit {
         this.searchService.search(params['keyword'], this.pageNumber, this.PAGE_SIZE).subscribe((respDto) => {
           if (respDto.data) {
             const search = respDto.data;
-            const artists = search.artist.items.map((artistDto) => this.artistMapper.mapToArtist(artistDto));
-            this.artists.push(...artists);
-            this.artistsJson = JSON.stringify(this.artists);
+            const artistDetails = search.artist.items.map((artistDetailDto) => this.mapToArtistDetail(artistDetailDto));
+            this.artistDetails.push(...artistDetails);
+            this.artistsJson = JSON.stringify(this.artistDetails);
             this.pageNumber++;
           }
         });
