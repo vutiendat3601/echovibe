@@ -20,6 +20,7 @@ import vn.io.echovibe.core.exception.BusinessRuleViolationException;
 import vn.io.echovibe.track.command.domain.TrackAggregate;
 import vn.io.echovibe.track.command.model.CreateTrackCommand;
 import vn.io.echovibe.track.command.model.DeleteTrackCommand;
+import vn.io.echovibe.track.command.model.MapTrackAudioCommand;
 import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
 import vn.io.echovibe.track.command.model.UpdateTrackCommand;
 import vn.io.echovibe.track.common.dto.TrackDto;
@@ -60,6 +61,13 @@ public class TrackCommandHandler implements CommandHandler {
   public void handle(@NonNull DeleteTrackCommand deleteTrackCommand) {
     final TrackAggregate trackAggregate = findTrackAggregateById(deleteTrackCommand.getId());
     trackAggregate.delete();
+    eventSourcingHandler.save(trackAggregate);
+  }
+
+  @Override
+  public void handle(@NonNull MapTrackAudioCommand mapTrackAudioCommand) {
+    final TrackAggregate trackAggregate = findTrackAggregateById(mapTrackAudioCommand.getId());
+    trackAggregate.mapTrackAudio(mapTrackAudioCommand);
     eventSourcingHandler.save(trackAggregate);
   }
 

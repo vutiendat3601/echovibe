@@ -8,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import vn.io.echovibe.core.command.Command;
 import vn.io.echovibe.core.command.CommandDispatcher;
 import vn.io.echovibe.core.command.CommandHandlerFunction;
@@ -24,6 +26,7 @@ import vn.io.echovibe.core.model.BulkResult;
 import vn.io.echovibe.core.model.CommandResult;
 import vn.io.echovibe.track.command.model.CreateTrackCommand;
 import vn.io.echovibe.track.command.model.DeleteTrackCommand;
+import vn.io.echovibe.track.command.model.MapTrackAudioCommand;
 import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
 import vn.io.echovibe.track.command.model.UpdateTrackCommand;
 
@@ -42,6 +45,7 @@ public class TrackCommandDispatcher implements CommandDispatcher {
     registerHandler(UpdateTrackCommand.class, commandHandler::handle);
     registerHandler(DeleteTrackCommand.class, commandHandler::handle);
     registerHandler(ReleaseTrackCommand.class, commandHandler::handle);
+    registerHandler(MapTrackAudioCommand.class, commandHandler::handle);
   }
 
   @Override

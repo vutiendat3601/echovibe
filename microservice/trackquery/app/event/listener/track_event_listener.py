@@ -5,7 +5,8 @@ from app.core.logger import Logger
 from app.constant.track_constant import (TRACK_CREATED_EVENT,
                                          TRACK_RELEASED_EVENT,
                                          TRACK_UPDATED_EVENT,
-                                         TRACK_DELETED_EVENT)
+                                         TRACK_DELETED_EVENT,
+                                         TRACK_AUDIO_MAPPED_EVENT)
 from app.event.handler.track_event_handler import TrackEventHandler
 from app.constant.constant import APP_NAME
 from app.core.configuration import configuration
@@ -14,7 +15,8 @@ from app.core.container import Container
 from app.event.schema.track_event_schema import (TrackCreatedEvent,
                                                  TrackReleasedEvent,
                                                  TrackUpdatedEvent,
-                                                 TrackDeletedEvent)
+                                                 TrackDeletedEvent,
+                                                 TrackAudioMappedEvent)
 
 kafka_broker_bootstrap_server_urls = configuration.get_kafka_broker_bootstrap_server_urls(
 )
@@ -119,8 +121,29 @@ async def listen_track_deleted_event():
         await track_deleted_event_consumer.stop()
 
 
+async def listen_track_audio_mapped_event():
+    track_audio_mapped_event_consumer = AIOKafkaConsumer(
+        TRACK_AUDIO_MAPPED_EVENT, **kafka_consumer_properties)
+    await track_audio_mapped_event_consumer.start()
+    logger.info(f"Listening: topic={TRACK_AUDIO_MAPPED_EVENT}")
+    try:
+        async for message in track_audio_mapped_event_consumer:
+            track_audio_mapped_event = TrackAudioMappedEvent(**message.value)
+            logger.info(
+                f"Received {TrackAudioMappedEvent.__name__}: id={track_audio_mapped_event.id}, version={track_audio_mapped_event.version}, timestamp={track_audio_mapped_event.timestamp}"
+            )
+            track_event_handler.handle_track_audio_mapped_event(
+                track_audio_mapped_event)
+            await track_audio_mapped_event_consumer.commit()
+    except Exception as e:
+        logger.info(f"Error when handling {TrackAudioMappedEvent.__name__}: {e}")
+    finally:
+        await track_audio_mapped_event_consumer.stop()
+
+
 def get_track_event_listeners() -> list[callable]:
     return [
         listen_track_created_event, listen_track_released_event,
-        listen_track_updated_event, listen_track_deleted_event
+        listen_track_updated_event, listen_track_deleted_event,
+        listen_track_audio_mapped_event
     ]
