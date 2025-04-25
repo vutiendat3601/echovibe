@@ -256,3 +256,6 @@ class TrackEventHandler:
             track.event_timestamp = track_audio_mapped_event.timestamp
             track.updated_at = updated_at
             self.track_repository.save_track(track)
+        self.logger.info(
+            f"Processed {TrackAudioMappedEvent.__name__}: id={track_audio_mapped_event.id}, version={track_audio_mapped_event.version}, timestamp={track_audio_mapped_event.timestamp}"
+        )
