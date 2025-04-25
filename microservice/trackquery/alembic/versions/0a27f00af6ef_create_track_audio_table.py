@@ -23,7 +23,7 @@ def upgrade() -> None:
 CREATE TABLE track_audio (
     id uuid NOT NULL,
     track_id uuid NOT NULL,
-    audio_file_key text NULL,
+    file_key text NULL,
     file_m3u8_url text NULL,
     is_active bool NOT NULL DEFAULT true,
 	event_type text NULL,
