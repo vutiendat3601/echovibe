@@ -19,4 +19,6 @@ public class TrackAudio {
   private String fileKey;
 
   private Boolean isActive;
+
+  private Integer durationSecond;
 }

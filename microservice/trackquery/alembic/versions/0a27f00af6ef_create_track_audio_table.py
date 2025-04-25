@@ -25,6 +25,7 @@ CREATE TABLE track_audio (
     track_id uuid NOT NULL,
     file_key text NULL,
     file_m3u8_url text NULL,
+    duration_second int NULL,
     is_active bool NOT NULL DEFAULT true,
 	event_type text NULL,
 	event_version numeric NULL,

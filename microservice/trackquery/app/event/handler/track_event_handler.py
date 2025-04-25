@@ -249,6 +249,7 @@ class TrackEventHandler:
                 track.track_audio.created_at = updated_at
             track.track_audio.file_m3u8_url = track_audio_mapped_event.track_audio.file_m3u8_url
             track.track_audio.file_key = track_audio_mapped_event.track_audio.file_key
+            track.track_audio.duration_second = track_audio_mapped_event.track_audio.duration_second
             track.track_audio.is_active = track_audio_mapped_event.track_audio.is_active
             track.event_type = track_audio_mapped_event.type
             track.event_version = track_audio_mapped_event.version
