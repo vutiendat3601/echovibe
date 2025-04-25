@@ -1,0 +1,150 @@
+<div class="now-playing-bar">
+  <div class="now-playing-bar-container">
+    <!-- Song info section -->
+    <div class="track-info">
+      <div class="track-image">
+        <img [src]="currentTrack?.imageUrl || 'assets/image/default-artist-thumbnail-image.png'" alt="Album art">
+      </div>
+      <div class="track-details">
+        <div class="track-name">{{ currentTrack?.name || 'No track playing' }}</div>
+        <div class="track-artist">{{ currentTrack?.artist || '' }}</div>
+      </div>
+      <div class="track-actions">
+        <button class="action-button" title="Like">
+          <i class="pi pi-heart-fill"></i>
+        </button>
+        <button *ngIf="currentTrack" class="action-button"
+                [class.active]="handleIsTrackSavedOffline(currentTrack.id)"
+                [title]="handleIsTrackSavedOffline(currentTrack.id) ? 'Remove from Offline' : 'Save for Offline'"
+                (click)="handleToggleOfflineSave(currentTrack)">
+          <i class="pi" [ngClass]="handleIsTrackSavedOffline(currentTrack.id) ? 'pi-cloud-download' : 'pi-download'"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Playback controls section -->
+    <div class="playback-controls">
+      <div class="control-buttons">
+        <button class="control-button" title="Shuffle" [class.active]="isShuffled" (click)="handleToggleShuffle()">
+          <i class="pi pi-sort-alt"></i>
+        </button>
+        <button class="control-button" title="Previous" (click)="handlePrevious()">
+          <i class="pi pi-step-backward"></i>
+        </button>
+        <button class="control-button play-button" (click)="handleTogglePlay()">
+          <i class="pi" [ngClass]="isPlaying ? 'pi-pause' : 'pi-play'"></i>
+        </button>
+        <button class="control-button" title="Next" (click)="handleNext()">
+          <i class="pi pi-step-forward"></i>
+        </button>
+        <button class="control-button" [class.active]="repeatMode !== 'off'" title="Repeat" (click)="handleToggleRepeat()">
+          <i class="pi" [class]="handleGetRepeatIcon()"></i>
+        </button>
+      </div>
+
+      <div class="playback-timeline">
+        <div class="time-elapsed">{{ handleFormatTime(currentTime) }}</div>
+        <div class="progress-container">
+          <div class="progress-bar" (click)="handleSetPosition($event)">
+            <div class="progress" [style.width.%]="progressPercent"></div>
+            <div class="progress-handle" [style.left.%]="progressPercent"></div>
+          </div>
+        </div>
+        <div class="time-total">{{ handleFormatTime(duration) }}</div>
+      </div>
+    </div>
+
+    <!-- Volume controls section -->
+    <div class="volume-controls">
+      <button class="control-button" [class.active]="showQueue" title="Queue" (click)="handleToggleQueue()">
+        <i class="pi pi-list"></i>
+      </button>
+      <button class="control-button" title="Volume" (click)="handleToggleMute()">
+        <i class="pi" [ngClass]="handleGetVolumeIcon()"></i>
+      </button>
+      <div class="volume-slider">
+        <div class="volume-bar" (click)="handleSetVolume($event)">
+          <div class="volume-level" [style.width.%]="volumePercent"></div>
+          <div class="volume-handle" [style.left.%]="volumePercent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Queue Panel -->
+  <div class="queue-panel" [class.show]="showQueue">
+    <div class="queue-header">
+      <h3>Play Queue</h3>
+      <button class="close-button" (click)="handleToggleQueue()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <div class="queue-list">
+      <div *ngIf="playlist.length === 0" class="queue-empty">
+        <p>Your queue is empty</p>
+      </div>
+
+      <!-- Now Playing Section -->
+      <div *ngIf="currentTrack && playlist.length > 0" class="queue-section">
+        <div class="queue-section-header">
+          <h4>Now Playing</h4>
+        </div>
+
+        <div class="queue-item current-track">
+          <div class="queue-item-info">
+            <div class="queue-item-image">
+              <img [src]="currentTrack.imageUrl || 'assets/image/default-artist-thumbnail-image.png'" alt="Album art">
+              <div class="play-indicator" *ngIf="isPlaying">
+                <i class="pi pi-volume-up"></i>
+              </div>
+            </div>
+            <div class="queue-item-details">
+              <div class="queue-item-title">{{ currentTrack.name }}</div>
+              <div class="queue-item-artist">{{ currentTrack.artist }}</div>
+            </div>
+          </div>
+          <div class="queue-item-actions">
+            <div class="queue-item-duration">{{ handleFormatTime(currentTrack.duration) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Up Section -->
+      <div *ngIf="handleGetNextUpTracks().length > 0" class="queue-section">
+        <div class="queue-section-header">
+          <h4>Next Up</h4>
+        </div>
+
+        <div *ngFor="let track of handleGetNextUpTracks()"
+             class="queue-item"
+             (click)="handlePlayTrack(track)">
+          <div class="queue-item-info">
+            <div class="queue-item-image">
+              <img [src]="track.imageUrl || 'assets/image/default-artist-thumbnail-image.png'" alt="Album art">
+            </div>
+            <div class="queue-item-details">
+              <div class="queue-item-title">{{ track.name }}</div>
+              <div class="queue-item-artist">{{ track.artist }}</div>
+            </div>
+          </div>
+          <div class="queue-item-actions">
+            <div class="queue-item-duration">{{ handleFormatTime(track.duration) }}</div>
+            <button class="queue-item-remove" (click)="handleRemoveTrack($event, track.id)">
+              <i class="pi pi-times"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="queue-footer">
+      <button class="clear-queue-button" (click)="handleClearQueue()" *ngIf="playlist.length > 0">
+        Clear Queue
+      </button>
+    </div>
+  </div>
+
+  <!-- Offline save toast -->
+  <p-toast />
+</div>
