@@ -46,6 +46,14 @@ class TrackEventHandler:
         track.created_at = updated_at
         track.updated_by = track_released_event.created_by
 
+        # Audio
+        if track_released_event.track_audio is not None:
+            if track_released_event.track_audio.is_active:
+                track.audio_file_m3u8_url = track_released_event.track_audio.file_m3u8_url
+            else:
+                track.audio_file_m3u8_url = None
+
+        # Artist
         for track_artist in track_released_event.track_artists:
             existed_track_artist: TrackArtist = next(
                 (item for item in track.track_artists
@@ -82,7 +90,6 @@ class TrackEventHandler:
                 existed_track_artist.event_timestamp = track_released_event.timestamp
                 existed_track_artist.updated_at = updated_at
                 existed_track_artist.updated_by = track_released_event.created_by
-
         self.track_repository.save_track(track)
         self.logger.info(
             f"Processed {TrackReleasedEvent.__name__}: id={track_released_event.id}, version={track_released_event.version}"

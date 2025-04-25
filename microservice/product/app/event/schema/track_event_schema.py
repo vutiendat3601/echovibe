@@ -28,6 +28,16 @@ class TrackDetailSchema(BaseModel):
         extra = "allow"
 
 
+class TrackAudioSchema(BaseModel):
+    file_m3u8_url: str | None = Field(default=None, alias="fileM3u8Url")
+    file_key: str | None = Field(default=None, alias="fileKey")
+    is_active: bool = Field(default=True, alias="isActive")
+
+    class Config:
+        populate_by_name = True
+        extra = "allow"
+
+
 class TrackCreatedEvent(EventSchema):
     urn: str
     ref_code: str | None = Field(default=None, alias="refCode")
@@ -53,6 +63,8 @@ class TrackReleasedEvent(EventSchema):
     ref_code: str | None = Field(default=None, alias="refCode")
     revision_number: int = Field(alias="revisionNumber")
     tags: list[TagSchema] = Field(default=[], alias="tags")
+    track_audio: TrackAudioSchema | None = Field(default=None,
+                                                 alias="trackAudio")
     track_artists: list[TrackArtistSchema] = Field(default=[],
                                                    alias="trackArtists")
 

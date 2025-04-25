@@ -47,7 +47,7 @@ class SqlmodelTrackDetailRepository(TrackDetailRepository):
         try:
             with self.session_factory() as session:
                 statement = text(
-                    "SELECT id, aggregate_id, urn, name, description, is_public, thumbnail_file_key, thumbnail_url, audio_m3u8_file_url, official_released_date, tags, artists_json FROM search_track(:keyword) LIMIT :limit OFFSET :offset;"
+                    "SELECT id, aggregate_id, urn, name, description, is_public, thumbnail_file_key, thumbnail_url, audio_file_m3u8_url, official_released_date, tags, artists_json FROM search_track(:keyword) LIMIT :limit OFFSET :offset;"
                 )
                 search_track_records = session.exec(statement=statement,
                                                     params={
@@ -64,7 +64,7 @@ class SqlmodelTrackDetailRepository(TrackDetailRepository):
                                 is_public=search_track_record[5],
                                 thumbnail_file_key=search_track_record[6],
                                 thumbnail_url=search_track_record[7],
-                                audio_m3u8_file_url=search_track_record[8],
+                                audio_file_m3u8_url=search_track_record[8],
                                 official_released_date=search_track_record[9],
                                 tags=search_track_record[10],
                                 artists_json=search_track_record[11])

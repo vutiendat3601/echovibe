@@ -163,6 +163,7 @@ public class TrackAggregate extends AggregateRoot {
             .isReleased(true)
             .revisionNumber(++revisionNumber)
             .refCode(refCode)
+            .trackAudio(trackAudio)
             .trackArtists(trackArtists)
             .tags(tags)
             .build();
@@ -178,8 +179,7 @@ public class TrackAggregate extends AggregateRoot {
 
   public void mapTrackAudio(MapTrackAudioCommand mapTrackAudioCommand) {
     final TrackAudio trackAudio = mapTrackAudioCommand.getTrackAudio();
-    if (Objects.isNull(trackAudio.getFileKey())
-        && Objects.isNull(trackAudio.getFileM3u8Url())) {
+    if (Objects.isNull(trackAudio.getFileKey()) && Objects.isNull(trackAudio.getFileM3u8Url())) {
       throw new BusinessRuleViolationException(
           TRACK_BR_04, "Track Audio must inclues at least audioFileKey or fileM3u8Url");
     }
@@ -225,6 +225,7 @@ public class TrackAggregate extends AggregateRoot {
     this.tags = trackReleasedEvent.getTags();
     this.trackArtists = trackReleasedEvent.getTrackArtists();
     this.refCode = trackReleasedEvent.getRefCode();
+    this.trackAudio = trackReleasedEvent.getTrackAudio();
     this.revisionNumber = trackReleasedEvent.getRevisionNumber();
   }
 
