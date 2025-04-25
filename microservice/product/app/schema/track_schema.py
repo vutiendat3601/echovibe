@@ -24,6 +24,8 @@ class TrackDetailSchema(BaseModel):
     official_released_date: str | None = Field(default=None,
                                                alias="officialReleasedDate")
     is_public: bool = Field(default=False, alias="isPublic")
+    audio_file_m3u8_url: str | None = Field(default=None,
+                                            alias="audioFileM3u8Url")
     tags: list[str] = Field(default=[], alias="tags")
     artists: list[TrackArtistSchema] = Field(default=[], alias="artists")
 
