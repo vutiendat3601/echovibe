@@ -3,6 +3,7 @@ package vn.io.echovibe.track.command.domain;
 import static vn.io.echovibe.core.constant.BusinessRuleConstant.BR_01;
 import static vn.io.echovibe.track.common.constant.TrackBusinessRuleConstant.TRACK_BR_01;
 import static vn.io.echovibe.track.common.constant.TrackBusinessRuleConstant.TRACK_BR_03;
+import static vn.io.echovibe.track.common.constant.TrackBusinessRuleConstant.TRACK_BR_04;
 import static vn.io.echovibe.track.common.constant.TrackConstant.TRACK_URN_PREFIX;
 
 import java.util.List;
@@ -12,13 +13,16 @@ import lombok.NoArgsConstructor;
 import vn.io.echovibe.core.domain.AggregateRoot;
 import vn.io.echovibe.core.exception.BusinessRuleViolationException;
 import vn.io.echovibe.track.command.model.CreateTrackCommand;
+import vn.io.echovibe.track.command.model.MapTrackAudioCommand;
 import vn.io.echovibe.track.command.model.UpdateTrackCommand;
+import vn.io.echovibe.track.common.event.TrackAudioMappedEvent;
 import vn.io.echovibe.track.common.event.TrackCreatedEvent;
 import vn.io.echovibe.track.common.event.TrackDeletedEvent;
 import vn.io.echovibe.track.common.event.TrackReleasedEvent;
 import vn.io.echovibe.track.common.event.TrackUpdatedEvent;
 import vn.io.echovibe.track.common.model.Tag;
 import vn.io.echovibe.track.common.model.TrackArtist;
+import vn.io.echovibe.track.common.model.TrackAudio;
 import vn.io.echovibe.track.common.model.TrackDetail;
 
 @Getter
@@ -41,6 +45,8 @@ public class TrackAggregate extends AggregateRoot {
   private Integer revisionNumber = -1;
 
   private String refCode;
+
+  private TrackAudio trackAudio;
 
   public TrackAggregate(CreateTrackCommand createTrackCommand) {
     final String urn = TRACK_URN_PREFIX + createTrackCommand.getId();
@@ -170,6 +176,22 @@ public class TrackAggregate extends AggregateRoot {
     raiseEvent(trackDeletedEvent);
   }
 
+  public void mapTrackAudio(MapTrackAudioCommand mapTrackAudioCommand) {
+    final TrackAudio trackAudio = mapTrackAudioCommand.getTrackAudio();
+    if (Objects.isNull(trackAudio.getAudioFileKey())
+        && Objects.isNull(trackAudio.getFileM3u8Url())) {
+      throw new BusinessRuleViolationException(
+          TRACK_BR_04, "Track Audio must inclues at least audioFileKey or fileM3u8Url");
+    }
+    final TrackAudioMappedEvent trackAudioMappedEvent =
+        TrackAudioMappedEvent.builder()
+            .id(this.id)
+            .trackAudio(trackAudio)
+            .isReleased(false)
+            .build();
+    raiseEvent(trackAudioMappedEvent);
+  }
+
   // ### TrackAggregate event apply functions #################################
 
   void apply(TrackCreatedEvent trackCreatedEvent) {
@@ -209,5 +231,11 @@ public class TrackAggregate extends AggregateRoot {
   void apply(TrackDeletedEvent trackDeletedEvent) {
     this.id = trackDeletedEvent.getId();
     this.isActive = trackDeletedEvent.getIsActive();
+  }
+
+  void apply(TrackAudioMappedEvent trackAudioMappedEvent) {
+    this.id = trackAudioMappedEvent.getId();
+    this.trackAudio = trackAudioMappedEvent.getTrackAudio();
+    this.isReleased = trackAudioMappedEvent.getIsReleased();
   }
 }

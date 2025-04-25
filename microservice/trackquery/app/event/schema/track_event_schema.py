@@ -27,6 +27,16 @@ class TrackDetailSchema(BaseModel):
         extra = "allow"
 
 
+class TrackAudioSchema(BaseModel):
+    file_m3u8_url: str | None = Field(default=None, alias="fileM3u8Url")
+    audio_file_key: str | None = Field(default=None, alias="audioFileKey")
+    is_active: bool = Field(default=True, alias="isActive")
+
+    class Config:
+        populate_by_name = True
+        extra = "allow"
+
+
 class TrackCreatedEvent(EventSchema):
     urn: str
     ref_code: str | None = Field(default=None, alias="refCode")
@@ -75,6 +85,14 @@ class TrackUpdatedEvent(EventSchema):
 class TrackDeletedEvent(EventSchema):
     is_active: bool = Field(default=True, alias="isActive")
     is_soft_deleted: bool = Field(alias="isSoftDeleted")
+
+    class Config:
+        populate_by_name = True
+        extra = "allow"
+
+
+class TrackAudioMappedEvent(EventSchema):
+    track_audio: TrackAudioSchema = Field(alias="trackAudio")
 
     class Config:
         populate_by_name = True

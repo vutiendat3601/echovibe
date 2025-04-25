@@ -127,7 +127,8 @@ class SqlmodelTrackRepository(TrackRepository):
                        is_load_revisions: bool = True):
         options = [
             selectinload(Track.detail),
-            selectinload(Track.track_artists)
+            selectinload(Track.track_artists),
+            selectinload(Track.track_audio),
         ]
         if (is_load_images):
             options.append(selectinload(Track.images))

@@ -19,6 +19,7 @@ class Track(SQLModel, table=True):
     tags: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
     tags_json: list[dict[str, any]] = Field([], sa_column=Column(JSONB))
     detail: Optional["TrackDetail"] = Relationship(back_populates="track")
+    track_audio: Optional["TrackAudio"] = Relationship(back_populates="track")
     track_artists: list["TrackArtist"] = Relationship(back_populates="track")
     images: list["TrackImage"] = Relationship(back_populates="track")
     revision_number: int = Field(default=-1)
@@ -131,3 +132,19 @@ class TrackRevision(SQLModel, table=True):
 
     class Config:
         arbitrary_types_allowed = True
+
+class TrackAudio(SQLModel, table=True):
+    __tablename__ = "track_audio"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    track_id: uuid.UUID = Field(foreign_key="track.id")
+    track: Track = Relationship(back_populates="track_audio")
+    audio_file_key: str | None = Field(None)
+    file_m3u8_url: str | None = Field(None)
+    is_active: bool = Field(default=True)
+    event_type: str | None = Field(None)
+    event_version: int | None = Field(None)
+    event_timestamp: datetime | None = Field(None)
+    created_at: datetime = Field(default=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default=datetime.now(timezone.utc))
+    created_by: str | None = Field(None)
+    updated_by: str | None = Field(None)

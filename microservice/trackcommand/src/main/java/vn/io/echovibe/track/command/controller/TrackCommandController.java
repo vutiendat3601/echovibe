@@ -20,6 +20,7 @@ import vn.io.echovibe.core.model.BulkResult;
 import vn.io.echovibe.core.util.IdentityUtils;
 import vn.io.echovibe.track.command.dto.CreateTrackDto;
 import vn.io.echovibe.track.command.dto.DeleteTrackDto;
+import vn.io.echovibe.track.command.dto.MapTrackAudioDto;
 import vn.io.echovibe.track.command.dto.ReleaseTrackDto;
 import vn.io.echovibe.track.command.dto.TagDto;
 import vn.io.echovibe.track.command.dto.TrackArtistDto;
@@ -27,6 +28,7 @@ import vn.io.echovibe.track.command.dto.TrackDetailDto;
 import vn.io.echovibe.track.command.dto.UpdateTrackDto;
 import vn.io.echovibe.track.command.model.CreateTrackCommand;
 import vn.io.echovibe.track.command.model.DeleteTrackCommand;
+import vn.io.echovibe.track.command.model.MapTrackAudioCommand;
 import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
 import vn.io.echovibe.track.command.model.UpdateTrackCommand;
 import vn.io.echovibe.track.common.model.Tag;
@@ -107,13 +109,30 @@ public class TrackCommandController {
 
   @Operation(operationId = "Bulk Release Track")
   @PostMapping("bulk-release")
-  public ResponseEntity<ResponseDto<BulkResult>> releaseTrack(
+  public ResponseEntity<ResponseDto<BulkResult>> bulkReleaseTrack(
       @Valid @RequestBody BulkDto<ReleaseTrackDto> bulkReleaseTrackDtos) {
     final List<ReleaseTrackCommand> releaseTrackCommands =
         bulkReleaseTrackDtos.items().stream()
             .map(rtd -> ReleaseTrackCommand.builder().id(rtd.id()).build())
             .collect(Collectors.toList());
     final BulkResult bulkResult = commandDispatcher.send(releaseTrackCommands);
+    return ResponseEntity.ok(ResponseDto.ok(REQUEST_PROCESSED_SUCCESS, bulkResult));
+  }
+
+  @Operation(operationId = "Bulk Map Track Audio")
+  @PostMapping("bulk-map-audio")
+  public ResponseEntity<ResponseDto<BulkResult>> bulkMapTrackAudio(
+      @Valid @RequestBody BulkDto<MapTrackAudioDto> bulkMapTrackAudioDtos) {
+    final List<MapTrackAudioCommand> mapTrackAudioCommands =
+        bulkMapTrackAudioDtos.items().stream()
+            .map(
+                mta ->
+                    MapTrackAudioCommand.builder()
+                        .id(mta.id())
+                        .trackAudio(mta.trackAudio())
+                        .build())
+            .collect(Collectors.toList());
+    final BulkResult bulkResult = commandDispatcher.send(mapTrackAudioCommands);
     return ResponseEntity.ok(ResponseDto.ok(REQUEST_PROCESSED_SUCCESS, bulkResult));
   }
 
