@@ -6,5 +6,5 @@ class EventSchema(BaseModel):
     id: str
     type: str
     version: int
-    created_by: str = Field(default=None, alias="createdBy")
+    created_by: str | None = Field(default=None, alias="createdBy")
     timestamp: datetime
