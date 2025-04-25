@@ -8,6 +8,7 @@ class TrackAudioSchema(BaseModel):
     file_m3u8_url: str | None = Field(default=None, alias="fileM3u8Url")
     file_key: str | None = Field(default=None, alias="fileKey")
     is_active: bool = Field(default=True, alias="isActive")
+    duration_second: int | None = Field(default=None, alias="durationSecond")
 
     class Config:
         populate_by_name = True

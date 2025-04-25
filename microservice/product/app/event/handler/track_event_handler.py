@@ -47,11 +47,12 @@ class TrackEventHandler:
         track.updated_by = track_released_event.created_by
 
         # Audio
-        if track_released_event.track_audio is not None:
-            if track_released_event.track_audio.is_active:
-                track.audio_file_m3u8_url = track_released_event.track_audio.file_m3u8_url
-            else:
-                track.audio_file_m3u8_url = None
+        if track_released_event.track_audio is not None and track_released_event.track_audio.is_active:
+            track.audio_file_m3u8_url = track_released_event.track_audio.file_m3u8_url
+            track.audio_duration_second = track_released_event.track_audio.duration_second
+        else:
+            track.audio_file_m3u8_url = None
+            track.audio_duration_second = None
 
         # Artist
         for track_artist in track_released_event.track_artists:
