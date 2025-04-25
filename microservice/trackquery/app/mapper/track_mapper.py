@@ -1,7 +1,7 @@
 from app.model.track import (Track, TrackImage, TrackArtist, TrackRevision)
 from app.schema.track_schema import (TrackSchema, TrackDetailSchema,
                                      TrackArtistSchema, TrackImageSchema,
-                                     TrackRevisionSchema)
+                                     TrackRevisionSchema, TrackAudioSchema)
 from app.schema.tag_schema import TagSchema
 
 
@@ -56,6 +56,12 @@ def map_to_track_schema(track: Track,
         revisions = [
             map_to_revision_schema(revision) for revision in track.revisions
         ]
+    audio: TrackAudioSchema | None = None
+    if track.track_audio is not None:
+        audio = TrackAudioSchema(file_m3u8_url=track.track_audio.file_m3u8_url,
+                                       file_key=track.track_audio.file_key,
+                                       is_active=track.track_audio.is_active)
+
     return TrackSchema(id=track.aggregate_id,
                        urn=track.urn,
                        ref_code=track.ref_code,
@@ -67,6 +73,7 @@ def map_to_track_schema(track: Track,
                        images=images,
                        revision_number=track.revision_number,
                        revisions=revisions,
+                       audio=audio,
                        created_at=track.created_at,
                        updated_at=track.updated_at,
                        created_by=track.created_by,
