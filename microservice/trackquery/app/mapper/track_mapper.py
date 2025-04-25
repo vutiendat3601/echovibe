@@ -58,9 +58,11 @@ def map_to_track_schema(track: Track,
         ]
     audio: TrackAudioSchema | None = None
     if track.track_audio is not None:
-        audio = TrackAudioSchema(file_m3u8_url=track.track_audio.file_m3u8_url,
-                                       file_key=track.track_audio.file_key,
-                                       is_active=track.track_audio.is_active)
+        audio = TrackAudioSchema(
+            file_m3u8_url=track.track_audio.file_m3u8_url,
+            file_key=track.track_audio.file_key,
+            is_active=track.track_audio.is_active,
+            duration_second=track.track_audio.duration_second)
 
     return TrackSchema(id=track.aggregate_id,
                        urn=track.urn,

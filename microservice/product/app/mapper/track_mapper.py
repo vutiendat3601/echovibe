@@ -18,4 +18,5 @@ def map_to_track_detail_schema(track_detail: TrackDetail):
         is_public=track_detail.is_public,
         tags=track_detail.tags,
         audio_file_m3u8_url=track_detail.audio_file_m3u8_url,
+        audio_duration_second=track_detail.audio_duration_second,
         artists=artists)

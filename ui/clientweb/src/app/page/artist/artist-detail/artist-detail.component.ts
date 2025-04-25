@@ -12,6 +12,7 @@ import { ButtonModule } from 'primeng/button';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import { productList } from '../../../component/productList/productList.component';
+
 import { Tag } from '../../../model/tag';
 
 interface ArtistDetail {
@@ -32,6 +33,15 @@ interface ArtistDetail {
   selector: 'app-artist-detail',
   standalone: true,
   imports: [CommonModule, ProgressBarModule, BadgeModule, CardModule, ButtonModule, FontAwesomeModule, productList],
+  imports: [
+    CommonModule,
+    ProgressBarModule,
+    BadgeModule,
+    CardModule,
+    ButtonModule,
+    FontAwesomeModule,
+    productList
+  ],
   templateUrl: './artist-detail.component.html',
   styleUrl: './artist-detail.component.scss'
 })
@@ -42,6 +52,7 @@ export class ArtistDetailComponent implements OnInit {
   showAll = false;
   showAllDiscography = false;
   discography = [
+
     {
       thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg',
       name: 'Chúng Ta Của Hiện Tại',
@@ -74,6 +85,15 @@ export class ArtistDetailComponent implements OnInit {
       name: 'Cơn Mưa Ngang Qua',
       info: 'Single • 2013'
     }
+    { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Chúng Ta Của Hiện Tại', info: 'Single • 2020' },
+    { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Có Chắc Yêu Là Đây', info: 'Single • 2020' },
+    { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Hãy Trao Cho Anh', info: 'Single • 2019' },
+    { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Chạy Ngay Đi', info: 'Single • 2018' },
+    { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Lạc Trôi', info: 'Single • 2017' },
+    { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Nơi Này Có Anh', info: 'Single • 2017' },
+    { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Âm Thầm Bên Em', info: 'Single • 2015' },
+    { thumbnail: 'https://static.znews.vn/static/topic/person/messi.jpg', name: 'Cơn Mưa Ngang Qua', info: 'Single • 2013' },
+
   ];
   // Icons from FontAwesome
   faPlay = faPlay;
@@ -124,7 +144,6 @@ export class ArtistDetailComponent implements OnInit {
       tags
     };
   }
-
   private loadData(): void {
     this.activeRoute.params.subscribe((params) => {
       if (params['id']) {
