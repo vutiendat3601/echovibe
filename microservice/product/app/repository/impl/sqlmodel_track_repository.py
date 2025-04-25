@@ -1,4 +1,5 @@
 from sqlmodel import Session, select, delete
+from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import SQLAlchemyError
 from contextlib import AbstractContextManager
 from typing import Callable
@@ -33,9 +34,10 @@ class SqlmodelTrackRepository(TrackRepository):
 
     def find_by_aggregate_id_and_is_active_true(
             self, aggregate_id: str) -> Track | None:
+        options = self._build_options()
         try:
             with self.session_factory() as session:
-                statement = (select(Track).filter(
+                statement = (select(Track).options(*options).filter(
                     Track.is_active == True,
                     Track.aggregate_id == aggregate_id))
                 track = session.exec(statement).first()
@@ -60,3 +62,9 @@ class SqlmodelTrackRepository(TrackRepository):
             raise e
         finally:
             session.close()
+
+    def _build_options(self):
+        options = [
+            selectinload(Track.track_artists),
+        ]
+        return options
