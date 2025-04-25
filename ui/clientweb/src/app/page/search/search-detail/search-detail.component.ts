@@ -1,7 +1,6 @@
 import { SearchService } from './../../../service/search.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Artist } from '../../../model/artist';
 import { ArtistDetailDto } from '../../../dto/artist-dto';
 
 interface ArtistDetail {
