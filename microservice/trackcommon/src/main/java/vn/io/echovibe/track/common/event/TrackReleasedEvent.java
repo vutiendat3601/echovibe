@@ -31,6 +31,8 @@ public class TrackReleasedEvent extends Event {
 
   private String refCode;
 
+  private String audioM3u8FileUrl;
+
   @Builder.Default private List<TrackArtist> trackArtists = new LinkedList<>();
 
   @Builder.Default private List<Tag> tags = new LinkedList<>();

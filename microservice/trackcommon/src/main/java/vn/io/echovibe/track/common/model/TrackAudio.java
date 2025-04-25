@@ -16,7 +16,7 @@ import lombok.Setter;
 public class TrackAudio {
   private String fileM3u8Url;
 
-  private String audioFileKey;
+  private String fileKey;
 
   private Boolean isActive;
 }

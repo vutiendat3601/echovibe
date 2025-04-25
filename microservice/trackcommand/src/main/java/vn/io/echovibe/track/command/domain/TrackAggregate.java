@@ -178,7 +178,7 @@ public class TrackAggregate extends AggregateRoot {
 
   public void mapTrackAudio(MapTrackAudioCommand mapTrackAudioCommand) {
     final TrackAudio trackAudio = mapTrackAudioCommand.getTrackAudio();
-    if (Objects.isNull(trackAudio.getAudioFileKey())
+    if (Objects.isNull(trackAudio.getFileKey())
         && Objects.isNull(trackAudio.getFileM3u8Url())) {
       throw new BusinessRuleViolationException(
           TRACK_BR_04, "Track Audio must inclues at least audioFileKey or fileM3u8Url");

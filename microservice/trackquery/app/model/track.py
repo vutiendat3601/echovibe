@@ -138,7 +138,7 @@ class TrackAudio(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     track_id: uuid.UUID = Field(foreign_key="track.id")
     track: Track = Relationship(back_populates="track_audio")
-    audio_file_key: str | None = Field(None)
+    file_key: str | None = Field(None)
     file_m3u8_url: str | None = Field(None)
     is_active: bool = Field(default=True)
     event_type: str | None = Field(None)

@@ -29,7 +29,7 @@ class TrackDetailSchema(BaseModel):
 
 class TrackAudioSchema(BaseModel):
     file_m3u8_url: str | None = Field(default=None, alias="fileM3u8Url")
-    audio_file_key: str | None = Field(default=None, alias="audioFileKey")
+    file_key: str | None = Field(default=None, alias="fileKey")
     is_active: bool = Field(default=True, alias="isActive")
 
     class Config:
