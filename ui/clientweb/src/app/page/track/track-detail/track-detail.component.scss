@@ -1,0 +1,240 @@
+.track-detail-container {
+  color: #fff;
+  min-height: 100vh;
+}
+
+// Header section with gradient background
+.track-header-section {
+  padding: 24px 24px 24px 24px;
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+.track-header {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding-top: 40px;
+}
+
+.track-thumbnail {
+  flex-shrink: 0;
+  width: 232px;
+  height: 232px;
+  box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+}
+
+.track-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.track-type {
+  font-size: 12px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.track-name {
+  font-size: 80px;
+  font-weight: 900;
+  margin: 0 0 12px 0;
+  letter-spacing: -2px;
+
+  @media (max-width: 1024px) {
+    font-size: 60px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 48px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 36px;
+  }
+}
+
+.track-metadata {
+  font-size: 14px;
+  margin-bottom: 8px;
+
+  .artist-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .verified-badge {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    margin-right: 4px;
+    border-radius: 50%;
+  }
+
+  .track-year {
+    color: rgba(255, 255, 255, 0.7);
+    margin-left: 6px;
+  }
+}
+
+.track-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+
+  .play-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #1ed760;
+    border: none;
+
+    .play-icon {
+      font-size: 24px;
+      color: black;
+    }
+
+    &:hover {
+      background-color: #1fdf64;
+      transform: scale(1.04);
+    }
+  }
+}
+
+// Content section with different background
+.track-content-section {
+  background-color: rgba(18, 18, 18, 1);
+  padding: 24px;
+  min-height: 500px;
+}
+
+.track-content-container {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 40px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr 300px;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.track-content-main {
+  .track-description, .track-lyrics {
+    margin-top: 32px;
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    p, pre {
+      font-size: 14px;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.7);
+      white-space: pre-wrap;
+    }
+  }
+
+  // Put lyrics first as shown in the image
+  .track-lyrics {
+    margin-top: 0;
+  }
+}
+
+.track-content-sidebar {
+  .artist-section {
+    margin-bottom: 32px;
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+  }
+
+  // New artist list style that matches the image
+  .artist-list {
+    .artist-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      border-radius: 4px;
+      background-color: rgba(24, 24, 24, 0.7);
+      margin-bottom: 8px;
+      transition: background-color 0.2s;
+      cursor: pointer;
+
+      &:hover {
+        background-color: rgba(40, 40, 40, 0.7);
+      }
+
+      .artist-avatar {
+        width: 64px;
+        height: 64px;
+        margin-right: 12px;
+
+        img {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          object-fit: cover;
+        }
+      }
+
+      .artist-info-compact {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        .artist-label {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.6);
+          margin-bottom: 4px;
+        }
+
+        .artist-name {
+          font-size: 16px;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+
+}
+
+.loading-container {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.error-container {
+  padding: 20px;
+  color: #e74c3c;
+  text-align: center;
+}

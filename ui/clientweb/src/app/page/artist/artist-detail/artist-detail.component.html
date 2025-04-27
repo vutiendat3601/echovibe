@@ -3,40 +3,40 @@
   <ng-template pTemplate="header">
     <div class="banner">
       <!-- Artist banner image with overlay -->
-      <img
-        src="https://channel.mediacdn.vn/428462621602512896/2024/3/10/photo-1-17100649431111117303217.jpg"
-        class="banner-img"
-      />
+      <img *ngIf="artist?.backgroundUrl" [src]="artist?.backgroundUrl" class="banner-img" />
+      <div *ngIf="!artist?.backgroundUrl" class="banner-img no-background"></div>
       <div class="overlay">
         <!-- Verified artist badge -->
-        <div class="flex gap-1 items-center">
-          <svg
-            data-encore-id="verifiedBadge"
-            role="img"
-            aria-hidden="false"
-            class="e-9812-icon e-9812-baseline encore-announcement-set b0NcxAbHvRbqgs2S8QDg"
-            viewBox="0 0 24 24"
-            style="
-              width: 20px;
-              height: 20px;
-              fill: #1da1f2;
-              --encore-icon-fill: var(--background-base, #ffffff);
-              position: relative;
-              background-image: linear-gradient(var(--text-base), var(--text-base));
-              background-size: 50% 50%;
-              background-position: center center;
-              background-repeat: no-repeat;
-            "
-          >
-            <path
-              style="background-color: #ffffff"
-              d="M10.814.5a1.658 1.658 0 0 1 2.372 0l2.512 2.572 3.595-.043a1.658 1.658 0 0 1 1.678 1.678l-.043 3.595 2.572 2.512c.667.65.667 1.722 0 2.372l-2.572 2.512.043 3.595a1.658 1.658 0 0 1-1.678 1.678l-3.595-.043-2.512 2.572a1.658 1.658 0 0 1-2.372 0l-2.512-2.572-3.595.043a1.658 1.658 0 0 1-1.678-1.678l.043-3.595L.5 13.186a1.658 1.658 0 0 1 0-2.372l2.572-2.512-.043-3.595a1.658 1.658 0 0 1 1.678-1.678l3.595.043L10.814.5zm6.584 9.12a1 1 0 0 0-1.414-1.413l-6.011 6.01-1.894-1.893a1 1 0 0 0-1.414 1.414l3.308 3.308 7.425-7.425z"
-            ></path>
-          </svg>
-          <p>Verified Artist</p>
-        </div>
+        @if (artist?.isVerified) {
+          <div class="flex gap-1 items-center">
+            <svg
+              data-encore-id="verifiedBadge"
+              role="img"
+              aria-hidden="false"
+              class="e-9812-icon e-9812-baseline encore-announcement-set b0NcxAbHvRbqgs2S8QDg"
+              viewBox="0 0 24 24"
+              style="
+                width: 20px;
+                height: 20px;
+                fill: #1da1f2;
+                --encore-icon-fill: var(--background-base, #ffffff);
+                position: relative;
+                background-image: linear-gradient(var(--text-base), var(--text-base));
+                background-size: 50% 50%;
+                background-position: center center;
+                background-repeat: no-repeat;
+              "
+            >
+              <path
+                style="background-color: #ffffff"
+                d="M10.814.5a1.658 1.658 0 0 1 2.372 0l2.512 2.572 3.595-.043a1.658 1.658 0 0 1 1.678 1.678l-.043 3.595 2.572 2.512c.667.65.667 1.722 0 2.372l-2.572 2.512.043 3.595a1.658 1.658 0 0 1-1.678 1.678l-3.595-.043-2.512 2.572a1.658 1.658 0 0 1-2.372 0l-2.512-2.572-3.595.043a1.658 1.658 0 0 1-1.678-1.678l.043-3.595L.5 13.186a1.658 1.658 0 0 1 0-2.372l2.572-2.512-.043-3.595a1.658 1.658 0 0 1 1.678-1.678l3.595.043L10.814.5zm6.584 9.12a1 1 0 0 0-1.414-1.413l-6.011 6.01-1.894-1.893a1 1 0 0 0-1.414 1.414l3.308 3.308 7.425-7.425z"
+              ></path>
+            </svg>
+            <p>Verified Artist</p>
+          </div>
+        }
         <!-- Artist name -->
-        <h1>Sơn Tùng M-TP</h1>
+        <h1>{{ artist?.name }}</h1>
         <!-- Listeners count -->
         <div class="sub-info">
           <span>1,696,710 monthly listeners</span>
@@ -154,18 +154,12 @@
       <div class="about-content">
         <!-- Artist background with image and biography -->
         <div class="about-bg">
-          <img
-            src="https://channel.mediacdn.vn/428462621602512896/2024/3/10/photo-1-17100649431111117303217.jpg"
-            alt="Artist Background"
-          />
+          <img *ngIf="artist?.backgroundUrl" [src]="artist?.backgroundUrl" alt="Artist Background" />
+          <div *ngIf="!artist?.backgroundUrl" class="no-background-about"></div>
           <div class="about-info">
             <!-- Biography section -->
             <h3>Biography</h3>
-            <p>
-              Sơn Tùng M-TP is a Vietnamese singer, songwriter, actor, and producer. He is one of the most influential
-              artists in the Vietnamese pop music scene. His music combines elements of traditional Vietnamese music
-              with contemporary pop, hip-hop, and R&B influences.
-            </p>
+            <p [innerHTML]="(artist?.biography || '') | safeHtmlPipe"></p>
             <!-- Artist stats display -->
             <div class="about-stats">
               <div class="stat">

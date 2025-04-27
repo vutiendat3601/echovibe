@@ -1,9 +1,8 @@
 import { ArtistService } from './../../../service/artist.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Artist, ArtistImage, ArtistRevision } from '../../../model/artist';
 import { ResponseDto } from '../../../dto/response-dto';
-import { ArtistDto } from '../../../dto/artist-dto';
+import { ArtistDetailDto } from '../../../dto/artist-dto';
 import { CommonModule } from '@angular/common';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { BadgeModule } from 'primeng/badge';
@@ -12,6 +11,21 @@ import { ButtonModule } from 'primeng/button';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import { productList } from '../../../component/productList/productList.component';
+import { SafeHtmlPipe } from '../../../pipe/safe-html.pipe';
+
+interface Artist {
+  id: string;
+  urn: string;
+  name: string;
+  description: string | null;
+  biography: string | null;
+  nationalityIsoCode: string | null;
+  thumbnailUrl: string | null;
+  backgroundUrl: string | null;
+  isPublic: boolean;
+  isVerified: boolean;
+  tags: string[];
+}
 
 
 @Component({
@@ -24,13 +38,14 @@ import { productList } from '../../../component/productList/productList.componen
     CardModule,
     ButtonModule,
     FontAwesomeModule,
-    productList
+    productList,
+    SafeHtmlPipe
   ],
   templateUrl: './artist-detail.component.html',
   styleUrl: './artist-detail.component.scss'
 })
 export class ArtistDetailComponent implements OnInit {
-  artist: ArtistDetail | null = null;
+  artist: Artist | null = null;
   artistJson: string | null = null;
   value = 0;
   showAll = false;
@@ -71,8 +86,7 @@ export class ArtistDetailComponent implements OnInit {
       if (params['id']) {
         this.artistService.getArtistById(params['id']).subscribe((respDto: ResponseDto<ArtistDetailDto | null>) => {
           if (respDto.data) {
-            this.artist = this.mapToArtistDetail(respDto.data);
-            this.artistJson = JSON.stringify(this.artist);
+            this.artist = respDto.data;
           } else {
             this.router.navigate(['/not-found']);
           }
