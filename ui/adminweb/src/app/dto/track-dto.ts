@@ -1,5 +1,5 @@
 import { Tag } from '../model/tag';
-import { TrackDetail, TrackImage, TrackRevision } from '../model/track';
+import { TrackAudio, TrackDetail, TrackImage, TrackRevision } from '../model/track';
 
 export interface TrackArtistDto {
   artistId: string | null;
@@ -48,6 +48,7 @@ export interface TrackDto {
   createdBy: string | null;
   updatedBy: string | null;
   trackArtists: TrackArtistDto[];
+  audio: TrackAudio | null;
 }
 
 export interface UpdateTrackDto {
@@ -57,4 +58,9 @@ export interface UpdateTrackDto {
   tags: Tag[];
   detail: TrackDetailDto;
   trackArtists: TrackArtistDto[];
+}
+
+export interface MapTrackAudioDto {
+  id: string;
+  trackAudio: TrackAudio;
 }

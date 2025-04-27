@@ -25,3 +25,10 @@ export interface TrackRevision {
   createdAt: string;
   createdBy: string | null;
 }
+
+export interface TrackAudio {
+  fileM3u8Url: string | null;
+  fileKey: string | null;
+  isActive: boolean;
+  durationSecond: number | null;
+}

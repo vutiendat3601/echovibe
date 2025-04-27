@@ -1,3 +1,4 @@
+import { AudioManagementComponent } from './audio-management/audio-management.component';
 import { Routes } from '@angular/router';
 import { RecommendationSystemComponent } from '../system/recommendation-system/recommendation-system.component';
 import { ArtistManagementComponent } from './artist-management/artist-management.component';
@@ -34,15 +35,15 @@ export default [
       }
     ]
   },
-  // {
-  //   path: 'audio',
-  //   children: [
-  //     {
-  //       path: '',
-  //       component: AudioManagementComponent
-  //     }
-  //   ]
-  // },
+  {
+    path: 'audio',
+    children: [
+      {
+        path: '',
+        component: AudioManagementComponent
+      }
+    ]
+  },
   {
     path: 'playlist',
     component: PlaylistManagementComponent
