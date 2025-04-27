@@ -3,14 +3,21 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TrackDto } from '../../../dto/track-dto';
 import { TrackService } from '../../../service/track.service';
+import { AudioService } from '../../../service/audio.service';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { BadgeModule } from 'primeng/badge';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faPlay, faHeart, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
+import { faPlay, faPause, faHeart, faEllipsisH, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { environment } from '../../../../environment/environment';
 import ColorThief from 'colorthief';
+import { Subscription } from 'rxjs';
+import { Popover } from 'primeng/popover';
+import { PopoverModule } from 'primeng/popover';
 
 @Component({
   selector: 'app-track-detail',
@@ -23,22 +30,34 @@ import ColorThief from 'colorthief';
     BadgeModule,
     CardModule,
     ButtonModule,
+    OverlayPanelModule,
     FontAwesomeModule,
-    RouterLink
-  ]
+    RouterLink,
+    ToastModule,
+    PopoverModule
+  ],
+  providers: [MessageService]
 })
 export class TrackDetailComponent implements OnInit {
   @ViewChild('trackThumbnail') trackThumbnail!: ElementRef;
+  @ViewChild('op') op!: Popover;
 
   track: TrackDto | null = null;
   isLoading = true;
   errorMessage = '';
   backgroundColor = 'rgba(18, 18, 18, 1)';
 
+  // Track playback state
+  isPlaying = false;
+  isCurrentTrack = false;
+  private subscriptions: Subscription[] = [];
+
   // Icons
   faPlay = faPlay;
+  faPause = faPause;
   faHeart = faHeart;
   faEllipsisH = faEllipsisH;
+  faPlus = faPlus;
 
   // Feature flags
   useMockData = !environment.production; // Use mock data in non-production environments
@@ -47,7 +66,9 @@ export class TrackDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private trackService: TrackService,
-    private renderer: Renderer2
+    private audioService: AudioService,
+    private renderer: Renderer2,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -57,6 +78,62 @@ export class TrackDetailComponent implements OnInit {
     } else {
       this.router.navigate(['/not-found']);
     }
+
+    // Subscribe to audio service to track current playback state
+    this.subscriptions.push(
+      this.audioService.currentTrack$.subscribe((currentTrack) => {
+        if (this.track && currentTrack) {
+          this.isCurrentTrack = currentTrack.id === this.track.id;
+        } else {
+          this.isCurrentTrack = false;
+        }
+      }),
+
+      this.audioService.isPlaying$.subscribe((isPlaying) => {
+        this.isPlaying = isPlaying && this.isCurrentTrack;
+      })
+    );
+  }
+
+  toggle(event: Event): void {
+    this.op.toggle(event);
+  }
+
+  // Play or pause the current track
+  handlePlayClick(): void {
+    if (!this.track) return;
+
+    if (this.isCurrentTrack) {
+      // If this is already the current track, just toggle play/pause
+      this.audioService.togglePlay();
+    } else {
+      // If this is a new track, set it and play
+      this.audioService.setTrackFromDto(this.track);
+      this.audioService.play();
+    }
+  }
+
+  // Add current track to queue
+  addToQueue(): void {
+    if (!this.track) return;
+
+    // Check if the track already exists in the queue
+    if (this.audioService.isTrackInQueue(this.track.id)) {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Already in Queue',
+        detail: `"${this.track.name}" is already in your play queue`
+      });
+      return;
+    }
+
+    // Add track to queue
+    this.audioService.addTrackDtoToQueue(this.track);
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Added to Queue',
+      detail: `"${this.track.name}" has been added to your queue`
+    });
   }
 
   private loadTrackDetails(trackId: string): void {
@@ -138,5 +215,10 @@ export class TrackDetailComponent implements OnInit {
       return `${(count / 1000).toFixed(1)}K`;
     }
     return count.toString();
+  }
+
+  ngOnDestroy(): void {
+    // Clean up subscriptions
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

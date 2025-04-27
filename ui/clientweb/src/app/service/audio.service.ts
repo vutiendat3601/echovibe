@@ -2,19 +2,16 @@ import { Injectable, signal, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import Hls from 'hls.js';
 import { OfflineAudioService } from './offline-audio.service';
+import { TrackDto } from '../dto/track-dto';
 
-export interface Track {
-  id: string;
-  name: string;
-  artist: string;
-  album?: string;
-  duration: number;
-  imageUrl?: string;
-  audioUrl: string;
+// Additional fields needed for tracks in the audio service
+export interface EnhancedTrackDto extends TrackDto {
   isM3u8?: boolean;
   isOffline?: boolean;
   offlineKey?: string;
   dateAdded?: number; // timestamp for when the track was added offline
+  // Optional fields to support legacy behaviors
+  album?: string;
 }
 
 export enum RepeatMode {
@@ -30,7 +27,7 @@ export class AudioService {
   private audio = new Audio();
   private hls: Hls | null = null;
 
-  private currentTrackSubject = new BehaviorSubject<Track | null>(null);
+  private currentTrackSubject = new BehaviorSubject<EnhancedTrackDto | null>(null);
   currentTrack$ = this.currentTrackSubject.asObservable();
 
   private isPlayingSubject = new BehaviorSubject<boolean>(false);
@@ -48,8 +45,9 @@ export class AudioService {
   private muteSubject = new BehaviorSubject<boolean>(false);
   mute$ = this.muteSubject.asObservable();
 
-  private playlistSubject = new BehaviorSubject<Track[]>([]);
-  playlist$ = this.playlistSubject.asObservable();
+  // Renamed from playlistSubject to queueSubject
+  private queueSubject = new BehaviorSubject<EnhancedTrackDto[]>([]);
+  queue$ = this.queueSubject.asObservable(); // Renamed from playlist$ to queue$
 
   private shuffleSubject = new BehaviorSubject<boolean>(false);
   shuffle$ = this.shuffleSubject.asObservable();
@@ -62,25 +60,22 @@ export class AudioService {
     return this.offlineAudioService.offlineTracks$;
   }
 
-  private originalPlaylist: Track[] = [];
+  private originalQueue: EnhancedTrackDto[] = []; // Renamed from originalPlaylist
   private shuffledOrder: number[] = [];
 
   constructor(private offlineAudioService: OfflineAudioService) {
     this.initAudioEvents();
+  }
 
-    const demoTrack: Track = {
-      id: '1',
-      name: 'Demo Track',
-      artist: 'Demo Artist',
-      album: 'Demo Album',
-      duration: 180,
-      imageUrl: 'assets/image/default-artist-thumbnail-image.png',
-      audioUrl:
-        'https://raw.githubusercontent.com/vutiendat3601/cdn/_/aud/r001/3cc285667227ac0041e4eecae141c0c4/3cc285667227ac0041e4eecae141c0c4.m3u8',
-      isM3u8: true
-    };
+  // Helper method to get the main artist name or combined artist names
+  getArtistName(track: EnhancedTrackDto): string {
+    if (!track.artists || track.artists.length === 0) return 'Unknown Artist';
 
-    this.setPlaylist([demoTrack]);
+    const mainArtist = track.artists.find(artist => artist.isMainArtist);
+    if (mainArtist) {
+      return mainArtist.name;
+    }
+    return track.artists.map(artist => artist.name).join(', ');
   }
 
   private initAudioEvents(): void {
@@ -102,11 +97,11 @@ export class AudioService {
         this.next();
       } else {
         const currentTrack = this.currentTrackSubject.value;
-        const playlist = this.playlistSubject.value;
+        const queue = this.queueSubject.value;
 
         if (currentTrack) {
           const currentIndex = this.getCurrentTrackIndex();
-          if (currentIndex < playlist.length - 1) {
+          if (currentIndex < queue.length - 1) {
             this.next();
           } else {
             this.isPlayingSubject.next(false);
@@ -130,7 +125,7 @@ export class AudioService {
     const currentTrack = this.currentTrackSubject.value;
     if (!currentTrack) return -1;
 
-    return this.playlistSubject.value.findIndex((t) => t.id === currentTrack.id);
+    return this.queueSubject.value.findIndex((t) => t.id === currentTrack.id);
   }
 
   toggleShuffle(): void {
@@ -145,9 +140,9 @@ export class AudioService {
   }
 
   private enableShuffle(): void {
-    this.originalPlaylist = [...this.playlistSubject.value];
+    this.originalQueue = [...this.queueSubject.value];
 
-    const indexes = Array.from({ length: this.originalPlaylist.length }, (_, i) => i);
+    const indexes = Array.from({ length: this.originalQueue.length }, (_, i) => i);
     this.shuffledOrder = this.shuffleArray(indexes);
 
     if (this.currentTrackSubject.value) {
@@ -162,26 +157,26 @@ export class AudioService {
   }
 
   private disableShuffle(): void {
-    if (this.originalPlaylist.length > 0) {
+    if (this.originalQueue.length > 0) {
       const currentTrack = this.currentTrackSubject.value;
 
-      this.playlistSubject.next([...this.originalPlaylist]);
+      this.queueSubject.next([...this.originalQueue]);
 
       if (currentTrack) {
-        const newIndex = this.playlistSubject.value.findIndex((t) => t.id === currentTrack.id);
+        const newIndex = this.queueSubject.value.findIndex((t) => t.id === currentTrack.id);
         if (newIndex !== -1) {
-          this.currentTrackSubject.next(this.playlistSubject.value[newIndex]);
+          this.currentTrackSubject.next(this.queueSubject.value[newIndex]);
         }
       }
     }
 
     this.shuffledOrder = [];
-    this.originalPlaylist = [];
+    this.originalQueue = [];
   }
 
   private applyShuffleOrder(): void {
-    const shuffledPlaylist = this.shuffledOrder.map((index) => this.originalPlaylist[index]);
-    this.playlistSubject.next(shuffledPlaylist);
+    const shuffledQueue = this.shuffledOrder.map((index) => this.originalQueue[index]);
+    this.queueSubject.next(shuffledQueue);
   }
 
   private shuffleArray<T>(array: T[]): T[] {
@@ -220,7 +215,7 @@ export class AudioService {
     this.audio.muted = newMuteState;
   }
 
-  setTrack(track: Track): void {
+  setTrack(track: EnhancedTrackDto): void {
     if (this.hls) {
       this.hls.destroy();
       this.hls = null;
@@ -231,9 +226,16 @@ export class AudioService {
 
     this.currentTrackSubject.next(track);
 
-    if (track.isM3u8 && Hls.isSupported()) {
+    // Use audioFileM3u8Url for M3U8 tracks
+    const audioUrl = track.audioFileM3u8Url || track.isM3u8 ? track.audioFileM3u8Url : '';
+    if (!audioUrl) {
+      console.error('Track has no audio URL');
+      return;
+    }
+
+    if ((track.isM3u8 || track.audioFileM3u8Url) && Hls.isSupported()) {
       this.hls = new Hls();
-      this.hls.loadSource(track.audioUrl);
+      this.hls.loadSource(audioUrl);
       this.hls.attachMedia(this.audio);
       this.hls.on(Hls.Events.MANIFEST_PARSED, () => {});
 
@@ -257,10 +259,44 @@ export class AudioService {
         }
       });
     } else {
-      this.audio.src = track.audioUrl;
+      this.audio.src = audioUrl;
     }
 
     this.currentTimeSubject.next(0);
+  }
+
+  // Method to play a track from TrackDto (automatically converts to EnhancedTrackDto)
+  setTrackFromDto(trackDto: TrackDto): void {
+    // Convert the basic TrackDto to EnhancedTrackDto
+    const enhancedTrack: EnhancedTrackDto = {
+      ...trackDto,
+      isM3u8: !!trackDto.audioFileM3u8Url // Set isM3u8 based on whether audioFileM3u8Url exists
+    };
+
+    // Use the existing setTrack method with the enhanced track
+    this.setTrack(enhancedTrack);
+    // Add the track to the queue if it's not already there
+    if (!this.isTrackInQueue(enhancedTrack.id)) {
+      this.addToQueue(enhancedTrack);
+    }
+  }
+
+  // Method to add a TrackDto to the queue (renamed from addTrackDtoToPlaylist)
+  addTrackDtoToQueue(trackDto: TrackDto): boolean {
+    // First check if the track is already in the queue
+    if (this.isTrackInQueue(trackDto.id)) {
+      return false; // Track already exists in queue
+    }
+
+    // Convert the basic TrackDto to EnhancedTrackDto
+    const enhancedTrack: EnhancedTrackDto = {
+      ...trackDto,
+      isM3u8: !!trackDto.audioFileM3u8Url // Set isM3u8 based on whether audioFileM3u8Url exists
+    };
+
+    // Use the existing addToQueue method with the enhanced track
+    this.addToQueue(enhancedTrack);
+    return true; // Successfully added track to queue
   }
 
   play(): void {
@@ -300,32 +336,34 @@ export class AudioService {
     }
   }
 
-  setPlaylist(tracks: Track[]): void {
-    this.playlistSubject.next(tracks);
+  // Renamed from setPlaylist to setQueue
+  setQueue(tracks: EnhancedTrackDto[]): void {
+    this.queueSubject.next(tracks);
 
     if (tracks.length > 0 && !this.currentTrackSubject.value) {
       this.setTrack(tracks[0]);
     }
 
     if (this.shuffleSubject.value && tracks.length > 0) {
-      this.originalPlaylist = [...tracks];
+      this.originalQueue = [...tracks];
       const indexes = Array.from({ length: tracks.length }, (_, i) => i);
       this.shuffledOrder = this.shuffleArray(indexes);
       this.applyShuffleOrder();
     }
   }
 
-  addToPlaylist(track: Track): void {
-    const currentPlaylist = this.playlistSubject.value;
-    this.playlistSubject.next([...currentPlaylist, track]);
+  // Renamed from addToPlaylist to addToQueue
+  addToQueue(track: EnhancedTrackDto): void {
+    const currentQueue = this.queueSubject.value;
+    this.queueSubject.next([...currentQueue, track]);
 
-    if (currentPlaylist.length === 0) {
+    if (currentQueue.length === 0) {
       this.setTrack(track);
     }
 
     if (this.shuffleSubject.value) {
-      this.originalPlaylist.push(track);
-      const newIndex = this.originalPlaylist.length - 1;
+      this.originalQueue.push(track);
+      const newIndex = this.originalQueue.length - 1;
 
       const randomPosition = Math.floor(Math.random() * (this.shuffledOrder.length + 1));
       this.shuffledOrder.splice(randomPosition, 0, newIndex);
@@ -336,28 +374,28 @@ export class AudioService {
 
   next(): void {
     const currentTrack = this.currentTrackSubject.value;
-    const playlist = this.playlistSubject.value;
+    const queue = this.queueSubject.value;
 
-    if (!currentTrack || playlist.length === 0) return;
+    if (!currentTrack || queue.length === 0) return;
 
-    const currentIndex = playlist.findIndex((track) => track.id === currentTrack.id);
-    const nextIndex = (currentIndex + 1) % playlist.length;
+    const currentIndex = queue.findIndex((track) => track.id === currentTrack.id);
+    const nextIndex = (currentIndex + 1) % queue.length;
 
-    this.setTrack(playlist[nextIndex]);
+    this.setTrack(queue[nextIndex]);
     this.play();
   }
 
   previous(): void {
     const currentTrack = this.currentTrackSubject.value;
-    const playlist = this.playlistSubject.value;
+    const queue = this.queueSubject.value;
 
-    if (!currentTrack || playlist.length === 0) return;
+    if (!currentTrack || queue.length === 0) return;
 
-    const currentIndex = playlist.findIndex((track) => track.id === currentTrack.id);
+    const currentIndex = queue.findIndex((track) => track.id === currentTrack.id);
 
     if (this.currentTimeSubject.value <= 3) {
-      const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-      this.setTrack(playlist[prevIndex]);
+      const prevIndex = (currentIndex - 1 + queue.length) % queue.length;
+      this.setTrack(queue[prevIndex]);
     } else {
       this.setCurrentTime(0);
     }
@@ -365,29 +403,30 @@ export class AudioService {
     this.play();
   }
 
-  removeFromPlaylist(trackId: string): void {
-    const currentPlaylist = this.playlistSubject.value;
+  // Renamed from removeFromPlaylist to removeFromQueue
+  removeFromQueue(trackId: string): void {
+    const currentQueue = this.queueSubject.value;
     const currentTrack = this.currentTrackSubject.value;
 
     const isRemovingCurrent = currentTrack && currentTrack.id === trackId;
 
-    const trackIndex = currentPlaylist.findIndex((track) => track.id === trackId);
+    const trackIndex = currentQueue.findIndex((track) => track.id === trackId);
     if (trackIndex === -1) return;
 
-    const updatedPlaylist = currentPlaylist.filter((track) => track.id !== trackId);
+    const updatedQueue = currentQueue.filter((track) => track.id !== trackId);
 
     if (this.shuffleSubject.value) {
-      this.originalPlaylist = this.originalPlaylist.filter((track) => track.id !== trackId);
+      this.originalQueue = this.originalQueue.filter((track) => track.id !== trackId);
 
       this.shuffledOrder = this.shuffledOrder.filter((i) => i !== trackIndex).map((i) => (i > trackIndex ? i - 1 : i));
     }
 
-    this.playlistSubject.next(updatedPlaylist);
+    this.queueSubject.next(updatedQueue);
 
     if (isRemovingCurrent) {
-      if (updatedPlaylist.length > 0) {
-        const nextIndex = trackIndex < updatedPlaylist.length ? trackIndex : 0;
-        this.setTrack(updatedPlaylist[nextIndex]);
+      if (updatedQueue.length > 0) {
+        const nextIndex = trackIndex < updatedQueue.length ? trackIndex : 0;
+        this.setTrack(updatedQueue[nextIndex]);
         this.play();
       } else {
         this.audio.pause();
@@ -406,19 +445,33 @@ export class AudioService {
 
   loadAudioFile(file: File): void {
     const isM3u8 = file.name.endsWith('.m3u8');
-
     const fileUrl = URL.createObjectURL(file);
 
-    const track: Track = {
+    const track: EnhancedTrackDto = {
       id: Date.now().toString(),
+      urn: `local:track:${Date.now()}`,
       name: file.name.replace(/\.[^/.]+$/, ''),
-      artist: 'Local File',
-      duration: 0,
-      audioUrl: fileUrl,
+      description: 'Local audio file',
+      thumbnailUrl: null,
+      officialReleasedDate: null,
+      isPublic: false,
+      audioFileM3u8Url: isM3u8 ? fileUrl : null,
+      audioDurationSecond: 0,
+      tags: ['local'],
+      artists: [ {
+        id: '0',
+        urn: 'local:artist:0',
+        name: 'Local File',
+        description: null,
+        thumbnailUrl: null,
+        isPublic: false,
+        isVerified: false,
+        isMainArtist: true
+      }],
       isM3u8: isM3u8
     };
 
-    this.addToPlaylist(track);
+    this.addToQueue(track);
     this.setTrack(track);
     this.play();
   }
@@ -426,16 +479,31 @@ export class AudioService {
   loadM3u8Url(url: string, name: string = 'Stream'): void {
     if (!url) return;
 
-    const track: Track = {
+    const track: EnhancedTrackDto = {
       id: Date.now().toString(),
+      urn: `stream:track:${Date.now()}`,
       name: name,
-      artist: 'Stream',
-      duration: 0,
-      audioUrl: url,
+      description: 'Streaming audio',
+      thumbnailUrl: null,
+      officialReleasedDate: null,
+      isPublic: false,
+      audioFileM3u8Url: url,
+      audioDurationSecond: 0,
+      tags: ['stream'],
+      artists: [ {
+        id: '0',
+        urn: 'stream:artist:0',
+        name: 'Stream',
+        description: null,
+        thumbnailUrl: null,
+        isPublic: false,
+        isVerified: false,
+        isMainArtist: true
+      }],
       isM3u8: true
     };
 
-    this.addToPlaylist(track);
+    this.addToQueue(track);
     this.setTrack(track);
     this.play();
   }
@@ -445,7 +513,7 @@ export class AudioService {
     return this.offlineAudioService.isTrackSavedOffline(trackId);
   }
 
-  async saveTrackForOffline(track: Track): Promise<boolean> {
+  async saveTrackForOffline(track: EnhancedTrackDto): Promise<boolean> {
     return this.offlineAudioService.saveTrackForOffline(track);
   }
 
@@ -454,7 +522,7 @@ export class AudioService {
   }
 
   // New method to play offline tracks
-  async playOfflineTrack(track: Track): Promise<void> {
+  async playOfflineTrack(track: EnhancedTrackDto): Promise<void> {
     try {
       if (!track.offlineKey) {
         throw new Error('Track has no offline key');
@@ -464,9 +532,9 @@ export class AudioService {
       const offlineUrl = await this.offlineAudioService.getOfflineAudioUrl(track);
 
       // Create a new track instance with the offline URL
-      const offlineTrack: Track = {
+      const offlineTrack: EnhancedTrackDto = {
         ...track,
-        audioUrl: offlineUrl
+        audioFileM3u8Url: offlineUrl
       };
 
       // Set and play the track
@@ -476,5 +544,17 @@ export class AudioService {
       console.error('Error playing offline track:', error);
       throw error;
     }
+  }
+
+  // Renamed from isTrackInPlaylist to isTrackInQueue
+  isTrackInQueue(trackId: string): boolean {
+    return this.queueSubject.value.some(track => track.id === trackId);
+  }
+
+  // Method to clear the queue
+  clearQueue(): void {
+    this.queueSubject.next([]);
+    this.originalQueue = [];
+    this.shuffledOrder = [];
   }
 }

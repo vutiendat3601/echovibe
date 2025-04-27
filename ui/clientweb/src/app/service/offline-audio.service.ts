@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import Hls from 'hls.js';
 import { openDB, IDBPDatabase } from 'idb';
-import { Track } from './audio.service';
+import { EnhancedTrackDto } from './audio.service';
 
 interface VideoDB {
   playlists: { id: string; content: string };
@@ -10,17 +10,11 @@ interface VideoDB {
   keys: { id: string; blob: Blob };
 }
 
-interface OfflineTrack extends Track {
-  isOffline: true;
-  offlineKey: string;
-  dateAdded: number;
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class OfflineAudioService {
-  private offlineTracksSubject = new BehaviorSubject<Track[]>([]);
+  private offlineTracksSubject = new BehaviorSubject<EnhancedTrackDto[]>([]);
   offlineTracks$ = this.offlineTracksSubject.asObservable();
 
   private dbPromise: Promise<IDBPDatabase<VideoDB>>;
@@ -45,7 +39,7 @@ export class OfflineAudioService {
     try {
       const offlineTracksJson = localStorage.getItem('offlineTracks');
       if (offlineTracksJson) {
-        const offlineTracks = JSON.parse(offlineTracksJson) as Track[];
+        const offlineTracks = JSON.parse(offlineTracksJson) as EnhancedTrackDto[];
         this.offlineTracksSubject.next(offlineTracks);
       } else {
         this.offlineTracksSubject.next([]);
@@ -56,7 +50,7 @@ export class OfflineAudioService {
     }
   }
 
-  private saveOfflineTracksToStorage(tracks: Track[]): void {
+  private saveOfflineTracksToStorage(tracks: EnhancedTrackDto[]): void {
     try {
       localStorage.setItem('offlineTracks', JSON.stringify(tracks));
     } catch (error) {
@@ -90,7 +84,7 @@ export class OfflineAudioService {
     return { segmentItems, keyUri };
   }
 
-  getAllOfflineTracks(): Observable<Track[]> {
+  getAllOfflineTracks(): Observable<EnhancedTrackDto[]> {
     return this.offlineTracks$;
   }
 
@@ -98,7 +92,7 @@ export class OfflineAudioService {
     return this.offlineTracksSubject.value.some((track) => track.id === trackId);
   }
 
-  async saveTrackForOffline(track: Track): Promise<boolean> {
+  async saveTrackForOffline(track: EnhancedTrackDto): Promise<boolean> {
     try {
       if (this.isTrackSavedOffline(track.id)) {
         return true; // Already saved
@@ -106,12 +100,14 @@ export class OfflineAudioService {
 
       console.log('Saving track for offline:', track);
 
-      if (track.isM3u8) {
+      // For tracks with M3U8 URLs
+      if (track.isM3u8 || track.audioFileM3u8Url) {
         // Save M3U8 playlist and segments
-        await this.savePlaylistAndSegments(track.id, track.audioUrl);
+        const audioUrl = track.audioFileM3u8Url || '';
+        await this.savePlaylistAndSegments(track.id, audioUrl);
 
         // Create offline track data
-        const offlineTrack: Track = {
+        const offlineTrack: EnhancedTrackDto = {
           ...track,
           isOffline: true,
           offlineKey: track.id,
@@ -126,29 +122,10 @@ export class OfflineAudioService {
 
         return true;
       } else {
-        // For non-M3U8 tracks, store the audio file directly
-        const response = await fetch(track.audioUrl);
-        const blob = await response.blob();
-        const db = await this.getDB();
-
-        // Store the audio blob
-        await db.put('segments', { id: track.id, blob });
-
-        // Create offline track data
-        const offlineTrack: Track = {
-          ...track,
-          isOffline: true,
-          offlineKey: track.id,
-          dateAdded: Date.now()
-        };
-
-        // Add to offline tracks list
-        const currentTracks = this.offlineTracksSubject.value;
-        const updatedTracks = [...currentTracks, offlineTrack];
-        this.offlineTracksSubject.next(updatedTracks);
-        this.saveOfflineTracksToStorage(updatedTracks);
-
-        return true;
+        // For non-M3U8 tracks, there's no direct audio URL in TrackDto
+        // This is an error case now with TrackDto, as we should always have audioFileM3u8Url
+        console.error('Track has no audio URL for offline saving');
+        return false;
       }
     } catch (error) {
       console.error('Error saving track for offline:', error);
@@ -241,7 +218,7 @@ export class OfflineAudioService {
     return URL.createObjectURL(blob);
   }
 
-  async getOfflineAudioUrl(track: Track): Promise<string> {
+  async getOfflineAudioUrl(track: EnhancedTrackDto): Promise<string> {
     if (!track.offlineKey) {
       throw new Error('Track has no offline key');
     }
@@ -249,15 +226,12 @@ export class OfflineAudioService {
     try {
       const db = await this.getDB();
 
-      if (track.isM3u8) {
-        return await this.getOfflinePlaylist(track.offlineKey, track.audioUrl);
+      if (track.isM3u8 || track.audioFileM3u8Url) {
+        const audioUrl = track.audioFileM3u8Url || '';
+        return await this.getOfflinePlaylist(track.offlineKey, audioUrl);
       } else {
-        // For regular audio files
-        const segment = await db.get('segments', track.offlineKey);
-        if (!segment) {
-          throw new Error('Offline audio file not found');
-        }
-        return URL.createObjectURL(segment.blob);
+        // This shouldn't happen with TrackDto as we should always have audioFileM3u8Url
+        throw new Error('Track has no M3U8 URL');
       }
     } catch (error) {
       console.error('Error getting offline audio URL:', error);
@@ -277,13 +251,14 @@ export class OfflineAudioService {
       const db = await this.getDB();
 
       // If it's an M3U8 track, cleanup related data
-      if (trackToRemove.isM3u8) {
+      if (trackToRemove.isM3u8 || trackToRemove.audioFileM3u8Url) {
         try {
           // Delete playlist entry
           await db.delete('playlists', trackId);
 
           // Get content to find segments that need deletion
-          const baseUrl = trackToRemove.audioUrl.substring(0, trackToRemove.audioUrl.lastIndexOf('/') + 1);
+          const audioUrl = trackToRemove.audioFileM3u8Url || '';
+          const baseUrl = audioUrl.substring(0, audioUrl.lastIndexOf('/') + 1);
           const playlistContent = localStorage.getItem(`playlist_${trackId}`);
 
           if (playlistContent) {
@@ -314,9 +289,6 @@ export class OfflineAudioService {
         } catch (cleanupError) {
           console.error('Error cleaning up M3U8 data:', cleanupError);
         }
-      } else {
-        // For regular audio, simply delete the segment
-        await db.delete('segments', trackId);
       }
 
       // Update the tracks list

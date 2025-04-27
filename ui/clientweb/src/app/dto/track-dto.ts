@@ -1,5 +1,4 @@
-
-interface ArtistDetailOfTrack {
+export interface ArtistDetailOfTrack {
   id: string;
   urn: string;
   name: string;
