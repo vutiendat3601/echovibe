@@ -1,38 +1,45 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AudioService, Track, RepeatMode } from '../../../service/audio.service';
+import { AudioService, EnhancedTrackDto, RepeatMode } from '../../../service/audio.service';
 import { OfflineAudioService } from '../../../service/offline-audio.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
+import { faPause, faPlay, faShuffle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-now-playing-bar',
   standalone: true,
-  imports: [CommonModule, FormsModule, Toast],
+  imports: [CommonModule, FormsModule, Toast, FontAwesomeModule],
   templateUrl: './now-playing-bar.component.html',
   styleUrl: './now-playing-bar.component.scss',
   providers: [MessageService]
 })
 export class NowPlayingBarComponent implements OnInit, OnDestroy {
-  currentTrack: Track | null = null;
+  currentTrack: EnhancedTrackDto | null = null;
   isPlaying: boolean = false;
   currentTime: number = 0;
   duration: number = 0;
   volumePercent: number = 100;
   progressPercent: number = 0;
 
+  // Icons
+  faShuffle = faShuffle; // FontAwesome icon for shuffle
+  faPlay = faPlay;
+  faPause = faPause;
+
   // New properties for extended functionality
   isMuted: boolean = false;
   isShuffled: boolean = false;
   repeatMode: RepeatMode = RepeatMode.OFF;
   showQueue: boolean = false;
-  playlist: Track[] = [];
+  queue: EnhancedTrackDto[] = []; // Renamed from playlist
 
   // Offline properties
-  offlineTracks: Track[] = [];
+  offlineTracks: EnhancedTrackDto[] = [];
 
   private subscriptions: Subscription[] = [];
 
@@ -81,14 +88,34 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
         this.repeatMode = mode;
       }),
 
-      this.audioService.playlist$.subscribe((playlist) => {
-        this.playlist = playlist;
+      this.audioService.queue$.subscribe((queue) => { // Renamed from playlist$ to queue$
+        this.queue = queue;
       }),
 
       this.offlineAudioService.offlineTracks$.subscribe((tracks) => {
         this.offlineTracks = tracks;
       })
     );
+  }
+
+  // Get artist name from EnhancedTrackDto
+  getArtistName(track: EnhancedTrackDto | null): string {
+    if (!track) return '';
+
+    if (!track.artists || track.artists.length === 0) return 'Unknown Artist';
+
+    const mainArtist = track.artists.find(artist => artist.isMainArtist);
+    if (mainArtist) {
+      return mainArtist.name;
+    }
+    return track.artists.map(artist => artist.name).join(', ');
+  }
+
+  // Get thumbnail image URL
+  getImageUrl(track: EnhancedTrackDto | null): string {
+    if (!track) return 'assets/image/default-artist-thumbnail-image.png';
+
+    return track.thumbnailUrl || 'assets/image/default-artist-thumbnail-image.png';
   }
 
   // Playback controls
@@ -122,7 +149,7 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
   }
 
   // Track selection from queue
-  handlePlayTrack(track: Track): void {
+  handlePlayTrack(track: EnhancedTrackDto): void {
     this.audioService.setTrack(track);
     this.audioService.play();
   }
@@ -130,61 +157,16 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
   // Remove track from queue
   handleRemoveTrack(event: Event, trackId: string): void {
     event.stopPropagation();
-    this.audioService.removeFromPlaylist(trackId);
-  }
-
-  // Position and volume controls
-  handleSetPosition(event: MouseEvent): void {
-    const progressBar = event.currentTarget as HTMLElement;
-    const clickPosition = event.offsetX / progressBar.offsetWidth;
-    const seekTime = this.duration * clickPosition;
-    this.audioService.setCurrentTime(seekTime);
-  }
-
-  handleSetVolume(event: MouseEvent): void {
-    const volumeBar = event.currentTarget as HTMLElement;
-    const clickPosition = event.offsetX / volumeBar.offsetWidth;
-    const volume = Math.round(clickPosition * 100);
-    this.audioService.setVolume(volume);
-  }
-
-  handleFormatTime(seconds: number): string {
-    return this.audioService.formatTime(seconds);
-  }
-
-  // Helper methods for template
-  handleGetRepeatIcon(): string {
-    switch (this.repeatMode) {
-      case RepeatMode.ONE:
-        return 'pi-sync pi-sync-one';
-      case RepeatMode.ALL:
-        return 'pi-sync';
-      default:
-        return 'pi-sync pi-sync-off';
-    }
-  }
-
-  handleGetVolumeIcon(): string {
-    if (this.isMuted || this.volumePercent === 0) {
-      return 'pi-volume-off';
-    } else if (this.volumePercent < 50) {
-      return 'pi-volume-down';
-    } else {
-      return 'pi-volume-up';
-    }
-  }
-
-  handleIsCurrentTrack(track: Track): boolean {
-    return !!this.currentTrack && this.currentTrack.id === track.id;
+    this.audioService.removeFromQueue(trackId); // Renamed from removeFromPlaylist
   }
 
   // Get the next up tracks (all tracks except the current one)
-  handleGetNextUpTracks(): Track[] {
-    if (!this.currentTrack || this.playlist.length <= 1) {
+  handleGetNextUpTracks(): EnhancedTrackDto[] {
+    if (!this.currentTrack || this.queue.length <= 1) {
       return [];
     }
 
-    return this.playlist.filter((track) => track.id !== this.currentTrack?.id);
+    return this.queue.filter((track) => track.id !== this.currentTrack?.id);
   }
 
   // Clear the entire queue
@@ -192,7 +174,7 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
     if (confirm('Are you sure you want to clear the entire queue?')) {
       // Reset audio but keep the current track
       const currentTrack = this.currentTrack;
-      this.audioService.setPlaylist(currentTrack ? [currentTrack] : []);
+      this.audioService.setQueue(currentTrack ? [currentTrack] : []);
     }
   }
 
@@ -202,7 +184,7 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
     return this.offlineAudioService.isTrackSavedOffline(trackId);
   }
 
-  async handleToggleOfflineSave(track: Track | null): Promise<void> {
+  async handleToggleOfflineSave(track: EnhancedTrackDto | null): Promise<void> {
     if (!track) return;
 
     try {
@@ -216,7 +198,7 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
         }
       } else {
         // Add to offline
-        const success = await this.offlineAudioService.saveTrackForOffline(track);
+        const success = await this.audioService.saveTrackForOffline(track);
         if (success) {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Song saved for offline listening' });
         } else {
@@ -226,6 +208,58 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
     } catch (error) {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error saving song for offline listening' });
     }
+  }
+
+  // Handle repeat icon based on repeat mode
+  handleGetRepeatIcon(): string {
+    switch (this.repeatMode) {
+      case RepeatMode.ALL:
+        return 'pi-sync';
+      case RepeatMode.ONE:
+        return 'pi-sync pi-sync-one';
+      default:
+        return 'pi-sync';
+    }
+  }
+
+  // Format time in seconds to MM:SS format
+  handleFormatTime(seconds: number): string {
+    if (!seconds || isNaN(seconds)) return '0:00';
+
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  }
+
+  // Set playback position when clicking on the progress bar
+  handleSetPosition(event: MouseEvent): void {
+    const progressBar = event.currentTarget as HTMLElement;
+    const clickPosition = event.offsetX / progressBar.offsetWidth;
+    const seekTime = this.duration * clickPosition;
+    this.audioService.setCurrentTime(seekTime);
+  }
+
+  // Get appropriate volume icon based on volume level and mute state
+  handleGetVolumeIcon(): string {
+    if (this.isMuted || this.volumePercent === 0) {
+      return 'pi-volume-off';
+    } else if (this.volumePercent < 50) {
+      return 'pi-volume-down';
+    } else {
+      return 'pi-volume-up';
+    }
+  }
+
+  // Set volume when clicking on the volume bar
+  handleSetVolume(event: MouseEvent): void {
+    const volumeBar = event.currentTarget as HTMLElement;
+    const rect = volumeBar.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const clickPositionPercent = (x / rect.width) * 100;
+
+    // Ensure volume is within valid range (0-100)
+    const newVolume = Math.max(0, Math.min(100, clickPositionPercent));
+    this.audioService.setVolume(newVolume);
   }
 
   ngOnDestroy(): void {

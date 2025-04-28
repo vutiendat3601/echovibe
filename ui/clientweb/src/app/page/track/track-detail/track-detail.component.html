@@ -1,0 +1,139 @@
+<div class="track-detail-container" *ngIf="track && !isLoading">
+  <!-- Header section with gradient background -->
+  <div class="track-header-section" [style.background]="backgroundColor">
+    <div class="track-header">
+      <div class="track-thumbnail">
+        <img
+          #trackThumbnail
+          [src]="track.thumbnailUrl || '/asset/image/default-track-thumbnail-image.png'"
+          alt="{{ track.name }}"
+          crossorigin="anonymous"
+        />
+      </div>
+      <div class="track-info">
+        <div class="track-type">Song</div>
+        <h1 class="track-name">{{ track.name }}</h1>
+        <div class="track-metadata flex gap-1">
+          <span class="artist-names flex">
+            <ng-container *ngFor="let artist of track.artists; let last = last" class="flex">
+              <a [routerLink]="['/artist', artist.id]" class="artist-link flex">
+                <img *ngIf="artist.isVerified" [src]="artist.thumbnailUrl" class="verified-badge" alt="Verified" />
+                <div>{{ artist.name }}</div>
+              </a>
+              <span *ngIf="!last"> • </span>
+            </ng-container>
+          </span>
+          <span class="track-year"
+            >{{ track.officialReleasedDate | date: 'yyyy' }} • {{ formatDuration(track.audioDurationSecond) }} •
+            {{ formatPlayCount(1000) }}</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <div class="track-actions">
+      <button pButton class="play-button" type="button" (click)="handlePlayClick()">
+        <fa-icon [icon]="isPlaying ? faPause : faPlay" class="play-icon"></fa-icon>
+      </button>
+      <button pButton icon="pi pi-heart" class="p-button-outlined p-button-rounded"></button>
+      <button
+        pButton
+        icon="pi pi-ellipsis-h"
+        class="p-button-outlined p-button-rounded"
+        (click)="toggle($event)"
+      ></button>
+
+      <!-- <p-overlayPanel #op [showCloseIcon]="true" [style]="{width: '200px'}">
+        <div class="overlay-menu">
+          <button class="menu-item" (click)="addToQueue(); op.hide()">
+            <fa-icon [icon]="faPlus"></fa-icon>
+            <span>Add to queue</span>
+          </button>
+        </div>
+      </p-overlayPanel> -->
+      <p-popover #op>
+        <div class="flex flex-col gap-4">
+          <div>
+            <ul class="list-none p-0 m-0 flex flex-col">
+              <li
+                class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border"
+                (click)="addToQueue(); op.hide()"
+              >
+                <svg
+                  data-encore-id="icon"
+                  role="img"
+                  aria-hidden="true"
+                  class="e-9812-icon e-9812-baseline"
+                  viewBox="0 0 16 16"
+                  width="15"
+                  height="15"
+                  style="
+                  --encore-icon-fill: var(--text-subdued, #656565);
+                  fill: #656565;"
+                >
+                  <path
+                    d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 0 1 7.187 6H13.5a2.5 2.5 0 0 0 0-5H7.966c.159.474.255.978.278 1.5H13.5a1 1 0 1 1 0 2H7.966zM2 2V0h1.5v2h2v1.5h-2v2H2v-2H0V2h2z"
+                  ></path>
+                </svg>
+
+                <span>Add to queue</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </p-popover>
+    </div>
+  </div>
+
+  <!-- Toast for notifications -->
+  <p-toast></p-toast>
+
+  <!-- Content section with different background -->
+  <div class="track-content-section">
+    <div class="track-content-container">
+      <div class="track-content-main">
+        <!-- <div class="track-lyrics" *ngIf="track.lyrics"> -->
+        <div class="track-lyrics">
+          <h3>Lyrics</h3>
+          <pre>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Laborum suscipit sed neque voluptas eum! Corrupti expedita, tempora aliquam deleniti culpa voluptatem ut tenetur nostrum reiciendis magnam, eos veniam similique ducimus.
+          </pre>
+        </div>
+
+        <div class="track-description" *ngIf="track.description">
+          <h3>Description</h3>
+          <p>{{ track.description }}</p>
+        </div>
+      </div>
+
+      <div class="track-content-sidebar">
+        <!-- Artist section that resembles the image -->
+        <div class="artist-section">
+          <div class="artist-list">
+            <div class="artist-item" *ngFor="let artist of track.artists">
+              <div class="artist-avatar">
+                <img
+                  [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'"
+                  alt="{{ artist.name }}"
+                  crossorigin="anonymous"
+                />
+              </div>
+              <div class="artist-info-compact">
+                <div class="artist-label">Artist</div>
+                <div class="artist-name">{{ artist.name }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-container" *ngIf="isLoading">
+  <p-progressBar mode="indeterminate" [style]="{ height: '6px' }"></p-progressBar>
+</div>
+
+<div class="error-container" *ngIf="errorMessage && !isLoading">
+  <p>{{ errorMessage }}</p>
+</div>

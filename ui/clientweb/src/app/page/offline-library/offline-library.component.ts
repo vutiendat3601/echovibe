@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AudioService, Track } from '../../service/audio.service';
+import { AudioService, EnhancedTrackDto } from '../../service/audio.service';
 import { OfflineAudioService } from '../../service/offline-audio.service';
 import { Subscription } from 'rxjs';
 
@@ -13,9 +13,9 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./offline-library.component.scss']
 })
 export class OfflineLibraryComponent implements OnInit, OnDestroy {
-  offlineTracks: Track[] = [];
+  offlineTracks: EnhancedTrackDto[] = [];
   searchTerm: string = '';
-  filteredTracks: Track[] = [];
+  filteredTracks: EnhancedTrackDto[] = [];
   sortOption: string = 'dateAdded';
   isLoading: boolean = true;
 
@@ -36,7 +36,7 @@ export class OfflineLibraryComponent implements OnInit, OnDestroy {
     );
   }
 
-  handlePlayTrack(track: Track): void {
+  handlePlayTrack(track: EnhancedTrackDto): void {
     this.audioService.playOfflineTrack(track).catch(error => {
       console.error('Error playing offline track:', error);
       // Handle playback error
@@ -44,7 +44,7 @@ export class OfflineLibraryComponent implements OnInit, OnDestroy {
     });
   }
 
-  async handleRemoveTrack(event: Event, track: Track): Promise<void> {
+  async handleRemoveTrack(event: Event, track: EnhancedTrackDto): Promise<void> {
     event.stopPropagation();
     if (confirm(`Remove "${track.name}" from your offline library?`)) {
       await this.offlineAudioService.removeTrackFromOffline(track.id);
@@ -59,14 +59,27 @@ export class OfflineLibraryComponent implements OnInit, OnDestroy {
     this.filterAndSortTracks();
   }
 
+  // Get artist name from EnhancedTrackDto
+  getArtistName(track: EnhancedTrackDto): string {
+    if (!track.artists || track.artists.length === 0) return 'Unknown Artist';
+
+    const mainArtist = track.artists.find(artist => artist.isMainArtist);
+    if (mainArtist) {
+      return mainArtist.name;
+    }
+    return track.artists.map(artist => artist.name).join(', ');
+  }
+
   private filterAndSortTracks(): void {
     // Filter tracks based on search term
     this.filteredTracks = this.offlineTracks.filter(track => {
       if (!this.searchTerm) return true;
 
       const searchTermLower = this.searchTerm.toLowerCase();
+      const artistName = this.getArtistName(track);
+
       return track.name.toLowerCase().includes(searchTermLower) ||
-             track.artist.toLowerCase().includes(searchTermLower);
+             artistName.toLowerCase().includes(searchTermLower);
     });
 
     // Sort tracks based on selected option
@@ -77,7 +90,7 @@ export class OfflineLibraryComponent implements OnInit, OnDestroy {
         case 'name':
           return a.name.localeCompare(b.name);
         case 'artist':
-          return a.artist.localeCompare(b.artist);
+          return this.getArtistName(a).localeCompare(this.getArtistName(b));
         default:
           return 0;
       }
