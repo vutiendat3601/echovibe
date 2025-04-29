@@ -34,7 +34,7 @@ kafka_consumer_properties = {
     "enable_auto_commit":
         False,
     "request_timeout_ms":
-        30_000
+        120_000
 }
 
 
