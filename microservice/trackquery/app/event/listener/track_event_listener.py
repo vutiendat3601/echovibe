@@ -61,6 +61,7 @@ async def listen_track_created_event():
         logger.info(f"Error when handling {TrackCreatedEvent.__name__}: {e}")
     finally:
         await track_created_event_listener.stop()
+        logger.info(f"Stopped listening: topic={TRACK_CREATED_EVENT}")
 
 
 async def listen_track_released_event():
@@ -81,6 +82,7 @@ async def listen_track_released_event():
         logger.info(f"Error when handling {TrackReleasedEvent.__name__}: {e}")
     finally:
         await track_released_event_listener.stop()
+        logger.info(f"Stopped listening: topic={TRACK_RELEASED_EVENT}")
 
 
 async def listen_track_updated_event():
@@ -100,6 +102,7 @@ async def listen_track_updated_event():
         logger.info(f"Error when handling {TrackUpdatedEvent.__name__}: {e}")
     finally:
         await track_updated_event_listener.stop()
+        logger.info(f"Stopped listening: topic={TRACK_UPDATED_EVENT}")
 
 
 async def listen_track_deleted_event():
@@ -119,6 +122,7 @@ async def listen_track_deleted_event():
         logger.info(f"Error when handling {TrackDeletedEvent.__name__}: {e}")
     finally:
         await track_deleted_event_consumer.stop()
+        logger.info(f"Stopped listening: topic={TRACK_DELETED_EVENT}")
 
 
 async def listen_track_audio_mapped_event():
@@ -136,9 +140,11 @@ async def listen_track_audio_mapped_event():
                 track_audio_mapped_event)
             await track_audio_mapped_event_consumer.commit()
     except Exception as e:
-        logger.info(f"Error when handling {TrackAudioMappedEvent.__name__}: {e}")
+        logger.info(
+            f"Error when handling {TrackAudioMappedEvent.__name__}: {e}")
     finally:
         await track_audio_mapped_event_consumer.stop()
+        logger.info(f"Stopped listening: topic={TRACK_AUDIO_MAPPED_EVENT}")
 
 
 def get_track_event_listeners() -> list[callable]:

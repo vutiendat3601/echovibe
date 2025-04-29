@@ -56,6 +56,7 @@ async def listen_track_released_event():
         logger.info(f"Error when handling {TrackReleasedEvent.__name__}: {e}")
     finally:
         await track_released_event_listener.stop()
+        logger.info(f"Stopped listening: topic={TRACK_RELEASED_EVENT}")
 
 
 async def listen_track_deleted_event():
@@ -75,6 +76,7 @@ async def listen_track_deleted_event():
         logger.info(f"Error when handling {TrackDeletedEvent.__name__}: {e}")
     finally:
         await track_deleted_event_consumer.stop()
+        logger.info(f"Stopped listening: topic={TRACK_DELETED_EVENT}")
 
 
 def get_track_event_listeners() -> list[callable]:
