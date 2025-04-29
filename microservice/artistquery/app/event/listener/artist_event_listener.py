@@ -63,6 +63,7 @@ async def listen_artist_created_event():
         logger.info(f"Error when handling {ArtistCreatedEvent.__name__}: {e}")
     finally:
         await artist_created_event_listener.stop()
+        logger.info(f"Stopped listening: topic={ARTIST_CREATED_EVENT}")
 
 
 async def listen_artist_released_event():
@@ -83,6 +84,7 @@ async def listen_artist_released_event():
         logger.info(f"Error when handling {ArtistReleasedEvent.__name__}: {e}")
     finally:
         await artist_released_event_listener.stop()
+        logger.info(f"Stopped listening: topic={ARTIST_RELEASED_EVENT}")
 
 
 async def listen_artist_updated_event():
@@ -103,6 +105,7 @@ async def listen_artist_updated_event():
         logger.info(f"Error when handling {ArtistUpdatedEvent.__name__}: {e}")
     finally:
         await artist_updated_event_listener.stop()
+        logger.info(f"Stopped listening: topic={ARTIST_UPDATED_EVENT}")
 
 
 async def listen_artist_deleted_event():
@@ -123,6 +126,7 @@ async def listen_artist_deleted_event():
         logger.info(f"Error when handling {ArtistDeletedEvent.__name__}: {e}")
     finally:
         await artist_deleted_event_consumer.stop()
+        logger.info(f"Stopped listening: topic={ARTIST_DELETED_EVENT}")
 
 
 async def listen_artist_visibility_set_event():
@@ -145,6 +149,7 @@ async def listen_artist_visibility_set_event():
             f"Error when handling {ArtistVerificationSetEvent.__name__}: {e}")
     finally:
         await artist_visibility_changed_event_consumer.stop()
+        logger.info(f"Stopped listening: topic={ARTIST_VERIFICATION_SET_EVENT}")
 
 
 def get_artist_event_listeners() -> list[callable]:
