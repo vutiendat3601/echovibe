@@ -244,6 +244,7 @@ class TrackEventHandler:
         track = self.track_repository.find_by_aggregate_id_and_is_active_true(
             track_audio_mapped_event.id)
         if track is not None:
+            track.is_released = track_audio_mapped_event.is_released
             if track.track_audio is None:
                 track.track_audio = TrackAudio()
                 track.track_audio.created_at = updated_at

@@ -94,6 +94,7 @@ class TrackDeletedEvent(EventSchema):
 
 class TrackAudioMappedEvent(EventSchema):
     track_audio: TrackAudioSchema = Field(alias="trackAudio")
+    is_released: bool = Field(default=False, alias="isReleased")
 
     class Config:
         populate_by_name = True
