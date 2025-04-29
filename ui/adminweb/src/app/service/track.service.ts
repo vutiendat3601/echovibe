@@ -75,7 +75,7 @@ export class TrackService {
       );
   }
 
-  bulkMapTrackAdio(bulkMapTrackAudioDtos: BulkDto<MapTrackAudioDto>) {
+  bulkMapTrackAudio(bulkMapTrackAudioDtos: BulkDto<MapTrackAudioDto>) {
     const actionTime = new Date();
     return this.http
       .post<ResponseDto<BulkResult>>(`${environment.trackCommandBaseUrl}/bulk-map-audio`, bulkMapTrackAudioDtos)

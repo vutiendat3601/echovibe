@@ -1,4 +1,4 @@
-import { CommonModule, formatDate } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -9,7 +9,7 @@ import { CardModule } from 'primeng/card';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
-import { DatePickerModule, DatePickerTypeView } from 'primeng/datepicker';
+import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { EditorModule } from 'primeng/editor';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -20,7 +20,7 @@ import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { InputTextModule } from 'primeng/inputtext';
-import { MultiSelectFilterEvent, MultiSelectModule } from 'primeng/multiselect';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { PanelModule } from 'primeng/panel';
 import { PopoverModule } from 'primeng/popover';
 import { RadioButtonModule } from 'primeng/radiobutton';
@@ -37,27 +37,10 @@ import { ArtistDto } from '../../../dto/artist-dto';
 import { ExceptionHandler, Message } from '../../../exception/exception-handler';
 import { CommandResult } from '../../../model/command-result';
 import { Tag } from '../../../model/tag';
+import { TrackAudio } from '../../../model/track';
 import { ArtistService } from '../../../service/artist.service';
 import { TrackService } from '../../../service/track.service';
-import {
-  CreateTrackDto,
-  DeleteTrackDto,
-  MapTrackAudioDto,
-  ReleaseTrackDto,
-  TrackArtistDto,
-  TrackDto,
-  UpdateTrackDto
-} from './../../../dto/track-dto';
-import { TrackAudio } from '../../../model/track';
-
-type ActionType = 'new' | 'edit';
-
-interface DateFormat {
-  name: string;
-  datePickerFormat: string;
-  format: string;
-  view: DatePickerTypeView;
-}
+import { MapTrackAudioDto, ReleaseTrackDto, TrackDto } from './../../../dto/track-dto';
 
 interface Column {
   field: string;
@@ -221,13 +204,10 @@ export class AudioManagementComponent implements OnInit {
       const mapTrackAudioDto: MapTrackAudioDto = {
         id: this.currentTrack.id,
         trackAudio: {
-          fileM3u8Url: this.currentTrack.audio.fileM3u8Url,
-          fileKey: null,
-          isActive: true,
-          durationSecond: 0
+          ...this.currentTrack.audio
         }
       };
-      this.updateTrackAudio(mapTrackAudioDto);
+      this.mapTrackAudio(mapTrackAudioDto);
     }
   }
 
@@ -282,6 +262,13 @@ export class AudioManagementComponent implements OnInit {
       (value: string) =>
         !this.fileM3u8UrlFormControl.errors && this.currentTrack.audio && (this.currentTrack.audio.fileM3u8Url = value)
     );
+
+    this.durationSecondFormControl.valueChanges.subscribe(
+      (value: number) =>
+        !this.fileM3u8UrlFormControl.errors &&
+        this.currentTrack.audio &&
+        (this.currentTrack.audio.durationSecond = value)
+    );
   }
 
   private listenAndProcessTrackEvents() {
@@ -321,8 +308,8 @@ export class AudioManagementComponent implements OnInit {
     });
   }
 
-  private updateTrackAudio(updateTrackDto: MapTrackAudioDto): void {
-    this.trackService.bulkMapTrackAdio({ items: [updateTrackDto] }).subscribe((respDto) => {
+  private mapTrackAudio(updateTrackDto: MapTrackAudioDto): void {
+    this.trackService.bulkMapTrackAudio({ items: [updateTrackDto] }).subscribe((respDto) => {
       const { isSuccessful, errors }: CommandResult = respDto.data.items[0];
       if (isSuccessful) {
         this.isDialogFormSubmitted = true;

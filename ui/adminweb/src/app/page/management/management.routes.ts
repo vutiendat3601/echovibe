@@ -6,6 +6,7 @@ import { PlaylistManagementComponent } from './playlist-management/playlist-mana
 import { TrackManagementComponent } from './track-management/track-management.component';
 import { ArtistManagementBulkComponent } from './artist-management-bulk/artist-management-bulk.component';
 import { TrackManagementBulkComponent } from './track-management-bulk/track-management-bulk.component';
+import { AudioManagementBulkComponent } from './audio-management-bulk/audio-management-bulk.component';
 
 export default [
   {
@@ -41,16 +42,20 @@ export default [
       {
         path: '',
         component: AudioManagementComponent
+      },
+      {
+        path: 'bulk',
+        component: AudioManagementBulkComponent
       }
     ]
   },
-  {
-    path: 'playlist',
-    component: PlaylistManagementComponent
-  },
-  {
-    path: 'recommendation-system',
-    component: RecommendationSystemComponent
-  },
+  // {
+  //   path: 'playlist',
+  //   component: PlaylistManagementComponent
+  // },
+  // {
+  //   path: 'recommendation-system',
+  //   component: RecommendationSystemComponent
+  // },
   { path: '**', redirectTo: '/not-found' }
 ] as Routes;
