@@ -1,0 +1,150 @@
+<!-- Toolbar -->
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <p-button
+      i18n-label="@@BUTTON_LABEL_SAVE"
+      icon="pi pi-save"
+      severity="success"
+      class="mr-2"
+      [disabled]="isLoading()"
+      (onClick)="handleBulkSaveTrackAudio()"
+    />
+
+    <!-- CSV Template Button -->
+    <p-button
+      i18n-label="@@BUTTON_LABEL_EXPORT_TEMPLATE"
+      icon="pi pi-file-export"
+      outlined
+      severity="secondary"
+      class="mr-2"
+    />
+    <!-- CSV Import Button -->
+    <p-fileupload
+      #fu
+      mode="basic"
+      i18n-chooseLabel="@@BUTTON_LABEL_CHOOSE_FILE"
+      chooseLabel="Choose file ..."
+      chooseIcon="pi pi-upload"
+      name="demo[]"
+      accept=".csv"
+      maxFileSize="10000000"
+      (onSelect)="handleCsvSelected($event)"
+    />
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dataTable
+  [value]="tracks()"
+  [rows]="25"
+  [columns]="columns"
+  [paginator]="true"
+  [globalFilterFields]="['id', 'name', 'tagsString']"
+  [tableStyle]="{ 'min-width': '75rem' }"
+  [(selection)]="selectedTracks"
+  [rowHover]="true"
+  dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Tracks"
+  [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[5, 10, 25]"
+  [loading]="isLoading()"
+>
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      <h5 class="m-0" i18n="@@TABLE_LABEL_CREATE_ARTISTS">Map Audio</h5>
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          (input)="handleGlobalFilter(dataTable, $event)"
+          i18n-placeholder="@@INPUT_PLACEHOLDER_SEARCH"
+          placeholder="Search ..."
+        />
+      </p-iconfield>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <!-- Checkbox -->
+      <th style="width: 4rem">
+        <p-tableHeaderCheckbox />
+      </th>
+
+      <!-- Action Buttons -->
+      <th style="min-width: 4rem">Action</th>
+
+      <!-- ID -->
+      <th style="width: 8rem">ID</th>
+
+      <!-- Name -->
+      <th pSortableColumn="name" style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_TRACK_NAME">
+        Track
+        <p-sortIcon field="name" />
+      </th>
+
+      <!-- File M3U8 -->
+      <th style="min-width: 32rem">Link File M3u8</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-track_ let-rowIndex="rowIndex">
+    @if (track_.formGroup) {
+      <ng-container [formGroup]="track_.formGroup">
+        <tr>
+          <!-- Checkbox -->
+          <td style="width: 4rem">
+            <p-tableCheckbox [value]="track_" />
+          </td>
+
+          <!-- Action Buttons -->
+          <td style="min-width: 4rem">
+            <!-- Edit -->
+            <p-button severity="success" icon="pi pi-pencil" [rounded]="true" [outlined]="true" />
+          </td>
+
+          <!-- ID -->
+          <td style="min-width: 16rem">
+            <p style="width: 8rem">{{ track_.id }}</p>
+            <p class="m-0">{{ track_.refCode }}</p>
+          </td>
+
+          <!-- Track -->
+          <td class="flex gap-x-2" style="min-width: 24rem">
+            <p-image
+              [preview]="true"
+              class="rounded"
+              imageClass="rounded object-cover w-20 h-20"
+              [src]="track_.thumbnailUrl"
+              [alt]="track_.name + '\'s thumbnail'"
+            />
+            <div class="flex-1">
+              <p class="m-0">{{ track_.name }}</p>
+              @for (trackArtist of track_.trackArtists; track trackArtist.artistId) {
+                @if (trackArtist.isActive) {
+                  <p-tag [value]="trackArtist.artistName" [severity]="trackArtist.isMainArtist ? 'success' : 'info'" />
+                }
+              }
+            </div>
+          </td>
+
+          <td style="min-width: 32rem">
+            <input pInputText type="text" class="w-full" formControlName="fileM3u8UrlFormControl" />
+          </td>
+        </tr>
+      </ng-container>
+    }
+  </ng-template>
+
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="15">
+        <div class="flex flex-col items-center justify-center">
+          <div class="text-center p-4">No artists found. Please check your query parameters.</div>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-confirmdialog />
+<p-toast position="top-right" />

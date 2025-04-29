@@ -241,7 +241,6 @@ export class TrackManagementBulkComponent implements OnInit {
   }
 
   handleGlobalFilter(table: Table, event: Event) {
-    console.log((event.target as HTMLInputElement).value);
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 
@@ -263,7 +262,7 @@ export class TrackManagementBulkComponent implements OnInit {
     track.isThumbnailDialogShowed = false;
   }
 
-  handleBulkSaveArtist(): void {
+  handleBulkSaveTrack(): void {
     this.isLoading.set(true);
     if (this.action === 'edit') {
       const updateTrackDtos: UpdateTrackDto[] = this.tracks().map(
@@ -369,8 +368,7 @@ export class TrackManagementBulkComponent implements OnInit {
     officialReleasedDateFormControl.valueChanges.subscribe(
       (value: Date) =>
         !officialReleasedDateFormControl.errors &&
-        ((track.officialReleasedDate = formatDate(value, track.officialReleasedDateFormat.format, 'en-US')),
-        console.log(track.officialReleasedDate))
+        (track.officialReleasedDate = formatDate(value, track.officialReleasedDateFormat.format, 'en-US'))
     );
 
     // Tags
@@ -400,6 +398,7 @@ export class TrackManagementBulkComponent implements OnInit {
       isPublicFormControl
     });
   }
+
   private bulkUpdateTrack(updateTrackDtos: UpdateTrackDto[]): void {
     this.trackService.bulkUpdateTrack({ items: updateTrackDtos }).subscribe((respDto) => {
       this.isLoading.set(false);
@@ -472,9 +471,9 @@ export class TrackManagementBulkComponent implements OnInit {
           thumbnailUrl: trackImport['thumbnailurl'] || null,
           refCode: trackImport['refcode'] || null,
           officialReleasedDateFormat,
+          officialReleasedDate,
           filteredTrackArtists: [...trackArtists],
           trackArtists,
-          officialReleasedDate: officialReleasedDate,
           tags: trackImport['tagsjson']
             ? ((JSON.parse(trackImport['tagsjson']) || []) as string[]).map(
                 (tag) => ({ name: tag, isActive: true }) as Tag
@@ -490,6 +489,7 @@ export class TrackManagementBulkComponent implements OnInit {
       }
     });
   }
+
   private listenAndProcessActiveRouteParams(): void {
     this.activeRoute.queryParams.subscribe((queryParams: Params) => {
       if (queryParams['ids']) {
