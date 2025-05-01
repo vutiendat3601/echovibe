@@ -101,7 +101,7 @@ export class TrackDetailComponent implements OnInit {
 
   // Play or pause the current track
   handlePlayClick(): void {
-    if (!this.track) return;
+    if (!this.track || !this.track.audioFileM3u8Url) return;
 
     if (this.isCurrentTrack) {
       // If this is already the current track, just toggle play/pause

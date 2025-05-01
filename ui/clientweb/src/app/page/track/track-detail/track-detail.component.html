@@ -32,7 +32,7 @@
     </div>
 
     <div class="track-actions">
-      <button pButton class="play-button" type="button" (click)="handlePlayClick()">
+      <button pButton class="play-button" type="button" (click)="handlePlayClick()" [disabled]="!track.audioFileM3u8Url">
         <fa-icon [icon]="isPlaying ? faPause : faPlay" class="play-icon"></fa-icon>
       </button>
       <button pButton icon="pi pi-heart" class="p-button-outlined p-button-rounded"></button>

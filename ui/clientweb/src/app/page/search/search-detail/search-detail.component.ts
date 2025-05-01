@@ -1,12 +1,11 @@
 import { SearchService } from './../../../service/search.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPlay, faUser, faClock, faMusic } from '@fortawesome/free-solid-svg-icons';
-// import { ArtistMapper } from '../../../mapper/artist-mapper';
 import { ArtistDetailDto } from '../../../dto/artist-dto';
 
 interface Artist {
@@ -134,45 +133,30 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
       type: 'Playlist'
     }
   ];
-  mockArtists: Artist[] = [
-    {
-      id: '1',
-      urn: 'urn:artist:1',
-      name: 'Deftones',
-      thumbnailUrl: '/asset/image/default-artist-thumbnail-image.png',
-      description: 'American alternative metal band',
-      backgroundUrl: '/asset/image/default-artist-thumbnail-image.png',
-      biography: 'Deftones are an American alternative metal band formed in 1988.',
-      nationalityIsoCode: 'US',
-      isPublic: true,
-      isVerified: true,
-      tags: []
-    },
-    {
-      id: '2',
-      urn: 'urn:artist:1',
-      name: 'Deftones',
-      thumbnailUrl: '/asset/image/default-artist-thumbnail-image.png',
-      description: 'American alternative metal band',
-      backgroundUrl: '/asset/image/default-artist-thumbnail-image.png',
-      biography: 'Deftones are an American alternative metal band formed in 1988.',
-      nationalityIsoCode: 'US',
-      isPublic: true,
-      isVerified: true,
-      tags: []
-    }
-  ];
 
   constructor(
     private readonly activeRoute: ActivatedRoute,
-    private readonly searchService: SearchService
-    // private readonly artistMapper: ArtistMapper
+    private readonly searchService: SearchService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
-    // Use mock data instead of API call
-    this.loadMockData();
-    this.loadData();
+    // Subscribe to route parameters to get the filter
+    this.activeRoute.params.subscribe((params) => {
+      if (params['keyword']) {
+        this.searchKeyword = params['keyword'];
+
+        // Set active filter based on the route parameter
+        if (params['filter']) {
+          this.activeFilter = params['filter'];
+        } else {
+          this.activeFilter = 'all';
+        }
+
+        // Load real data instead of mock data
+        this.loadData();
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -182,24 +166,22 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
 
   setActiveFilter(filter: string): void {
     this.activeFilter = filter;
-    // In a real implementation, you would reload data based on the filter
+    // Navigate to the new route with the selected filter
+    if (filter === 'all') {
+      this.router.navigate(['/search', this.searchKeyword]);
+    } else {
+      this.router.navigate(['/search', this.searchKeyword, filter]);
+    }
   }
 
   private loadMockData(): void {
-    const paramsSub = this.activeRoute.params.subscribe((params) => {
-      if (params['keyword']) {
-        this.searchKeyword = params['keyword'];
-        this.isLoading = true;
+    this.isLoading = true;
 
-        // Simulate API loading delay
-        setTimeout(() => {
-          this.artists = this.mockArtists;
-          this.isLoading = false;
-        }, 800);
-      }
-    });
-
-    this.subscriptions.push(paramsSub);
+    // Simulate API loading delay
+    setTimeout(() => {
+      // We no longer use mock artists data - we get real data from the API
+      this.isLoading = false;
+    }, 800);
   }
 
   private loadData(): void {
@@ -238,17 +220,32 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
   }
 
   loadMoreResults(): void {
-    // Simulate loading more results
     this.isLoading = true;
 
-    setTimeout(() => {
-      // Nothing to do for mock data, but we'll simulate the loading
-      this.isLoading = false;
-    }, 800);
+    const searchSub = this.searchService.search(this.searchKeyword, this.pageNumber, this.PAGE_SIZE).subscribe({
+      next: (respDto) => {
+        if (respDto.data) {
+          const search = respDto.data;
+          const artists = search.artist.items.map((artistDetailDto: ArtistDetailDto) => artistDetailDto as Artist);
+
+          // Add new artists to existing list
+          this.artists = [...this.artists, ...artists];
+          this.pageNumber++;
+          console.log('Loaded more artists, total:', this.artists.length);
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error fetching additional search results:', err);
+        this.isLoading = false;
+      }
+    });
+
+    this.subscriptions.push(searchSub);
   }
 
   navigateToArtist(artist: Artist): void {
-    // To be implemented - navigate to artist detail page
-    console.log('Navigate to artist:', artist);
+    // Navigate to artist detail page using the artist's id
+    this.router.navigate(['/artist', artist.id]);
   }
 }
