@@ -5,9 +5,6 @@
     <button class="filter-tab" [class.active]="activeFilter === 'artists'" (click)="setActiveFilter('artists')">Artists</button>
     <button class="filter-tab" [class.active]="activeFilter === 'songs'" (click)="setActiveFilter('songs')">Songs</button>
     <button class="filter-tab" [class.active]="activeFilter === 'playlists'" (click)="setActiveFilter('playlists')">Playlists</button>
-    <button class="filter-tab" [class.active]="activeFilter === 'albums'" (click)="setActiveFilter('albums')">Albums</button>
-    <button class="filter-tab" [class.active]="activeFilter === 'podcasts'" (click)="setActiveFilter('podcasts')">Podcasts & Shows</button>
-    <button class="filter-tab" [class.active]="activeFilter === 'profiles'" (click)="setActiveFilter('profiles')">Profiles</button>
   </div>
 
   <!-- Loading Indicator -->
@@ -17,100 +14,126 @@
   </div>
 
   <div *ngIf="!isLoading || artists.length > 0" class="search-content">
-    <!-- Two-column layout for top section -->
-    <div class="top-section">
-      <!-- Top Result -->
-      <div class="top-result-section" *ngIf="artists.length > 0">
-        <h2>Top result</h2>
-        <div class="top-result-card" (click)="navigateToArtist(artists[0])">
-          <div class="top-result-image">
-            <img [src]="artists[0].thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'" [alt]="artists[0].name">
+    <!-- All Filter Content -->
+    <ng-container *ngIf="activeFilter === 'all'">
+      <!-- Two-column layout for top section -->
+      <div class="top-section">
+        <!-- Top Result -->
+        <div class="top-result-section" *ngIf="artists.length > 0">
+          <h2>Top result</h2>
+          <div class="top-result-card" (click)="navigateToArtist(artists[0])">
+            <div class="top-result-image">
+              <img [src]="artists[0].thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'" [alt]="artists[0].name">
+            </div>
+            <div class="top-result-info">
+              <h3>{{ artists[0].name }}</h3>
+              <span class="top-result-type">Artist</span>
+            </div>
+            <div class="top-result-play-button">
+              <button class="play-button">
+                <fa-icon [icon]="faPlay"></fa-icon>
+              </button>
+            </div>
           </div>
-          <div class="top-result-info">
-            <h3>{{ artists[0].name }}</h3>
-            <span class="top-result-type">Artist</span>
-          </div>
-          <div class="top-result-play-button">
-            <button class="play-button">
-              <fa-icon [icon]="faPlay"></fa-icon>
-            </button>
+        </div>
+
+        <!-- Songs -->
+        <div class="songs-section">
+          <h2>Songs</h2>
+          <div class="songs-list">
+            <!-- Use mock song data -->
+            <div *ngFor="let song of mockSongs" class="song-item">
+              <div class="song-image">
+                <img [src]="song.albumImage" [alt]="song.title">
+              </div>
+              <div class="song-info">
+                <div class="song-title">{{ song.title }}</div>
+                <div class="song-artist">
+                  <span *ngIf="song.explicit" class="explicit-label">E</span>
+                  {{ song.artist }} <span *ngIf="song.featuredArtist">(feat. {{ song.featuredArtist }})</span>
+                </div>
+              </div>
+              <div class="song-duration">{{ song.duration }}</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Songs -->
-      <div class="songs-section">
-        <h2>Songs</h2>
-        <div class="songs-list">
-          <!-- Use mock song data -->
-          <div *ngFor="let song of mockSongs" class="song-item">
-            <div class="song-image">
-              <img [src]="song.albumImage" [alt]="song.title">
-            </div>
-            <div class="song-info">
-              <div class="song-title">{{ song.title }}</div>
-              <div class="song-artist">
-                <span *ngIf="song.explicit" class="explicit-label">E</span>
-                {{ song.artist }} <span *ngIf="song.featuredArtist">(feat. {{ song.featuredArtist }})</span>
+      <!-- Featuring Artist Section -->
+      <div class="featuring-section" *ngIf="artists.length > 0">
+        <h2>Featuring {{ artists[0].name }}</h2>
+
+        <div class="featuring-grid">
+          <!-- Use mock playlist data -->
+          <div *ngFor="let playlist of mockPlaylists" class="featuring-card">
+            <div class="featuring-card-img">
+              <img [src]="playlist.coverImage" [alt]="playlist.title">
+              <div class="featuring-card-logo" *ngIf="playlist.badge">
+                <span class="featuring-card-icon">{{ playlist.badge }}</span>
               </div>
             </div>
-            <div class="song-duration">{{ song.duration }}</div>
+            <div class="featuring-card-title">{{ playlist.title }}</div>
+            <div class="featuring-card-subtitle">{{ playlist.description }}</div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Featuring Artist Section -->
-    <div class="featuring-section">
-      <h2>Featuring {{ artists[0].name }}</h2>
+      <!-- Artists Section (when there are multiple artists) -->
+      <div class="artists-section" *ngIf="artists.length > 1">
+        <h2>Artists</h2>
 
-      <div class="featuring-grid">
-        <!-- Use mock playlist data -->
-        <div *ngFor="let playlist of mockPlaylists" class="featuring-card">
-          <div class="featuring-card-img">
-            <img [src]="playlist.coverImage" [alt]="playlist.title">
-            <div class="featuring-card-logo" *ngIf="playlist.badge">
-              <span class="featuring-card-icon">{{ playlist.badge }}</span>
+        <div class="artists-grid">
+          <div *ngFor="let artist of artists.slice(1)" class="artist-card" (click)="navigateToArtist(artist)">
+            <div class="artist-card-image">
+              <img [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'"
+                   [alt]="artist.name">
+              <div class="play-button">
+                <fa-icon [icon]="faPlay"></fa-icon>
+              </div>
+            </div>
+            <div class="artist-card-content">
+              <div class="artist-card-title">{{ artist.name }}</div>
+              <div class="artist-card-subtitle">Artist</div>
             </div>
           </div>
-          <div class="featuring-card-title">{{ playlist.title }}</div>
-          <div class="featuring-card-subtitle">{{ playlist.description }}</div>
         </div>
       </div>
-    </div>
+    </ng-container>
 
-    <!-- Artists Section (when there are multiple artists) -->
-    <div class="artists-section">
-      <h2>Artists</h2>
+    <!-- Artists Filter Content -->
+    <ng-container *ngIf="activeFilter === 'artists'">
+      <!-- <h1 class="filter-title">Artists</h1> -->
 
-      <div class="artists-grid">
-        <div *ngFor="let artist of artists.slice(1)" class="artist-card" (click)="navigateToArtist(artist)">
-          <div class="artist-card-image">
-            <img [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'"
-                 [alt]="artist.name">
-            <div class="play-button">
-              <fa-icon [icon]="faPlay"></fa-icon>
+      <div class="artists-grid-view">
+        <div *ngFor="let artist of artists" class="artist-round-card" (click)="navigateToArtist(artist)">
+          <div class="artist-round-image">
+            <img [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'" [alt]="artist.name">
+            <div class="artist-play-button">
+              <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
             </div>
           </div>
-          <div class="artist-card-content">
-            <div class="artist-card-title">{{ artist.name }}</div>
-            <div class="artist-card-subtitle">Artist</div>
-          </div>
+          <div class="artist-name">{{ artist.name }}</div>
+          <div class="artist-type">Artist</div>
         </div>
       </div>
-    </div>
+    </ng-container>
 
-    <!-- No Results Message (will not show with mock data) -->
+    <!-- Songs Filter Content (placeholder for future implementation) -->
+    <ng-container *ngIf="activeFilter === 'songs'">
+      <h1 class="filter-title">Songs</h1>
+      <!-- Songs content goes here -->
+    </ng-container>
+
+    <!-- Playlists Filter Content (placeholder for future implementation) -->
+    <ng-container *ngIf="activeFilter === 'playlists'">
+      <h1 class="filter-title">Playlists</h1>
+      <!-- Playlists content goes here -->
+    </ng-container>
+
+    <!-- No Results Message -->
     <div *ngIf="artists.length === 0 && !isLoading" class="no-results">
       <h3>No results found for "{{ searchKeyword }}"</h3>
       <p>Try searching for something else</p>
-    </div>
-
-    <!-- Load More Button -->
-    <div *ngIf="artists.length > 0" class="load-more">
-      <button (click)="loadMoreResults()" [disabled]="isLoading" class="load-more-button">
-        {{ isLoading ? 'Loading...' : 'Load More' }}
-      </button>
     </div>
   </div>
 </div>

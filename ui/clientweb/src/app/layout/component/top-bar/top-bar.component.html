@@ -36,11 +36,48 @@
   </div>
 
   <div class="layout-topbar-search">
-    <p-iconfield [style]="{ maxWidth: '400px', margin: '0 auto' }">
-      <p-inputicon styleClass="pi pi-search" />
-      <input type="text" pInputText placeholder="Search" class="w-full" size="large" />
-      <p-inputicon styleClass="pi pi-spinner pi-spin" />
-    </p-iconfield>
+    <div class="search-input-container" [class.focused]="isSearchFocused">
+      <div class="search-input-wrapper">
+        <i class="pi pi-search search-icon"></i>
+        <input
+          type="text"
+          [placeholder]="'What do you want to play?'"
+          class="search-input"
+          (focus)="onSearchFocus()"
+          (blur)="onSearchBlur()"
+          (input)="onSearchInput()"
+          [(ngModel)]="searchQuery"
+        />
+        <div class="keyboard-shortcut">
+          <span class="shortcut-key">Ctrl</span>
+          <span class="shortcut-key">K</span>
+        </div>
+      </div>
+
+      <!-- Recent Searches Dropdown -->
+      <div class="recent-searches-dropdown" *ngIf="isSearchFocused && !searchQuery && recentSearches.length > 0">
+        <div class="dropdown-header">Recent searches</div>
+
+        <div class="search-results">
+          <div class="search-item" *ngFor="let result of recentSearches" (click)="selectSearchResult(result)">
+            <div class="search-item-image">
+              <img [src]="result.imageUrl" [alt]="result.title">
+            </div>
+            <div class="search-item-info">
+              <div class="search-item-title">{{ result.title }}</div>
+              <div class="search-item-artist">{{ result.artist }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clear Recent Searches Button -->
+        <div class="clear-searches-container">
+          <button class="clear-searches-button" (click)="clearRecentSearches($event)">
+            Clear recent searches
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="layout-topbar-actions">

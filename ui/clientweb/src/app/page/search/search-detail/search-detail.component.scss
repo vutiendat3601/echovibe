@@ -179,10 +179,14 @@ $accent-hover-color: #1ed760;
     }
 
     &:hover {
-      .play-button {
-        opacity: 1;
-        transform: translateY(0);
+      .top-result-play-button{
+        .play-button {
+          background-color: $accent-hover-color;
+          transform: scale(1.05) translateY(0);
+          opacity: 1;
+        }
       }
+
     }
   }
 }
@@ -405,17 +409,26 @@ $accent-hover-color: #1ed760;
         align-items: center;
         justify-content: center;
         opacity: 0;
+        // z-index: 1000;
         transform: translateY(8px);
         transition: all 0.3s ease;
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 
-        &:hover {
-          background-color: $accent-hover-color;
-          transform: scale(1.05) translateY(0);
-        }
+        // &:hover {
+        //   background-color: $accent-hover-color;
+        //   transform: scale(1.05) translateY(0);
+        // }
 
         fa-icon {
           font-size: 18px;
+        }
+      }
+
+      &:hover {
+        .play-button {
+          opacity: 1;
+          background-color: $accent-hover-color;
+          transform: scale(1.05) translateY(0);
         }
       }
     }
@@ -435,6 +448,105 @@ $accent-hover-color: #1ed760;
         font-size: 14px;
       }
     }
+  }
+}
+
+// Filter title
+.filter-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: $text-primary;
+}
+
+// Artist grid view for the Artists filter tab
+.artists-grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 32px;
+  padding-bottom: 48px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.artist-round-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  text-align: center;
+
+  &:hover {
+    background-color: $surface-hover-color;
+
+    .artist-play-button {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .artist-round-image {
+    width: 100%;
+    max-width: 180px;
+    aspect-ratio: 1/1;
+    margin-bottom: 16px;
+    position: relative;
+
+    img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .artist-play-button {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background-color: $accent-color;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.3s ease;
+
+      .play-icon {
+        font-size: 18px;
+        color: white;
+      }
+    }
+  }
+
+  .artist-name {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    color: $text-primary;
+  }
+
+  .artist-type {
+    color: $text-secondary;
+    font-size: 14px;
   }
 }
 
