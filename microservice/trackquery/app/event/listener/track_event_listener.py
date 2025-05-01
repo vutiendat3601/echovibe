@@ -40,7 +40,9 @@ kafka_consumer_properties = {
     "enable_auto_commit":
         False,
     "request_timeout_ms":
-        120_000
+        120_000,
+    "max_poll_records":
+        1
 }
 
 
