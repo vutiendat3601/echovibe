@@ -16,15 +16,20 @@ search_service: SearchService = Provide[Container.search_service]
 
 
 @search_router.get("", response_model=ResponseSchema[SearchSchema])
-def search(keyword: str,
+def search(keyword: str = Query(...),
            types: list[SearchType] = Query(),
            page: int = Query(default=0),
            size: int = Query(default=50)):
-    artist_detail_schemas = None
+    keyword = keyword.strip()
+
+    artist_detail_schemas: list[ArtistDetailSchema] | None = None
     if SearchType.ARTIST in types:
-        artist_detail_schemas = search_service.search_artist(
-            keyword, page, size)
+        artist_detail_schemas = []
+        if keyword != "":
+            artist_detail_schemas = search_service.search_artist(
+                keyword, page, size)
     search_artist_result = SearchResult(items=artist_detail_schemas)
+    
     search_schema: SearchSchema = SearchSchema(keyword=keyword,
                                                artist=search_artist_result)
     response_scheme = ok(data=search_schema)
