@@ -56,9 +56,9 @@ async def listen_track_released_event():
             await track_released_event_listener.commit()
     except Exception as e:
         logger.info(f"Error when handling {TrackReleasedEvent.__name__}: {e}")
-    finally:
-        await track_released_event_listener.stop()
-        logger.info(f"Stopped listening: topic={TRACK_RELEASED_EVENT}")
+    # finally:
+    #     await track_released_event_listener.stop()
+    #     logger.info(f"Stopped listening: topic={TRACK_RELEASED_EVENT}")
 
 
 async def listen_track_deleted_event():
