@@ -31,3 +31,6 @@ jobs:
       - name: Build product image
         working-directory: ./microservice/product
         run: ./release.sh
+      - name: Build activity image
+        working-directory: ./microservice/activity
+        run: ./release.sh

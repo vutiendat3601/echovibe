@@ -1,6 +1,6 @@
 from fastapi import APIRouter, WebSocket
 
-activity_router = APIRouter(prefix="/v1/activity", tags=["Acitivity"])
+activity_router = APIRouter(prefix="/v1", tags=["Acitivity"])
 
 # artist_service: ArtistService = Provide[Container.artist_service]
 
