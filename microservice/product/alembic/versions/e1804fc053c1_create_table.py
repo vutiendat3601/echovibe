@@ -208,7 +208,7 @@ CREATE TABLE track_artist (
     is_active bool NOT NULL DEFAULT true,
     is_main_artist bool NOT NULL DEFAULT false,
     event_type text NULL,
-    event_version numeric NULL,
+    event_version int NULL,
     event_timestamp timestamptz NULL,
     created_at timestamptz NOT NULL,
     updated_at timestamptz NOT NULL,
@@ -338,6 +338,27 @@ END;
 $function$
 ;"""
 
+    create_playlist_table_ddl = """
+CREATE TABLE playlist (
+    id uuid NOT NULL,
+	urn varchar(255) NOT NULL,
+    aggregate_id varchar(12) NOT NULL,
+    name varchar(255) NOT NULL,
+    is_public bool NOT NULL DEFAULT true,
+    is_active bool NOT NULL DEFAULT true,
+    thumbnail_url text NULL,
+    track_ids _text NOT NULL DEFAULT '{}',
+    event_type text NULL,
+    event_version int NULL,
+    event_timestamp timestamptz NULL,
+    created_at timestamptz NOT NULL,
+    updated_at timestamptz NOT NULL,
+    created_by varchar(255) NULL,
+    updated_by varchar(255) NULL,
+    CONSTRAINT playlist_pkey PRIMARY KEY (id)
+);
+"""
+
     ddls = [
         create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
         create_artist_table_ddl, create_artist_detail_materialized_view_ddl,
@@ -348,7 +369,7 @@ $function$
         refresh_mv_track_detail_view_function_ddl,
         track_refresh_mv_track_detail_trigger_ddl,
         track_artist_refresh_mv_track_detail_trigger_ddl,
-        search_track_function_ddl
+        search_track_function_ddl, create_playlist_table_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)
@@ -368,6 +389,7 @@ def downgrade() -> None:
     drop_track_detail_materialized_view = "DROP MATERIALIZED VIEW mv_track_detail;"
     drop_track_artist_table_ddl = "DROP TABLE IF EXISTS track_artist;"
     drop_track_table_ddl = "DROP TABLE IF EXISTS track;"
+    drop_playlist_table_ddl = "DROP TABLE IF EXISTS playlist;"
 
     ddls = [
         drop_uuid_ossp_extension_ddl, drop_unaccent_extension_ddl,
@@ -378,7 +400,7 @@ def downgrade() -> None:
         drop_track_refresh_mv_track_detail_trigger_ddl,
         drop_refresh_mv_track_detail_view_function_ddl,
         drop_track_detail_materialized_view, drop_track_artist_table_ddl,
-        drop_track_table_ddl
+        drop_track_table_ddl, drop_playlist_table_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)

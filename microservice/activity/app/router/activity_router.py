@@ -4,7 +4,7 @@ from dependency_injector.wiring import Provide
 from app.core.logger import Logger
 from app.util.jwt_extractor import verify_jwt_token
 from app.service.activity_service import ActivityService
-from app.schema.activity_schema import CreateActivitySchema
+from app.schema.activity_schema import ActivitySchema
 import json
 
 activity_router = APIRouter(prefix="/v1", tags=["Acitivity"])
@@ -25,9 +25,14 @@ async def listen_activity_websocket(websocket: WebSocket):
         while True:
             message = await websocket.receive_text()
             message_json = json.loads(message)
-            create_activity_schema: CreateActivitySchema = CreateActivitySchema(
+            create_activity_schema: ActivitySchema = ActivitySchema(
                 **message_json)
-            activity_service.handle_activity(create_activity_schema, jwt_claims)
+            aggregate_id = activity_service.handle_activity(
+                create_activity_schema, jwt_claims)
+            if aggregate_id:
+                await websocket.send_text(
+                    json.dumps({"id": aggregate_id}))
+
     except Exception as e:
         logger.error(f"Error processing message: {e}")
         await websocket.send_text(
