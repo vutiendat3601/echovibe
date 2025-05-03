@@ -1,5 +1,5 @@
 from typing import Generic, TypeVar
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from http import HTTPStatus
 
