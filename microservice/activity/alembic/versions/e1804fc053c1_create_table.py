@@ -24,6 +24,7 @@ def upgrade() -> None:
     create_activity_table_ddl = """
     CREATE TABLE activity (
         id uuid NOT NULL,
+        aggregate_id varchar(12) NOT NULL,
         description varchar(255) NULL,
         type varchar(255) NOT NULL,
         data_json jsonb NULL,

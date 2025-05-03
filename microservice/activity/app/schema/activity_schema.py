@@ -1,8 +1,9 @@
 from pydantic import BaseModel, Field
+from app.enum.action_type import ActionType
 
 
 class CreateActivitySchema(BaseModel):
-    type: str = Field(alias="type")
+    type: ActionType = Field(alias="type")
     data_json: dict[str, any] | None = Field(default=None, alias="dataJson")
 
     class Config:
