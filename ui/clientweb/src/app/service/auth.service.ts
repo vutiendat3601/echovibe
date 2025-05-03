@@ -65,6 +65,10 @@ export class AuthService {
     this.oauthService.refreshToken();
   }
 
+  getAccessToken(): string {
+    return this.oauthService.getAccessToken();
+  }
+
   get resourceAccess(): ResourceAccessClaim {
     const claims: Record<string, any> = this.oauthService.getIdentityClaims();
     let resourceAccess: ResourceAccessClaim = {};
