@@ -403,7 +403,7 @@ AS SELECT
             ORDER BY
                 array_position(p.track_ids, mtd.aggregate_id)
             ) AS t0
-    ) AS tracks
+    )::jsonb AS tracks_json
    FROM playlist p
    WHERE p.is_active
 WITH DATA;
