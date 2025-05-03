@@ -107,4 +107,7 @@ async def listen_playlist_deleted_event():
 
 
 def get_playlist_event_listeners() -> list[callable]:
-    return [listen_playlist_created_event, listen_playlist_updated_event]
+    return [
+        listen_playlist_created_event, listen_playlist_updated_event,
+        listen_playlist_deleted_event
+    ]
