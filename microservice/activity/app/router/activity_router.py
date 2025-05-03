@@ -20,15 +20,18 @@ async def listen_activity_websocket(websocket: WebSocket):
     if (authorization):
         authorization = authorization.removeprefix("Bearer ")
         jwt_claims = verify_jwt_token(authorization)
-    await websocket.accept()
-    while True:
-        try:
+    try:
+        await websocket.accept()
+        while True:
             message = await websocket.receive_text()
             message_json = json.loads(message)
             create_activity_schema: CreateActivitySchema = CreateActivitySchema(
                 **message_json)
             activity_service.handle_activity(create_activity_schema, jwt_claims)
-        except Exception as e:
-            logger.error(f"Error processing message: {e}")
-            await websocket.send_text(
-                json.dumps({"error": "Failed to process message"}))
+    except Exception as e:
+        logger.error(f"Error processing message: {e}")
+        await websocket.send_text(
+            json.dumps({"error": "Failed to process message"}))
+    finally:
+        await websocket.close()
+        logger.info("WebSocket connection closed")
