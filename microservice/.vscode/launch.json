@@ -67,6 +67,21 @@
       "jinja": true,
       "envFile": "${workspaceFolder}/product/.env",
       "justMyCode": false
+    },
+    {
+      "name": "activity",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "cwd": "${workspaceFolder}/activity",
+      "args": [
+        "app.main:app",
+        "--reload",
+        "--port=6300"
+      ],
+      "jinja": true,
+      "envFile": "${workspaceFolder}/activity/.env",
+      "justMyCode": false
     }
   ]
 }

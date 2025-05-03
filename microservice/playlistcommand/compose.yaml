@@ -1,9 +1,0 @@
-services:
-  playlistcommand-mongo-i1:
-    image: "mongo:8.0.4"
-    environment:
-      - "MONGO_INITDB_ROOT_USERNAME=echovibe_playlistcommand"
-      - "MONGO_INITDB_ROOT_PASSWORD=echovibe_playlistcommand"
-      - "MONGO_INITDB_DATABASE=echovibe_playlistcommand"
-    ports:
-      - "26140:27017"
