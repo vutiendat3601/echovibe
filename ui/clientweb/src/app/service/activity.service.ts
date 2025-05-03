@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { flatMap, Observable, Subject } from 'rxjs';
 import { environment } from '../../environment/environment';
 import { ActivityDto } from '../dto/activity-dto';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,10 +11,10 @@ export class ActivityService {
   private websocket: WebSocket | null = null;
   private messageSubject: Subject<string> = new Subject();
 
-  constructor() {}
+  constructor(private readonly authService: AuthService) {}
 
   private connect(): void {
-    this.websocket = new WebSocket(`${environment.activityWsBaseUrl}/v1/ws`);
+    this.websocket = new WebSocket(`${environment.activityWsBaseUrl}/v1/ws?jwt=${this.authService.getAccessToken()}`);
 
     this.websocket.onmessage = (event) => {
       this.messageSubject.next(event.data);
