@@ -5,6 +5,7 @@ on:
       - "microservice/artistquery/**"
       - "microservice/trackquery/**"
       - "microservice/product/**"
+      - "microservice/activity/**"
     branches:
       - develop
     types:
