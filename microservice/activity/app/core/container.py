@@ -6,8 +6,8 @@ from app.repository.impl.sqlmodel_activity_repository import SqlmodelActivityRep
 
 
 class Container(containers.DeclarativeContainer):
-    # wiring_config = containers.WiringConfiguration(
-    #     modules=["app.router.acitivity_router"])
+    wiring_config = containers.WiringConfiguration(
+        modules=["app.router.activity_router"])
 
     logger = providers.Singleton(Logger)
     database = providers.Singleton(

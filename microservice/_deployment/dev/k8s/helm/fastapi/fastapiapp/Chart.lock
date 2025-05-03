@@ -11,5 +11,8 @@ dependencies:
 - name: product
   repository: file://../microservice/product
   version: 1.0.0
-digest: sha256:9cada8e9b88269e78becff67f905e7a651ddd6c7b5c1337a3d708cb02cd6caa5
-generated: "2025-04-12T13:47:20.285189+07:00"
+- name: activity
+  repository: file://../microservice/activity
+  version: 1.0.0
+digest: sha256:fa37d705ca18a11134d91d0331b8c88c5e4dad8d4958a2bc3990bbc35961b15d
+generated: "2025-05-03T14:45:38.484241+07:00"
