@@ -23,7 +23,7 @@ class Configuration:
     _web_cors_cors_maxage: int
     _database_configuration: DatabaseConfiguration
     _kafka_broker_bootstrap_server_urls = None
-    _jwks_url: str | None = None
+    _open_id_connect_certs_url: str | None = None
 
     def __init__(self) -> None:
         self._build_number = os.getenv("BUILD_NUMBER", "unknown")
@@ -49,7 +49,8 @@ class Configuration:
         self._database_configuration.name = os.getenv("DATABASE_NAME")
         self._kafka_broker_bootstrap_server_urls = os.getenv(
             "KAFKA_BROKER_BOOTSTRAP_SERVER_URLS")
-        self._jwks_url = os.getenv("JWKS_URL")
+        self._open_id_connect_certs_url = os.getenv(
+            "APP_WEB_AUTH_OPENIDCONNECTCERTSURL")
 
     def get_build_number(self) -> str:
         return self._build_number
@@ -78,8 +79,8 @@ class Configuration:
     def get_environment(self) -> str:
         return self._environment
 
-    def get_jwks_url(self) -> str:
-        return self._jwks_url
+    def get_open_id_connect_certs_url(self) -> str:
+        return self._open_id_connect_certs_url
 
 
 configuration = Configuration()

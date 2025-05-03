@@ -6,7 +6,7 @@ from app.core.configuration import configuration
 
 
 def get_jwks():
-    response = requests.get(configuration.get_jwks_url())
+    response = requests.get(configuration.get_open_id_connect_certs_url())
     response.raise_for_status()
     return response.json()["keys"]
 
