@@ -27,11 +27,10 @@ async def listen_activity_websocket(websocket: WebSocket):
             message_json = json.loads(message)
             create_activity_schema: ActivitySchema = ActivitySchema(
                 **message_json)
-            aggregate_id = activity_service.handle_activity(
+            processed_data: dict[str, str] = activity_service.handle_activity(
                 create_activity_schema, jwt_claims)
-            if aggregate_id:
-                await websocket.send_text(
-                    json.dumps({"id": aggregate_id}))
+            if len(processed_data):
+                await websocket.send_text(json.dumps(processed_data))
 
     except Exception as e:
         logger.error(f"Error processing message: {e}")
