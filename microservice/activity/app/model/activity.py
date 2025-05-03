@@ -8,6 +8,7 @@ class Activity(SQLModel, table=True):
     __tablename__ = "activity"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     aggregate_id: str = Field(..., max_length=12)
+    session_id: str | None = Field(None, max_length=12)
     description: str | None = Field(None)
     type: str = Field(None)
     data_json: dict[str, any] | None = Field(None, sa_column=Column(JSONB))

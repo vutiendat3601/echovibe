@@ -3,33 +3,30 @@ from datetime import datetime, timezone
 from app.core.logger import Logger
 from app.model.activity import Activity
 from app.schema.activity_schema import ActivitySchema
-from app.event.sender.event_sender import send_event
 from app.constant.constant import AUTH_SYSTEM_USERNAME
-from app.util.identity_utils import generate_aggregate_id
 from app.enum.action_type import ActionType
-from app.event.schema.playlist_event_schema import (PlaylistCreatedEvent,
-                                                    PlaylistUpdatedEvent,
-                                                    PlaylistDeletedEvent)
-from app.constant.playlist_constant import (PLAYLIST_CREATED_EVENT,
-                                            PLAYLIST_UPDATED_EVENT,
-                                            PLAYLIST_DELETED_EVENT,
-                                            PLAYLIST_URN_PREFIX)
-from app.core.exception import NotFoundException
 
-import asyncio
+from app.service.artist_service import ArtistService
+from app.service.playlist_service import PlaylistService
+from app.service.track_service import TrackService
 
 
 class ActivityService:
 
-    def __init__(self, activity_repository: ActivityRepository, logger: Logger):
-        self.activity_repository = activity_repository
+    def __init__(self, playlist_service: PlaylistService,
+                 artist_service: ArtistService, track_service: TrackService,
+                 logger: Logger):
+        self.playlist_service = playlist_service
+        self.artist_service = artist_service
+        self.track_service = track_service
         self.logger = logger
 
     def handle_activity(self,
                         activity_schema: ActivitySchema,
-                        jwt_claims: dict = {}) -> str | None:
+                        jwt_claims: dict = {}) -> dict[str, str]:
         created_at = datetime.now(timezone.utc)
         activity: Activity = Activity(
+            session_id=activity_schema.session_id,
             aggregate_id=activity_schema.aggregate_id,
             description=None,
             type=activity_schema.type,
@@ -39,79 +36,55 @@ class ActivityService:
             if jwt_claims and jwt_claims.get("sub") else AUTH_SYSTEM_USERNAME,
         )
 
+        # Playlist action handlers
         if activity.type == ActionType.CREATE_PLAYLIST:
-            return self._handle_create_playlist(activity)
+            return self.playlist_service.handle_create_playlist(activity)
+
         elif activity.type == ActionType.UPDATE_PLAYLIST:
-            return self._handle_update_playlist(activity)
+            return self.playlist_service.handle_update_playlist(activity)
+
         elif activity.type == ActionType.DELETE_PLAYLIST:
-            return self._handle_delete_playlist(activity)
+            return self.playlist_service.handle_delete_playlist(activity)
+
+        # Artist action handlers
+        elif activity.type == ActionType.LIKE_ARTIST:
+            return self.artist_service.handle_like_artist_action(activity)
+
+        elif activity.type == ActionType.UNLIKE_ARTIST:
+            return self.artist_service.handle_unlike_artist_action(activity)
+
+        elif activity.type == ActionType.VIEW_ARTIST_DETAIL_PAGE:
+            return self.artist_service.handle_view_artist_detail_page_action(
+                activity)
+
+        elif activity.type == ActionType.VIEWED_ARTIST_DETAIL_PAGE:
+            return self.artist_service.handle_viewed_artist_detail_page_action(
+                activity.session_id)
+
+        # Track action handlers
+        elif activity.type == ActionType.LIKE_TRACK:
+            return self.track_service.handle_like_track_action(activity)
+
+        elif activity.type == ActionType.UNLIKE_TRACK:
+            return self.track_service.handle_unlike_track_action(activity)
+
+        elif activity.type == ActionType.LISTEN_TRACK:
+            return self.track_service.handle_listen_track_action(activity)
+
+        elif activity.type == ActionType.LISTENED_TRACK:
+            return self.track_service.handle_listened_track_action(
+                activity.session_id)
+
+        elif activity.type == ActionType.VIEW_TRACK_DETAIL_PAGE:
+            return self.track_service.handle_view_track_detail_page_action(
+                activity)
+
+        elif activity.type == ActionType.VIEWED_TRACK_DETAIL_PAGE:
+            return self.track_service.handle_viewed_track_detail_page_action(
+                activity.session_id)
+
         else:
-            self.activity_repository.save_activity(activity)
-
-    def _handle_create_playlist(self, activity: Activity) -> str:
-        aggregate_id = generate_aggregate_id()
-        activity.aggregate_id = aggregate_id
-        self.activity_repository.save_activity(activity)
-        self.logger.info(
-            f"Saved Activity: type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
-        )
-        playlist_created_event = PlaylistCreatedEvent(
-            type=PlaylistCreatedEvent.__name__,
-            id=activity.aggregate_id,
-            urn=f"{PLAYLIST_URN_PREFIX}{activity.aggregate_id}",
-            name=activity.data_json.get("name", "My playlist"),
-            track_ids=activity.data_json.get("trackIds", []),
-            is_public=activity.data_json.get("isPublic", False),
-            thumbnail_url=activity.data_json.get("thumbnailUrl"),
-            version=-1,
-            created_by=activity.created_by,
-            timestamp=activity.created_at)
-        asyncio.create_task(
-            send_event(topic=PLAYLIST_CREATED_EVENT,
-                       event=playlist_created_event,
-                       logger=self.logger))
-        return activity.aggregate_id
-
-    def _handle_update_playlist(self, activity: Activity) -> str:
-        aggregate_id = activity.aggregate_id
-        if self.activity_repository.find_by_aggregate_id(aggregate_id):
-            self.activity_repository.save_activity(activity)
-            self.logger.info(
-                f"Saved Activity: type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
+            self.logger.error(
+                f"Unsupported activity type: {activity.type}. Activity not saved."
             )
-            playlist_updated_event = PlaylistUpdatedEvent(
-                type=PlaylistUpdatedEvent.__name__,
-                id=activity.aggregate_id,
-                name=activity.data_json.get("name", "My playlist"),
-                track_ids=activity.data_json.get("trackIds", []),
-                is_public=activity.data_json.get("isPublic", False),
-                thumbnail_url=activity.data_json.get("thumbnailUrl"),
-                version=-1,
-                created_by=activity.created_by,
-                timestamp=activity.created_at)
-            asyncio.create_task(
-                send_event(topic=PLAYLIST_UPDATED_EVENT,
-                           event=playlist_updated_event,
-                           logger=self.logger))
-        return activity.aggregate_id
-
-    def _handle_delete_playlist(self, activity: Activity) -> str:
-        aggregate_id = activity.aggregate_id
-        if self.activity_repository.find_by_aggregate_id(aggregate_id):
-            self.activity_repository.save_activity(activity)
-            self.logger.info(
-                f"Saved Activity: type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
-            )
-            playlist_deleted_event = PlaylistDeletedEvent(
-                type=PlaylistDeletedEvent.__name__,
-                id=activity.aggregate_id,
-                is_soft_deleted=False,
-                is_active=False,
-                version=-1,
-                created_by=activity.created_by,
-                timestamp=activity.created_at)
-            asyncio.create_task(
-                send_event(topic=PLAYLIST_DELETED_EVENT,
-                           event=playlist_deleted_event,
-                           logger=self.logger))
-        return activity.aggregate_id
+            return None
