@@ -21,7 +21,7 @@ class PlaylistEventHandler:
             aggregate_id=playlist_created_event.id,
             urn=playlist_created_event.urn,
             name=playlist_created_event.name,
-            playlist_ids=playlist_created_event.playlist_ids,
+            track_ids=playlist_created_event.track_ids,
             is_public=playlist_created_event.is_public,
             thumbnail_url=playlist_created_event.thumbnail_url,
             version=playlist_created_event.version,
