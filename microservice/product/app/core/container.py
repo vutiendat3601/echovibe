@@ -7,8 +7,10 @@ from app.repository.impl.sqlmodel_artist_detail_repository import SqlmodelArtist
 from app.repository.impl.sqlmodel_track_repository import SqlmodelTrackRepository
 from app.repository.impl.sqlmodel_track_detail_repository import SqlmodelTrackDetailRepository
 from app.repository.impl.sqlmodel_playlist_repository import SqlmodelPlaylistRepository
+from app.repository.impl.sqlmodel_playlist_detail_repository import SqlmodelPlaylistDetailRepository
 from app.service.artist_service import ArtistService
 from app.service.track_service import TrackService
+from app.service.playlist_service import PlaylistService
 from app.service.search_service import SearchService
 from app.event.handler.artist_event_handler import ArtistEventHandler
 from app.event.handler.track_event_handler import TrackEventHandler
@@ -19,6 +21,7 @@ class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(modules=[
         "app.router.artist_router",
         "app.router.track_router",
+        "app.router.playlist_router",
         "app.router.search_router",
         "app.event.listener.track_event_listener",
         "app.event.listener.playlist_event_listener",
@@ -51,6 +54,10 @@ class Container(containers.DeclarativeContainer):
         SqlmodelPlaylistRepository,
         logger=logger,
         session_factory=database.provided.session)
+    playlist_detail_repository = providers.Factory(
+        SqlmodelPlaylistDetailRepository,
+        logger=logger,
+        session_factory=database.provided.session)
 
     # Service
     artist_service = providers.Factory(
@@ -61,10 +68,16 @@ class Container(containers.DeclarativeContainer):
         TrackService,
         logger=logger,
         track_detail_repository=track_detail_repository)
+    playlist_service = providers.Factory(
+        PlaylistService,
+        logger=logger,
+        playlist_detail_repository=playlist_detail_repository)
     search_service = providers.Factory(
         SearchService,
         logger=logger,
         artist_detail_repository=artist_detail_repository,
+        track_detail_repository=track_detail_repository,
+        playlist_detail_repository=playlist_detail_repository,
     )
 
     # Event Handler

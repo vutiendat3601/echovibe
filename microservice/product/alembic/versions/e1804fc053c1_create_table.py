@@ -339,25 +339,137 @@ $function$
 ;"""
 
     create_playlist_table_ddl = """
-CREATE TABLE playlist (
-    id uuid NOT NULL,
+CREATE TABLE public.playlist (
+	id uuid NOT NULL,
 	urn varchar(255) NOT NULL,
-    aggregate_id varchar(12) NOT NULL,
-    name varchar(255) NOT NULL,
-    is_public bool NOT NULL DEFAULT true,
-    is_active bool NOT NULL DEFAULT true,
-    thumbnail_url text NULL,
-    track_ids _text NOT NULL DEFAULT '{}',
-    event_type text NULL,
-    event_version int NULL,
-    event_timestamp timestamptz NULL,
-    created_at timestamptz NOT NULL,
-    updated_at timestamptz NOT NULL,
-    created_by varchar(255) NULL,
-    updated_by varchar(255) NULL,
-    CONSTRAINT playlist_pkey PRIMARY KEY (id)
+	aggregate_id varchar(12) NOT NULL,
+	"name" varchar(255) NOT NULL,
+	is_public bool DEFAULT true NOT NULL,
+	is_active bool DEFAULT true NOT NULL,
+	thumbnail_url text NULL,
+	track_ids _text DEFAULT '{}'::text[] NOT NULL,
+	tsv tsvector NULL,
+	event_type text NULL,
+	event_version int4 NULL,
+	event_timestamp timestamptz NULL,
+	created_at timestamptz NOT NULL,
+	updated_at timestamptz NOT NULL,
+	created_by varchar(255) NULL,
+	updated_by varchar(255) NULL,
+	CONSTRAINT playlist_pkey PRIMARY KEY (id)
 );
+
+-- DROP FUNCTION public.playlist_update_tsv();
+CREATE OR REPLACE FUNCTION public.playlist_update_tsv()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    NEW.tsv = to_tsvector('english', NEW.name || ' ' || unaccent(NEW.name));
+    RETURN NEW;
+END;
+$function$;
+
+-- Trigger: playlist_update_tsv_trigger
+CREATE TRIGGER playlist_update_tsv_trigger
+BEFORE INSERT OR UPDATE ON playlist
+FOR EACH ROW
+EXECUTE FUNCTION playlist_update_tsv()
+;
 """
+
+    create_playlist_detail_materialized_view_ddl = """
+CREATE MATERIALIZED VIEW public.mv_playlist_detail
+TABLESPACE pg_default
+AS SELECT
+    p.id,
+    p.aggregate_id,
+    p.urn,
+    p."name",
+    p.is_public,
+    p.thumbnail_url,
+    p.created_by,
+    p.updated_by,
+    p.created_at,
+    p.updated_at,
+    p.is_active,
+    p.tsv,
+    (SELECT
+        json_agg(t0.*) AS json_agg
+    FROM
+        (SELECT * FROM mv_track_detail mtd
+            WHERE
+                mtd.aggregate_id::text = ANY (p.track_ids)
+            ORDER BY
+                array_position(p.track_ids, mtd.aggregate_id)
+            ) AS t0
+    ) AS tracks
+   FROM playlist p
+   WHERE p.is_active
+WITH DATA;
+
+CREATE OR REPLACE FUNCTION refresh_mv_playlist_detail()
+RETURNS trigger AS $$
+BEGIN
+  REFRESH MATERIALIZED VIEW mv_playlist_detail;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql
+;
+
+CREATE TRIGGER playlist_refresh_mv_playlist_detail_trigger
+AFTER INSERT OR UPDATE OR DELETE ON playlist
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mv_playlist_detail()
+;
+    """
+
+    search_playlist_function_ddl = """
+CREATE OR REPLACE FUNCTION public.search_playlist(keyword text)
+ RETURNS TABLE(tsv_criteria text, id uuid, aggregate_id character varying, urn character varying, name character varying, is_public boolean, is_active boolean, thumbnail_url text, tsv tsvector, tracks_json jsonb)
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    words text[];
+    tsv_criteria text;
+
+BEGIN
+    SELECT
+    string_to_array(keyword, ' ')
+INTO
+    words;
+
+SELECT
+    array_to_string(words, ':* | ')
+INTO
+    tsv_criteria;
+
+SELECT
+    tsv_criteria || ':*'
+INTO
+    tsv_criteria;
+
+RETURN QUERY
+    SELECT
+    tsv_criteria,
+    pd.id,
+    pd.aggregate_id,
+    pd.urn,
+    pd."name",
+    pd.is_public,
+    pd.is_active,
+    pd.thumbnail_url,
+    pd.tsv,
+    pd.tracks_json
+FROM
+    mv_playlist_detail pd
+WHERE
+    pd.is_public
+    AND pd.tsv @@ to_tsquery('english', tsv_criteria);
+END;
+
+$function$
+;"""
 
     ddls = [
         create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
@@ -369,7 +481,9 @@ CREATE TABLE playlist (
         refresh_mv_track_detail_view_function_ddl,
         track_refresh_mv_track_detail_trigger_ddl,
         track_artist_refresh_mv_track_detail_trigger_ddl,
-        search_track_function_ddl, create_playlist_table_ddl
+        search_track_function_ddl, create_playlist_table_ddl,
+        create_playlist_detail_materialized_view_ddl,
+        search_playlist_function_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)
@@ -390,6 +504,9 @@ def downgrade() -> None:
     drop_track_artist_table_ddl = "DROP TABLE IF EXISTS track_artist;"
     drop_track_table_ddl = "DROP TABLE IF EXISTS track;"
     drop_playlist_table_ddl = "DROP TABLE IF EXISTS playlist;"
+    drop_playlist_detail_materialized_view_ddl = "DROP MATERIALIZED VIEW IF EXISTS mv_playlist_detail;"
+    drop_playlist_refresh_mv_playlist_detail_trigger_ddl = "DROP TRIGGER IF EXISTS playlist_refresh_mv_playlist_detail_trigger;"
+    drop_search_playlist_function_ddl = "DROP FUNCTION IF EXISTS search_playlist;"
 
     ddls = [
         drop_uuid_ossp_extension_ddl, drop_unaccent_extension_ddl,
@@ -400,7 +517,10 @@ def downgrade() -> None:
         drop_track_refresh_mv_track_detail_trigger_ddl,
         drop_refresh_mv_track_detail_view_function_ddl,
         drop_track_detail_materialized_view, drop_track_artist_table_ddl,
-        drop_track_table_ddl, drop_playlist_table_ddl
+        drop_track_table_ddl, drop_playlist_table_ddl,
+        drop_playlist_refresh_mv_playlist_detail_trigger_ddl,
+        drop_search_playlist_function_ddl,
+        drop_playlist_detail_materialized_view_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)

@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from app.schema.artist_schema import ArtistDetailSchema
 
 
 class TrackArtistSchema(BaseModel):
@@ -26,10 +25,11 @@ class TrackDetailSchema(BaseModel):
     is_public: bool = Field(default=False, alias="isPublic")
     audio_file_m3u8_url: str | None = Field(default=None,
                                             alias="audioFileM3u8Url")
-    audio_duration_second: int | None = Field(default=None, alias="audioDurationSecond")
+    audio_duration_second: int | None = Field(default=None,
+                                              alias="audioDurationSecond")
     tags: list[str] = Field(default=[], alias="tags")
     artists: list[TrackArtistSchema] = Field(default=[], alias="artists")
 
     class Config:
         populate_by_name = True
-        extra = "allow"
+        # extra = "allow"
