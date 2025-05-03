@@ -51,8 +51,8 @@ CREATE TABLE public.artist_like (
 );
 """
 
-    create_aritst_detail_page_view_table_ddl = """
-CREATE TABLE public.aritst_detail_page_view (
+    create_artist_detail_page_view_table_ddl = """
+CREATE TABLE public.artist_detail_page_view (
 	id uuid NOT NULL,
 	aggregate_id varchar(12) NOT NULL,
 	user_id varchar(255) NOT NULL,
@@ -140,7 +140,7 @@ CREATE TABLE public.track_stats (
     ddls = [
         create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
         create_activity_table_ddl, create_aritst_like_table_ddl,
-        create_aritst_detail_page_view_table_ddl, create_artist_stats_table_ddl,
+        create_artist_detail_page_view_table_ddl, create_artist_stats_table_ddl,
         create_track_like_table_ddl, create_track_detail_page_view_table_ddl,
         create_track_listen_table_ddl, create_track_stats_table_ddl
     ]
