@@ -32,3 +32,6 @@ async def listen_activity_websocket(websocket: WebSocket):
             logger.error(f"Error processing message: {e}")
             await websocket.send_text(
                 json.dumps({"error": "Failed to process message"}))
+        finally:
+            await websocket.close()
+            logger.info("WebSocket connection closed")
