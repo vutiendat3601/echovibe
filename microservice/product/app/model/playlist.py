@@ -27,3 +27,21 @@ class Playlist(SQLModel, table=True):
 
     class Config:
         arbitrary_types_allowed = True
+
+
+class PlaylistDetail(SQLModel, table=True):
+    __tablename__ = "mv_playlist_detail"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    aggregate_id: str = Field(..., max_length=16, unique=True)
+    urn: str = Field(..., max_length=255, unique=True)
+    name: str = Field(..., max_length=255)
+    is_public: bool = Field(default=False)
+    thumbnail_url: str | None = Field(None)
+    tracks_json: list[dict[str, any]] = Field([], sa_column=Column(JSONB))
+    created_at: datetime = Field(default=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default=datetime.now(timezone.utc))
+    created_by: str | None = Field(None)
+    updated_by: str | None = Field(None)
+
+    class Config:
+        arbitrary_types_allowed = True
