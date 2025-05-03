@@ -18,8 +18,6 @@ from app.event.schema.track_event_schema import (TrackCreatedEvent,
                                                  TrackDeletedEvent,
                                                  TrackAudioMappedEvent)
 
-kafka_broker_bootstrap_server_urls = configuration.get_kafka_broker_bootstrap_server_urls(
-)
 track_event_handler: TrackEventHandler = Provide[Container.track_event_handler]
 
 track_repository: TrackRepository = Provide[Container.track_repository]
@@ -30,7 +28,7 @@ environement = configuration.get_environment()
 
 kafka_consumer_properties = {
     "bootstrap_servers":
-        kafka_broker_bootstrap_server_urls,
+        configuration.get_kafka_broker_bootstrap_server_urls(),
     "group_id":
         f"{APP_NAME}{('' if environement == 'production' else '-' + environement)}",
     "key_deserializer":

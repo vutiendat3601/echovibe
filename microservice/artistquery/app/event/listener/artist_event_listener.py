@@ -18,8 +18,6 @@ from app.event.schema.artist_event_schema import (ArtistCreatedEvent,
                                                   ArtistDeletedEvent,
                                                   ArtistVerificationSetEvent)
 
-kafka_broker_bootstrap_server_urls = configuration.get_kafka_broker_bootstrap_server_urls(
-)
 artist_event_handler: ArtistEventHandler = Provide[
     Container.artist_event_handler]
 
@@ -31,7 +29,7 @@ environement = configuration.get_environment()
 
 kafka_consumer_properties = {
     "bootstrap_servers":
-        kafka_broker_bootstrap_server_urls,
+        configuration.get_kafka_broker_bootstrap_server_urls(),
     "group_id":
         f"{APP_NAME}{('' if environement == 'production' else '-' + environement)}",
     "key_deserializer":

@@ -3,3 +3,5 @@ from enum import Enum
 
 class ActionType(Enum):
     CREATE_PLAYLIST = "CREATE_PLAYLIST"
+    UPDATE_PLAYLIST = "UPDATE_PLAYLIST"
+    DELETE_PLAYLIST = "DELETE_PLAYLIST"

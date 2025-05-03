@@ -9,6 +9,7 @@ from app.router.router import api_router
 from app.core.container import Container
 from app.event.listener.artist_event_listener import get_artist_event_listeners
 from app.event.listener.track_event_listener import get_track_event_listeners
+from app.event.listener.playlist_event_listener import get_playlist_event_listeners
 from app.core.configuration import configuration
 from app.constant.constant import APP_NAME
 
@@ -25,7 +26,8 @@ class AppInitializer:
             self.logger.info("Starting Kafka consumers...")
             consumer_tasks = []
             consumer_listeners: list[callable] = [
-                *get_artist_event_listeners(), *get_track_event_listeners()
+                *get_artist_event_listeners(), *get_track_event_listeners(),
+                *get_playlist_event_listeners()
             ]
             for consumer_listener in consumer_listeners:
                 consumer_tasks.append(asyncio.create_task(consumer_listener()))
