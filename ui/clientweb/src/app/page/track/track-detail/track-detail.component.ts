@@ -18,6 +18,8 @@ import ColorThief from 'colorthief';
 import { Subscription } from 'rxjs';
 import { Popover } from 'primeng/popover';
 import { PopoverModule } from 'primeng/popover';
+import { ActivityService } from '../../../service/activity.service';
+import { ActionType } from '../../../constant/action-type';
 
 @Component({
   selector: 'app-track-detail',
@@ -36,7 +38,7 @@ import { PopoverModule } from 'primeng/popover';
     ToastModule,
     PopoverModule
   ],
-  providers: [MessageService]
+  providers: [MessageService, ActivityService]
 })
 export class TrackDetailComponent implements OnInit {
   @ViewChild('trackThumbnail') trackThumbnail!: ElementRef;
@@ -68,7 +70,8 @@ export class TrackDetailComponent implements OnInit {
     private trackService: TrackService,
     private audioService: AudioService,
     private renderer: Renderer2,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private acitivityService: ActivityService
   ) {}
 
   ngOnInit(): void {
@@ -145,6 +148,18 @@ export class TrackDetailComponent implements OnInit {
         if (!this.track) {
           this.errorMessage = 'Track not found';
         } else {
+          this.acitivityService.send({
+            sessionId: null,
+            aggregateId: this.track.id,
+            type: ActionType.VIEW_TRACK_DETAIL_PAGE,
+            dataJson: null
+            // {
+            // name: 'Những bài hát hay nhất của Sơn Tùng M-TP',
+            // isPublic: true,
+            // thumbnailUrl: null,
+            // trackIds: ['wtzugknWgsmi', 'pdzsaqauHvgD']
+            // }
+          });
           // Extract color after image is loaded
           setTimeout(() => this.extractColorFromThumbnail(), 300);
         }

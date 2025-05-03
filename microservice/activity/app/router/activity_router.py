@@ -15,11 +15,10 @@ activity_service: ActivityService = Provide[Container.activity_service]
 
 @activity_router.websocket(path="/ws")
 async def listen_activity_websocket(websocket: WebSocket):
-    authorization = websocket.headers.get("Authorization")
+    jwt = websocket.query_params.get("jwt")
     jwt_claims = {}
-    if (authorization):
-        authorization = authorization.removeprefix("Bearer ")
-        jwt_claims = verify_jwt_token(authorization)
+    if (jwt):
+        jwt_claims = verify_jwt_token(jwt)
     try:
         await websocket.accept()
         while True:
