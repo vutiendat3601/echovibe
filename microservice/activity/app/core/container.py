@@ -3,6 +3,7 @@ from app.core.logger import Logger
 from app.core.database import Database
 from app.core.configuration import configuration
 from app.repository.impl.sqlmodel_activity_repository import SqlmodelActivityRepository
+from app.service.activity_service import ActivityService
 
 
 class Container(containers.DeclarativeContainer):
@@ -20,3 +21,5 @@ class Container(containers.DeclarativeContainer):
         session_factory=database.provided.session)
 
     # Service
+    activity_service = providers.Factory(
+        ActivityService, activity_repository=activity_repository, logger=logger)
