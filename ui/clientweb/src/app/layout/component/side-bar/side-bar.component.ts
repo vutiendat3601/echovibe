@@ -42,6 +42,7 @@ interface Member {
 })
 export class SideBarComponent implements OnInit, OnDestroy {
   likedSongsCount = 1;
+  activeTab: string = 'playlists'; // Track active tab: 'playlists', 'artists', or 'mysongs'
   artists = [
     { name: 'Sơn Tùng M-TP', imageUrl: 'assets/image/default-artist-thumbnail-image.png' },
     { name: 'ANH TRAI "SAY HI"', imageUrl: 'assets/image/default-artist-thumbnail-image.png' }
@@ -78,11 +79,25 @@ export class SideBarComponent implements OnInit, OnDestroy {
       })
     );
 
+    // Check current route to set active tab on initialization
+    const currentUrl = this.router.url;
+    if (currentUrl.includes('offline-library')) {
+      this.activeTab = 'mysongs';
+    } else if (currentUrl.includes('artist')) {
+      this.activeTab = 'artists';
+    } else {
+      this.activeTab = 'playlists';
+    }
+
     // Initial load of playlists
     this.loadPlaylists();
 
     // Initialize context menu items
     this.initializeContextMenu();
+  }
+
+  setActiveTab(tab: string): void {
+    this.activeTab = tab;
   }
 
   initializeContextMenu(): void {

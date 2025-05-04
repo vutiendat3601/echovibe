@@ -1,3 +1,5 @@
 export enum SearchType {
-  ARTIST = 'ARTIST'
+  ARTIST = 'ARTIST',
+  TRACK = 'TRACK',
+  PLAYLIST = 'PLAYLIST'
 }

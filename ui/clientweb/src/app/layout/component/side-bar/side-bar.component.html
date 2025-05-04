@@ -48,8 +48,9 @@
     </div>
 
     <div class="library-tabs">
-      <button class="tab-button active">Playlists</button>
-      <button class="tab-button">Artists</button>
+      <button class="tab-button" [class.active]="activeTab === 'playlists'" (click)="setActiveTab('playlists')">Playlists</button>
+      <button class="tab-button" [class.active]="activeTab === 'artists'" (click)="setActiveTab('artists')">Artists</button>
+      <button class="tab-button" [class.active]="activeTab === 'mysongs'" (click)="setActiveTab('mysongs')" [routerLink]="['/offline-library']">Offline</button>
     </div>
 
     <div class="library-search">

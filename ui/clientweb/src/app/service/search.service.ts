@@ -16,7 +16,7 @@ export class SearchService {
     keyword: string,
     page: number = 0,
     size: number = 100,
-    types: SearchType[] = [SearchType.ARTIST]
+    types: SearchType[] = [SearchType.ARTIST, SearchType.TRACK, SearchType.PLAYLIST]
   ): Observable<ResponseDto<SearchDto>> {
     return this.http.get<ResponseDto<SearchDto>>(
       `${environment.productBaseUrl}/v1/search?keyword=${keyword}&page=${page}&size=${size}&types=${types.join(',')}`

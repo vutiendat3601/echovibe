@@ -2,12 +2,23 @@
   <div class="now-playing-bar-container">
     <!-- Song info section -->
     <div class="track-info">
-      <div class="track-image">
+      <div class="track-image" *ngIf="currentTrack?.id" [routerLink]="['/track', currentTrack?.id]" style="cursor: pointer;">
+        <img [src]="getImageUrl(currentTrack)" alt="Album art">
+      </div>
+      <div class="track-image" *ngIf="!currentTrack?.id">
         <img [src]="getImageUrl(currentTrack)" alt="Album art">
       </div>
       <div class="track-details">
-        <div class="track-name">{{ currentTrack?.name || 'No track playing' }}</div>
-        <div class="track-artist">{{ getArtistName(currentTrack) }}</div>
+        <div class="track-name" *ngIf="currentTrack?.id" [routerLink]="['/track', currentTrack?.id]" style="cursor: pointer;" [title]="currentTrack?.name">{{ currentTrack?.name || 'No track playing' }}</div>
+        <div class="track-name" *ngIf="!currentTrack?.id">{{ 'No track playing' }}</div>
+        <div class="track-artist" *ngIf="(currentTrack?.artists ?? []).length > 0">
+          <ng-container *ngFor="let artist of currentTrack?.artists; let last = last">
+            <span *ngIf="artist?.id" [routerLink]="['/artist', artist.id]" style="cursor: pointer;">{{ artist.name }}</span>
+            <span *ngIf="!artist?.id">{{ artist.name }}</span>
+            <span *ngIf="!last">, </span>
+          </ng-container>
+        </div>
+        <div class="track-artist" *ngIf="!currentTrack?.artists || currentTrack?.artists ?? [].length === 0">{{ currentTrack?.id ? getArtistName(currentTrack) : 'Unknown Artist' }}</div>
       </div>
       <div class="track-actions">
         <button class="action-button" title="Like">
@@ -25,7 +36,7 @@
     <!-- Playback controls section -->
     <div class="playback-controls">
       <div class="control-buttons">
-        <button class="control-button" title="Shuffle" [class.active]="isShuffled" (click)="handleToggleShuffle()">
+        <button class="control-button shuffle-button" title="Shuffle" [class.active]="isShuffled" (click)="handleToggleShuffle()">
           <fa-icon [icon]="faShuffle"></fa-icon>
         </button>
         <button class="control-button" title="Previous" (click)="handlePrevious()">
@@ -37,7 +48,7 @@
         <button class="control-button" title="Next" (click)="handleNext()">
           <fa-icon [icon]="faForwardStep" style="font-size: 20px;"></fa-icon>
         </button>
-        <button class="control-button" [class.active]="repeatMode !== 'off'" title="Repeat" (click)="handleToggleRepeat()">
+        <button class="control-button repeat-button" [class.active]="repeatMode !== 'off'" title="Repeat" (click)="handleToggleRepeat()">
           <i class="pi" [class]="handleGetRepeatIcon()"></i>
         </button>
       </div>
@@ -56,10 +67,10 @@
 
     <!-- Volume controls section -->
     <div class="volume-controls">
-      <button class="control-button" [class.active]="showQueue" title="Queue" (click)="handleToggleQueue()">
+      <button class="control-button queue-toggle" [class.active]="showQueue" title="Queue" (click)="handleToggleQueue()">
         <i class="pi pi-list"></i>
       </button>
-      <button class="control-button" title="Volume" (click)="handleToggleMute()">
+      <button class="control-button volume-toggle" title="Volume" (click)="handleToggleMute()">
         <i class="pi" [ngClass]="handleGetVolumeIcon()"></i>
       </button>
       <div class="volume-slider">
