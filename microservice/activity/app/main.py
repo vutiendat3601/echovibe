@@ -24,16 +24,16 @@ class AppInitializer:
                            version="1.0.0",
                            openapi_url="/v1/openapi")
         allow_origins: list[
-            str] = configuration.get_web_cors_alllowed_origin_patterns(),
-        allow_methods: list[str] = configuration.get_web_cors_allowed_methods(),
-        allow_headers = configuration.get_web_cors_allow_headers(),
-        allow_credentials = configuration.get_web_cors_allow_credentials(),
+            str] = configuration.get_web_cors_alllowed_origin_patterns()
+        allow_methods: list[str] = configuration.get_web_cors_allowed_methods()
+        allow_headers = configuration.get_web_cors_allow_headers()
+        allow_credentials = configuration.get_web_cors_allow_credentials()
         max_age = configuration.get_web_cors_maxage()
         self.app.add_middleware(CORSMiddleware,
-                                allow_origins=allow_origins[0],
-                                allow_methods=allow_methods[0],
-                                allow_headers=allow_headers[0],
-                                allow_credentials=allow_credentials[0],
+                                allow_origins=allow_origins,
+                                allow_methods=allow_methods,
+                                allow_headers=allow_headers,
+                                allow_credentials=allow_credentials,
                                 max_age=max_age)
         self.logger.info(f"""
 {banner}
@@ -42,7 +42,7 @@ Powered by FastAPI
 """)
         self.logger.info(allow_credentials)
         self.logger.info(
-            f"Cross-origin resource sharing (CORS) configuration: allowedOriginPatterns={allow_origins[0]}, allowedMethods={allow_methods[0]}, allowedHeaders={allow_headers[0]}, allowCredentials={allow_credentials[0]}, maxAge={max_age}"
+            f"Cross-origin resource sharing (CORS) configuration: allowedOriginPatterns={allow_origins}, allowedMethods={allow_methods}, allowedHeaders={allow_headers}, allowCredentials={allow_credentials}, maxAge={max_age}"
         )
 
         # Set routes
