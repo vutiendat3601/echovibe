@@ -31,3 +31,7 @@ database:
   host: infras.echovibe.io.vn
   port: 16300
   name: echovibe_activity
+
+redis:
+  enabled: false
+  url:

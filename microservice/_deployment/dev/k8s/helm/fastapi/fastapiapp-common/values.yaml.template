@@ -38,3 +38,6 @@ database:
   host: 
   port:
   name:
+redis:
+  enabled: false
+  url:
