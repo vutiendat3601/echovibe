@@ -2,6 +2,7 @@ import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/c
 import { Injectable, Optional } from '@angular/core';
 import { OAuthModuleConfig, OAuthResourceServerErrorHandler, OAuthStorage } from 'angular-oauth2-oidc';
 import { catchError, Observable } from 'rxjs';
+import { CLIENT_TOKEN } from '../constant/constant';
 
 @Injectable()
 export class DefaultOAuthInterceptor implements HttpInterceptor {
@@ -27,7 +28,7 @@ export class DefaultOAuthInterceptor implements HttpInterceptor {
       let sendAccessToken = this.oauthModuleConfig.resourceServer.sendAccessToken;
 
       if (sendAccessToken) {
-        const accessToken = this.oauthStorage.getItem('access_token');
+        const accessToken = this.oauthStorage.getItem('access_token') || localStorage.getItem(CLIENT_TOKEN);
         const authorizationHeaderValue = `Bearer ${accessToken}`;
         const headers = req.headers.set('Authorization', authorizationHeaderValue);
         req = req.clone({ headers });
