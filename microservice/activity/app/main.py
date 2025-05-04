@@ -20,7 +20,7 @@ class AppInitializer:
         self.logger = self.container.logger()
         self.database = self.container.database()
 
-        self.app = FastAPI(title="Echo Vibe - Product APIs",
+        self.app = FastAPI(title="Echo Vibe - Activity APIs",
                            version="1.0.0",
                            openapi_url="/v1/openapi")
         allow_origins: list[

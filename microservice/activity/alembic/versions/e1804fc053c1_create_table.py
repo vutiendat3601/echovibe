@@ -137,12 +137,66 @@ CREATE TABLE public.track_stats (
 );
 """
 
+    create_user_data_table_ddl = """
+CREATE TABLE public.user_data (
+	id uuid NOT NULL,
+	user_id varchar(255) NOT NULL,
+	data_json jsonb NOT NULL,
+	created_at timestamptz DEFAULT CURRENT_TIMESTAMP NULL,
+	updated_at timestamptz DEFAULT CURRENT_TIMESTAMP NULL,
+	created_by varchar(255) NULL,
+	updated_by varchar(255) NULL,
+	CONSTRAINT user_data__pkey PRIMARY KEY (id),
+	CONSTRAINT user_data__user_id___key UNIQUE (user_id)
+);
+"""
+
+    create_user_stats_materialized_view_ddl = """
+CREATE MATERIALIZED VIEW public.mv_user_stats
+TABLESPACE pg_default
+AS SELECT id,
+    user_id,
+    data_json,
+    updated_at,
+    ( SELECT array_agg(tl.aggregate_id) AS array_agg
+           FROM track_like tl
+          WHERE tl.is_active AND tl.user_id::text = ud.user_id::text) AS liked_track_ids,
+    ( SELECT array_agg(al.aggregate_id) AS array_agg
+           FROM artist_like al
+          WHERE al.is_active AND al.user_id::text = ud.user_id::text) AS liked_artist_ids
+   FROM user_data ud
+WITH DATA;
+
+CREATE OR REPLACE FUNCTION refresh_mv_user_stats()
+RETURNS trigger AS $$
+BEGIN
+  REFRESH MATERIALIZED VIEW public.mv_user_stats;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER user_data__refresh_mv_user_stats_trigger
+AFTER INSERT OR UPDATE OR DELETE ON public.user_data
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mv_user_stats();
+
+CREATE TRIGGER track_like__refresh_mv_user_stats_trigger
+AFTER INSERT OR UPDATE OR DELETE ON public.track_like
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mv_user_stats();
+
+CREATE TRIGGER artist_like__refresh_mv_user_stats_trigger
+AFTER INSERT OR UPDATE OR DELETE ON public.artist_like
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mv_user_stats();
+"""
     ddls = [
         create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
         create_activity_table_ddl, create_aritst_like_table_ddl,
         create_artist_detail_page_view_table_ddl, create_artist_stats_table_ddl,
         create_track_like_table_ddl, create_track_detail_page_view_table_ddl,
-        create_track_listen_table_ddl, create_track_stats_table_ddl
+        create_track_listen_table_ddl, create_track_stats_table_ddl,
+        create_user_data_table_ddl, create_user_stats_materialized_view_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)
