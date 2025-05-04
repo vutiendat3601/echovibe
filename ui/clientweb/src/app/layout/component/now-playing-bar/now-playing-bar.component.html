@@ -18,7 +18,7 @@
             <span *ngIf="!last">, </span>
           </ng-container>
         </div>
-        <div class="track-artist" *ngIf="!currentTrack?.artists || currentTrack?.artists ?? [].length === 0">{{ currentTrack?.id ? getArtistName(currentTrack) : 'Unknown Artist' }}</div>
+        <!-- <div class="track-artist" *ngIf="!currentTrack?.artists || currentTrack?.artists ?? [].length === 0">{{ currentTrack?.id ? getArtistName(currentTrack) : 'Unknown Artist' }}</div> -->
       </div>
       <div class="track-actions">
         <button class="action-button" title="Like">
