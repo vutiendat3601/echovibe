@@ -49,25 +49,18 @@ class ArtistService:
         return {}
 
     def handle_unlike_artist_action(self, activity: Activity) -> dict[str, str]:
-        self.activity_repository.save_activity(activity)
-        updated_at = datetime.now(timezone.utc)
         artist_like = self.artist_like_repository.find_by_aggregate_id_and_user_id(
             aggregate_id=activity.aggregate_id, user_id=activity.created_by)
         if artist_like:
+            self.activity_repository.save_activity(activity)
+            updated_at = datetime.now(timezone.utc)
             artist_like.is_active = False
             artist_like.updated_at = updated_at
             artist_like.updated_by = activity.created_by
-        else:
-            artist_like = ArtistLike(aggregate_id=activity.aggregate_id,
-                                     user_id=activity.created_by,
-                                     is_active=False,
-                                     created_at=updated_at,
-                                     updated_at=updated_at,
-                                     created_by=activity.created_by)
-        self.artist_like_repository.save_artist_like(artist_like)
-        self.logger.info(
-            f"Processed {ActionType.UNLIKE_ARTIST} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
-        )
+            self.artist_like_repository.save_artist_like(artist_like)
+            self.logger.info(
+                f"Processed {ActionType.UNLIKE_ARTIST} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
+            )
         return {}
 
     def handle_view_artist_detail_page_action(
