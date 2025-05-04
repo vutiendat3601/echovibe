@@ -49,7 +49,7 @@ kafka_consumer_properties = {
 
 async def listen_playlist_created_event():
     playlist_created_event_listener = AIOKafkaConsumer(
-        PLAYLIST_CREATED_EVENT, **kafka_consumer_properties)
+        PLAYLIST_CREATED_EVENT, **configuration.get_kafka_consumer_properties())
     await playlist_created_event_listener.start()
     logger.info(f"Listening: topic={PLAYLIST_CREATED_EVENT}")
     try:
@@ -70,7 +70,7 @@ async def listen_playlist_created_event():
 
 async def listen_playlist_updated_event():
     playlist_updated_event_listener = AIOKafkaConsumer(
-        PLAYLIST_UPDATED_EVENT, **kafka_consumer_properties)
+        PLAYLIST_UPDATED_EVENT, **configuration.get_kafka_consumer_properties())
     await playlist_updated_event_listener.start()
     logger.info(f"Listening: topic={PLAYLIST_UPDATED_EVENT}")
     try:
@@ -91,7 +91,7 @@ async def listen_playlist_updated_event():
 
 async def listen_playlist_deleted_event():
     playlist_deleted_event_listener = AIOKafkaConsumer(
-        PLAYLIST_DELETED_EVENT, **kafka_consumer_properties)
+        PLAYLIST_DELETED_EVENT, **configuration.get_kafka_consumer_properties())
     await playlist_deleted_event_listener.start()
     logger.info(f"Listening: topic={PLAYLIST_DELETED_EVENT}")
     try:

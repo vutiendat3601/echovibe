@@ -1,5 +1,7 @@
 import os
 from dotenv import load_dotenv
+from app.constant.constant import APP_NAME
+import json
 
 load_dotenv()
 
@@ -75,6 +77,30 @@ class Configuration:
 
     def get_environment(self) -> str:
         return self._environment
+
+    def get_kafka_consumer_properties(self) -> dict[str, any]:
+        return {
+            "bootstrap_servers":
+                self._kafka_broker_bootstrap_server_urls,
+            "group_id":
+                f"{APP_NAME}{('' if self._environment == 'production' else '-' + self._environment)}",
+            "key_deserializer":
+                lambda k: json.loads(k.decode()) if k else None,
+            "value_deserializer":
+                lambda v: json.loads(v.decode()) if v else None,
+            "enable_auto_commit":
+                False,
+            "request_timeout_ms":
+                60_000,
+            "max_poll_records":
+                1,
+            "max_poll_interval_ms":
+                270_000,
+            "session_timeout_ms":
+                90_000,
+            "heartbeat_interval_ms":
+                30_000
+        }
 
 
 configuration = Configuration()

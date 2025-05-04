@@ -52,7 +52,7 @@ kafka_consumer_properties = {
 
 async def listen_track_created_event():
     track_created_event_listener = AIOKafkaConsumer(TRACK_CREATED_EVENT,
-                                                    **kafka_consumer_properties)
+                                                    **configuration.get_kafka_consumer_properties())
     await track_created_event_listener.start()
     logger.info(f"Listening: topic={TRACK_CREATED_EVENT}")
     try:
@@ -72,7 +72,7 @@ async def listen_track_created_event():
 
 async def listen_track_released_event():
     track_released_event_listener = AIOKafkaConsumer(
-        TRACK_RELEASED_EVENT, **kafka_consumer_properties)
+        TRACK_RELEASED_EVENT, **configuration.get_kafka_consumer_properties())
     await track_released_event_listener.start()
     logger.info(f"Listening: topic={TRACK_RELEASED_EVENT}")
     try:
@@ -93,7 +93,7 @@ async def listen_track_released_event():
 
 async def listen_track_updated_event():
     track_updated_event_listener = AIOKafkaConsumer(TRACK_UPDATED_EVENT,
-                                                    **kafka_consumer_properties)
+                                                    **configuration.get_kafka_consumer_properties())
     await track_updated_event_listener.start()
     logger.info(f"Listening: topic={TRACK_UPDATED_EVENT}")
     try:
@@ -113,7 +113,7 @@ async def listen_track_updated_event():
 
 async def listen_track_deleted_event():
     track_deleted_event_consumer = AIOKafkaConsumer(TRACK_DELETED_EVENT,
-                                                    **kafka_consumer_properties)
+                                                    **configuration.get_kafka_consumer_properties())
     await track_deleted_event_consumer.start()
     logger.info(f"Listening: topic={TRACK_DELETED_EVENT}")
     try:
@@ -133,7 +133,7 @@ async def listen_track_deleted_event():
 
 async def listen_track_audio_mapped_event():
     track_audio_mapped_event_consumer = AIOKafkaConsumer(
-        TRACK_AUDIO_MAPPED_EVENT, **kafka_consumer_properties)
+        TRACK_AUDIO_MAPPED_EVENT, **configuration.get_kafka_consumer_properties())
     await track_audio_mapped_event_consumer.start()
     logger.info(f"Listening: topic={TRACK_AUDIO_MAPPED_EVENT}")
     try:

@@ -1,11 +1,9 @@
 from dependency_injector.wiring import Provide
 from aiokafka import AIOKafkaConsumer
-import json
 from app.core.logger import Logger
 from app.constant.track_constant import (TRACK_RELEASED_EVENT,
                                          TRACK_DELETED_EVENT)
 from app.event.handler.track_event_handler import TrackEventHandler
-from app.constant.constant import APP_NAME
 from app.core.configuration import configuration
 from app.repository.impl.sqlmodel_track_repository import TrackRepository
 from app.core.container import Container
@@ -18,35 +16,10 @@ track_repository: TrackRepository = Provide[Container.track_repository]
 
 logger: Logger = Provide[Container.logger]
 
-environement = configuration.get_environment()
-
-kafka_consumer_properties = {
-    "bootstrap_servers":
-        configuration.get_kafka_broker_bootstrap_server_urls(),
-    "group_id":
-        f"{APP_NAME}{('' if environement == 'production' else '-' + environement)}",
-    "key_deserializer":
-        lambda k: json.loads(k.decode()) if k else None,
-    "value_deserializer":
-        lambda v: json.loads(v.decode()) if v else None,
-    "enable_auto_commit":
-        False,
-    "request_timeout_ms":
-        60_000,
-    "max_poll_records":
-        1,
-    "max_poll_interval_ms":
-        270_000,
-    "session_timeout_ms":
-        90_000,
-    "heartbeat_interval_ms":
-        30_000
-}
-
 
 async def listen_track_released_event():
     track_released_event_listener = AIOKafkaConsumer(
-        TRACK_RELEASED_EVENT, **kafka_consumer_properties)
+        TRACK_RELEASED_EVENT, **configuration.get_kafka_consumer_properties())
     await track_released_event_listener.start()
     logger.info(f"Listening: topic={TRACK_RELEASED_EVENT}")
     try:
@@ -67,7 +40,7 @@ async def listen_track_released_event():
 
 async def listen_track_deleted_event():
     track_deleted_event_consumer = AIOKafkaConsumer(TRACK_DELETED_EVENT,
-                                                    **kafka_consumer_properties)
+                                                    **configuration.get_kafka_consumer_properties())
     await track_deleted_event_consumer.start()
     logger.info(f"Listening: topic={TRACK_DELETED_EVENT}")
     try:
