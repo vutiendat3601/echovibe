@@ -22,7 +22,7 @@ deployment:
 kafka:
   enabled: true
 openidconnect:
-  enabled: false
+  enabled: true
 database:
   enabled: true
   vendor: "postgresql+psycopg"
