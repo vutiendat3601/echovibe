@@ -1,1 +1,179 @@
-<p>{{ artistJson || 'Artist not found!' }}</p>
+<!-- <p>{{ artistJson || 'Artist not found!' }}</p> -->
+<p-card class="artist-card">
+  <ng-template pTemplate="header">
+    <div class="banner">
+      <!-- Artist banner image with overlay -->
+      <img *ngIf="artist?.backgroundUrl" [src]="artist?.backgroundUrl" class="banner-img" />
+      <div *ngIf="!artist?.backgroundUrl" class="banner-img no-background"></div>
+      <div class="overlay">
+        <!-- Verified artist badge -->
+        @if (artist?.isVerified) {
+          <div class="flex gap-1 items-center">
+            <svg
+              data-encore-id="verifiedBadge"
+              role="img"
+              aria-hidden="false"
+              class="e-9812-icon e-9812-baseline encore-announcement-set b0NcxAbHvRbqgs2S8QDg"
+              viewBox="0 0 24 24"
+              style="
+                width: 20px;
+                height: 20px;
+                fill: #1da1f2;
+                --encore-icon-fill: var(--background-base, #ffffff);
+                position: relative;
+                background-image: linear-gradient(var(--text-base), var(--text-base));
+                background-size: 50% 50%;
+                background-position: center center;
+                background-repeat: no-repeat;
+              "
+            >
+              <path
+                style="background-color: #ffffff"
+                d="M10.814.5a1.658 1.658 0 0 1 2.372 0l2.512 2.572 3.595-.043a1.658 1.658 0 0 1 1.678 1.678l-.043 3.595 2.572 2.512c.667.65.667 1.722 0 2.372l-2.572 2.512.043 3.595a1.658 1.658 0 0 1-1.678 1.678l-3.595-.043-2.512 2.572a1.658 1.658 0 0 1-2.372 0l-2.512-2.572-3.595.043a1.658 1.658 0 0 1-1.678-1.678l.043-3.595L.5 13.186a1.658 1.658 0 0 1 0-2.372l2.572-2.512-.043-3.595a1.658 1.658 0 0 1 1.678-1.678l3.595.043L10.814.5zm6.584 9.12a1 1 0 0 0-1.414-1.413l-6.011 6.01-1.894-1.893a1 1 0 0 0-1.414 1.414l3.308 3.308 7.425-7.425z"
+              ></path>
+            </svg>
+            <p>Verified Artist</p>
+          </div>
+        }
+        <!-- Artist name -->
+        <h1>{{ artist?.name }}</h1>
+        <!-- Listeners count -->
+        <div class="sub-info">
+          <span>1,696,710 monthly listeners</span>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="content">
+    <!-- Action buttons section (play, follow, more) -->
+    <div class="flex flex-wrap gap-5 items-center">
+      <p-button severity="success" rounded [style]="{ width: '55px', height: '55px' }">
+        <fa-icon [icon]="faPlay" size="xl" class="pl-1"></fa-icon>
+      </p-button>
+      <button class="font-bold border rounded-full text-sm text-white w-[100px] h-[30px]">Following</button>
+      <button>
+        <i class="pi pi-ellipsis-h" style="font-size: 1.5rem"></i>
+      </button>
+    </div>
+
+    <!-- Popular songs section -->
+    <h2>Popular</h2>
+    <div class="song-list">
+      <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
+        <span class="song-index">
+          <span class="number">1</span>
+          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
+        </span>
+        <span class="song-title" style="flex: 1">Đừng Làm Trái Tim Anh Đau</span>
+        <span style="flex: 1; text-align: center">44,952,835</span>
+        <span style="flex: 1; text-align: right">4:39</span>
+      </div>
+      <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
+        <span class="song-index">
+          <span class="number">2</span>
+          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
+        </span>
+        <span class="song-title" style="flex: 1">Âm Thầm Bên Em</span>
+        <span style="flex: 1; text-align: center">36,297,049</span>
+        <span style="flex: 1; text-align: right">4:53</span>
+      </div>
+      <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
+        <span class="song-index">
+          <span class="number">3</span>
+          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
+        </span>
+        <span class="song-title" style="flex: 1">Chúng Ta Không Thuộc Về Nhau</span>
+        <span style="flex: 1; text-align: center">30,000,000</span>
+        <span style="flex: 1; text-align: right">4:20</span>
+      </div>
+      <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
+        <span class="song-index">
+          <span class="number">4</span>
+          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
+        </span>
+        <span class="song-title" style="flex: 1">Nơi Này Có Anh</span>
+        <span style="flex: 1; text-align: center">25,000,000</span>
+        <span style="flex: 1; text-align: right">4:10</span>
+      </div>
+      <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
+        <span class="song-index">
+          <span class="number">5</span>
+          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
+        </span>
+        <span class="song-title" style="flex: 1">Hãy Trao Cho Anh</span>
+        <span style="flex: 1; text-align: center">50,000,000</span>
+        <span style="flex: 1; text-align: right">4:50</span>
+      </div>
+      <div class="song-row" *ngIf="showAll" style="display: flex; justify-content: space-between; width: 100%">
+        <span class="song-index">
+          <span class="number">6</span>
+          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
+        </span>
+        <span class="song-title" style="flex: 1">Một Bước Yêu Vạn Dặm Đau</span>
+        <span style="flex: 1; text-align: center">20,000,000</span>
+        <span style="flex: 1; text-align: right">4:30</span>
+      </div>
+      <div class="song-row" *ngIf="showAll" style="display: flex; justify-content: space-between; width: 100%">
+        <span class="song-index">
+          <span class="number">7</span>
+          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
+        </span>
+        <span class="song-title" style="flex: 1">Cơn Mưa Ngang Qua</span>
+        <span style="flex: 1; text-align: center">15,000,000</span>
+        <span style="flex: 1; text-align: right">4:00</span>
+      </div>
+    </div>
+    <!-- See more/less button for songs -->
+    <button (click)="toggleShowAll()" class="see-more-btn font-bold pt-2">
+      {{ showAll ? 'See Less' : 'See More' }}
+    </button>
+
+    <!-- Discography section using product-list component -->
+    <product-list
+      [title]="'Discography'"
+      [items]="discography"
+      [showAll]="showAllDiscography"
+      (toggleShowAll)="toggleShowAllDiscography()"
+    >
+    </product-list>
+
+    <!-- Fans Also Like section using product-list component -->
+    <product-list
+      [title]="'Fans Also Like'"
+      [items]="discography"
+      [showAll]="showAllDiscography"
+      [circularThumbnails]="true"
+      (toggleShowAll)="toggleShowAllDiscography()"
+    >
+    </product-list>
+
+    <!-- Artist About Section -->
+    <div class="artist-about">
+      <h2>About</h2>
+      <div class="about-content">
+        <!-- Artist background with image and biography -->
+        <div class="about-bg">
+          <img *ngIf="artist?.backgroundUrl" [src]="artist?.backgroundUrl" alt="Artist Background" />
+          <div *ngIf="!artist?.backgroundUrl" class="no-background-about"></div>
+          <div class="about-info">
+            <!-- Biography section -->
+            <h3>Biography</h3>
+            <p [innerHTML]="(artist?.biography || '') | safeHtmlPipe"></p>
+            <!-- Artist stats display -->
+            <div class="about-stats">
+              <div class="stat">
+                <span class="stat-number">5.8M</span>
+                <span class="stat-label">monthly listeners</span>
+              </div>
+              <div class="stat">
+                <span class="stat-number">1.2M</span>
+                <span class="stat-label">followers</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</p-card>

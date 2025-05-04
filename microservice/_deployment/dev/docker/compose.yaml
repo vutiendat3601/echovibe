@@ -180,6 +180,58 @@ services:
   #     - "artistcommand-i1"
   #     - "artistquery-i1"
   #   restart: "on-failure:3"
+  activity-pg-i1:
+    image: "postgres:17.2-bookworm"
+    container_name: "echovibe-activity-pg-i1"
+    hostname: "echovibe-activity-pg-i1"
+    environment:
+      - POSTGRES_DB=echovibe_activity
+      - POSTGRES_USER=echovibe_activity
+      - POSTGRES_PASSWORD=echovibe_activity
+    ports:
+      - "16300:5432"
+    networks:
+      - "default"
+    volumes:
+      - "./activity-pg/:/var/lib/postgresql/data"
+    restart: "on-failure:3"
+  # activity-i1:
+  #   image: "vutiendat3601/echovibe-activity:latest"
+  #   build:
+  #     context: ../../../activity/
+  #   container_name: "echovibe-activity-i1"
+  #   hostname: "echovibe-activity-i1"
+  #   ports:
+  #     - "6300:6300"
+  #   environment:
+  #     - "APP_HOST=0.0.0.0"
+  #     - "APP_PORT=6300"
+  #     - "DATABASE_VENDOR=postgresql+psycopg"
+  #     - "DATABASE_HOST=localhost"
+  #     - "DATABASE_PORT=16300"
+  #     - "DATABASE_USERNAME=echovibe_activity"
+  #     - "DATABASE_PASSWORD=echovibe_activity"
+  #     - "DATABASE_NAME=echovibe_activity"
+  #     - "KAFKA_BROKER_BOOTSTRAP_SERVER_URLS=infras.echovibe.io.vn:9092"
+  #   networks:
+  #     - "default"
+  #   restart: "on-failure:3"
+  # apigateway-nginx-i1:
+  #   build:
+  #     context: "../../../_infrastructure/apigateway/local/nginx/"
+  #   container_name: "echovibe-apigateway-nginx-i1"
+  #   hostname: "echovibe-apigateway-nginx-i1"
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - "./log/apigateway-nginx/:/app/log/"
+  #   networks:
+  #     - "default"
+  #   depends_on:
+  #     - "artistcommand-i1"
+  #     - "artistquery-i1"
+  #   restart: "on-failure:3"
 networks:
   default:
     name: echovibe-net

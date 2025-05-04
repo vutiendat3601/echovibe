@@ -12,12 +12,8 @@ from app.core.configuration import configuration
 from app.repository.impl.sqlmodel_artist_repository import ArtistRepository
 from app.core.container import Container
 from app.event.schema.artist_event_schema import (ArtistReleasedEvent,
-                                                  ArtistUpdatedEvent,
-                                                  ArtistDeletedEvent,
-                                                  ArtistVerificationSetEvent)
+                                                  ArtistDeletedEvent)
 
-kafka_broker_bootstrap_server_urls = configuration.get_kafka_broker_bootstrap_server_urls(
-)
 artist_event_handler: ArtistEventHandler = Provide[
     Container.artist_event_handler]
 
@@ -29,7 +25,7 @@ environement = configuration.get_environment()
 
 kafka_consumer_properties = {
     "bootstrap_servers":
-        kafka_broker_bootstrap_server_urls,
+        configuration.get_kafka_broker_bootstrap_server_urls(),
     "group_id":
         f"{APP_NAME}{('' if environement == 'production' else '-' + environement)}",
     "key_deserializer":
@@ -39,13 +35,21 @@ kafka_consumer_properties = {
     "enable_auto_commit":
         False,
     "request_timeout_ms":
+        60_000,
+    "max_poll_records":
+        1,
+    "max_poll_interval_ms":
+        270_000,
+    "session_timeout_ms":
+        90_000,
+    "heartbeat_interval_ms":
         30_000
 }
 
 
 async def listen_artist_released_event():
     artist_released_event_listener = AIOKafkaConsumer(
-        ARTIST_RELEASED_EVENT, **kafka_consumer_properties)
+        ARTIST_RELEASED_EVENT, **configuration.get_kafka_consumer_properties())
     await artist_released_event_listener.start()
     logger.info(f"Listening: topic={ARTIST_RELEASED_EVENT}")
     try:
@@ -61,11 +65,12 @@ async def listen_artist_released_event():
         logger.info(f"Error when handling {ArtistReleasedEvent.__name__}: {e}")
     finally:
         await artist_released_event_listener.stop()
+        logger.info(f"Stopped listening: topic={ARTIST_RELEASED_EVENT}")
 
 
 async def listen_artist_deleted_event():
     artist_deleted_event_consumer = AIOKafkaConsumer(
-        ARTIST_DELETED_EVENT, **kafka_consumer_properties)
+        ARTIST_DELETED_EVENT, **configuration.get_kafka_consumer_properties())
     await artist_deleted_event_consumer.start()
     logger.info(f"Listening: topic={ARTIST_DELETED_EVENT}")
     try:
@@ -81,6 +86,7 @@ async def listen_artist_deleted_event():
         logger.info(f"Error when handling {ArtistDeletedEvent.__name__}: {e}")
     finally:
         await artist_deleted_event_consumer.stop()
+        logger.info(f"Stopped listening: topic={ARTIST_DELETED_EVENT}")
 
 
 def get_artist_event_listeners() -> list[callable]:

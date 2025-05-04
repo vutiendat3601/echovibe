@@ -13,4 +13,7 @@ public interface TrackBusinessRuleConstant {
       new BusinessRule(
           "BR-TRACK-03",
           "The 'refCode' cannot be changed once it has been released at least once.");
+  BusinessRule TRACK_BR_04 =
+      new BusinessRule(
+          "BR-TRACK-04", "Track Audio must inclues at least audioFileKey or fileM3u8Url.");
 }

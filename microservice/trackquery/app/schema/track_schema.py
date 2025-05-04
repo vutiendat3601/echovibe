@@ -4,6 +4,17 @@ from app.enum.track_image_type import TrackImageType
 from app.schema.tag_schema import TagSchema
 
 
+class TrackAudioSchema(BaseModel):
+    file_m3u8_url: str | None = Field(default=None, alias="fileM3u8Url")
+    file_key: str | None = Field(default=None, alias="fileKey")
+    is_active: bool = Field(default=True, alias="isActive")
+    duration_second: int | None = Field(default=None, alias="durationSecond")
+
+    class Config:
+        populate_by_name = True
+        extra = "allow"
+
+
 class TrackDetailSchema(BaseModel):
     name: str
     description: str | None = Field(default=None, alias="description")
@@ -70,6 +81,7 @@ class TrackSchema(BaseModel):
     images: list[TrackImageSchema] | None = Field(default=None, alias="images")
     revisions: list[TrackRevisionSchema] | None = Field(default=None,
                                                         alias="revisions")
+    audio: TrackAudioSchema | None = Field(default=None, alias="audio")
     track_artists: list[TrackArtistSchema] | None = Field(default=[],
                                                           alias="trackArtists")
     created_at: datetime = Field(alias="createdAt")

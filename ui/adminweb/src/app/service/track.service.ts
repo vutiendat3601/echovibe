@@ -4,7 +4,14 @@ import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../environment/environment';
 import { BulkDto } from '../dto/bulk-dto';
 import { ResponseDto } from '../dto/response-dto';
-import { CreateTrackDto, DeleteTrackDto, ReleaseTrackDto, TrackDto, UpdateTrackDto } from '../dto/track-dto';
+import {
+  CreateTrackDto,
+  DeleteTrackDto,
+  MapTrackAudioDto,
+  ReleaseTrackDto,
+  TrackDto,
+  UpdateTrackDto
+} from '../dto/track-dto';
 import { BulkResult } from '../model/bulk-result';
 
 @Injectable({
@@ -59,6 +66,19 @@ export class TrackService {
     const actionTime = new Date();
     return this.http
       .post<ResponseDto<BulkResult>>(`${environment.trackCommandBaseUrl}/bulk-release`, bulkReleaseTrackDtos)
+      .pipe(
+        tap((respDto) =>
+          respDto.data.items.forEach(
+            ({ id, isSuccessful }) => id && isSuccessful && this.changedTrackIds.set(id, actionTime)
+          )
+        )
+      );
+  }
+
+  bulkMapTrackAudio(bulkMapTrackAudioDtos: BulkDto<MapTrackAudioDto>) {
+    const actionTime = new Date();
+    return this.http
+      .post<ResponseDto<BulkResult>>(`${environment.trackCommandBaseUrl}/bulk-map-audio`, bulkMapTrackAudioDtos)
       .pipe(
         tap((respDto) =>
           respDto.data.items.forEach(

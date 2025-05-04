@@ -5,6 +5,7 @@ on:
       - "microservice/artistquery/**"
       - "microservice/trackquery/**"
       - "microservice/product/**"
+      - "microservice/activity/**"
     branches:
       - develop
     types:
@@ -30,4 +31,7 @@ jobs:
         run: ./release.sh
       - name: Build product image
         working-directory: ./microservice/product
+        run: ./release.sh
+      - name: Build activity image
+        working-directory: ./microservice/activity
         run: ./release.sh

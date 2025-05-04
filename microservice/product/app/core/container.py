@@ -4,15 +4,28 @@ from app.core.database import Database
 from app.core.configuration import configuration
 from app.repository.impl.sqlmodel_artist_repository import SqlmodelArtistRepository
 from app.repository.impl.sqlmodel_artist_detail_repository import SqlmodelArtistDetailRepository
+from app.repository.impl.sqlmodel_track_repository import SqlmodelTrackRepository
+from app.repository.impl.sqlmodel_track_detail_repository import SqlmodelTrackDetailRepository
+from app.repository.impl.sqlmodel_playlist_repository import SqlmodelPlaylistRepository
+from app.repository.impl.sqlmodel_playlist_detail_repository import SqlmodelPlaylistDetailRepository
 from app.service.artist_service import ArtistService
-from app.event.handler.artist_event_handler import ArtistEventHandler
+from app.service.track_service import TrackService
+from app.service.playlist_service import PlaylistService
 from app.service.search_service import SearchService
+from app.event.handler.artist_event_handler import ArtistEventHandler
+from app.event.handler.track_event_handler import TrackEventHandler
+from app.event.handler.playlist_event_handler import PlaylistEventHandler
 
 
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(modules=[
-        "app.router.artist_router", "app.router.search_router",
-        "app.event.listener.artist_event_listener"
+        "app.router.artist_router",
+        "app.router.track_router",
+        "app.router.playlist_router",
+        "app.router.search_router",
+        "app.event.listener.track_event_listener",
+        "app.event.listener.playlist_event_listener",
+        "app.event.listener.artist_event_listener",
     ])
 
     logger = providers.Singleton(Logger)
@@ -24,9 +37,25 @@ class Container(containers.DeclarativeContainer):
         SqlmodelArtistRepository,
         logger=logger,
         session_factory=database.provided.session)
-
     artist_detail_repository = providers.Factory(
         SqlmodelArtistDetailRepository,
+        logger=logger,
+        session_factory=database.provided.session)
+
+    track_repository = providers.Factory(
+        SqlmodelTrackRepository,
+        logger=logger,
+        session_factory=database.provided.session)
+    track_detail_repository = providers.Factory(
+        SqlmodelTrackDetailRepository,
+        logger=logger,
+        session_factory=database.provided.session)
+    playlist_repository = providers.Factory(
+        SqlmodelPlaylistRepository,
+        logger=logger,
+        session_factory=database.provided.session)
+    playlist_detail_repository = providers.Factory(
+        SqlmodelPlaylistDetailRepository,
         logger=logger,
         session_factory=database.provided.session)
 
@@ -35,11 +64,30 @@ class Container(containers.DeclarativeContainer):
         ArtistService,
         logger=logger,
         artist_detail_repository=artist_detail_repository)
+    track_service = providers.Factory(
+        TrackService,
+        logger=logger,
+        track_detail_repository=track_detail_repository)
+    playlist_service = providers.Factory(
+        PlaylistService,
+        logger=logger,
+        playlist_detail_repository=playlist_detail_repository)
     search_service = providers.Factory(
         SearchService,
         logger=logger,
         artist_detail_repository=artist_detail_repository,
+        track_detail_repository=track_detail_repository,
+        playlist_detail_repository=playlist_detail_repository,
     )
+
     # Event Handler
     artist_event_handler = providers.Factory(
         ArtistEventHandler, artist_repository=artist_repository, logger=logger)
+    track_event_handler = providers.Factory(TrackEventHandler,
+                                            track_repository=track_repository,
+                                            artist_repository=artist_repository,
+                                            logger=logger)
+    playlist_event_handler = providers.Factory(
+        PlaylistEventHandler,
+        playlist_repository=playlist_repository,
+        logger=logger)

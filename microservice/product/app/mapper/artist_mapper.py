@@ -1,9 +1,9 @@
 from app.model.artist import ArtistDetail
-from app.schema.artist_schema import ArtistDetailScheme
+from app.schema.artist_schema import ArtistDetailSchema
 
 
 def map_to_artist_detail_schema(artist_detail: ArtistDetail):
-    return ArtistDetailScheme(
+    return ArtistDetailSchema(
         id=artist_detail.aggregate_id,
         urn=artist_detail.urn,
         name=artist_detail.name,

@@ -9,7 +9,9 @@ export const routes: Routes = [
     component: LayoutComponent,
     children: [
       { path: 'artist', loadChildren: () => import('./app/page/artist/artist.routes') },
-      { path: 'search', loadChildren: () => import('./app/page/search/search.routes') }
+      { path: 'search', loadChildren: () => import('./app/page/search/search.routes') },
+      { path: 'offline-library', loadChildren: () => import('./app/page/offline-library/offline-library.routes') },
+      { path: 'track', loadChildren: () => import('./app/page/track/track.routes').then(m => m.TRACK_ROUTES) }
     ]
   },
   { path: 'auth', loadChildren: () => import('./app/page/auth/auth.routes') },

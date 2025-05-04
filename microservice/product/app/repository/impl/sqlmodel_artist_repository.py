@@ -30,6 +30,19 @@ class SqlmodelArtistRepository(ArtistRepository):
             raise e
         finally:
             session.close()
+            
+    def find_by_aggregate_id(self, aggregate_id: str) -> Artist | None:
+        try:
+            with self.session_factory() as session:
+                statement = (select(Artist).filter(
+                    Artist.aggregate_id == aggregate_id))
+                artist = session.exec(statement).first()
+                return artist
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
 
     def find_by_aggregate_id_and_is_active_true(
             self, aggregate_id: str) -> Artist | None:

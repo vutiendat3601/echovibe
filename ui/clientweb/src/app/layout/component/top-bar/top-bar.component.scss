@@ -1,0 +1,182 @@
+// @import '../../../../asset/layout/variables/layout';
+
+// Search component styles
+.layout-topbar-search {
+  flex: 1;
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+
+  .search-input-container {
+    position: relative;
+    width: 100%;
+    border-radius: 500px;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+
+    &.focused {
+      background-color: #242424;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+    }
+
+    .search-input-wrapper {
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      position: relative;
+
+      .search-icon {
+        color: #a7a7a7;
+        margin: 0 12px;
+        font-size: 14px;
+      }
+
+      .search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        height: 36px;
+        padding: 0;
+        color: white;
+        font-size: 14px;
+        outline: none;
+
+        &::placeholder {
+          color: #a7a7a7;
+        }
+      }
+
+      .keyboard-shortcut {
+        display: flex;
+        align-items: center;
+        margin-right: 12px;
+
+        .shortcut-key {
+          background-color: #333;
+          color: #a7a7a7;
+          border-radius: 3px;
+          font-size: 11px;
+          padding: 2px 5px;
+          margin-left: 4px;
+        }
+      }
+    }
+
+    // Recent searches dropdown
+    .recent-searches-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: #282828;
+      border-radius: 5px;
+      margin-top: 8px;
+      box-shadow: 0 16px 24px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      max-height: 70vh; // Limit the height to 70% of viewport
+      max-width: 450px; // Limit the width
+      width: 100%;
+      overflow: hidden; // Hide overflow
+      margin-left: auto;
+      margin-right: auto;
+
+      .dropdown-header {
+        padding: 16px 16px 8px;
+        font-weight: 700;
+        color: #fff;
+        font-size: 16px;
+      }
+
+      .search-results {
+        padding: 0 8px;
+        max-height: calc(70vh - 120px); // Account for header and footer
+        overflow-y: auto; // Enable vertical scrolling
+
+        .search-item {
+          display: flex;
+          align-items: center;
+          padding: 8px 8px;
+          border-radius: 4px;
+          cursor: pointer;
+
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+          }
+
+          .search-item-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-right: 12px;
+
+            img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+          }
+
+          .search-item-info {
+            flex: 1;
+
+            .search-item-title {
+              font-size: 14px;
+              font-weight: 500;
+              color: #fff;
+              margin-bottom: 4px;
+            }
+
+            .search-item-artist {
+              font-size: 12px;
+              color: #a7a7a7;
+            }
+          }
+        }
+      }
+
+      // Clear recent searches button
+      .clear-searches-container {
+        padding: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: center;
+
+        .clear-searches-button {
+          background-color: transparent;
+          border: none;
+          color: #a7a7a7;
+          font-size: 14px;
+          cursor: pointer;
+          padding: 8px 16px;
+          border-radius: 4px;
+          transition: all 0.2s ease;
+
+          &:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+          }
+
+          &:focus {
+            outline: none;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Explicit label style
+.explicit-label {
+  display: inline-block;
+  background-color: rgba(255, 255, 255, 0.6);
+  color: #121212;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-right: 6px;
+  line-height: 14px;
+  vertical-align: middle;
+}

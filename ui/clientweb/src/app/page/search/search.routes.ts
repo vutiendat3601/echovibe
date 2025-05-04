@@ -3,6 +3,10 @@ import { SearchDetailComponent } from './search-detail/search-detail.component';
 
 export default [
   {
+    path: ':keyword/:filter',
+    component: SearchDetailComponent
+  },
+  {
     path: ':keyword',
     component: SearchDetailComponent
   },

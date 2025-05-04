@@ -3,10 +3,12 @@ import { ApplicationConfig } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
 import Aura from '@primeng/themes/aura';
-import { DefaultOAuthInterceptor, provideOAuthClient } from 'angular-oauth2-oidc';
+import { provideOAuthClient } from 'angular-oauth2-oidc';
+
 import { providePrimeNG } from 'primeng/config';
 import { routes } from './app.routes';
 import { oauthModuleConfig } from './auth.config';
+import { DefaultOAuthInterceptor } from './app/interceptor/default-oauth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [

@@ -4,6 +4,9 @@ export const URL_REGEX: RegExp =
   /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/;
 
 export const UNDEFINED = 'UNDEFINED';
+export const CLIENT_TOKEN = 'client-token';
+export const USER_STATS = 'user-stats';
+
 
 export enum ArtistNationality {
   AF = 'Afghanistan',

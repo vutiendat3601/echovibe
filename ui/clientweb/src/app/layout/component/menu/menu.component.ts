@@ -22,6 +22,11 @@ export class MenuComponent {
             label: $localize`:@@MENU_ITEM_LABEL_MY_LIKED_TRACK_PLAYLIST:Liked songs`,
             icon: 'pi pi-heart-fill',
             routerLink: ['/me/liked-songs']
+          },
+          {
+            label: 'Offline Library',
+            icon: 'pi pi-cloud-download',
+            routerLink: ['/offline-library']
           }
         ]
       }

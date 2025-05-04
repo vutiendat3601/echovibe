@@ -9,6 +9,10 @@ class ArtistRepository(ABC):
         """Save Artist"""
 
     @abstractmethod
+    def find_by_aggregate_id(self, aggregate_id: str) -> Artist | None:
+        """Find Artist by aggregate_id"""
+
+    @abstractmethod
     def find_by_aggregate_id_and_is_active_true(
             self, aggregate_id: str) -> Artist | None:
         """Find Artist by aggregate_id"""

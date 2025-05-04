@@ -4,9 +4,10 @@ from app.repository.impl.sqlmodel_track_repository import TrackRepository
 from app.event.schema.track_event_schema import (TrackCreatedEvent,
                                                  TrackReleasedEvent,
                                                  TrackUpdatedEvent,
-                                                 TrackDeletedEvent)
+                                                 TrackDeletedEvent,
+                                                 TrackAudioMappedEvent)
 from app.model.track import (Track, TrackDetail, TrackArtist, TrackImage,
-                             TrackRevision)
+                             TrackRevision, TrackAudio)
 from app.enum.track_image_type import TrackImageType
 
 
@@ -220,11 +221,11 @@ class TrackEventHandler:
 
     def handle_track_deleted_event(self,
                                    track_deleted_event: TrackDeletedEvent):
-        updated_at = datetime.now(timezone.utc)
         if track_deleted_event.is_soft_deleted:
             track = self.track_repository.find_by_aggregate_id_and_is_active_true(
                 track_deleted_event.id)
             if track is not None:
+                updated_at = datetime.now(timezone.utc)
                 track.is_active = track_deleted_event.is_active
                 track.event_type = track_deleted_event.type
                 track.event_version = track_deleted_event.version
@@ -235,4 +236,27 @@ class TrackEventHandler:
             self.track_repository.delete_by_aggregate_id(track_deleted_event.id)
         self.logger.info(
             f"Processed {TrackDeletedEvent.__name__}: id={track_deleted_event.id}, version={track_deleted_event.version}, timestamp={track_deleted_event.timestamp}"
+        )
+
+    def handle_track_audio_mapped_event(
+            self, track_audio_mapped_event: TrackAudioMappedEvent):
+        updated_at = datetime.now(timezone.utc)
+        track = self.track_repository.find_by_aggregate_id_and_is_active_true(
+            track_audio_mapped_event.id)
+        if track is not None:
+            track.is_released = track_audio_mapped_event.is_released
+            if track.track_audio is None:
+                track.track_audio = TrackAudio()
+                track.track_audio.created_at = updated_at
+            track.track_audio.file_m3u8_url = track_audio_mapped_event.track_audio.file_m3u8_url
+            track.track_audio.file_key = track_audio_mapped_event.track_audio.file_key
+            track.track_audio.duration_second = track_audio_mapped_event.track_audio.duration_second
+            track.track_audio.is_active = track_audio_mapped_event.track_audio.is_active
+            track.event_type = track_audio_mapped_event.type
+            track.event_version = track_audio_mapped_event.version
+            track.event_timestamp = track_audio_mapped_event.timestamp
+            track.updated_at = updated_at
+            self.track_repository.save_track(track)
+        self.logger.info(
+            f"Processed {TrackAudioMappedEvent.__name__}: id={track_audio_mapped_event.id}, version={track_audio_mapped_event.version}, timestamp={track_audio_mapped_event.timestamp}"
         )

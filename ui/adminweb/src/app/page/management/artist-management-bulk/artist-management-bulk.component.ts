@@ -41,7 +41,7 @@ import { UrlValidator } from '../../../validator/url.validator';
 import { ArtistDto, CreateArtistDto, UpdateArtistDto } from './../../../dto/artist-dto';
 import { ArtistNationalityNamePipe } from './../../../pipe/artist-nationality.pipe';
 
-interface ArtistImportCsvColumn {
+interface ArtistCsvColumn {
   name: string;
   ispublic: string;
   description: string;
@@ -126,9 +126,6 @@ interface Artist {
   providers: [MessageService, ArtistService, ConfirmationService, UrlValidator]
 })
 export class ArtistManagementBulkComponent implements OnInit {
-  private readonly MAX_NUMBER_OF_ROWS = 50;
-  private readonly ARTIST_IMPORT_CSV_CHUNK_PREFIX = 'importArtistCsv_chunk_';
-
   readonly I18N = {
     IS_PUBLIC_TRUE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_YES:Yes`,
     IS_PUBLIC_FALSE: $localize`:@@COLUMN_CELL_VALUE_MANAGE_ARTIST_PUBLIC_NO:No`,
@@ -447,7 +444,7 @@ export class ArtistManagementBulkComponent implements OnInit {
       delimiter: ',',
       worker: true,
       step: (results) => {
-        const artistImport = results.data as ArtistImportCsvColumn;
+        const artistImport = results.data as ArtistCsvColumn;
         const artist: Artist = {
           ...this.emptyArtist(),
           name: artistImport['name'] || null,
@@ -541,6 +538,7 @@ export class ArtistManagementBulkComponent implements OnInit {
       isBiographyDialogShowed: false
     };
   }
+  
   private mapToArtist(artistDto: ArtistDto): Artist {
     const {
       id,

@@ -1,9 +1,12 @@
+import { AudioManagementComponent } from './audio-management/audio-management.component';
 import { Routes } from '@angular/router';
 import { RecommendationSystemComponent } from '../system/recommendation-system/recommendation-system.component';
 import { ArtistManagementComponent } from './artist-management/artist-management.component';
 import { PlaylistManagementComponent } from './playlist-management/playlist-management.component';
 import { TrackManagementComponent } from './track-management/track-management.component';
 import { ArtistManagementBulkComponent } from './artist-management-bulk/artist-management-bulk.component';
+import { TrackManagementBulkComponent } from './track-management-bulk/track-management-bulk.component';
+import { AudioManagementBulkComponent } from './audio-management-bulk/audio-management-bulk.component';
 
 export default [
   {
@@ -26,16 +29,33 @@ export default [
       {
         path: '',
         component: TrackManagementComponent
+      },
+      {
+        path: 'bulk',
+        component: TrackManagementBulkComponent
       }
     ]
   },
   {
-    path: 'playlist',
-    component: PlaylistManagementComponent
+    path: 'audio',
+    children: [
+      {
+        path: '',
+        component: AudioManagementComponent
+      },
+      {
+        path: 'bulk',
+        component: AudioManagementBulkComponent
+      }
+    ]
   },
-  {
-    path: 'recommendation-system',
-    component: RecommendationSystemComponent
-  },
+  // {
+  //   path: 'playlist',
+  //   component: PlaylistManagementComponent
+  // },
+  // {
+  //   path: 'recommendation-system',
+  //   component: RecommendationSystemComponent
+  // },
   { path: '**', redirectTo: '/not-found' }
 ] as Routes;

@@ -1,9 +1,11 @@
 from fastapi import APIRouter
 from app.router.artist_router import artist_router
+from app.router.track_router import track_router
+from app.router.playlist_router import playlist_router
 from app.router.search_router import search_router
 
-apiRouter = APIRouter()
-routers = [artist_router, search_router]
+api_router = APIRouter()
+routers = [artist_router, track_router, playlist_router, search_router]
 
 for router in routers:
-    apiRouter.include_router(router)
+    api_router.include_router(router)

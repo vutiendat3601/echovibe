@@ -17,3 +17,7 @@ dependencies:
   - name: product
     version: "1.0.0"
     repository: file://../microservice/product
+  - name: activity
+    version: "1.0.0"
+    repository: file://../microservice/activity
+

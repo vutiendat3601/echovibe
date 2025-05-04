@@ -1,0 +1,12 @@
+name: "echovibe-activity"
+services:
+  activity-pg-i1:
+    image: "postgres:17.2-bookworm"
+    container_name: "echovibe-activity-pg-i1"
+    hostname: "echovibe-activity-pg-i1"
+    environment:
+      - POSTGRES_DB=echovibe_activity
+      - POSTGRES_USER=echovibe_activity
+      - POSTGRES_PASSWORD=echovibe_activity
+    ports:
+      - "16300:5432"

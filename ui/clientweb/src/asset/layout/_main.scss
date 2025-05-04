@@ -5,6 +5,8 @@
     justify-content: space-between;
     padding: 6rem 2rem 0 2rem;
     transition: margin-left var(--layout-section-transition-duration);
+    /* Add padding at the bottom to accommodate the now-playing-bar */
+    padding-bottom: 90px;
 }
 
 .layout-main {

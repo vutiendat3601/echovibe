@@ -24,6 +24,7 @@ import vn.io.echovibe.core.model.BulkResult;
 import vn.io.echovibe.core.model.CommandResult;
 import vn.io.echovibe.track.command.model.CreateTrackCommand;
 import vn.io.echovibe.track.command.model.DeleteTrackCommand;
+import vn.io.echovibe.track.command.model.MapTrackAudioCommand;
 import vn.io.echovibe.track.command.model.ReleaseTrackCommand;
 import vn.io.echovibe.track.command.model.UpdateTrackCommand;
 
@@ -42,6 +43,7 @@ public class TrackCommandDispatcher implements CommandDispatcher {
     registerHandler(UpdateTrackCommand.class, commandHandler::handle);
     registerHandler(DeleteTrackCommand.class, commandHandler::handle);
     registerHandler(ReleaseTrackCommand.class, commandHandler::handle);
+    registerHandler(MapTrackAudioCommand.class, commandHandler::handle);
   }
 
   @Override

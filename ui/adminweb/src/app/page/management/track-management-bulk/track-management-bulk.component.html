@@ -1,0 +1,380 @@
+<!-- Toolbar -->
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <p-button
+      i18n-label="@@BUTTON_LABEL_SAVE"
+      icon="pi pi-save"
+      severity="success"
+      class="mr-2"
+      [disabled]="isLoading()"
+      (onClick)="handleBulkSaveTrack()"
+    />
+
+    @if (action == 'import') {
+      <!-- CSV Template Button -->
+      <p-button
+        i18n-label="@@BUTTON_LABEL_EXPORT_TEMPLATE"
+        icon="pi pi-file-export"
+        outlined
+        severity="secondary"
+        class="mr-2"
+      />
+      <!-- CSV Import Button -->
+      <p-fileupload
+        #fu
+        mode="basic"
+        i18n-chooseLabel="@@BUTTON_LABEL_CHOOSE_FILE"
+        chooseLabel="Choose file ..."
+        chooseIcon="pi pi-upload"
+        name="demo[]"
+        accept=".csv"
+        maxFileSize="10000000"
+        (onSelect)="handleCsvSelected($event)"
+      />
+    }
+  </ng-template>
+</p-toolbar>
+
+<p-table
+  #dataTable
+  [value]="tracks()"
+  [rows]="25"
+  [columns]="columns"
+  [paginator]="true"
+  [globalFilterFields]="['id', 'name', 'tagsString']"
+  [tableStyle]="{ 'min-width': '75rem' }"
+  [(selection)]="selectedTracks"
+  [rowHover]="true"
+  dataKey="id"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Tracks"
+  [showCurrentPageReport]="true"
+  [rowsPerPageOptions]="[5, 10, 25]"
+  [loading]="isLoading()"
+>
+  <ng-template #caption>
+    <div class="flex items-center justify-between">
+      @if (action === 'edit') {
+        <h5 class="m-0" i18n="@@TABLE_LABEL_UPDATE_ARTISTS">Update Tracks</h5>
+      } @else if (action === 'import') {
+        <h5 class="m-0" i18n="@@TABLE_LABEL_CREATE_ARTISTS">Create Tracks</h5>
+      }
+      <p-iconfield>
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          pInputText
+          type="text"
+          (input)="handleGlobalFilter(dataTable, $event)"
+          i18n-placeholder="@@INPUT_PLACEHOLDER_SEARCH"
+          placeholder="Search ..."
+        />
+      </p-iconfield>
+    </div>
+  </ng-template>
+  <ng-template #header>
+    <tr>
+      <!-- Action Buttons -->
+      <th style="min-width: 8rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_ACTIONS">Action</th>
+
+      <!-- ID -->
+      <th style="min-width: 12rem" [hidden]="['import'].includes(action)">ID</th>
+
+      <!-- Thumbnail -->
+      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_THUMBNAIL">Thumbnail</th>
+
+      <!-- Name -->
+      <th pSortableColumn="name" style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NAME">
+        Name
+        <p-sortIcon field="name" />
+      </th>
+
+      <!-- Artist -->
+      <th pSortableColumn="trackArtists" style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NAME">
+        Artist
+        <p-sortIcon field="trackArtists" />
+      </th>
+
+      <!-- Official released date -->
+      <th pSortableColumn="officialReleasedDate" style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_NAME">
+        Official released date
+        <p-sortIcon field="officialReleasedDate" />
+      </th>
+
+      <!-- Public -->
+      <th style="min-width: 14rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_PUBLIC">Public</th>
+
+      <!-- Revision -->
+      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_REVISION">Revision</th>
+
+      <!-- Released -->
+      <th style="min-width: 12rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_RELEASED">Released</th>
+
+      <!-- Reference code -->
+      <th style="min-width: 24rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_REFERENCE_CODE">Reference code</th>
+
+      <!-- Description -->
+      <th style="min-width: 20rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_DESCRIPTION">Description</th>
+
+      <!-- Tag -->
+      <th style="min-width: 16rem" i18n="@@COLUMN_LABEL_MANAGE_ARTIST_TAG">Tag</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-track_ let-rowIndex="rowIndex">
+    @if (track_.formGroup) {
+      <ng-container [formGroup]="track_.formGroup">
+        <tr>
+          <!-- Action -->
+          <td>
+            <!-- Remove from edit list -->
+            <p-button
+              icon="pi pi-minus-circle"
+              severity="danger"
+              [rounded]="true"
+              [outlined]="true"
+              (onClick)="handleRemoveRow(rowIndex)"
+            />
+          </td>
+
+          <!-- ID -->
+          <td style="min-width: 12rem" [hidden]="['import'].includes(action)">{{ track_.id }}</td>
+
+          <!-- Thumbnail -->
+          <td style="min-width: 12rem">
+            <div class="flex items-center">
+              <p-button
+                icon="pi pi-pencil"
+                [rounded]="true"
+                [outlined]="true"
+                (onClick)="handleEditThumbnail(track_)"
+              />
+              <p-image
+                [preview]="true"
+                class="ml-2 rounded cursor-pointer"
+                imageClass="rounded object-cover w-20 h-20"
+                [src]="track_.thumbnailUrl"
+                [alt]="track_.name + '\'s thumbnail'"
+              >
+              </p-image>
+            </div>
+
+            <!-- Update Thumbnail Dialog -->
+            <p-dialog
+              [style]="{ width: 'clamp(400px, 90vw, 800px)' }"
+              i18n-header="@@DIALOG_LABEL_EDIT_THUMBNAIL"
+              header="Thumbnail"
+              [modal]="true"
+              [closable]="true"
+              [dismissableMask]="true"
+              [(visible)]="track_.isThumbnailDialogShowed"
+            >
+              <ng-container>
+                <p-panel i18n-header="@@FORM_SECTION_ARTIST_THUMBNAIL" header="Thumbnail">
+                  <div class="w-full flex justify-center">
+                    <p-image
+                      [src]="
+                        renderableImageUrls.includes(track_.formGroup?.get('thumbnailUrlFormControl')?.value)
+                          ? track_.formGroup.get('thumbnailUrlFormControl').value
+                          : 'asset/image/default-track-thumbnail-image.png'
+                      "
+                      alt="Thumbnail Preview"
+                      [preview]="true"
+                      class="rounded cursor-pointer"
+                      imageClass="rounded object-cover w-64 h-64"
+                    />
+                  </div>
+                  <p-floatlabel variant="on" class="mt-2 w-full">
+                    <input
+                      id="thumbnailUrl"
+                      ng-invalid
+                      ng-dirty
+                      pInputText
+                      formControlName="thumbnailUrlFormControl"
+                      class="w-full"
+                    />
+                    <label i18n="@@FORM_LABEL_ARTIST_THUMBNAIL_URL" for="thumbnailUrl">Thumbnail link</label>
+                  </p-floatlabel>
+                </p-panel>
+              </ng-container>
+              <ng-template #footer>
+                <div>
+                  <p-button
+                    i18n-label="@@BUTTON_LABEL_CANCEL"
+                    label="Cancel"
+                    text
+                    severity="danger"
+                    (onClick)="handleThumbnailDialogClose(track_, false)"
+                  />
+                  <p-button
+                    i18n-label="@@BUTTON_LABEL_SAVE"
+                    label="Save"
+                    severity="success"
+                    (onClick)="handleThumbnailDialogClose(track_, true)"
+                  />
+                </div>
+              </ng-template>
+            </p-dialog>
+          </td>
+
+          <!-- Name -->
+          <td style="min-width: 16rem">
+            <input pInputText type="text" class="w-full" formControlName="nameFormControl" />
+          </td>
+
+          <!-- Artist -->
+          <td style="min-width: 16rem">
+            <p-multiselect
+              class="flex-1"
+              [options]="track_.filteredTrackArtists"
+              formControlName="trackArtistsFormControl"
+              i18n-placeholder="@@FORM_LABEL_ARTIST_TAG_EDIT"
+              placeholder="Edit artists"
+              optionLabel="artistName"
+              styleClass="w-full md:w-80"
+              display="chip"
+              i18n-emptyFilterMessage="@@MESSAGE_NO_RESULT_FOUND"
+              emptyFilterMessage="No results found."
+              [filterValue]="track_.tagFilterKeyword"
+              (onFilter)="handleTagFilter($event, track_)"
+            >
+              <ng-template let-trackArtist #item>
+                <div class="flex items-center gap-2">
+                  <p>{{ trackArtist.artistName }}</p>
+                </div>
+              </ng-template>
+            </p-multiselect>
+          </td>
+
+          <td class="flex flex-col gap-y-2" style="min-width: 16rem">
+            <p-floatlabel variant="on">
+              <p-select
+                id="officialReleasedDateFormat"
+                [options]="OFFICIAL_RELEASED_DATE_FORMATS"
+                formControlName="officialReleasedDateFormatFormControl"
+                optionLabel="format"
+                placeholder=""
+                class="w-full"
+              ></p-select>
+              <label for="officialReleasedDateFormat">Released date format</label>
+            </p-floatlabel>
+            <!-- </div> -->
+            <!-- Official released date format -->
+            <!-- <div class="ml-2 flex-1"> -->
+            <p-floatlabel variant="on">
+              <p-datepicker
+                id="officialReleasedDate"
+                formControlName="officialReleasedDateFormControl"
+                [dateFormat]="track_.officialReleasedDateFormat.datePickerFormat"
+                [view]="track_.officialReleasedDateFormat.view"
+                styleClass="w-full"
+              />
+              <!-- i18n="@@FORM_LABEL_TRACK_OFFICIAL_RELEASED_DATE" -->
+              <label for="officialReleasedDate">Released date</label>
+            </p-floatlabel>
+            <!-- </div> -->
+          </td>
+
+          <!-- Public -->
+          <td style="min-width: 14rem" class="text-center">
+            <p-select
+              [options]="IS_PUBLIC_OPTIONS"
+              optionLabel="name"
+              optionValue="value"
+              class="w-full"
+              appendTo="body"
+              formControlName="isPublicFormControl"
+            />
+          </td>
+
+          <!-- Revision - read-only -->
+          <td style="min-width: 8rem">
+            {{ track_.revisionNumber }}
+          </td>
+
+          <!-- Released - Display Only with Hidden Form Control -->
+          <td style="min-width: 12rem" class="text-center">
+            <p-tag
+              [icon]="'pi ' + (track_.isReleased ? 'pi-check' : 'pi-times')"
+              [value]="track_.isReleased ? I18N.IS_RELEASED_TRUE : I18N.IS_RELEASED_FALSE"
+              [severity]="track_.isReleased ? 'success' : 'danger'"
+            />
+          </td>
+
+          <!-- Reference code - In case revision > -1, disable edit -->
+          <td style="min-width: 24rem">
+            <input pInputText type="text" class="w-full" formControlName="refCodeFormControl" />
+          </td>
+
+          <!-- Description -->
+          <td style="min-width: 8rem">
+            <textarea pInputText rows="2" class="w-full" formControlName="descriptionFormControl"></textarea>
+          </td>
+
+          <!-- Tag -->
+          <td style="min-width: 16rem">
+            <p-multiselect
+              class="flex-1"
+              [options]="track_.tags"
+              formControlName="tagsFormControl"
+              i18n-placeholder="@@FORM_LABEL_ARTIST_TAG_EDIT"
+              placeholder="Edit tags"
+              optionLabel="name"
+              optionValue="name"
+              styleClass="w-full md:w-80"
+              display="chip"
+              i18n-emptyFilterMessage="@@MESSAGE_NO_RESULT_FOUND"
+              emptyFilterMessage="No results found."
+              [filterValue]="track_.tagFilterKeyword"
+              (onFilter)="handleTagFilter($event, track_)"
+            >
+              <ng-template #header>
+                <div class="font-medium px-3 py-2">Tag</div>
+              </ng-template>
+              <ng-template #footer>
+                @if (!track_.tagFilterFoundExactMatch) {
+                  <div [style]="{ padding: 'var(--p-multiselect-list-padding)' }">
+                    <p-button
+                      severity="secondary"
+                      text
+                      size="small"
+                      styleClass="w-full"
+                      (onClick)="handleCreateTag(track_)"
+                    >
+                      <i class="pi pi-plus"></i>
+                      <span>
+                        Add tag
+                        <span>'{{ track_.tagFilterKeyword }}'</span>
+                      </span>
+                    </p-button>
+                  </div>
+                }
+              </ng-template>
+              <ng-template let-tag #item>
+                <div class="flex items-center gap-2">
+                  <p>{{ tag.name }}</p>
+                </div>
+              </ng-template>
+              <ng-template #dropdownicon>
+                <i class="pi pi-tags"></i>
+              </ng-template>
+              <ng-template #filtericon>
+                <i class="pi pi-hashtag"></i>
+              </ng-template>
+            </p-multiselect>
+          </td>
+        </tr>
+      </ng-container>
+    }
+  </ng-template>
+
+  <ng-template #emptymessage>
+    <tr>
+      <td colspan="15">
+        <div class="flex flex-col items-center justify-center">
+          <div class="text-center p-4">No artists found. Please check your query parameters.</div>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-confirmdialog />
+<p-toast position="top-right" />
