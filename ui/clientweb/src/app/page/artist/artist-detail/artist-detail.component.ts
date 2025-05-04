@@ -110,11 +110,10 @@ export class ArtistDetailComponent implements OnInit {
   }
 
   private listenActivityEvent() {
-    this.acitivityService.message.subscribe((text) => {
+    this.acitivityService.websocketMessage.subscribe((text) => {
       const activityResp = JSON.parse(text);
       if (activityResp?.type === ActionType.VIEW_ARTIST_DETAIL_PAGE) {
         setTimeout(() => {
-          console.log(text);
           this.acitivityService.send({
             sessionId: activityResp?.sessionId || null,
             aggregateId: this.artist?.id || null,

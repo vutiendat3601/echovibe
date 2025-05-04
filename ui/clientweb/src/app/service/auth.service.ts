@@ -1,5 +1,5 @@
 import { Inject, Injectable, LOCALE_ID } from '@angular/core';
-import { OAuthService } from 'angular-oauth2-oidc';
+import { OAuthService, OAuthStorage } from 'angular-oauth2-oidc';
 import { BehaviorSubject, filter, Observable, Subject } from 'rxjs';
 import { authorizationCodePkceFlowConfig } from '../../auth.config';
 import { UserProfile } from '../model/user-profile';
@@ -24,6 +24,7 @@ export class AuthService {
 
   constructor(
     private readonly oauthService: OAuthService,
+    private readonly oauthStorage: OAuthStorage,
     private readonly http: HttpClient,
     @Inject(LOCALE_ID) private readonly locale: string
   ) {
@@ -38,7 +39,7 @@ export class AuthService {
     this.oauthService.configure(authorizationCodePkceFlowConfig);
     this.oauthService
       .loadDiscoveryDocumentAndTryLogin()
-      .then((hasTokens) => hasTokens && setTimeout(() => this.loadUserProfile(), 1_000));
+      .then((_) => this.oauthStorage.getItem('access_token') && this.loadUserProfile());
     this.oauthService.setupAutomaticSilentRefresh();
     this.oauthService.events
       .pipe(filter((event) => ['token_received', 'token_refreshed'].includes(event.type)))
@@ -89,8 +90,8 @@ export class AuthService {
     this.oauthService.refreshToken();
   }
 
-  getAccessToken(): string {
-    return this.oauthService.getAccessToken();
+  getAccessToken(): string | null {
+    return this.oauthStorage.getItem('access_token');
   }
 
   get resourceAccess(): ResourceAccessClaim {
