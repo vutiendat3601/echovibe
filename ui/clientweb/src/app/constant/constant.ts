@@ -5,6 +5,8 @@ export const URL_REGEX: RegExp =
 
 export const UNDEFINED = 'UNDEFINED';
 export const CLIENT_TOKEN = 'client-token';
+export const USER_STATS = 'user-stats';
+
 
 export enum ArtistNationality {
   AF = 'Afghanistan',
