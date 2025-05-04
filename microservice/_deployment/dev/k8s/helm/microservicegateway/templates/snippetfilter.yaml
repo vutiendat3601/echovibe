@@ -4,7 +4,15 @@ metadata:
   name: microservice-snippetsfilter
   namespace: {{ .Values.global.namespace }}
 spec:
-  snippets: 
+  snippets:
+  - context: http.server
+    value: |
+      location /client-token {
+        proxy_method POST;
+        proxy_pass https://auth-svc.microservice.svc.cluster.local/realms/echovibe/protocol/openid-connect/token;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_body "client_id=echovibe-clientweb-guest&client_secret=h79ZhiYvLGaiC3XfWmbH61qiRCKam8sn&grant_type=client_credentials";
+      }
   - context: http.server.location
     value: |
       proxy_set_header X-Real-IP $remote_addr;
