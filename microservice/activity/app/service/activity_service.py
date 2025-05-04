@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from app.core.logger import Logger
 from app.model.activity import Activity
 from app.schema.activity_schema import ActivitySchema
-from app.constant.constant import AUTH_SYSTEM_USERNAME
+from app.constant.constant import AUTH_SYSTEM_USERNAME, JWT_CLAIM_SUB
 from app.enum.action_type import ActionType
 
 from app.service.artist_service import ArtistService
@@ -25,6 +25,9 @@ class ActivityService:
                         activity_schema: ActivitySchema,
                         jwt_claims: dict = {}) -> dict[str, str]:
         created_at = datetime.now(timezone.utc)
+        created_by = jwt_claims.get(
+            JWT_CLAIM_SUB,
+            AUTH_SYSTEM_USERNAME) if jwt_claims else AUTH_SYSTEM_USERNAME
         activity: Activity = Activity(
             session_id=activity_schema.session_id,
             aggregate_id=activity_schema.aggregate_id,
@@ -32,8 +35,7 @@ class ActivityService:
             type=activity_schema.type,
             data_json=activity_schema.data_json,
             created_at=created_at,
-            created_by=jwt_claims.get("sub")
-            if jwt_claims and jwt_claims.get("sub") else AUTH_SYSTEM_USERNAME,
+            created_by=created_by,
         )
 
         # Playlist action handlers
