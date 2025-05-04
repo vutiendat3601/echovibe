@@ -48,30 +48,23 @@ class TrackService:
                                    created_by=activity.created_by)
         self.track_like_repository.save_track_like(track_like)
         self.logger.info(
-            f"Processed {ActionType.LIKE_TRACK} action: id={activity.id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
+            f"Processed {ActionType.LIKE_TRACK} action: id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
         return {}
 
     def handle_unlike_track_action(self, activity: Activity) -> dict[str, str]:
-        self.activity_repository.save_activity(activity)
-        updated_at = datetime.now(timezone.utc)
         track_like = self.track_like_repository.find_by_aggregate_id_and_user_id(
             aggregate_id=activity.aggregate_id, user_id=activity.created_by)
         if track_like:
+            self.activity_repository.save_activity(activity)
+            updated_at = datetime.now(timezone.utc)
             track_like.is_active = False
             track_like.updated_at = updated_at
             track_like.updated_by = activity.created_by
-        else:
-            track_like = TrackLike(aggregate_id=activity.aggregate_id,
-                                   user_id=activity.created_by,
-                                   is_active=False,
-                                   created_at=updated_at,
-                                   updated_at=updated_at,
-                                   created_by=activity.created_by)
-        self.track_like_repository.save_track_like(track_like)
-        self.logger.info(
-            f"Processed {ActionType.UNLIKE_TRACK} action: id={activity.id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
-        )
+            self.track_like_repository.save_track_like(track_like)
+            self.logger.info(
+                f"Processed {ActionType.UNLIKE_TRACK} action: id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
+            )
         return {}
 
     def handle_listen_track_action(self, activity: Activity) -> dict[str, str]:
