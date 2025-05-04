@@ -113,7 +113,7 @@ $accent-hover-color: #1ed760;
     display: flex;
     flex-direction: column;
     transition: background-color 0.3s ease;
-    height: 100%;
+    // height: 100%;
     max-height: 300px;
     position: relative;
     cursor: pointer;
@@ -257,6 +257,104 @@ $accent-hover-color: #1ed760;
       font-size: 14px;
       color: $text-secondary;
       text-align: right;
+    }
+  }
+}
+
+// Songs table for the Songs filter tab
+.songs-table {
+  width: 100%;
+  color: $text-primary;
+  margin-top: 20px;
+
+  .songs-table-header {
+    display: grid;
+    grid-template-columns: 40px 1fr 100px;
+    padding: 0 16px 8px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: $text-secondary;
+    font-size: 14px;
+    font-weight: 500;
+    align-items: center;
+    height: 32px;
+    position: sticky;
+    top: 0;
+    background-color: $background-color;
+    z-index: 2;
+  
+    .song-number, .song-duration {
+      text-align: left;
+    }
+  
+    .song-title-header {
+      margin-left: 56px; // Leave space for the thumbnail
+    }
+  }
+
+  .songs-table-body {
+    .song-row {
+      display: grid;
+      grid-template-columns: 40px 1fr 100px;
+      padding: 8px 16px;
+      align-items: center;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      
+      &:hover {
+        background-color: $surface-hover-color;
+      }
+      
+      .song-number {
+        color: $text-secondary;
+        font-size: 16px;
+      }
+      
+      .song-info-cell {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        
+        .song-thumbnail {
+          width: 40px;
+          height: 40px;
+          object-fit: cover;
+          border-radius: 4px;
+        }
+        
+        .song-details {
+          .song-title {
+            color: $text-primary;
+            font-size: 16px;
+            font-weight: 400;
+            margin-bottom: 4px;
+          }
+          
+          .song-artist {
+            color: $text-secondary;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            
+            .explicit-label {
+              background-color: rgba(255, 255, 255, 0.6);
+              color: #000;
+              font-size: 10px;
+              font-weight: 700;
+              padding: 1px 5px;
+              border-radius: 3px;
+              margin-right: 4px;
+            }
+          }
+        }
+      }
+      
+      .song-duration {
+        color: $text-secondary;
+        font-size: 14px;
+        text-align: left;
+      }
     }
   }
 }
@@ -588,6 +686,31 @@ $accent-hover-color: #1ed760;
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+  }
+}
+
+// Load more button at the bottom of search results
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+  margin-bottom: 24px;
+  
+  .load-more-btn {
+    background-color: transparent;
+    border: 1px solid $text-secondary;
+    color: $text-primary;
+    padding: 10px 32px;
+    border-radius: 500px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      border-color: $text-primary;
+      transform: scale(1.03);
     }
   }
 }

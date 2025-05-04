@@ -1,0 +1,577 @@
+.playlist-detail-container {
+  color: #fff;
+  min-height: 100vh;
+}
+
+// Header section with gradient background
+.playlist-header-section {
+  padding: 24px 24px 24px 24px;
+  position: relative;
+  transition: background 0.3s ease;
+  border-radius: 6px;
+}
+
+.playlist-header {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding-top: 40px;
+}
+
+.playlist-cover {
+  flex-shrink: 0;
+  width: 232px;
+  height: 232px;
+  box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .placeholder-cover {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #450af5, #c4efd9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+
+    i {
+      font-size: 64px;
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+}
+
+.playlist-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.playlist-type {
+  font-size: 12px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.playlist-title {
+  font-size: 80px;
+  font-weight: 900;
+  margin: 0 0 12px 0;
+  letter-spacing: -2px;
+
+  @media (max-width: 1024px) {
+    font-size: 60px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 48px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 36px;
+  }
+}
+
+.playlist-stats {
+  font-size: 14px;
+  margin-bottom: 8px;
+
+  .playlist-creator {
+    font-weight: 500;
+  }
+}
+
+.playlist-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+
+  .play-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #1ed760;
+    border: none;
+
+    .play-icon {
+      font-size: 24px;
+      color: black;
+    }
+
+    &:hover {
+      background-color: #1fdf64;
+      transform: scale(1.04);
+    }
+  }
+
+  .action-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    color: rgba(255, 255, 255, 0.7);
+
+    &:hover {
+      color: #fff;
+      transform: scale(1.08);
+    }
+  }
+}
+
+// Playlist tracks section
+.playlist-tracks {
+  background-color: rgba(18, 18, 18, 1);
+  padding: 0 24px 24px;
+
+  .track-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #fff;
+
+    thead tr {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      height: 36px;
+
+      th {
+        text-align: left;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 14px;
+        font-weight: 400;
+        padding: 0 16px 8px 16px;
+      }
+    }
+
+    tbody tr {
+      border-radius: 4px;
+      height: 56px;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      td {
+        padding: 0 16px;
+      }
+    }
+  }
+
+  .number-col {
+    width: 40px;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: right;
+  }
+
+  .title-col {
+    max-width: 300px;
+  }
+
+  .album-col,
+  .date-added-col {
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .duration-col {
+    width: 120px;
+    text-align: right;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  .track-info {
+    display: flex;
+    align-items: center;
+  }
+
+  .track-img {
+    width: 40px;
+    height: 40px;
+    margin-right: 16px;
+  }
+
+  .track-details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .track-name {
+    color: #ffffff;
+    font-size: 16px;
+  }
+
+  .track-artist {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+  }
+
+  .no-tracks {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 40px 0;
+  }
+}
+
+// Find More button styling
+.find-more-container {
+  display: flex;
+  justify-content: flex-end;
+  margin: 20px 16px;
+}
+
+.find-more-button {
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 500px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+
+  &:hover {
+    border-color: #fff;
+    transform: scale(1.04);
+  }
+}
+
+// Find More section - Inline style
+.find-more-section {
+  background-color: rgba(24, 24, 24, 1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 24px;
+  margin-top: 20px;
+
+  .find-more-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .close-button {
+      color: rgba(255, 255, 255, 0.7);
+
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
+
+  .search-input-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin-bottom: 16px;
+
+    .search-input {
+      width: 100%;
+      height: 48px;
+      background-color: #242424;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      padding: 0 16px 0 48px;
+      border-radius: 4px;
+
+      &:focus {
+        outline: none;
+        background-color: #333;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .pi-search {
+      position: absolute;
+      left: 16px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .clear-search-button {
+      position: absolute;
+      right: 16px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
+
+  .search-loading {
+    margin-bottom: 16px;
+  }
+
+  .search-results {
+    margin-top: 16px;
+
+    .search-result-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      gap: 16px;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .search-result-thumbnail {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 4px;
+        }
+      }
+
+      .search-result-info {
+        flex: 1;
+        min-width: 0;
+
+        .search-result-title {
+          font-size: 16px;
+          font-weight: 500;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .search-result-artist {
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.7);
+        }
+      }
+
+      .search-result-type {
+        flex: 0 0 200px;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.7);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .search-result-actions {
+        button {
+          background-color: transparent;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: white;
+
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: white;
+          }
+        }
+      }
+    }
+  }
+
+  .no-search-results {
+    padding: 16px 0;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+// Search dialog styling - modal overlay
+.search-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.search-dialog {
+  width: 80%;
+  max-width: 800px;
+  max-height: 90vh;
+  background-color: #121212;
+  border-radius: 8px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+  .search-dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 24px 8px;
+
+    h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .close-button {
+      color: rgba(255, 255, 255, 0.7);
+
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
+
+  .search-input-container {
+    padding: 0 24px 16px;
+    display: flex;
+    align-items: center;
+    position: relative;
+
+    .search-input {
+      width: 100%;
+      height: 48px;
+      background-color: #242424;
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      padding: 0 16px 0 48px;
+      border-radius: 4px;
+
+      &:focus {
+        outline: none;
+        background-color: #333;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    .pi-search {
+      position: absolute;
+      left: 36px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .clear-search-button {
+      position: absolute;
+      right: 36px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
+
+  .search-results {
+    overflow-y: auto;
+    max-height: 60vh;
+    padding: 0 24px 24px;
+
+    .search-result-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 16px;
+      margin-bottom: 4px;
+      border-radius: 4px;
+      gap: 16px;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .search-result-thumbnail {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 4px;
+        }
+      }
+
+      .search-result-info {
+        flex: 1;
+        min-width: 0;
+
+        .search-result-title {
+          font-size: 16px;
+          font-weight: 500;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .search-result-artist {
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.7);
+        }
+      }
+
+      .search-result-type {
+        flex: 0 0 200px;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.7);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .search-result-actions {
+        button {
+          background-color: transparent;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          color: white;
+
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: white;
+          }
+        }
+      }
+    }
+  }
+
+  .no-search-results {
+    padding: 24px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+  }
+}

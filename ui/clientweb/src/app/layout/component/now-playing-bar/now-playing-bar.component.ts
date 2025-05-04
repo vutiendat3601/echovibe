@@ -3,17 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AudioService, EnhancedTrackDto, RepeatMode } from '../../../service/audio.service';
 import { OfflineAudioService } from '../../../service/offline-audio.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
-import { faPause, faPlay, faShuffle } from '@fortawesome/free-solid-svg-icons';
+import { faBackwardStep, faForwardStep, faPause, faPlay, faShuffle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-now-playing-bar',
   standalone: true,
-  imports: [CommonModule, FormsModule, Toast, FontAwesomeModule],
+  imports: [CommonModule, FormsModule, Toast, FontAwesomeModule, RouterLink],
   templateUrl: './now-playing-bar.component.html',
   styleUrl: './now-playing-bar.component.scss',
   providers: [MessageService]
@@ -27,9 +27,11 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
   progressPercent: number = 0;
 
   // Icons
-  faShuffle = faShuffle; // FontAwesome icon for shuffle
+  faShuffle = faShuffle;
   faPlay = faPlay;
   faPause = faPause;
+  faForwardStep = faForwardStep;
+  faBackwardStep = faBackwardStep;
 
   // New properties for extended functionality
   isMuted: boolean = false;

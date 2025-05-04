@@ -553,30 +553,185 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
-  .volume-controls {
-    width: 20%;
-  }
-
-  .volume-slider {
-    display: none;
+@media (max-width: 992px) {
+  .now-playing-bar-container {
+    flex-wrap: nowrap;
   }
 
   .track-info {
-    width: 40%;
+    width: 30%;
+    min-width: 150px;
+  }
+
+  .playback-controls {
+    width: 45%;
+  }
+
+  .volume-controls {
+    width: 25%;
+    min-width: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .now-playing-bar {
+    padding: 0 8px;
+  }
+
+  .now-playing-bar-container {
+    justify-content: space-around;
+  }
+
+  .volume-controls {
+    width: 20%;
+    min-width: 80px;
+  }
+
+  .volume-slider {
+    width: 60px;
+  }
+
+  .track-info {
+    width: 35%;
+    min-width: 120px;
+  }
+
+  .track-image {
+    width: 48px;
+    height: 48px;
+    margin-right: 10px;
+  }
+
+  .playback-controls {
+    width: 45%;
+  }
+
+  /* Reduce spacing between controls */
+  .control-button {
+    padding: 6px;
+    margin: 0 4px;
+    font-size: 14px;
+  }
+
+  .play-button {
+    width: 30px;
+    height: 30px;
+    margin: 0 8px;
+  }
+
+  .queue-panel {
+    width: 300px;
+    right: -300px;
   }
 }
 
 @media (max-width: 576px) {
+  .now-playing-bar {
+    height: 80px;
+  }
+
   .playback-timeline {
-    width: 80%;
+    width: 100%;
   }
 
   .track-info {
-    width: 50%;
+    width: 35%;
+    min-width: 90px; /* Reduced minimum width */
+  }
+
+  .track-image {
+    width: 40px;
+    height: 40px;
+    margin-right: 8px;
+  }
+
+  .track-name {
+    font-size: 11px; /* Smaller font size */
+    line-height: 14px; /* Smaller line height */
   }
 
   .track-artist {
     display: none;
+  }
+
+  .track-actions {
+    margin-left: 4px;
+  }
+
+  .action-button {
+    padding: 4px;
+    font-size: 14px;
+  }
+
+  .play-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .time-elapsed, .time-total {
+    min-width: 30px;
+    font-size: 10px;
+  }
+
+  .queue-panel {
+    width: 250px;
+    right: -250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .now-playing-bar {
+    height: 70px;
+  }
+
+  .playback-controls {
+    width: 60%; /* Increased width for controls */
+  }
+
+  .volume-controls {
+    width: 15%;
+    min-width: 40px;
+  }
+
+  /* Hide volume slider but not the buttons */
+  .volume-slider {
+    display: none;
+  }
+
+  .control-buttons {
+    margin-bottom: 4px;
+  }
+
+  /* Keep shuffle and repeat buttons visible */
+  /* Remove any code that hides them */
+
+  .track-image {
+    width: 32px; /* Even smaller thumbnail */
+    height: 32px;
+    margin-right: 6px;
+  }
+
+  .track-info {
+    min-width: 80px; /* Further reduced width */
+    width: 25%;
+  }
+
+  .track-actions {
+    display: none;
+  }
+
+  .track-details {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .queue-panel {
+    width: 100%;
+    right: -100%;
+  }
+
+  .queue-panel.show {
+    right: 0;
+    width: 100%;
   }
 }

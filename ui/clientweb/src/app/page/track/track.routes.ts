@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
 import { TrackDetailComponent } from './track-detail/track-detail.component';
 
-export const TRACK_ROUTES: Routes = [
+export default [
   {
     path: ':id',
     component: TrackDetailComponent
   }
-];
+] as Routes;

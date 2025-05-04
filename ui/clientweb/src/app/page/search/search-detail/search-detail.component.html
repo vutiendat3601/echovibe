@@ -41,8 +41,8 @@
         <div class="songs-section">
           <h2>Songs</h2>
           <div class="songs-list">
-            <!-- Use mock song data -->
-            <div *ngFor="let song of mockSongs" class="song-item">
+            <!-- Using real track data - limited to 4 items -->
+            <div *ngFor="let song of tracks.slice(0, 4)" class="song-item" (click)="navigateToTrack(song)">
               <div class="song-image">
                 <img [src]="song.albumImage" [alt]="song.title">
               </div>
@@ -50,7 +50,7 @@
                 <div class="song-title">{{ song.title }}</div>
                 <div class="song-artist">
                   <span *ngIf="song.explicit" class="explicit-label">E</span>
-                  {{ song.artist }} <span *ngIf="song.featuredArtist">(feat. {{ song.featuredArtist }})</span>
+                  {{ song.artist }} <span *ngIf="song.featuredArtists">(feat. {{ song.featuredArtists }})</span>
                 </div>
               </div>
               <div class="song-duration">{{ song.duration }}</div>
@@ -118,10 +118,39 @@
       </div>
     </ng-container>
 
-    <!-- Songs Filter Content (placeholder for future implementation) -->
+    <!-- Songs Filter Content -->
     <ng-container *ngIf="activeFilter === 'songs'">
-      <h1 class="filter-title">Songs</h1>
-      <!-- Songs content goes here -->
+      <!-- <h1 class="filter-title">Songs</h1> -->
+
+      <!-- Songs table -->
+      <div class="songs-table">
+        <!-- Table header -->
+        <div class="songs-table-header">
+          <div class="song-number">#</div>
+          <div class="song-title-header">Title</div>
+          <div class="song-duration">
+            <fa-icon [icon]="faClock"></fa-icon>
+          </div>
+        </div>
+
+        <!-- Table body -->
+        <div class="songs-table-body">
+          <div *ngFor="let song of tracks; let i = index" class="song-row" (click)="navigateToTrack(song)">
+            <div class="song-number">{{ i + 1 }}</div>
+            <div class="song-info-cell">
+              <img class="song-thumbnail" [src]="song.albumImage" [alt]="song.title">
+              <div class="song-details">
+                <div class="song-title">{{ song.title }}</div>
+                <div class="song-artist">
+                  <span *ngIf="song.explicit" class="explicit-label">E</span>
+                  {{ song.artist }} <span *ngIf="song.featuredArtists">(feat. {{ song.featuredArtists }})</span>
+                </div>
+              </div>
+            </div>
+            <div class="song-duration">{{ song.duration }}</div>
+          </div>
+        </div>
+      </div>
     </ng-container>
 
     <!-- Playlists Filter Content (placeholder for future implementation) -->
@@ -131,9 +160,14 @@
     </ng-container>
 
     <!-- No Results Message -->
-    <div *ngIf="artists.length === 0 && !isLoading" class="no-results">
+    <div *ngIf="(artists.length === 0 && tracks.length === 0) && !isLoading" class="no-results">
       <h3>No results found for "{{ searchKeyword }}"</h3>
       <p>Try searching for something else</p>
+    </div>
+
+    <!-- Load More Button -->
+    <div *ngIf="(artists.length > 0 || tracks.length > 0) && !isLoading" class="load-more-container">
+      <button class="load-more-btn" (click)="loadMoreResults()">Load More</button>
     </div>
   </div>
 </div>
