@@ -8,7 +8,7 @@ from app.schema.schema import ResponseSchema, ok
 from app.schema.user_schema import UserStatsSchema
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from app.constant.constant import AUTH_SYSTEM_USERNAME
+from app.constant.constant import AUTH_SYSTEM_USERNAME, JWT_CLAIM_SUB
 
 user_router = APIRouter(prefix="/v1", tags=["User"])
 
@@ -25,7 +25,8 @@ async def get_user_stats(authorization: str | None = Header(
     if jwt:
         jwt_claims = verify_jwt_token(jwt)
     user_id = jwt_claims.get(
-        "user_id", AUTH_SYSTEM_USERNAME) if jwt_claims else AUTH_SYSTEM_USERNAME
+        JWT_CLAIM_SUB,
+        AUTH_SYSTEM_USERNAME) if jwt_claims else AUTH_SYSTEM_USERNAME
     user_stats_schema = user_service.get_user_stats(user_id)
     response = ok(data=user_stats_schema)
     return JSONResponse(content=jsonable_encoder(response))
