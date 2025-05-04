@@ -36,7 +36,11 @@ kafka_consumer_properties = {
     "max_poll_records":
         1,
     "max_poll_interval_ms":
-        600_000
+        600_000,
+    "session_timeout_ms":
+        600_000,
+    "heartbeat_interval_ms":
+        200_000
 }
 
 
