@@ -8,6 +8,18 @@ spec:
   - context: http.server
     value: |
       location /client-token {
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Correlation-ID $request_id;
+
+        # Preflight request (CORS)
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' '*';
+        add_header 'Access-Control-Allow-Headers' '*';
+        if ($request_method = 'OPTIONS') {
+          return 204;
+        }
         proxy_method POST;
         proxy_pass https://auth-svc.microservice.svc.cluster.local/realms/echovibe/protocol/openid-connect/token;
         proxy_set_header Content-Type "application/x-www-form-urlencoded";
