@@ -29,13 +29,13 @@
           <fa-icon [icon]="faShuffle"></fa-icon>
         </button>
         <button class="control-button" title="Previous" (click)="handlePrevious()">
-          <i class="pi pi-step-backward"></i>
+          <fa-icon [icon]="faBackwardStep" style="font-size: 20px;"></fa-icon>
         </button>
         <button class="control-button play-button" (click)="handleTogglePlay()">
           <fa-icon [icon]="isPlaying ? faPause : faPlay"></fa-icon>
         </button>
         <button class="control-button" title="Next" (click)="handleNext()">
-          <i class="pi pi-step-forward"></i>
+          <fa-icon [icon]="faForwardStep" style="font-size: 20px;"></fa-icon>
         </button>
         <button class="control-button" [class.active]="repeatMode !== 'off'" title="Repeat" (click)="handleToggleRepeat()">
           <i class="pi" [class]="handleGetRepeatIcon()"></i>

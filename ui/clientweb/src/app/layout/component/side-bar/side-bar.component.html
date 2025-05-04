@@ -1,3 +1,125 @@
 <div class="layout-side-bar">
-  <app-menu></app-menu>
+  <!-- Add ConfirmDialog component -->
+  <p-confirmDialog
+    [style]="{ width: '450px' }"
+    acceptButtonStyleClass="p-button-danger"
+    rejectButtonStyleClass="p-button-text"
+  >
+  </p-confirmDialog>
+
+  <!-- Add Edit Playlist Dialog -->
+  <app-edit-playlist-dialog
+    [(visible)]="showEditPlaylistDialog"
+    [playlist]="selectedPlaylist"
+    (playlistUpdated)="handlePlaylistUpdated($event)">
+  </app-edit-playlist-dialog>
+
+  <div class="sticky-header">
+    <div class="library-header">
+      <div class="library-title">
+        <i class="pi pi-book"></i>
+        <span>Your Library</span>
+      </div>
+      <div class="library-actions">
+        <p-button type="button" severity="secondary" label="Create" (onClick)="toggle($event)" styleClass="">
+          <i class="pi pi-plus"></i>
+        </p-button>
+        <p-popover #op>
+          <div class="flex flex-col gap-4">
+            <div>
+              <ul class="list-none p-0 m-0 flex flex-col">
+                <li
+                  class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border"
+                  (click)="handleCreatePlaylist()"
+                >
+                  <i class="pi pi-list" style="font-size: 3rem; margin-right: 3px"></i>
+                  <div>
+                    <span class="font-medium">Playlist</span>
+                    <div class="text-sm text-surface-500 dark:text-surface-400">
+                      Build a playlist with songs, or episodes
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </p-popover>
+      </div>
+    </div>
+
+    <div class="library-tabs">
+      <button class="tab-button active">Playlists</button>
+      <button class="tab-button">Artists</button>
+    </div>
+
+    <div class="library-search">
+      <button class="search-button">
+        <i class="pi pi-search"></i>
+      </button>
+      <button class="sort-button">
+        Recents
+        <i class="pi pi-sort-alt"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="library-content">
+    <!-- Toast for notifications -->
+    <p-toast></p-toast>
+
+    <!-- Context Menu -->
+    <p-contextMenu #playlistMenu [model]="playlistContextMenuItems" [appendTo]="'body'"></p-contextMenu>
+
+    <!-- Grid layout for cards -->
+    <div class="card-grid">
+      <!-- Liked Songs -->
+      <div class="library-card" routerLink="/me/liked-songs">
+        <div class="card-thumbnail gradient-purple">
+          <i class="pi pi-heart-fill"></i>
+        </div>
+        <div class="card-info">
+          <h3>Liked Songs</h3>
+          <p class="card-subtitle">Playlist • {{ likedSongsCount }} songs</p>
+        </div>
+      </div>
+
+      <!-- User Playlists -->
+      <div
+        class="library-card"
+        *ngFor="let playlist of playlists"
+        [routerLink]="['/playlist', playlist.id]"
+        (contextmenu)="onPlaylistContextMenu($event, playlist); playlistMenu.show($event)"
+      >
+        <div class="card-thumbnail" *ngIf="!playlist.coverImageUrl">
+          <i class="pi pi-music"></i>
+        </div>
+        <img
+          *ngIf="playlist.coverImageUrl"
+          [src]="playlist.coverImageUrl"
+          class="card-thumbnail"
+          alt="{{ playlist.name }}"
+        />
+        <div class="card-info">
+          <h3>{{ playlist.name }}</h3>
+          <p class="card-subtitle">
+            Playlist • {{ playlist.tracks.length }} {{ playlist.tracks.length === 1 ? 'song' : 'songs' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Artist cards -->
+      <div class="library-card" *ngFor="let artist of artists">
+        <img [src]="artist.imageUrl" class="card-thumbnail" alt="{{ artist.name }}" />
+        <div class="card-info">
+          <h3>{{ artist.name }}</h3>
+          <p class="card-subtitle">Artist</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keep original menu for functionality -->
+  <div class="hidden-menu">
+    <app-menu></app-menu>
+  </div>
 </div>
