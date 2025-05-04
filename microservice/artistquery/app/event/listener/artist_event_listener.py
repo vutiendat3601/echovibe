@@ -53,7 +53,7 @@ kafka_consumer_properties = {
 
 async def listen_artist_created_event():
     artist_created_event_listener = AIOKafkaConsumer(
-        ARTIST_CREATED_EVENT, **kafka_consumer_properties)
+        ARTIST_CREATED_EVENT, **configuration.get_kafka_consumer_properties())
     await artist_created_event_listener.start()
     logger.info(f"Listening: topic={ARTIST_CREATED_EVENT}")
     try:
@@ -74,7 +74,7 @@ async def listen_artist_created_event():
 
 async def listen_artist_released_event():
     artist_released_event_listener = AIOKafkaConsumer(
-        ARTIST_RELEASED_EVENT, **kafka_consumer_properties)
+        ARTIST_RELEASED_EVENT, **configuration.get_kafka_consumer_properties())
     await artist_released_event_listener.start()
     logger.info(f"Listening: topic={ARTIST_RELEASED_EVENT}")
     try:
@@ -95,7 +95,7 @@ async def listen_artist_released_event():
 
 async def listen_artist_updated_event():
     artist_updated_event_listener = AIOKafkaConsumer(
-        ARTIST_UPDATED_EVENT, **kafka_consumer_properties)
+        ARTIST_UPDATED_EVENT, **configuration.get_kafka_consumer_properties())
     await artist_updated_event_listener.start()
     logger.info(f"Listening: topic={ARTIST_UPDATED_EVENT}")
     try:
@@ -116,7 +116,7 @@ async def listen_artist_updated_event():
 
 async def listen_artist_deleted_event():
     artist_deleted_event_consumer = AIOKafkaConsumer(
-        ARTIST_DELETED_EVENT, **kafka_consumer_properties)
+        ARTIST_DELETED_EVENT, **configuration.get_kafka_consumer_properties())
     await artist_deleted_event_consumer.start()
     logger.info(f"Listening: topic={ARTIST_DELETED_EVENT}")
     try:
@@ -137,7 +137,8 @@ async def listen_artist_deleted_event():
 
 async def listen_artist_visibility_set_event():
     artist_visibility_changed_event_consumer = AIOKafkaConsumer(
-        ARTIST_VERIFICATION_SET_EVENT, **kafka_consumer_properties)
+        ARTIST_VERIFICATION_SET_EVENT,
+        **configuration.get_kafka_consumer_properties())
     await artist_visibility_changed_event_consumer.start()
     logger.info(f"Listening: topic={ARTIST_VERIFICATION_SET_EVENT}")
     try:

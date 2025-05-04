@@ -49,7 +49,7 @@ kafka_consumer_properties = {
 
 async def listen_artist_released_event():
     artist_released_event_listener = AIOKafkaConsumer(
-        ARTIST_RELEASED_EVENT, **kafka_consumer_properties)
+        ARTIST_RELEASED_EVENT, **configuration.get_kafka_consumer_properties())
     await artist_released_event_listener.start()
     logger.info(f"Listening: topic={ARTIST_RELEASED_EVENT}")
     try:
@@ -70,7 +70,7 @@ async def listen_artist_released_event():
 
 async def listen_artist_deleted_event():
     artist_deleted_event_consumer = AIOKafkaConsumer(
-        ARTIST_DELETED_EVENT, **kafka_consumer_properties)
+        ARTIST_DELETED_EVENT, **configuration.get_kafka_consumer_properties())
     await artist_deleted_event_consumer.start()
     logger.info(f"Listening: topic={ARTIST_DELETED_EVENT}")
     try:
