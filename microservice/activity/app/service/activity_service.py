@@ -23,20 +23,19 @@ class ActivityService:
 
     def handle_activity(self,
                         activity_schema: ActivitySchema,
+                        fingerprint: str | None,
                         jwt_claims: dict = {}) -> dict[str, str]:
         created_at = datetime.now(timezone.utc)
         created_by = jwt_claims.get(
-            JWT_CLAIM_SUB,
-            AUTH_SYSTEM_USERNAME) if jwt_claims else AUTH_SYSTEM_USERNAME
-        activity: Activity = Activity(
-            session_id=activity_schema.session_id,
-            aggregate_id=activity_schema.aggregate_id,
-            description=None,
-            type=activity_schema.type,
-            data_json=activity_schema.data_json,
-            created_at=created_at,
-            created_by=created_by,
-        )
+            JWT_CLAIM_SUB, AUTH_SYSTEM_USERNAME) if jwt_claims else fingerprint
+        activity: Activity = Activity(session_id=activity_schema.session_id,
+                                      aggregate_id=activity_schema.aggregate_id,
+                                      description=None,
+                                      type=activity_schema.type,
+                                      data_json=activity_schema.data_json,
+                                      created_at=created_at,
+                                      fingerprint=fingerprint,
+                                      created_by=created_by)
 
         # Playlist action handlers
         if activity.type == ActionType.CREATE_PLAYLIST:

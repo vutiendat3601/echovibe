@@ -30,6 +30,7 @@ CREATE TABLE activity (
     type varchar(255) NOT NULL,
     data_json jsonb NULL,
     created_at timestamptz DEFAULT current_timestamp,
+    fingerprint varchar(255),
     created_by varchar(255),
     CONSTRAINT activity_pkey PRIMARY KEY (id),
     CONSTRAINT activity__session_id___key UNIQUE (session_id)

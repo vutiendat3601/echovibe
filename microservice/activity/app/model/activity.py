@@ -13,6 +13,7 @@ class Activity(SQLModel, table=True):
     type: str = Field(None)
     data_json: dict[str, any] | None = Field(None, sa_column=Column(JSONB))
     created_at: datetime = Field(default=datetime.now(timezone.utc))
+    fingerprint: str | None = Field(None, max_length=255)
     created_by: str | None = Field(None)
 
     class Config:

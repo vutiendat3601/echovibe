@@ -1,4 +1,4 @@
-from fastapi import APIRouter, WebSocket
+from fastapi import APIRouter, WebSocket, Header
 from app.core.container import Container
 from dependency_injector.wiring import Provide
 from app.core.logger import Logger
@@ -18,9 +18,14 @@ activity_service: ActivityService = Provide[Container.activity_service]
 @activity_router.websocket(path="/ws")
 async def listen_activity_websocket(websocket: WebSocket):
     jwt = websocket.query_params.get("jwt")
+    fingerprint = websocket.query_params.get("fingerprint")
     jwt_claims = {}
     if (jwt):
         jwt_claims = verify_jwt_token(jwt)
+    if not jwt_claims and not fingerprint:
+        logger.error("No fingerprint or JWT token provided")
+        await websocket.close()
+        return
     try:
         await websocket.accept()
         while True:
@@ -29,7 +34,7 @@ async def listen_activity_websocket(websocket: WebSocket):
             create_activity_schema: ActivitySchema = ActivitySchema(
                 **message_json)
             processed_data: MessageResponseSchema | None = activity_service.handle_activity(
-                create_activity_schema, jwt_claims)
+                create_activity_schema, fingerprint, jwt_claims)
             if processed_data:
                 await websocket.send_text(
                     processed_data.model_dump_json(by_alias=True))
