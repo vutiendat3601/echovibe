@@ -64,7 +64,8 @@ class TrackService:
                 f"Processed {ActionType.UNLIKE_TRACK} action: id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
 
-    def handle_listen_track_tracking(self, activity: Activity) -> dict[str, str]:
+    def handle_listen_track_tracking(self,
+                                     activity: Activity) -> dict[str, str]:
         session_id = generate_aggregate_id()
         activity.session_id = session_id
         self.activity_repository.save_activity(activity)
@@ -72,7 +73,7 @@ class TrackService:
             f"Processed {ActionType.LISTENED_TRACK_TRACKING} action: session_id={activity.session_id}, aggregate_id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
         return MessageResponseSchema(
-            id=activity.aggregate_id,
+            aggregate_id=activity.aggregate_id,
             sessionId=session_id,
             type=MessageType.PROCESSED_LISTEN_TRACK_TRACKING)
 
@@ -103,7 +104,7 @@ class TrackService:
             f"Processed {ActionType.VIEW_TRACK_DETAIL_PAGE_TRACKING} action: session_id={activity.session_id}, aggregate_id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
         return MessageResponseSchema(
-            id=activity.aggregate_id,
+            aggregate_id=activity.aggregate_id,
             sessionId=session_id,
             type=MessageType.PROCESSED_VIEW_TRACK_DETAIL_PAGE_TRACKING)
 

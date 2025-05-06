@@ -16,8 +16,8 @@ class ActivitySchema(BaseModel):
 
 
 class MessageResponseSchema(BaseModel):
-    session_id: str | None = Field(default=None, alias="sessionId")
     aggregate_id: str | None = Field(default=None, alias="aggregateId")
+    session_id: str | None = Field(default=None, alias="sessionId")
     type: MessageType
     data_json: dict[str, any] | None = Field(default=None, alias="dataJson")
 
