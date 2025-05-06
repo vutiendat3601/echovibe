@@ -7,6 +7,7 @@ from app.service.activity_service import ActivityService
 from app.schema.activity_schema import ActivitySchema
 from fastapi.encoders import jsonable_encoder
 import json
+from app.schema.activity_schema import MessageResponseSchema
 
 activity_router = APIRouter(prefix="/v1", tags=["Acitivity"])
 
@@ -27,15 +28,15 @@ async def listen_activity_websocket(websocket: WebSocket):
             message_json = json.loads(message)
             create_activity_schema: ActivitySchema = ActivitySchema(
                 **message_json)
-            processed_data: dict[str, str] = activity_service.handle_activity(
+            processed_data: MessageResponseSchema | None = activity_service.handle_activity(
                 create_activity_schema, jwt_claims)
             if processed_data:
-                await websocket.send_text(jsonable_encoder(processed_data))
+                await websocket.send_text(processed_data.model_dump_json())
 
     except Exception as e:
         logger.error(f"Error processing message: {e}")
         await websocket.send_text(
-            jsonable_encoder({"error": "Failed to process message"}))
+            json.dumps({"error": "Failed to process message"}))
     finally:
         await websocket.close()
         logger.info("WebSocket connection closed")
