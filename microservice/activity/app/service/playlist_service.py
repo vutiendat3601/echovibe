@@ -13,7 +13,7 @@ from app.constant.playlist_constant import (PLAYLIST_CREATED_EVENT,
                                             PLAYLIST_UPDATED_EVENT,
                                             PLAYLIST_DELETED_EVENT,
                                             PLAYLIST_URN_PREFIX)
-from app.service.artist_service import ArtistService
+from app.enum.message_type import MessageType
 import asyncio
 
 
@@ -45,7 +45,10 @@ class PlaylistService:
             send_event(topic=PLAYLIST_CREATED_EVENT,
                        event=playlist_created_event,
                        logger=self.logger))
-        return {"id": activity.aggregate_id, "type": activity.type}
+        return {
+            "id": activity.aggregate_id,
+            "type": MessageType.PROCESSED_CREATE_PLAYLIST_ACTION
+        }
 
     def handle_update_playlist(self, activity: Activity) -> str:
         aggregate_id = activity.aggregate_id
@@ -68,7 +71,10 @@ class PlaylistService:
                 send_event(topic=PLAYLIST_UPDATED_EVENT,
                            event=playlist_updated_event,
                            logger=self.logger))
-        return {"id": activity.aggregate_id, "type": activity.type}
+        return {
+            "id": activity.aggregate_id,
+            "type": MessageType.PROCESSED_UPDATE_PLAYLIST_ACTION
+        }
 
     def handle_delete_playlist(self, activity: Activity) -> str:
         aggregate_id = activity.aggregate_id
@@ -89,4 +95,7 @@ class PlaylistService:
                 send_event(topic=PLAYLIST_DELETED_EVENT,
                            event=playlist_deleted_event,
                            logger=self.logger))
-        return {}
+        return {
+            "id": activity.aggregate_id,
+            "type": MessageType.PROCESSED_DELETE_PLAYLIST_ACTION
+        }
