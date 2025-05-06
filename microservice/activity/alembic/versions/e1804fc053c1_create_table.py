@@ -60,8 +60,7 @@ CREATE TABLE public.artist_detail_page_view (
     session_id varchar(12) NOT NULL,
     created_at timestamptz DEFAULT current_timestamp,
     created_by varchar(255),
-	CONSTRAINT aritst_detail_page_view__pkey PRIMARY KEY (id),
-    CONSTRAINT artist_detail_page_view__session_id___key UNIQUE (session_id)
+	CONSTRAINT aritst_detail_page_view__pkey PRIMARY KEY (id)
 );
 """
 
@@ -103,8 +102,7 @@ CREATE TABLE public.track_detail_page_view (
     session_id varchar(12) NOT NULL,
     created_at timestamptz DEFAULT current_timestamp,
     created_by varchar(255),
-	CONSTRAINT track_detail_page_view__pkey PRIMARY KEY (id),
-    CONSTRAINT track_detail_page_view__session_id___key UNIQUE (session_id)
+	CONSTRAINT track_detail_page_view__pkey PRIMARY KEY (id)
 );
 """
 
@@ -117,8 +115,7 @@ CREATE TABLE public.track_listen (
     session_id varchar(12) NOT NULL,
     created_at timestamptz DEFAULT current_timestamp,
     created_by varchar(255),
-	CONSTRAINT track_listen__pkey PRIMARY KEY (id),
-    CONSTRAINT track_listen__session_id___key UNIQUE (session_id)
+	CONSTRAINT track_listen__pkey PRIMARY KEY (id)
 );
 """
 
