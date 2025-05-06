@@ -3,13 +3,12 @@ from app.repository.artist_repository import (ArtistDetailPageViewRepository,
                                               ArtistLikeRepository,
                                               ArtistStatsRepository)
 from datetime import datetime, timezone
+from app.schema.activity_schema import MessageResponseSchema
 from app.enum.action_type import ActionType
 from app.core.logger import Logger
 from app.model.activity import Activity
-from app.schema.activity_schema import ActivitySchema
-from app.event.sender.event_sender import send_event
-from app.enum.action_type import ActionType
-from app.model.artist import (ArtistLike, ArtistDetailPageView, ArtistStats)
+from app.model.artist import (ArtistLike, ArtistDetailPageView)
+from app.enum.message_type import MessageType
 from app.util.identity_utils import generate_aggregate_id
 
 
@@ -26,7 +25,7 @@ class ArtistService:
         self.artist_stats_repository = artist_stats_repository
         self.logger = logger
 
-    def handle_like_artist_action(self, activity: Activity) -> dict[str, str]:
+    def handle_like_artist_action(self, activity: Activity) -> None:
         self.activity_repository.save_activity(activity)
         updated_at = datetime.now(timezone.utc)
         artist_like = self.artist_like_repository.find_by_aggregate_id_and_user_id(
@@ -46,9 +45,8 @@ class ArtistService:
         self.logger.info(
             f"Processed {ActionType.LIKE_ARTIST} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
-        return {}
 
-    def handle_unlike_artist_action(self, activity: Activity) -> dict[str, str]:
+    def handle_unlike_artist_action(self, activity: Activity) -> None:
         artist_like = self.artist_like_repository.find_by_aggregate_id_and_user_id(
             aggregate_id=activity.aggregate_id, user_id=activity.created_by)
         if artist_like:
@@ -61,24 +59,21 @@ class ArtistService:
             self.logger.info(
                 f"Processed {ActionType.UNLIKE_ARTIST} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
-        return {}
 
     def handle_view_artist_detail_page_action(
-            self, activity: Activity) -> dict[str, str]:
+            self, activity: Activity) -> MessageResponseSchema:
         session_id = generate_aggregate_id()
         activity.session_id = session_id
         self.activity_repository.save_activity(activity)
         self.logger.info(
             f"Processed {ActionType.VIEW_ARTIST_DETAIL_PAGE} action: session_id={activity.session_id}, aggregate_id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
-        return {
-            "id": activity.aggregate_id,
-            "sessionId": session_id,
-            "type": activity.type
-        }
+        return MessageResponseSchema(
+            id=activity.aggregate_id,
+            sessionId=session_id,
+            type=MessageType.PROCESSED_VIEW_ARTIST_DETAIL_PAGE_ACTION)
 
-    def handle_viewed_artist_detail_page_action(
-            self, session_id: str) -> dict[str, str]:
+    def handle_viewed_artist_detail_page_action(self, session_id: str) -> None:
         activity: Activity = self.activity_repository.find_by_session_id(
             session_id)
         if activity:
@@ -97,4 +92,3 @@ class ArtistService:
             self.logger.info(
                 f"Processed {ActionType.VIEW_ARTIST_DETAIL_PAGE} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
-        return {}
