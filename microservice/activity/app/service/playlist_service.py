@@ -44,9 +44,8 @@ class PlaylistService:
             send_event(topic=PLAYLIST_CREATED_EVENT,
                        event=playlist_created_event,
                        logger=self.logger))
-        return MessageResponseSchema(
-            id=activity.aggregate_id,
-            type=MessageType.PROCESSED_CREATE_PLAYLIST)
+        return MessageResponseSchema(aggregate_id=activity.aggregate_id,
+                                     type=MessageType.PROCESSED_CREATE_PLAYLIST)
 
     def handle_update_playlist(self,
                                activity: Activity) -> MessageResponseSchema:
@@ -70,9 +69,8 @@ class PlaylistService:
                 send_event(topic=PLAYLIST_UPDATED_EVENT,
                            event=playlist_updated_event,
                            logger=self.logger))
-        return MessageResponseSchema(
-            id=activity.aggregate_id,
-            type=MessageType.PROCESSED_UPDATE_PLAYLIST)
+        return MessageResponseSchema(aggregate_id=activity.aggregate_id,
+                                     type=MessageType.PROCESSED_UPDATE_PLAYLIST)
 
     def handle_delete_playlist(self,
                                activity: Activity) -> MessageResponseSchema:
@@ -94,6 +92,5 @@ class PlaylistService:
                 send_event(topic=PLAYLIST_DELETED_EVENT,
                            event=playlist_deleted_event,
                            logger=self.logger))
-        return MessageResponseSchema(
-            id=activity.aggregate_id,
-            type=MessageType.PROCESSED_DELETE_PLAYLIST)
+        return MessageResponseSchema(aggregate_id=activity.aggregate_id,
+                                     type=MessageType.PROCESSED_DELETE_PLAYLIST)

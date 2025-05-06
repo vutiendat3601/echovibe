@@ -69,7 +69,7 @@ class ArtistService:
             f"Processed {ActionType.VIEW_ARTIST_DETAIL_PAGE_TRACKING} action: session_id={activity.session_id}, aggregate_id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
         return MessageResponseSchema(
-            id=activity.aggregate_id,
+            aggregate_id=activity.aggregate_id,
             sessionId=session_id,
             type=MessageType.PROCESSED_VIEW_ARTIST_DETAIL_PAGE_TRACKING)
 
