@@ -5,7 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea'; // Fix: Correct module name
-import { PlaylistDto } from '../../dto/playlist-dto';
+import { PlaylistDetailDto } from '../../dto/playlist-dto';
 import { PlaylistService } from '../../service/playlist.service';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
@@ -28,9 +28,9 @@ import { ToastModule } from 'primeng/toast';
 })
 export class EditPlaylistDialogComponent implements OnInit {
   @Input() visible: boolean = false;
-  @Input() playlist: PlaylistDto | null = null;
+  @Input() playlist: PlaylistDetailDto | null = null;
   @Output() visibleChange = new EventEmitter<boolean>();
-  @Output() playlistUpdated = new EventEmitter<PlaylistDto>();
+  @Output() playlistUpdated = new EventEmitter<PlaylistDetailDto>();
 
   // Form fields
   playlistName: string = '';
@@ -54,11 +54,11 @@ export class EditPlaylistDialogComponent implements OnInit {
   }
 
   resetForm(): void {
-    if (this.playlist) {
-      this.playlistName = this.playlist.name;
-      this.playlistDescription = this.playlist.description || '';
-      this.imageUrl = this.playlist.coverImageUrl || '';
-    }
+    // if (this.playlist) {
+    //   this.playlistName = this.playlist.name;
+    //   this.playlistDescription = this.playlist.description || '';
+    //   this.imageUrl = this.playlist.coverImageUrl || '';
+    // }
   }
 
   onHide(): void {
@@ -85,47 +85,44 @@ export class EditPlaylistDialogComponent implements OnInit {
   }
 
   saveChanges(): void {
-    if (!this.playlist) return;
-
-    this.isSubmitting = true;
-
+    // if (!this.playlist) return;
+    // this.isSubmitting = true;
     // In a real application, you would handle file upload and then update the playlist
     // For now, we'll just use the image URL from the selected file (preview)
-    const coverImageUrl = this.imageUrl;
-
-    this.playlistService.updatePlaylist(
-      this.playlist.id,
-      this.playlistName,
-      this.playlistDescription,
-      coverImageUrl
-    ).subscribe({
-      next: (response) => {
-        if (response.data) {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Playlist details updated successfully'
-          });
-          this.playlistUpdated.emit(response.data);
-          this.onHide();
-        } else {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: response.message
-          });
-        }
-        this.isSubmitting = false;
-      },
-      error: (error) => {
-        console.error('Error updating playlist:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to update playlist details'
-        });
-        this.isSubmitting = false;
-      }
-    });
+    // const coverImageUrl = this.imageUrl;
+    // this.playlistService.updatePlaylist(
+    //   this.playlist.id,
+    //   this.playlistName,
+    //   this.playlistDescription,
+    //   coverImageUrl
+    // ).subscribe({
+    //   next: (response) => {
+    //     if (response.data) {
+    //       this.messageService.add({
+    //         severity: 'success',
+    //         summary: 'Success',
+    //         detail: 'Playlist details updated successfully'
+    //       });
+    //       this.playlistUpdated.emit(response.data);
+    //       this.onHide();
+    //     } else {
+    //       this.messageService.add({
+    //         severity: 'error',
+    //         summary: 'Error',
+    //         detail: response.message
+    //       });
+    //     }
+    //     this.isSubmitting = false;
+    //   },
+    //   error: (error) => {
+    //     console.error('Error updating playlist:', error);
+    //     this.messageService.add({
+    //       severity: 'error',
+    //       summary: 'Error',
+    //       detail: 'Failed to update playlist details'
+    //     });
+    //     this.isSubmitting = false;
+    //   }
+    // });
   }
 }

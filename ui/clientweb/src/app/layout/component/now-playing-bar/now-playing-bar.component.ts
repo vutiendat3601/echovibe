@@ -90,7 +90,8 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
         this.repeatMode = mode;
       }),
 
-      this.audioService.queue$.subscribe((queue) => { // Renamed from playlist$ to queue$
+      this.audioService.queue$.subscribe((queue) => {
+        // Renamed from playlist$ to queue$
         this.queue = queue;
       }),
 
@@ -106,11 +107,11 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
 
     if (!track.artists || track.artists.length === 0) return 'Unknown Artist';
 
-    const mainArtist = track.artists.find(artist => artist.isMainArtist);
+    const mainArtist = track.artists.find((artist) => artist.isMainArtist);
     if (mainArtist) {
       return mainArtist.name;
     }
-    return track.artists.map(artist => artist.name).join(', ');
+    return track.artists.map((artist) => artist.name).join(', ');
   }
 
   // Get thumbnail image URL
@@ -194,21 +195,41 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
         // Remove from offline
         const success = await this.offlineAudioService.removeTrackFromOffline(track.id);
         if (success) {
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Song removed from offline library' });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Song removed from offline library'
+          });
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to remove song from offline library' });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to remove song from offline library'
+          });
         }
       } else {
         // Add to offline
         const success = await this.audioService.saveTrackForOffline(track);
         if (success) {
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Song saved for offline listening' });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Song saved for offline listening'
+          });
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to save song for offline listening' });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to save song for offline listening'
+          });
         }
       }
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error saving song for offline listening' });
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Error saving song for offline listening'
+      });
     }
   }
 

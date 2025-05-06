@@ -2,9 +2,15 @@
   <!-- Filter Tabs -->
   <div class="filter-tabs">
     <button class="filter-tab" [class.active]="activeFilter === 'all'" (click)="setActiveFilter('all')">All</button>
-    <button class="filter-tab" [class.active]="activeFilter === 'artists'" (click)="setActiveFilter('artists')">Artists</button>
-    <button class="filter-tab" [class.active]="activeFilter === 'songs'" (click)="setActiveFilter('songs')">Songs</button>
-    <button class="filter-tab" [class.active]="activeFilter === 'playlists'" (click)="setActiveFilter('playlists')">Playlists</button>
+    <button class="filter-tab" [class.active]="activeFilter === 'artists'" (click)="setActiveFilter('artists')">
+      Artists
+    </button>
+    <button class="filter-tab" [class.active]="activeFilter === 'songs'" (click)="setActiveFilter('songs')">
+      Songs
+    </button>
+    <button class="filter-tab" [class.active]="activeFilter === 'playlists'" (click)="setActiveFilter('playlists')">
+      Playlists
+    </button>
   </div>
 
   <!-- Loading Indicator -->
@@ -23,7 +29,10 @@
           <h2>Top result</h2>
           <div class="top-result-card" (click)="navigateToArtist(artists[0])">
             <div class="top-result-image">
-              <img [src]="artists[0].thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'" [alt]="artists[0].name">
+              <img
+                [src]="artists[0].thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'"
+                [alt]="artists[0].name"
+              />
             </div>
             <div class="top-result-info">
               <h3>{{ artists[0].name }}</h3>
@@ -44,7 +53,7 @@
             <!-- Using real track data - limited to 4 items -->
             <div *ngFor="let song of tracks.slice(0, 4)" class="song-item" (click)="navigateToTrack(song)">
               <div class="song-image">
-                <img [src]="song.albumImage" [alt]="song.title">
+                <img [src]="song.albumImage" [alt]="song.title" />
               </div>
               <div class="song-info">
                 <div class="song-title">{{ song.title }}</div>
@@ -67,7 +76,7 @@
           <!-- Use mock playlist data -->
           <div *ngFor="let playlist of mockPlaylists" class="featuring-card">
             <div class="featuring-card-img">
-              <img [src]="playlist.coverImage" [alt]="playlist.title">
+              <img [src]="playlist.coverImage" [alt]="playlist.title" />
               <div class="featuring-card-logo" *ngIf="playlist.badge">
                 <span class="featuring-card-icon">{{ playlist.badge }}</span>
               </div>
@@ -85,8 +94,10 @@
         <div class="artists-grid">
           <div *ngFor="let artist of artists.slice(1)" class="artist-card" (click)="navigateToArtist(artist)">
             <div class="artist-card-image">
-              <img [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'"
-                   [alt]="artist.name">
+              <img
+                [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'"
+                [alt]="artist.name"
+              />
               <div class="play-button">
                 <fa-icon [icon]="faPlay"></fa-icon>
               </div>
@@ -107,7 +118,7 @@
       <div class="artists-grid-view">
         <div *ngFor="let artist of artists" class="artist-round-card" (click)="navigateToArtist(artist)">
           <div class="artist-round-image">
-            <img [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'" [alt]="artist.name">
+            <img [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'" [alt]="artist.name" />
             <div class="artist-play-button">
               <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
             </div>
@@ -138,7 +149,7 @@
           <div *ngFor="let song of tracks; let i = index" class="song-row" (click)="navigateToTrack(song)">
             <div class="song-number">{{ i + 1 }}</div>
             <div class="song-info-cell">
-              <img class="song-thumbnail" [src]="song.albumImage" [alt]="song.title">
+              <img class="song-thumbnail" [src]="song.albumImage" [alt]="song.title" />
               <div class="song-details">
                 <div class="song-title">{{ song.title }}</div>
                 <div class="song-artist">
@@ -160,7 +171,7 @@
     </ng-container>
 
     <!-- No Results Message -->
-    <div *ngIf="(artists.length === 0 && tracks.length === 0) && !isLoading" class="no-results">
+    <div *ngIf="artists.length === 0 && tracks.length === 0 && !isLoading" class="no-results">
       <h3>No results found for "{{ searchKeyword }}"</h3>
       <p>Try searching for something else</p>
     </div>

@@ -1,11 +1,11 @@
-import { Injectable, signal, inject } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
 import Hls from 'hls.js';
+import { BehaviorSubject } from 'rxjs';
+import { TrackDetailDto } from '../dto/track-dto';
 import { OfflineAudioService } from './offline-audio.service';
-import { TrackDto } from '../dto/track-dto';
 
 // Additional fields needed for tracks in the audio service
-export interface EnhancedTrackDto extends TrackDto {
+export interface EnhancedTrackDto extends TrackDetailDto {
   isM3u8?: boolean;
   isOffline?: boolean;
   offlineKey?: string;
@@ -71,11 +71,11 @@ export class AudioService {
   getArtistName(track: EnhancedTrackDto): string {
     if (!track.artists || track.artists.length === 0) return 'Unknown Artist';
 
-    const mainArtist = track.artists.find(artist => artist.isMainArtist);
+    const mainArtist = track.artists.find((artist) => artist.isMainArtist);
     if (mainArtist) {
       return mainArtist.name;
     }
-    return track.artists.map(artist => artist.name).join(', ');
+    return track.artists.map((artist) => artist.name).join(', ');
   }
 
   private initAudioEvents(): void {
@@ -266,7 +266,7 @@ export class AudioService {
   }
 
   // Method to play a track from TrackDto (automatically converts to EnhancedTrackDto)
-  setTrackFromDto(trackDto: TrackDto): void {
+  setTrackFromDto(trackDto: TrackDetailDto): void {
     // Convert the basic TrackDto to EnhancedTrackDto
     const enhancedTrack: EnhancedTrackDto = {
       ...trackDto,
@@ -282,7 +282,7 @@ export class AudioService {
   }
 
   // Method to add a TrackDto to the queue (renamed from addTrackDtoToPlaylist)
-  addTrackDtoToQueue(trackDto: TrackDto): boolean {
+  addTrackDtoToQueue(trackDto: TrackDetailDto): boolean {
     // First check if the track is already in the queue
     if (this.isTrackInQueue(trackDto.id)) {
       return false; // Track already exists in queue
@@ -458,16 +458,18 @@ export class AudioService {
       audioFileM3u8Url: isM3u8 ? fileUrl : null,
       audioDurationSecond: 0,
       tags: ['local'],
-      artists: [ {
-        id: '0',
-        urn: 'local:artist:0',
-        name: 'Local File',
-        description: null,
-        thumbnailUrl: null,
-        isPublic: false,
-        isVerified: false,
-        isMainArtist: true
-      }],
+      artists: [
+        {
+          id: '0',
+          urn: 'local:artist:0',
+          name: 'Local File',
+          description: null,
+          thumbnailUrl: null,
+          isPublic: false,
+          isVerified: false,
+          isMainArtist: true
+        }
+      ],
       isM3u8: isM3u8
     };
 
@@ -490,16 +492,18 @@ export class AudioService {
       audioFileM3u8Url: url,
       audioDurationSecond: 0,
       tags: ['stream'],
-      artists: [ {
-        id: '0',
-        urn: 'stream:artist:0',
-        name: 'Stream',
-        description: null,
-        thumbnailUrl: null,
-        isPublic: false,
-        isVerified: false,
-        isMainArtist: true
-      }],
+      artists: [
+        {
+          id: '0',
+          urn: 'stream:artist:0',
+          name: 'Stream',
+          description: null,
+          thumbnailUrl: null,
+          isPublic: false,
+          isVerified: false,
+          isMainArtist: true
+        }
+      ],
       isM3u8: true
     };
 
@@ -548,7 +552,7 @@ export class AudioService {
 
   // Renamed from isTrackInPlaylist to isTrackInQueue
   isTrackInQueue(trackId: string): boolean {
-    return this.queueSubject.value.some(track => track.id === trackId);
+    return this.queueSubject.value.some((track) => track.id === trackId);
   }
 
   // Method to clear the queue

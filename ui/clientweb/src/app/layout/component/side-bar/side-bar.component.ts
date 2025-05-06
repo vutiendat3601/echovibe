@@ -8,7 +8,6 @@ import { ButtonModule } from 'primeng/button';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { MenuItem } from 'primeng/api';
 import { PlaylistService } from '../../../service/playlist.service';
-import { PlaylistDto } from '../../../dto/playlist-dto';
 import { Subscription } from 'rxjs';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
@@ -49,7 +48,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
   ];
 
   // Add playlists property to store user playlists
-  playlists: PlaylistDto[] = [];
+  // playlists: PlaylistDetailDto[] = [];
   private subscription: Subscription = new Subscription();
 
   isCreateMenuVisible = false;
@@ -58,7 +57,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
 
   // Context menu for playlists
   playlistContextMenuItems: MenuItem[] = [];
-  selectedPlaylist: PlaylistDto | null = null;
+  // selectedPlaylist: PlaylistDto | null = null;
 
   // Edit playlist dialog visibility control
   showEditPlaylistDialog: boolean = false;
@@ -73,11 +72,11 @@ export class SideBarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Subscribe to playlists observable to get real-time updates
-    this.subscription.add(
-      this.playlistService.playlists$.subscribe(playlists => {
-        this.playlists = playlists;
-      })
-    );
+    // this.subscription.add(
+    // this.playlistService.playlists$.subscribe(playlists => {
+    //   this.playlists = playlists;
+    // })
+    // );
 
     // Check current route to set active tab on initialization
     const currentUrl = this.router.url;
@@ -128,24 +127,24 @@ export class SideBarComponent implements OnInit, OnDestroy {
     ];
   }
 
-  onPlaylistContextMenu(event: MouseEvent, playlist: PlaylistDto): void {
+  onPlaylistContextMenu(event: MouseEvent, playlist: any): void {
     // Prevent the default context menu
-    event.preventDefault();
+    // event.preventDefault();
     // Store the selected playlist
-    this.selectedPlaylist = playlist;
+    // this.selectedPlaylist = playlist;
   }
 
   loadPlaylists(): void {
-    this.playlistService.getPlaylists().subscribe({
-      next: (response) => {
-        if (response.data) {
-          this.playlists = response.data;
-        }
-      },
-      error: (error) => {
-        console.error('Error loading playlists:', error);
-      }
-    });
+    // this.playlistService.getPlaylists().subscribe({
+    //   next: (response) => {
+    //     if (response.data) {
+    //       this.playlists = response.data;
+    //     }
+    //   },
+    //   error: (error) => {
+    //     console.error('Error loading playlists:', error);
+    //   }
+    // });
   }
 
   toggle(event: Event): void {
@@ -154,135 +153,131 @@ export class SideBarComponent implements OnInit, OnDestroy {
 
   handleCreatePlaylist(): void {
     // Hide popover
-    this.op.hide();
-
+    // this.op.hide();
     // Create a new playlist and navigate to it
-    this.playlistService.createPlaylist('My Playlist #' + Math.floor(Math.random() * 100)).subscribe({
-      next: (response) => {
-        if (response.data) {
-          // Navigate to the new playlist
-          this.router.navigate([`/playlist/${response.data.id}`]);
-        }
-      },
-      error: (error) => {
-        console.error('Error creating playlist:', error);
-      }
-    });
+    // this.playlistService.createPlaylist('My Playlist #' + Math.floor(Math.random() * 100)).subscribe({
+    //   next: (response) => {
+    //     if (response.data) {
+    //       // Navigate to the new playlist
+    //       this.router.navigate([`/playlist/${response.data.id}`]);
+    //     }
+    //   },
+    //   error: (error) => {
+    //     console.error('Error creating playlist:', error);
+    //   }
+    // });
   }
 
   // Methods for context menu actions
   playPlaylist(): void {
-    if (!this.selectedPlaylist) return;
-
-    this.playlistService.playPlaylist(this.selectedPlaylist.id).subscribe({
-      next: (response) => {
-        if (response.data) {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Playing',
-            detail: `Playing playlist "${this.selectedPlaylist?.name}"`
-          });
-        } else {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: response.message
-          });
-        }
-      },
-      error: (error) => {
-        console.error('Error playing playlist:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to play playlist'
-        });
-      }
-    });
+    // if (!this.selectedPlaylist) return;
+    // this.playlistService.playPlaylist(this.selectedPlaylist.id).subscribe({
+    //   next: (response) => {
+    //     if (response.data) {
+    //       this.messageService.add({
+    //         severity: 'success',
+    //         summary: 'Playing',
+    //         detail: `Playing playlist "${this.selectedPlaylist?.name}"`
+    //       });
+    //     } else {
+    //       this.messageService.add({
+    //         severity: 'error',
+    //         summary: 'Error',
+    //         detail: response.message
+    //       });
+    //     }
+    //   },
+    //   error: (error) => {
+    //     console.error('Error playing playlist:', error);
+    //     this.messageService.add({
+    //       severity: 'error',
+    //       summary: 'Error',
+    //       detail: 'Failed to play playlist'
+    //     });
+    //   }
+    // });
   }
 
   addPlaylistToQueue(): void {
-    if (!this.selectedPlaylist) return;
-
-    this.playlistService.addPlaylistToQueue(this.selectedPlaylist.id).subscribe({
-      next: (response) => {
-        if (response.data) {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Added to Queue',
-            detail: `"${this.selectedPlaylist?.name}" has been added to your queue`
-          });
-        } else {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: response.message
-          });
-        }
-      },
-      error: (error) => {
-        console.error('Error adding playlist to queue:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to add playlist to queue'
-        });
-      }
-    });
+    // if (!this.selectedPlaylist) return;
+    // this.playlistService.addPlaylistToQueue(this.selectedPlaylist.id).subscribe({
+    //   next: (response) => {
+    //     if (response.data) {
+    //       this.messageService.add({
+    //         severity: 'success',
+    //         summary: 'Added to Queue',
+    //         detail: `"${this.selectedPlaylist?.name}" has been added to your queue`
+    //       });
+    //     } else {
+    //       this.messageService.add({
+    //         severity: 'error',
+    //         summary: 'Error',
+    //         detail: response.message
+    //       });
+    //     }
+    //   },
+    //   error: (error) => {
+    //     console.error('Error adding playlist to queue:', error);
+    //     this.messageService.add({
+    //       severity: 'error',
+    //       summary: 'Error',
+    //       detail: 'Failed to add playlist to queue'
+    //     });
+    //   }
+    // });
   }
 
   editPlaylistDetails(): void {
-    if (!this.selectedPlaylist) return;
+    // if (!this.selectedPlaylist) return;
     // Show the edit playlist dialog instead of navigating
-    this.showEditPlaylistDialog = true;
+    // this.showEditPlaylistDialog = true;
   }
 
   // Handle playlist updated event from the dialog
-  handlePlaylistUpdated(updatedPlaylist: PlaylistDto): void {
-    this.messageService.add({
-      severity: 'success',
-      summary: 'Playlist Updated',
-      detail: `"${updatedPlaylist.name}" has been updated successfully`
-    });
+  handlePlaylistUpdated(updatedPlaylist: any): void {
+    // this.messageService.add({
+    //   severity: 'success',
+    //   summary: 'Playlist Updated',
+    //   detail: `"${updatedPlaylist.name}" has been updated successfully`
+    // });
   }
 
   deletePlaylist(): void {
-    if (!this.selectedPlaylist) return;
-
-    this.confirmationService.confirm({
-      header: 'Confirm Deletion',
-      message: `Are you sure you want to delete "${this.selectedPlaylist.name}"?`,
-      icon: 'pi pi-exclamation-triangle',
-      acceptButtonStyleClass: 'p-button-danger',
-      acceptIcon: 'pi pi-trash',
-      accept: () => {
-        this.playlistService.deletePlaylist(this.selectedPlaylist!.id).subscribe({
-          next: (response) => {
-            if (response.data) {
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Deleted',
-                detail: `"${this.selectedPlaylist?.name}" has been deleted`
-              });
-            } else {
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: response.message
-              });
-            }
-          },
-          error: (error) => {
-            console.error('Error deleting playlist:', error);
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Error',
-              detail: 'Failed to delete playlist'
-            });
-          }
-        });
-      }
-    });
+    // if (!this.selectedPlaylist) return;
+    // this.confirmationService.confirm({
+    //   header: 'Confirm Deletion',
+    //   message: `Are you sure you want to delete "${this.selectedPlaylist.name}"?`,
+    //   icon: 'pi pi-exclamation-triangle',
+    //   acceptButtonStyleClass: 'p-button-danger',
+    //   acceptIcon: 'pi pi-trash',
+    //   accept: () => {
+    //     this.playlistService.deletePlaylist(this.selectedPlaylist!.id).subscribe({
+    //       next: (response) => {
+    //         if (response.data) {
+    //           this.messageService.add({
+    //             severity: 'success',
+    //             summary: 'Deleted',
+    //             detail: `"${this.selectedPlaylist?.name}" has been deleted`
+    //           });
+    //         } else {
+    //           this.messageService.add({
+    //             severity: 'error',
+    //             summary: 'Error',
+    //             detail: response.message
+    //           });
+    //         }
+    //       },
+    //       error: (error) => {
+    //         console.error('Error deleting playlist:', error);
+    //         this.messageService.add({
+    //           severity: 'error',
+    //           summary: 'Error',
+    //           detail: 'Failed to delete playlist'
+    //         });
+    //       }
+    //     });
+    //   }
+    // });
   }
 
   ngOnDestroy(): void {

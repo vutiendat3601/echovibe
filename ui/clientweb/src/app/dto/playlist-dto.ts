@@ -1,13 +1,28 @@
-import { TrackDto } from "./track-dto";
+import { TrackDetailDto } from './track-dto';
 
-export interface PlaylistDto {
+export interface CreatePlaylistDto {
+  name: string;
+  trackIds: string[];
+  isPublic: boolean;
+  thumbnailUrl: string | null;
+}
+export interface UpdatePlaylistDto {
   id: string;
   name: string;
-  description?: string;
-  createdAt: number;
-  updatedAt: number;
-  coverImageUrl?: string;
-  creatorName: string;
+  trackIds: string[];
   isPublic: boolean;
-  tracks: TrackDto[];
+  thumbnailUrl: string | null;
+}
+
+export interface PlaylistDetailDto {
+  id: string;
+  urn: string;
+  name: string;
+  isPublic: boolean;
+  thumbnailUrl: boolean;
+  tracks: TrackDetailDto[];
+  createdBy: string;
+  updatedBy: string;
+  createdAt: string;
+  updatedAt: string;
 }

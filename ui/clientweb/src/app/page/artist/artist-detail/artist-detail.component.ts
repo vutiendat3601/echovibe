@@ -1,19 +1,20 @@
-import { ArtistService } from './../../../service/artist.service';
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ResponseDto } from '../../../dto/response-dto';
-import { ArtistDetailDto } from '../../../dto/artist-dto';
 import { CommonModule } from '@angular/common';
-import { ProgressBarModule } from 'primeng/progressbar';
-import { BadgeModule } from 'primeng/badge';
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import { BadgeModule } from 'primeng/badge';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { productList } from '../../../component/productList/productList.component';
+import { ArtistDetailDto } from '../../../dto/artist-dto';
+import { ResponseDto } from '../../../dto/response-dto';
 import { SafeHtmlPipe } from '../../../pipe/safe-html.pipe';
 import { ActivityService } from '../../../service/activity.service';
-import { ActionType } from '../../../constant/action-type';
+import { TrackingService } from '../../../service/tracking.service';
+import { MessageResponseDto } from './../../../dto/activity-dto';
+import { ArtistService } from './../../../service/artist.service';
 
 interface Artist {
   id: string;
@@ -46,7 +47,8 @@ interface Artist {
   styleUrl: './artist-detail.component.scss',
   providers: [ActivityService]
 })
-export class ArtistDetailComponent implements OnInit {
+export class ArtistDetailComponent implements OnInit, OnDestroy {
+  viewArtistDetailTrackingSessionId: string | null = null;
   artist: Artist | null = null;
   artistJson: string | null = null;
   value = 0;
@@ -93,12 +95,16 @@ export class ArtistDetailComponent implements OnInit {
     private readonly activeRoute: ActivatedRoute,
     private readonly artistService: ArtistService,
     private readonly router: Router,
-    private acitivityService: ActivityService
+    private readonly trackingService: TrackingService
   ) {}
 
   ngOnInit(): void {
     this.loadData();
-    this.listenActivityEvent();
+    this.listenTrackingEvent();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy();
   }
 
   toggleShowAll(): void {
@@ -109,17 +115,12 @@ export class ArtistDetailComponent implements OnInit {
     this.showAllDiscography = !this.showAllDiscography;
   }
 
-  private listenActivityEvent() {
-    this.acitivityService.websocketMessage.subscribe((text) => {
-      const activityResp = JSON.parse(text);
-      if (activityResp?.type === ActionType.VIEW_ARTIST_DETAIL_PAGE) {
-        setTimeout(() => {
-          this.acitivityService.send({
-            sessionId: activityResp?.sessionId || null,
-            aggregateId: this.artist?.id || null,
-            type: ActionType.VIEWED_ARTIST_DETAIL_PAGE,
-            dataJson: null
-          });
+  private listenTrackingEvent() {
+    this.trackingService.viewArtistDetailPageTracking.subscribe(({ sessionId, aggregateId }: MessageResponseDto) => {
+      if (this.artist && aggregateId === this.artist.id && sessionId) {
+        this.viewArtistDetailTrackingSessionId = sessionId;
+        window.setTimeout(() => {
+          this.trackingService.sendViewedArtistDetailPageTracking(sessionId);
         }, 10_000);
       }
     });
@@ -131,12 +132,7 @@ export class ArtistDetailComponent implements OnInit {
         this.artistService.getArtistById(params['id']).subscribe((respDto: ResponseDto<ArtistDetailDto | null>) => {
           if (respDto.data) {
             this.artist = respDto.data;
-            this.acitivityService.send({
-              sessionId: null,
-              aggregateId: this.artist.id,
-              type: ActionType.VIEW_ARTIST_DETAIL_PAGE,
-              dataJson: null
-            });
+            this.trackingService.startViewArtistDetailPageTracking(this.artist.id);
           } else {
             this.router.navigate(['/not-found']);
           }
@@ -145,5 +141,10 @@ export class ArtistDetailComponent implements OnInit {
         this.router.navigate(['/not-found']);
       }
     });
+  }
+
+  private destroy() {
+    this.viewArtistDetailTrackingSessionId &&
+      this.trackingService.sendViewedArtistDetailPageTracking(this.viewArtistDetailTrackingSessionId);
   }
 }
