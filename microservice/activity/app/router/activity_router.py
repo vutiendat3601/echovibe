@@ -31,7 +31,8 @@ async def listen_activity_websocket(websocket: WebSocket):
             processed_data: MessageResponseSchema | None = activity_service.handle_activity(
                 create_activity_schema, jwt_claims)
             if processed_data:
-                await websocket.send_text(processed_data.model_dump_json())
+                await websocket.send_text(
+                    processed_data.model_dump_json(by_alias=True))
 
     except Exception as e:
         logger.error(f"Error processing message: {e}")
