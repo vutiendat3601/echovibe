@@ -5,6 +5,7 @@ from app.core.logger import Logger
 from app.util.jwt_extractor import verify_jwt_token
 from app.service.activity_service import ActivityService
 from app.schema.activity_schema import ActivitySchema
+from fastapi.encoders import jsonable_encoder
 import json
 
 activity_router = APIRouter(prefix="/v1", tags=["Acitivity"])
@@ -28,13 +29,13 @@ async def listen_activity_websocket(websocket: WebSocket):
                 **message_json)
             processed_data: dict[str, str] = activity_service.handle_activity(
                 create_activity_schema, jwt_claims)
-            if len(processed_data):
-                await websocket.send_text(json.dumps(processed_data))
+            if processed_data:
+                await websocket.send_text(jsonable_encoder(processed_data))
 
     except Exception as e:
         logger.error(f"Error processing message: {e}")
         await websocket.send_text(
-            json.dumps({"error": "Failed to process message"}))
+            jsonable_encoder({"error": "Failed to process message"}))
     finally:
         await websocket.close()
         logger.info("WebSocket connection closed")

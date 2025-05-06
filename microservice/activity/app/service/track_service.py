@@ -4,14 +4,13 @@ from app.repository.track_repository import (TrackDetailPageViewRepository,
                                              TrackListenRepository,
                                              TrackStatsRepository)
 from datetime import datetime, timezone
+from app.schema.activity_schema import MessageResponseSchema
 from app.enum.action_type import ActionType
 from app.core.logger import Logger
 from app.model.activity import Activity
-from app.schema.activity_schema import ActivitySchema
-from app.event.sender.event_sender import send_event
 from app.enum.action_type import ActionType
-from app.model.track import (TrackLike, TrackDetailPageView, TrackListen,
-                             TrackStats)
+from app.model.track import (TrackLike, TrackDetailPageView, TrackListen)
+from app.enum.message_type import MessageType
 from app.util.identity_utils import generate_aggregate_id
 
 
@@ -30,7 +29,7 @@ class TrackService:
         self.track_stats_repository = track_stats_repository
         self.logger = logger
 
-    def handle_like_track_action(self, activity: Activity) -> dict[str, str]:
+    def handle_like_track_action(self, activity: Activity) -> None:
         self.activity_repository.save_activity(activity)
         updated_at = datetime.now(timezone.utc)
         track_like = self.track_like_repository.find_by_aggregate_id_and_user_id(
@@ -50,9 +49,8 @@ class TrackService:
         self.logger.info(
             f"Processed {ActionType.LIKE_TRACK} action: id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
-        return {}
 
-    def handle_unlike_track_action(self, activity: Activity) -> dict[str, str]:
+    def handle_unlike_track_action(self, activity: Activity) -> None:
         track_like = self.track_like_repository.find_by_aggregate_id_and_user_id(
             aggregate_id=activity.aggregate_id, user_id=activity.created_by)
         if track_like:
@@ -65,7 +63,6 @@ class TrackService:
             self.logger.info(
                 f"Processed {ActionType.UNLIKE_TRACK} action: id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
-        return {}
 
     def handle_listen_track_action(self, activity: Activity) -> dict[str, str]:
         session_id = generate_aggregate_id()
@@ -74,13 +71,12 @@ class TrackService:
         self.logger.info(
             f"Processed {ActionType.LISTENED_TRACK} action: session_id={activity.session_id}, aggregate_id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
-        return {
-            "id": activity.aggregate_id,
-            "sessionId": session_id,
-            "type": activity.type
-        }
+        return MessageResponseSchema(
+            id=activity.aggregate_id,
+            sessionId=session_id,
+            type=MessageType.PROCESSED_LISTEN_TRACK_ACTION)
 
-    def handle_listened_track_action(self, session_id: str) -> dict[str, str]:
+    def handle_listened_track_action(self, session_id: str) -> None:
         activity: Activity | None = self.activity_repository.find_by_session_id(
             session_id)
         if activity:
@@ -97,24 +93,21 @@ class TrackService:
             self.logger.info(
                 f"Processed {ActionType.LISTENED_TRACK} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
-        return {}
 
     def handle_view_track_detail_page_action(
-            self, activity: Activity) -> dict[str, str]:
+            self, activity: Activity) -> MessageResponseSchema:
         session_id = generate_aggregate_id()
         activity.session_id = session_id
         self.activity_repository.save_activity(activity)
         self.logger.info(
             f"Processed {ActionType.VIEW_TRACK_DETAIL_PAGE} action: session_id={activity.session_id}, aggregate_id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
-        return {
-            "id": activity.aggregate_id,
-            "sessionId": session_id,
-            "type": activity.type
-        }
+        return MessageResponseSchema(
+            id=activity.aggregate_id,
+            sessionId=session_id,
+            type=MessageType.PROCESSED_VIEW_TRACK_DETAIL_PAGE_ACTION)
 
-    def handle_viewed_track_detail_page_action(
-            self, session_id: str) -> dict[str, str]:
+    def handle_viewed_track_detail_page_action(self, session_id: str) -> None:
         activity: Activity | None = self.activity_repository.find_by_session_id(
             session_id)
         if activity:
@@ -133,4 +126,3 @@ class TrackService:
             self.logger.info(
                 f"Processed {ActionType.VIEWED_TRACK_DETAIL_PAGE} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
-        return {}
