@@ -29,7 +29,7 @@ class TrackService:
         self.track_stats_repository = track_stats_repository
         self.logger = logger
 
-    def handle_like_track_action(self, activity: Activity) -> None:
+    def handle_like_track(self, activity: Activity) -> None:
         self.activity_repository.save_activity(activity)
         updated_at = datetime.now(timezone.utc)
         track_like = self.track_like_repository.find_by_aggregate_id_and_user_id(
@@ -50,7 +50,7 @@ class TrackService:
             f"Processed {ActionType.LIKE_TRACK} action: id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
 
-    def handle_unlike_track_action(self, activity: Activity) -> None:
+    def handle_unlike_track(self, activity: Activity) -> None:
         track_like = self.track_like_repository.find_by_aggregate_id_and_user_id(
             aggregate_id=activity.aggregate_id, user_id=activity.created_by)
         if track_like:
@@ -64,21 +64,21 @@ class TrackService:
                 f"Processed {ActionType.UNLIKE_TRACK} action: id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
 
-    def handle_listen_track_action(self, activity: Activity) -> dict[str, str]:
+    def handle_listen_track_tracking(self, activity: Activity) -> dict[str, str]:
         session_id = generate_aggregate_id()
         activity.session_id = session_id
         self.activity_repository.save_activity(activity)
         self.logger.info(
-            f"Processed {ActionType.LISTENED_TRACK} action: session_id={activity.session_id}, aggregate_id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
+            f"Processed {ActionType.LISTENED_TRACK_TRACKING} action: session_id={activity.session_id}, aggregate_id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
         return MessageResponseSchema(
             id=activity.aggregate_id,
             sessionId=session_id,
-            type=MessageType.PROCESSED_LISTEN_TRACK_ACTION)
+            type=MessageType.PROCESSED_LISTEN_TRACK_TRACKING)
 
-    def handle_listened_track_action(self, session_id: str) -> None:
+    def handle_listened_track_tracking(self, session_id: str) -> None:
         activity: Activity | None = self.activity_repository.find_by_session_id_and_type(
-            session_id, ActionType.LISTEN_TRACK.name)
+            session_id, ActionType.LISTEN_TRACK_TRACKING.name)
         if activity:
             created_at = datetime.now(timezone.utc)
             duration_second = (created_at - activity.created_at).total_seconds()
@@ -91,25 +91,25 @@ class TrackService:
                                        created_by=activity.created_by)
             self.track_listen_repository.save_track_listen(track_listen)
             self.logger.info(
-                f"Processed {ActionType.LISTENED_TRACK} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
+                f"Processed {ActionType.LISTENED_TRACK_TRACKING} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
 
-    def handle_view_track_detail_page_action(
+    def handle_view_track_detail_page_tracking(
             self, activity: Activity) -> MessageResponseSchema:
         session_id = generate_aggregate_id()
         activity.session_id = session_id
         self.activity_repository.save_activity(activity)
         self.logger.info(
-            f"Processed {ActionType.VIEW_TRACK_DETAIL_PAGE} action: session_id={activity.session_id}, aggregate_id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
+            f"Processed {ActionType.VIEW_TRACK_DETAIL_PAGE_TRACKING} action: session_id={activity.session_id}, aggregate_id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
         return MessageResponseSchema(
             id=activity.aggregate_id,
             sessionId=session_id,
-            type=MessageType.PROCESSED_VIEW_TRACK_DETAIL_PAGE_ACTION)
+            type=MessageType.PROCESSED_VIEW_TRACK_DETAIL_PAGE_TRACKING)
 
-    def handle_viewed_track_detail_page_action(self, session_id: str) -> None:
+    def handle_viewed_track_detail_page_tracking(self, session_id: str) -> None:
         activity: Activity | None = self.activity_repository.find_by_session_id_and_type(
-            session_id, ActionType.VIEW_TRACK_DETAIL_PAGE.name)
+            session_id, ActionType.VIEW_TRACK_DETAIL_PAGE_TRACKING.name)
         if activity:
             created_at = datetime.now(timezone.utc)
             duration_second = (created_at - activity.created_at).total_seconds()
@@ -124,5 +124,5 @@ class TrackService:
             self.track_detail_page_view_repository.save_track_detail_page_view(
                 track_detail_page_view)
             self.logger.info(
-                f"Processed {ActionType.VIEWED_TRACK_DETAIL_PAGE} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
+                f"Processed {ActionType.VIEWED_TRACK_DETAIL_PAGE_TRACKING} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )

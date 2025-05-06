@@ -46,7 +46,7 @@ class PlaylistService:
                        logger=self.logger))
         return MessageResponseSchema(
             id=activity.aggregate_id,
-            type=MessageType.PROCESSED_CREATE_PLAYLIST_ACTION)
+            type=MessageType.PROCESSED_CREATE_PLAYLIST)
 
     def handle_update_playlist(self,
                                activity: Activity) -> MessageResponseSchema:
@@ -72,7 +72,7 @@ class PlaylistService:
                            logger=self.logger))
         return MessageResponseSchema(
             id=activity.aggregate_id,
-            type=MessageType.PROCESSED_UPDATE_PLAYLIST_ACTION)
+            type=MessageType.PROCESSED_UPDATE_PLAYLIST)
 
     def handle_delete_playlist(self,
                                activity: Activity) -> MessageResponseSchema:
@@ -96,4 +96,4 @@ class PlaylistService:
                            logger=self.logger))
         return MessageResponseSchema(
             id=activity.aggregate_id,
-            type=MessageType.PROCESSED_DELETE_PLAYLIST_ACTION)
+            type=MessageType.PROCESSED_DELETE_PLAYLIST)

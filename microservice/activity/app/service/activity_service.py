@@ -38,54 +38,54 @@ class ActivityService:
                                       created_by=created_by)
 
         # Playlist action handlers
-        if activity.type == ActionType.CREATE_PLAYLIST:
+        if activity.type == ActionType.CREATE_PLAYLIST and created_by != fingerprint:
             return self.playlist_service.handle_create_playlist(activity)
 
-        elif activity.type == ActionType.UPDATE_PLAYLIST:
+        elif activity.type == ActionType.UPDATE_PLAYLIST and created_by != fingerprint:
             return self.playlist_service.handle_update_playlist(activity)
 
-        elif activity.type == ActionType.DELETE_PLAYLIST:
+        elif activity.type == ActionType.DELETE_PLAYLIST and created_by != fingerprint:
             return self.playlist_service.handle_delete_playlist(activity)
 
         # Artist action handlers
-        elif activity.type == ActionType.LIKE_ARTIST:
-            return self.artist_service.handle_like_artist_action(activity)
+        elif activity.type == ActionType.LIKE_ARTIST and created_by != fingerprint:
+            return self.artist_service.handle_like_artist(activity)
 
-        elif activity.type == ActionType.UNLIKE_ARTIST:
-            return self.artist_service.handle_unlike_artist_action(activity)
+        elif activity.type == ActionType.UNLIKE_ARTIST and created_by != fingerprint:
+            return self.artist_service.handle_unlike_artist(activity)
 
-        elif activity.type == ActionType.VIEW_ARTIST_DETAIL_PAGE:
-            return self.artist_service.handle_view_artist_detail_page_action(
+        elif activity.type == ActionType.VIEW_ARTIST_DETAIL_PAGE_TRACKING:
+            return self.artist_service.handle_view_artist_detail_page_tracking(
                 activity)
 
-        elif activity.type == ActionType.VIEWED_ARTIST_DETAIL_PAGE:
-            return self.artist_service.handle_viewed_artist_detail_page_action(
+        elif activity.type == ActionType.VIEWED_ARTIST_DETAIL_PAGE_TRACKING:
+            return self.artist_service.handle_viewed_artist_detail_page_tracking(
                 activity.session_id)
 
         # Track action handlers
-        elif activity.type == ActionType.LIKE_TRACK:
-            return self.track_service.handle_like_track_action(activity)
+        elif activity.type == ActionType.LIKE_TRACK and created_by != fingerprint:
+            return self.track_service.handle_like_track(activity)
 
-        elif activity.type == ActionType.UNLIKE_TRACK:
-            return self.track_service.handle_unlike_track_action(activity)
+        elif activity.type == ActionType.UNLIKE_TRACK and created_by != fingerprint:
+            return self.track_service.handle_unlike_track(activity)
 
-        elif activity.type == ActionType.LISTEN_TRACK:
-            return self.track_service.handle_listen_track_action(activity)
+        elif activity.type == ActionType.LISTEN_TRACK_TRACKING:
+            return self.track_service.handle_listen_track_tracking(activity)
 
-        elif activity.type == ActionType.LISTENED_TRACK:
-            return self.track_service.handle_listened_track_action(
+        elif activity.type == ActionType.LISTENED_TRACK_TRACKING:
+            return self.track_service.handle_listened_track_tracking(
                 activity.session_id)
 
-        elif activity.type == ActionType.VIEW_TRACK_DETAIL_PAGE:
-            return self.track_service.handle_view_track_detail_page_action(
+        elif activity.type == ActionType.VIEW_TRACK_DETAIL_PAGE_TRACKING:
+            return self.track_service.handle_view_track_detail_page_tracking(
                 activity)
 
-        elif activity.type == ActionType.VIEWED_TRACK_DETAIL_PAGE:
-            return self.track_service.handle_viewed_track_detail_page_action(
+        elif activity.type == ActionType.VIEWED_TRACK_DETAIL_PAGE_TRACKING:
+            return self.track_service.handle_viewed_track_detail_page_tracking(
                 activity.session_id)
 
         else:
             self.logger.error(
-                f"Unsupported activity type: {activity.type}. Activity not saved."
+                f"Unsupported activity type: {activity.type}. Activity is not saved."
             )
-            return None
+        return None
