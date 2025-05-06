@@ -77,8 +77,8 @@ class TrackService:
             type=MessageType.PROCESSED_LISTEN_TRACK_ACTION)
 
     def handle_listened_track_action(self, session_id: str) -> None:
-        activity: Activity | None = self.activity_repository.find_by_session_id(
-            session_id)
+        activity: Activity | None = self.activity_repository.find_by_session_id_and_type(
+            session_id, ActionType.LISTEN_TRACK.name)
         if activity:
             created_at = datetime.now(timezone.utc)
             duration_second = (created_at - activity.created_at).total_seconds()
@@ -108,8 +108,8 @@ class TrackService:
             type=MessageType.PROCESSED_VIEW_TRACK_DETAIL_PAGE_ACTION)
 
     def handle_viewed_track_detail_page_action(self, session_id: str) -> None:
-        activity: Activity | None = self.activity_repository.find_by_session_id(
-            session_id)
+        activity: Activity | None = self.activity_repository.find_by_session_id_and_type(
+            session_id, ActionType.VIEW_TRACK_DETAIL_PAGE.name)
         if activity:
             created_at = datetime.now(timezone.utc)
             duration_second = (created_at - activity.created_at).total_seconds()

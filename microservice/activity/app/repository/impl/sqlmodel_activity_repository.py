@@ -31,11 +31,12 @@ class SqlmodelActivityRepository(ActivityRepository):
         finally:
             session.close()
 
-    def find_by_session_id(self, session_id: str) -> Activity | None:
+    def find_by_session_id_and_type(self, session_id: str,
+                                    type: str) -> Activity | None:
         try:
             with self.session_factory() as session:
                 statement = (select(Activity).filter(
-                    Activity.session_id == session_id))
+                    Activity.session_id == session_id, Activity.type == type))
                 activity = session.exec(statement).first()
                 return activity
         except SQLAlchemyError as e:

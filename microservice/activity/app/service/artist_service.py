@@ -74,8 +74,8 @@ class ArtistService:
             type=MessageType.PROCESSED_VIEW_ARTIST_DETAIL_PAGE_ACTION)
 
     def handle_viewed_artist_detail_page_action(self, session_id: str) -> None:
-        activity: Activity = self.activity_repository.find_by_session_id(
-            session_id)
+        activity: Activity = self.activity_repository.find_by_session_id_and_type(
+            session_id, ActionType.VIEW_ARTIST_DETAIL_PAGE.name)
         if activity:
             created_at = datetime.now(timezone.utc)
             duration_second = (created_at - activity.created_at).total_seconds()
