@@ -61,7 +61,7 @@
         <div class="search-results">
           <div class="search-item" *ngFor="let result of recentSearches" (click)="selectSearchResult(result)">
             <div class="search-item-image">
-              <img [src]="result.imageUrl" [alt]="result.title">
+              <img [src]="result.imageUrl" [alt]="result.title" />
             </div>
             <div class="search-item-info">
               <div class="search-item-title">{{ result.title }}</div>
@@ -72,9 +72,7 @@
 
         <!-- Clear Recent Searches Button -->
         <div class="clear-searches-container">
-          <button class="clear-searches-button" (click)="clearRecentSearches($event)">
-            Clear recent searches
-          </button>
+          <button class="clear-searches-button" (click)="clearRecentSearches($event)">Clear recent searches</button>
         </div>
       </div>
     </div>

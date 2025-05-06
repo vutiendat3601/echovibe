@@ -5,13 +5,13 @@
       <!-- Search box with icon and clear button -->
       <div class="search-box">
         <i class="pi pi-search"></i>
-        <input type="text"
-               [(ngModel)]="searchTerm"
-               (input)="handleOnSearchChange()"
-               placeholder="Search offline tracks...">
-        <button *ngIf="searchTerm"
-                class="clear-search"
-                (click)="searchTerm = ''; handleOnSearchChange()">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="handleOnSearchChange()"
+          placeholder="Search offline tracks..."
+        />
+        <button *ngIf="searchTerm" class="clear-search" (click)="searchTerm = ''; handleOnSearchChange()">
           <i class="pi pi-times"></i>
         </button>
       </div>
@@ -54,19 +54,17 @@
         <div class="track-actions"></div>
       </div>
 
-      <div *ngFor="let track of filteredTracks; let i = index"
-           class="track-item"
-           (click)="handlePlayTrack(track)">
+      <div *ngFor="let track of filteredTracks; let i = index" class="track-item" (click)="handlePlayTrack(track)">
         <div class="track-number">{{ i + 1 }}</div>
         <!-- Track title and thumbnail column -->
         <div class="track-title">
-          <img [src]="track.thumbnailUrl || 'assets/image/default-artist-thumbnail-image.png'" alt="Track image">
+          <img [src]="track.thumbnailUrl || 'assets/image/default-artist-thumbnail-image.png'" alt="Track image" />
           <div class="track-name">{{ track.name }}</div>
         </div>
         <!-- Artist column using getArtistName method -->
         <div class="track-artist">{{ getArtistName(track) }}</div>
         <!-- Date added column with formatting -->
-        <div class="track-added">{{ track.dateAdded | date:'MMM d, y' }}</div>
+        <div class="track-added">{{ track.dateAdded | date: 'MMM d, y' }}</div>
         <!-- Actions column with remove button -->
         <div class="track-actions">
           <button class="track-action" title="Remove from offline library" (click)="handleRemoveTrack($event, track)">

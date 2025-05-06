@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPlay, faUser, faClock, faMusic } from '@fortawesome/free-solid-svg-icons';
 import { ArtistDetailDto } from '../../../dto/artist-dto';
-import { TrackDto } from '../../../dto/track-dto';
+import { TrackDetailDto } from '../../../dto/track-dto';
 
 interface Artist {
   id: string;
@@ -161,7 +161,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
               this.artists = [...this.artists, ...artists];
 
               // Process tracks data
-              const tracks = search.track.items.map((trackDto: TrackDto) => this.convertToDisplayTrack(trackDto));
+              const tracks = search.track.items.map((trackDto: TrackDetailDto) => this.convertToDisplayTrack(trackDto));
               this.tracks = [...this.tracks, ...tracks];
 
               this.pageNumber++;
@@ -196,7 +196,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
           this.artists = [...this.artists, ...artists];
 
           // Process tracks data
-          const tracks = search.track.items.map((trackDto: TrackDto) => this.convertToDisplayTrack(trackDto));
+          const tracks = search.track.items.map((trackDto: TrackDetailDto) => this.convertToDisplayTrack(trackDto));
           this.tracks = [...this.tracks, ...tracks];
 
           this.pageNumber++;
@@ -214,14 +214,14 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
   }
 
   // Helper function to convert TrackDto to DisplayTrack
-  private convertToDisplayTrack(trackDto: TrackDto): DisplayTrack {
+  private convertToDisplayTrack(trackDto: TrackDetailDto): DisplayTrack {
     // Find main artist
-    const mainArtist = trackDto.artists.find(artist => artist.isMainArtist)?.name || 'Unknown Artist';
+    const mainArtist = trackDto.artists.find((artist) => artist.isMainArtist)?.name || 'Unknown Artist';
 
     // Get featured artists (non-main artists)
     const featuredArtists = trackDto.artists
-      .filter(artist => !artist.isMainArtist)
-      .map(artist => artist.name)
+      .filter((artist) => !artist.isMainArtist)
+      .map((artist) => artist.name)
       .join(', ');
 
     // Format duration from seconds to mm:ss

@@ -40,7 +40,12 @@
         <div class="artist-profile-section flex items-center gap-4 my-2">
           <!-- Artist thumbnail -->
           <div class="artist-thumbnail">
-            <img *ngIf="artist?.thumbnailUrl" [src]="artist?.thumbnailUrl" class="circle-thumbnail" alt="{{ artist?.name }}" />
+            <img
+              *ngIf="artist?.thumbnailUrl"
+              [src]="artist?.thumbnailUrl"
+              class="circle-thumbnail"
+              alt="{{ artist?.name }}"
+            />
             <div *ngIf="!artist?.thumbnailUrl" class="circle-thumbnail default-thumbnail"></div>
           </div>
 
@@ -170,7 +175,7 @@
           <div class="about-info">
             <!-- Biography section -->
             <h3>Biography</h3>
-            <p [innerHTML]="(artist?.biography || '') | safeHtmlPipe"></p>
+            <p [innerHTML]="artist?.biography || '' | safeHtmlPipe"></p>
             <!-- Artist stats display -->
             <div class="about-stats">
               <div class="stat">

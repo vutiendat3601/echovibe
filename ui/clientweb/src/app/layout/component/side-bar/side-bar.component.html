@@ -8,10 +8,8 @@
   </p-confirmDialog>
 
   <!-- Add Edit Playlist Dialog -->
-  <app-edit-playlist-dialog
-    [(visible)]="showEditPlaylistDialog"
-    [playlist]="selectedPlaylist"
-    (playlistUpdated)="handlePlaylistUpdated($event)">
+  <!-- [playlist]="selectedPlaylist" -->
+  <app-edit-playlist-dialog [(visible)]="showEditPlaylistDialog" (playlistUpdated)="handlePlaylistUpdated($event)">
   </app-edit-playlist-dialog>
 
   <div class="sticky-header">
@@ -48,9 +46,20 @@
     </div>
 
     <div class="library-tabs">
-      <button class="tab-button" [class.active]="activeTab === 'playlists'" (click)="setActiveTab('playlists')">Playlists</button>
-      <button class="tab-button" [class.active]="activeTab === 'artists'" (click)="setActiveTab('artists')">Artists</button>
-      <button class="tab-button" [class.active]="activeTab === 'mysongs'" (click)="setActiveTab('mysongs')" [routerLink]="['/offline-library']">Offline</button>
+      <button class="tab-button" [class.active]="activeTab === 'playlists'" (click)="setActiveTab('playlists')">
+        Playlists
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 'artists'" (click)="setActiveTab('artists')">
+        Artists
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'mysongs'"
+        (click)="setActiveTab('mysongs')"
+        [routerLink]="['/offline-library']"
+      >
+        Offline
+      </button>
     </div>
 
     <div class="library-search">
@@ -85,7 +94,7 @@
       </div>
 
       <!-- User Playlists -->
-      <div
+      <!-- <div
         class="library-card"
         *ngFor="let playlist of playlists"
         [routerLink]="['/playlist', playlist.id]"
@@ -106,7 +115,7 @@
             Playlist • {{ playlist.tracks.length }} {{ playlist.tracks.length === 1 ? 'song' : 'songs' }}
           </p>
         </div>
-      </div>
+      </div> -->
 
       <!-- Artist cards -->
       <div class="library-card" *ngFor="let artist of artists">

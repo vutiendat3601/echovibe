@@ -9,7 +9,7 @@ export interface ArtistDetailOfTrack {
   isMainArtist: boolean; // Indicates if the artist is the main artist for the track
 }
 
-export interface TrackDto {
+export interface TrackDetailDto {
   id: string;
   urn: string;
   name: string;

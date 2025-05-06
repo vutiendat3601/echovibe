@@ -9,8 +9,7 @@ describe('NowPlayingBarComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [NowPlayingBarComponent]
-    })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(NowPlayingBarComponent);
     component = fixture.componentInstance;

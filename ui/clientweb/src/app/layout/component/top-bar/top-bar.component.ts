@@ -138,7 +138,7 @@ export class TopBarComponent implements OnInit {
         debounceTime(300), // Wait for 300ms pause in events
         distinctUntilChanged() // Only emit if value is different from previous
       )
-      .subscribe(query => {
+      .subscribe((query) => {
         if (query && query.trim().length > 1) {
           this.navigateToSearchResults(query);
         }

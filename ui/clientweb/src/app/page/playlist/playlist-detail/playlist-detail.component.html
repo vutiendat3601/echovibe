@@ -1,9 +1,10 @@
 <div class="playlist-detail-container">
   <!-- Edit Playlist Dialog -->
-  <app-edit-playlist-dialog 
+  <app-edit-playlist-dialog
     [(visible)]="showEditPlaylistDialog"
     [playlist]="currentPlaylist"
-    (playlistUpdated)="handlePlaylistUpdated($event)">
+    (playlistUpdated)="handlePlaylistUpdated($event)"
+  >
   </app-edit-playlist-dialog>
 
   <!-- Playlist Header with dynamic background -->
@@ -42,16 +43,12 @@
       <!-- Action buttons -->
       <button pButton icon="pi pi-heart" class="p-button-text p-button-rounded action-button"></button>
       <button pButton icon="pi pi-download" class="p-button-text p-button-rounded action-button"></button>
-      
+
       <!-- Edit button -->
-      <button 
-        pButton 
-        class="p-button-text p-button-rounded action-button"
-        (click)="openEditPlaylistDialog()"
-      >
+      <button pButton class="p-button-text p-button-rounded action-button" (click)="openEditPlaylistDialog()">
         <fa-icon [icon]="faPencil"></fa-icon>
       </button>
-      
+
       <button
         pButton
         icon="pi pi-ellipsis-h"
@@ -88,7 +85,7 @@
                 class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border"
                 (click)="openEditPlaylistDialog(); optionsPopover.hide()"
               >
-                <i class="pi pi-pencil" style="font-size: 15px; color: #656565;"></i>
+                <i class="pi pi-pencil" style="font-size: 15px; color: #656565"></i>
                 <span>Edit details</span>
               </li>
             </ul>
