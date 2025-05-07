@@ -1,6 +1,8 @@
 from app.repository.activity_repository import ActivityRepository
 from app.core.logger import Logger
+from datetime import datetime, timezone
 from app.model.activity import Activity
+from app.model.user import UserPlaylist
 from app.event.sender.event_sender import send_event
 from app.enum.message_type import MessageType
 from app.schema.activity_schema import MessageResponseSchema
@@ -12,18 +14,24 @@ from app.constant.playlist_constant import (PLAYLIST_CREATED_EVENT,
                                             PLAYLIST_UPDATED_EVENT,
                                             PLAYLIST_DELETED_EVENT,
                                             PLAYLIST_URN_PREFIX)
+from app.repository.user_repository import UserPlaylistRepository
+
 import asyncio
 
 
 class PlaylistService:
 
-    def __init__(self, activity_repository: ActivityRepository, logger: Logger):
+    def __init__(self, activity_repository: ActivityRepository,
+                 user_playlist_repository: UserPlaylistRepository,
+                 logger: Logger):
         self.activity_repository = activity_repository
+        self.user_playlist_repository = user_playlist_repository
         self.logger = logger
 
     def handle_create_playlist(self,
                                activity: Activity) -> MessageResponseSchema:
         aggregate_id = generate_aggregate_id()
+        created_at = datetime.now(timezone.utc)
         activity.aggregate_id = aggregate_id
         self.activity_repository.save_activity(activity)
         self.logger.info(
@@ -44,6 +52,14 @@ class PlaylistService:
             send_event(topic=PLAYLIST_CREATED_EVENT,
                        event=playlist_created_event,
                        logger=self.logger))
+        user_playlist = UserPlaylist(playlist_id=aggregate_id,
+                                     user_id=activity.created_by,
+                                     is_active=True,
+                                     created_at=created_at,
+                                     updated_at=created_at,
+                                     created_by=activity.created_by,
+                                     updated_by=activity.created_by)
+        self.user_playlist_repository.save_user_playlist(user_playlist)
         return MessageResponseSchema(aggregate_id=activity.aggregate_id,
                                      type=MessageType.PROCESSED_CREATE_PLAYLIST)
 

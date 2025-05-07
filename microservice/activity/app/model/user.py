@@ -32,3 +32,18 @@ class UserUsageData(SQLModel, table=True):
 
     class Config:
         arbitrary_types_allowed = True
+
+
+class UserPlaylist(SQLModel, table=True):
+    __tablename__ = "user_playlist"
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    playlist_id: str = Field(..., max_length=12)
+    user_id: str = Field(..., max_length=255)
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(default=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default=datetime.now(timezone.utc))
+    created_by: str | None = Field(None)
+    updated_by: str | None = Field(None)
+
+    class Config:
+        arbitrary_types_allowed = True
