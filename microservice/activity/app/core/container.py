@@ -15,7 +15,7 @@ from app.repository.impl.sqlmodel_track_repository import (
     SqlmodelTrackDetailPageViewRepository, SqlmodelTrackLikeRepository,
     SqlmodelTrackListenRepository, SqlmodelTrackStatsRepository)
 from app.repository.impl.sqlmodel_user_repository import (
-    SqlmodelUserDataRepository, SqlmodelUserStatsRepository)
+    SqlmodelUserDataRepository, SqlmodelUserUsageDataRepository)
 
 
 class Container(containers.DeclarativeContainer):
@@ -63,8 +63,8 @@ class Container(containers.DeclarativeContainer):
         SqlmodelUserDataRepository,
         logger=logger,
         session_factory=database.provided.session)
-    user_stats_repository = providers.Factory(
-        SqlmodelUserStatsRepository,
+    user_usage_data_repository = providers.Factory(
+        SqlmodelUserUsageDataRepository,
         logger=logger,
         session_factory=database.provided.session)
 
@@ -90,7 +90,7 @@ class Container(containers.DeclarativeContainer):
         UserService,
         activity_repository=activity_repository,
         user_data_repository=user_data_repository,
-        user_stats_repository=user_stats_repository,
+        user_usage_data_repository=user_usage_data_repository,
         logger=logger)
 
     activity_service = providers.Factory(ActivityService,

@@ -20,14 +20,15 @@ class UserData(SQLModel, table=True):
         arbitrary_types_allowed = True
 
 
-class UserStats(SQLModel, table=True):
-    __tablename__ = "mv_user_stats"
+class UserUsageData(SQLModel, table=True):
+    __tablename__ = "mv_user_usage_data"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: str = Field(..., max_length=255)
     data_json: dict[str, any] | None = Field(None, sa_column=Column(JSONB))
     updated_at: datetime = Field(default=datetime.now(timezone.utc))
     liked_track_ids: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
     liked_artist_ids: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
+    created_playlist_ids: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
 
     class Config:
         arbitrary_types_allowed = True

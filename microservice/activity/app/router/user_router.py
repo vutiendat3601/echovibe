@@ -5,7 +5,7 @@ from app.core.logger import Logger
 from app.util.jwt_extractor import verify_jwt_token
 from app.service.user_service import UserService
 from app.schema.schema import ResponseSchema, ok
-from app.schema.user_schema import UserStatsSchema
+from app.schema.user_schema import UserUsageDataSchema
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from app.constant.constant import AUTH_SYSTEM_USERNAME, JWT_CLAIM_SUB
@@ -16,9 +16,9 @@ logger: Logger = Provide[Container.logger]
 user_service: UserService = Provide[Container.user_service]
 
 
-@user_router.get(path="/me/stats",
-                 response_model=ResponseSchema[UserStatsSchema])
-async def get_user_stats(authorization: str | None = Header(
+@user_router.get(path="/me/usage_data",
+                 response_model=ResponseSchema[UserUsageDataSchema])
+async def get_user_usage_data(authorization: str | None = Header(
     None, alias="Authorization")):
     jwt = authorization.removeprefix("Bearer ") if authorization else None
     jwt_claims = {}
@@ -27,6 +27,6 @@ async def get_user_stats(authorization: str | None = Header(
     user_id = jwt_claims.get(
         JWT_CLAIM_SUB,
         AUTH_SYSTEM_USERNAME) if jwt_claims else AUTH_SYSTEM_USERNAME
-    user_stats_schema = user_service.get_user_stats(user_id)
-    response = ok(data=user_stats_schema)
+    user_usage_data_schema = user_service.get_user_usage_data(user_id)
+    response = ok(data=user_usage_data_schema)
     return JSONResponse(content=jsonable_encoder(response))

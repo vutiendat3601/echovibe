@@ -1,6 +1,6 @@
 from app.repository.user_repository import (UserDataRepository,
-                                            UserStatsRepository)
-from app.model.user import UserData, UserStats
+                                            UserUsageDataRepository)
+from app.model.user import UserData, UserUsageData
 from sqlalchemy.exc import SQLAlchemyError
 from contextlib import AbstractContextManager
 from typing import Callable
@@ -34,7 +34,7 @@ class SqlmodelUserDataRepository(UserDataRepository):
             session.close()
 
 
-class SqlmodelUserStatsRepository(UserStatsRepository):
+class SqlmodelUserUsageDataRepository(UserUsageDataRepository):
 
     def __init__(
         self, logger: Logger,
@@ -43,11 +43,11 @@ class SqlmodelUserStatsRepository(UserStatsRepository):
         self.logger = logger
         self.session_factory = session_factory
 
-    def find_by_user_id(self, user_id: str) -> UserStats | None:
+    def find_by_user_id(self, user_id: str) -> UserUsageData | None:
         try:
             with self.session_factory() as session:
-                statement = (select(UserStats).filter(
-                    UserStats.user_id == user_id))
+                statement = (select(UserUsageData).filter(
+                    UserUsageData.user_id == user_id))
                 user_stats = session.exec(statement).first()
                 return user_stats
         except SQLAlchemyError as e:
