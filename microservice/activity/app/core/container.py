@@ -15,7 +15,8 @@ from app.repository.impl.sqlmodel_track_repository import (
     SqlmodelTrackDetailPageViewRepository, SqlmodelTrackLikeRepository,
     SqlmodelTrackListenRepository, SqlmodelTrackStatsRepository)
 from app.repository.impl.sqlmodel_user_repository import (
-    SqlmodelUserDataRepository, SqlmodelUserUsageDataRepository)
+    SqlmodelUserDataRepository, SqlmodelUserUsageDataRepository,
+    SqlmodelUserPlaylistRepository)
 
 
 class Container(containers.DeclarativeContainer):
@@ -67,10 +68,17 @@ class Container(containers.DeclarativeContainer):
         SqlmodelUserUsageDataRepository,
         logger=logger,
         session_factory=database.provided.session)
+    user_playlist_repository = providers.Factory(
+        SqlmodelUserPlaylistRepository,
+        logger=logger,
+        session_factory=database.provided.session)
 
     # Service
     playlist_service = providers.Factory(
-        PlaylistService, activity_repository=activity_repository, logger=logger)
+        PlaylistService,
+        activity_repository=activity_repository,
+        user_playlist_repository=user_playlist_repository,
+        logger=logger)
     artist_service = providers.Factory(
         ArtistService,
         activity_repository=activity_repository,
