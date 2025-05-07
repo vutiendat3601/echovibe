@@ -36,7 +36,7 @@ export class UserService {
     });
   }
 
-  get userStats(): Observable<UserUsageDto> {
+  get userUsageData(): Observable<UserUsageDto> {
     return this.userUsageSubject.asObservable();
   }
 

@@ -253,7 +253,7 @@ export class TrackDetailComponent implements OnInit {
   }
 
   private listenDataChange() {
-    this.userService.userStats.subscribe(({ likedTrackIds }) => {
+    this.userService.userUsageData.subscribe(({ likedTrackIds }) => {
       this.track && (this.isLiked = likedTrackIds.includes(this.track.id));
     });
   }
