@@ -138,7 +138,7 @@ CREATE TABLE public.track_stats (
     create_user_playlist_table_ddl = """
 CREATE TABLE public.user_playlist (
 	id uuid NOT NULL,
-    aggregate_id varchar(12) NOT NULL,
+    playlist_id varchar(12) NOT NULL,
 	user_id varchar(255) NOT NULL,
     is_active boolean NOT NULL DEFAULT true,
     created_at timestamptz DEFAULT current_timestamp,
@@ -176,7 +176,7 @@ AS SELECT id,
     ( SELECT array_agg(al.aggregate_id) AS array_agg
            FROM artist_like al
           WHERE al.is_active AND al.user_id::text = ud.user_id::text) AS liked_artist_ids,
-    ( SELECT array_agg(up.aggregate_id) AS array_agg
+    ( SELECT array_agg(up.playlist_id) AS array_agg
            FROM user_playlist up
           WHERE up.is_active AND up.user_id::text = ud.user_id::text) AS created_playlist_ids
    FROM user_data ud
@@ -202,6 +202,11 @@ EXECUTE FUNCTION refresh_mv_user_usage_data();
 
 CREATE TRIGGER artist_like__refresh_mv_user_usage_data_trigger
 AFTER INSERT OR UPDATE OR DELETE ON public.artist_like
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mv_user_usage_data();
+
+CREATE TRIGGER user_playlist__refresh_mv_user_usage_data_trigger
+AFTER INSERT OR UPDATE OR DELETE ON public.user_playlist
 FOR EACH STATEMENT
 EXECUTE FUNCTION refresh_mv_user_usage_data();
 """
@@ -235,6 +240,7 @@ def downgrade() -> None:
     drop_track_like_table_ddl = "DROP TABLE IF EXISTS public.track_like;"
     drop_track_detail_page_view_table_ddl = "DROP TABLE IF EXISTS public.track_detail_page_view;"
     drop_track_listen_table_ddl = "DROP TABLE IF EXISTS public.track_listen;"
+    drop_user_playlist_table_ddl = "DROP TABLE IF EXISTS public.user_playlist;"
     drop_track_stats_table_ddl = "DROP TABLE IF EXISTS public.track_stats;"
     ddls = [
         drop_uuid_ossp_extension_ddl, drop_unaccent_extension_ddl,
@@ -242,7 +248,8 @@ def downgrade() -> None:
         drop_artist_like_table_ddl, drop_artist_stats_table_ddl,
         drop_aritst_detail_page_view_table_ddl, drop_artist_stats_table_ddl,
         drop_track_like_table_ddl, drop_track_detail_page_view_table_ddl,
-        drop_track_listen_table_ddl, drop_track_stats_table_ddl
+        drop_user_playlist_table_ddl, drop_track_listen_table_ddl,
+        drop_track_stats_table_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)
