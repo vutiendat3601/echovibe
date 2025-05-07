@@ -16,7 +16,7 @@ logger: Logger = Provide[Container.logger]
 user_service: UserService = Provide[Container.user_service]
 
 
-@user_router.get(path="/me/usage_data",
+@user_router.get(path="/me/usage-data",
                  response_model=ResponseSchema[UserUsageDataSchema])
 async def get_user_usage_data(authorization: str | None = Header(
     None, alias="Authorization")):
