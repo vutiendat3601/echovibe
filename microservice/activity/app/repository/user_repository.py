@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from app.model.user import UserData, UserStats
+from app.model.user import UserData, UserUsageData
 
 
 class UserDataRepository(ABC):
@@ -9,8 +9,8 @@ class UserDataRepository(ABC):
         """Save UserData"""
 
 
-class UserStatsRepository(ABC):
+class UserUsageDataRepository(ABC):
 
     @abstractmethod
-    def find_by_user_id(self, user_id: str) -> UserStats | None:
+    def find_by_user_id(self, user_id: str) -> UserUsageData | None:
         """Find UserStats by user_id"""
