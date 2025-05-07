@@ -1,4 +1,4 @@
-export interface UserStatsDto {
+export interface UserUsageDto {
   userId: string;
   data: any | null;
   updatedAt: string;

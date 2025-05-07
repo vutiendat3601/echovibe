@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { identity, Observable, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { environment } from '../../environment/environment';
 import { ResponseDto } from '../dto/response-dto';
-import { UserStatsDto } from './../dto/user-dto';
+import { UserUsageDto } from './../dto/user-dto';
 import { PlaylistService } from './playlist.service';
 import { TrackService } from './track.service';
 import { ArtistService } from './artist.service';
@@ -12,8 +12,8 @@ import { ArtistService } from './artist.service';
   providedIn: 'root'
 })
 export class UserService {
-  private retrievedUserStats: UserStatsDto | null = null;
-  private userStatsSubject: Subject<UserStatsDto> = new Subject();
+  private retrievedUserUsage: UserUsageDto | null = null;
+  private userUsageSubject: Subject<UserUsageDto> = new Subject();
 
   constructor(
     private readonly playlistService: PlaylistService,
@@ -26,53 +26,53 @@ export class UserService {
   }
 
   refresh(): void {
-    if (this.retrievedUserStats) {
-      this.userStatsSubject.next(this.retrievedUserStats);
+    if (this.retrievedUserUsage) {
+      this.userUsageSubject.next(this.retrievedUserUsage);
       return;
     }
-    this.getUserStats().subscribe((respDto) => {
-      this.retrievedUserStats = respDto.data;
-      this.userStatsSubject.next(this.retrievedUserStats);
+    this.getUserUsageData().subscribe((respDto) => {
+      this.retrievedUserUsage = respDto.data;
+      this.userUsageSubject.next(this.retrievedUserUsage);
     });
   }
 
-  get userStats(): Observable<UserStatsDto> {
-    return this.userStatsSubject.asObservable();
+  get userStats(): Observable<UserUsageDto> {
+    return this.userUsageSubject.asObservable();
   }
 
   private listenDataChange() {
     this.playlistService.createdPlaylistId.subscribe((_playlistId) => {});
 
     this.artistService.likedArtistId.subscribe((artistId) => {
-      if (this.retrievedUserStats) {
-        this.retrievedUserStats.likedArtistIds.unshift(artistId);
+      if (this.retrievedUserUsage) {
+        this.retrievedUserUsage.likedArtistIds.unshift(artistId);
         this.refresh();
       }
     });
 
     this.artistService.unlikedArtistId.subscribe((artistId) => {
-      if (this.retrievedUserStats) {
-        this.retrievedUserStats.likedArtistIds = this.retrievedUserStats.likedArtistIds.filter((ai) => ai != artistId);
+      if (this.retrievedUserUsage) {
+        this.retrievedUserUsage.likedArtistIds = this.retrievedUserUsage.likedArtistIds.filter((ai) => ai != artistId);
         this.refresh();
       }
     });
 
     this.trackService.likedTrackId.subscribe((trackId) => {
-      if (this.retrievedUserStats) {
-        this.retrievedUserStats.likedTrackIds.unshift(trackId);
+      if (this.retrievedUserUsage) {
+        this.retrievedUserUsage.likedTrackIds.unshift(trackId);
         this.refresh();
       }
     });
 
     this.trackService.unlikedTrackId.subscribe((trackId) => {
-      if (this.retrievedUserStats) {
-        this.retrievedUserStats.likedTrackIds = this.retrievedUserStats.likedTrackIds.filter((ti) => ti != trackId);
+      if (this.retrievedUserUsage) {
+        this.retrievedUserUsage.likedTrackIds = this.retrievedUserUsage.likedTrackIds.filter((ti) => ti != trackId);
         this.refresh();
       }
     });
   }
 
-  private getUserStats(): Observable<ResponseDto<UserStatsDto>> {
-    return this.http.get<ResponseDto<UserStatsDto>>(`${environment.activityBaseUrl}/v1/me/stats`);
+  private getUserUsageData(): Observable<ResponseDto<UserUsageDto>> {
+    return this.http.get<ResponseDto<UserUsageDto>>(`${environment.activityBaseUrl}/v1/me/usage-data`);
   }
 }
