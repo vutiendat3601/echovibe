@@ -4,4 +4,5 @@ export interface UserUsageDto {
   updatedAt: string;
   likedTrackIds: string[];
   likedArtistIds: string[];
+  createdPlaylistIds: string[];
 }
