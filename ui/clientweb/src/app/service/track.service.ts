@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { environment } from '../../environment/environment';
-import { TrackDetailDto } from '../dto/track-dto';
+import { TrackDetailDto, TrackStatsDto } from '../dto/track-dto';
 import { ResponseDto } from '../dto/response-dto';
 import { ActivityService } from './activity.service';
 import { ActionType } from '../constant/action-type';
@@ -27,6 +27,10 @@ export class TrackService {
     return this.http.get<ResponseDto<[TrackDetailDto | null]>>(
       `${environment.productBaseUrl}/v1/tracks?ids=${ids.join(',')}`
     );
+  }
+
+  getTrackStats(id: string): Observable<ResponseDto<TrackStatsDto>> {
+    return this.http.get<ResponseDto<TrackStatsDto>>(`${environment.activityBaseUrl}/v1/tracks/${id}/stats`);
   }
 
   likeTrack(id: string): void {

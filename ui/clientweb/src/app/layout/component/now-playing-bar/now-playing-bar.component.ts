@@ -116,9 +116,9 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
 
   // Get thumbnail image URL
   getImageUrl(track: EnhancedTrackDto | null): string {
-    if (!track) return 'assets/image/default-artist-thumbnail-image.png';
+    if (!track) return 'asset/image/default-artist-thumbnail-image.svg';
 
-    return track.thumbnailUrl || 'assets/image/default-artist-thumbnail-image.png';
+    return track.thumbnailUrl || 'asset/image/default-artist-thumbnail-image.svg';
   }
 
   // Playback controls

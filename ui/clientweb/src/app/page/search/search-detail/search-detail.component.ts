@@ -72,7 +72,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
       id: '1',
       title: 'This is Deftones',
       description: 'By Spotify',
-      coverImage: '/asset/image/default-artist-thumbnail-image.png',
+      coverImage: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'Playlist',
       badge: 'SPOTIFY'
     },
@@ -80,7 +80,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
       id: '2',
       title: 'Deftones Radio',
       description: 'With Korn, System of a Down',
-      coverImage: '/asset/image/default-artist-thumbnail-image.png',
+      coverImage: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'Radio',
       badge: 'RADIO'
     },
@@ -88,14 +88,14 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
       id: '3',
       title: 'Alternative Metal',
       description: 'Best of alternative metal',
-      coverImage: '/asset/image/default-artist-thumbnail-image.png',
+      coverImage: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'Playlist'
     },
     {
       id: '4',
       title: 'Rock Classics',
       description: 'Rock hits from all decades',
-      coverImage: '/asset/image/default-artist-thumbnail-image.png',
+      coverImage: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'Playlist'
     }
   ];
@@ -234,7 +234,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
       title: trackDto.name,
       artist: mainArtist,
       featuredArtists: featuredArtists.length > 0 ? featuredArtists : undefined,
-      albumImage: trackDto.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png',
+      albumImage: trackDto.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg',
       duration: formattedDuration,
       explicit: false // Assuming no explicit flag in the API, defaulting to false
     };

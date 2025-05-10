@@ -1,21 +1,21 @@
-<div class="track-detail-container" *ngIf="track && !isLoading">
+<div class="track-detail-container" *ngIf="trackDetail && !isLoading">
   <!-- Header section with gradient background -->
   <div class="track-header-section" [style.background]="backgroundColor">
     <div class="track-header">
       <div class="track-thumbnail">
         <img
           #trackThumbnail
-          [src]="track.thumbnailUrl || '/asset/image/default-track-thumbnail-image.png'"
-          alt="{{ track.name }}"
+          [src]="trackDetail.thumbnailUrl || '/asset/image/default-track-thumbnail-image.png'"
+          alt="{{ trackDetail.name }}"
           crossorigin="anonymous"
         />
       </div>
       <div class="track-info">
         <div class="track-type">Song</div>
-        <h1 class="track-name">{{ track.name }}</h1>
+        <h1 class="track-name">{{ trackDetail.name }}</h1>
         <div class="track-metadata flex gap-1">
           <span class="artist-names flex">
-            <ng-container *ngFor="let artist of track.artists; let last = last" class="flex">
+            <ng-container *ngFor="let artist of trackDetail.artists; let last = last" class="flex">
               <a [routerLink]="['/artist', artist.id]" class="artist-link flex">
                 <img *ngIf="artist.isVerified" [src]="artist.thumbnailUrl" class="verified-badge" alt="Verified" />
                 <div>{{ artist.name }}</div>
@@ -24,8 +24,8 @@
             </ng-container>
           </span>
           <span class="track-year"
-            >{{ track.officialReleasedDate | date: 'yyyy' }} • {{ formatDuration(track.audioDurationSecond) }} •
-            {{ formatPlayCount(1000) }}</span
+            >{{ trackDetail.officialReleasedDate | date: 'yyyy' }} •
+            {{ formatDuration(trackDetail.audioDurationSecond) }} • {{ formatPlayCount(1000) }}</span
           >
         </div>
       </div>
@@ -37,7 +37,7 @@
         class="play-button"
         type="button"
         (click)="handlePlayClick()"
-        [disabled]="!track.audioFileM3u8Url"
+        [disabled]="!trackDetail.audioFileM3u8Url"
       >
         <fa-icon [icon]="isPlaying ? faPause : faPlay" class="play-icon"></fa-icon>
       </button>
@@ -96,7 +96,7 @@
   <div class="track-content-section">
     <div class="track-content-container">
       <div class="track-content-main">
-        <!-- <div class="track-lyrics" *ngIf="track.lyrics"> -->
+        <!-- <div class="track-lyrics" *ngIf="trackDetail.lyrics"> -->
         <div class="track-lyrics">
           <h3>Lyrics</h3>
           <pre>
@@ -104,9 +104,9 @@
           </pre>
         </div>
 
-        <div class="track-description" *ngIf="track.description">
+        <div class="track-description" *ngIf="trackDetail.description">
           <h3>Description</h3>
-          <p>{{ track.description }}</p>
+          <p>{{ trackDetail.description }}</p>
         </div>
       </div>
 
@@ -114,10 +114,10 @@
         <!-- Artist section that resembles the image -->
         <div class="artist-section">
           <div class="artist-list">
-            <div class="artist-item" *ngFor="let artist of track.artists">
+            <div class="artist-item" *ngFor="let artist of trackDetail.artists">
               <div class="artist-avatar">
                 <img
-                  [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'"
+                  [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'"
                   alt="{{ artist.name }}"
                   crossorigin="anonymous"
                 />

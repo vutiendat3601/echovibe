@@ -22,3 +22,10 @@ export interface TrackDetailDto {
   tags: string[]; // Tags associated with the track
   artists: ArtistDetailOfTrack[]; // List of artists associated with the track
 }
+
+export interface TrackStatsDto {
+  id: string;
+  totalDetailPageViews: number;
+  totalLikes: number;
+  totalListens: number;
+}
