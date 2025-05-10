@@ -13,6 +13,12 @@ class TrackLikeRepository(ABC):
                                          user_id: str) -> TrackLike | None:
         """Find TrackLike by aggregate_id and user_id"""
 
+    @abstractmethod
+    def find_by_aggregate_id_and_user_id_and_is_active(
+            self, aggregate_id: str, user_id: str,
+            is_active: bool) -> TrackLike | None:
+        """Find TrackLike by aggregate_id and user_id"""
+
 
 class TrackDetailPageViewRepository(ABC):
 
