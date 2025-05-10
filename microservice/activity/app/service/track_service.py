@@ -9,7 +9,8 @@ from app.enum.action_type import ActionType
 from app.core.logger import Logger
 from app.model.activity import Activity
 from app.enum.action_type import ActionType
-from app.model.track import (TrackLike, TrackDetailPageView, TrackListen)
+from app.model.track import (TrackLike, TrackDetailPageView, TrackListen,
+                             TrackStats)
 from app.enum.message_type import MessageType
 from app.util.identity_utils import generate_aggregate_id
 from app.mapper.track_mapper import map_to_track_stats_schema
@@ -94,12 +95,18 @@ class TrackService:
                         activity.aggregate_id)
                     if track_stats:
                         track_stats.total_listens += 1
+                        track_stats.updated_at = created_at
+                        track_stats.updated_by = activity.created_by
                     else:
-                        track_stats = TrackStatsSchema(
-                            id=activity.aggregate_id,
+                        track_stats = TrackStats(
+                            aggregate_id=activity.aggregate_id,
                             total_detail_page_views=0,
                             total_likes=0,
-                            total_listens=1)
+                            total_listens=1,
+                            created_at=created_at,
+                            updated_at=created_at,
+                            created_by=activity.created_by,
+                            updated_by=activity.created_by)
                     self.track_stats_repository.save_track_stats(track_stats)
                 track_listen = TrackListen(session_id=session_id,
                                            aggregate_id=activity.aggregate_id,
@@ -140,12 +147,18 @@ class TrackService:
                         activity.aggregate_id)
                     if track_stats:
                         track_stats.total_detail_page_views += 1
+                        track_stats.updated_at = created_at
+                        track_stats.updated_by = activity.created_by
                     else:
-                        track_stats = TrackStatsSchema(
-                            id=activity.aggregate_id,
+                        track_stats = TrackStats(
+                            aggregate_id=activity.aggregate_id,
                             total_detail_page_views=1,
                             total_likes=0,
-                            total_listens=0)
+                            total_listens=0,
+                            created_at=created_at,
+                            updated_at=created_at,
+                            created_by=activity.created_by,
+                            updated_by=activity.created_by)
                     self.track_stats_repository.save_track_stats(track_stats)
                 track_detail_page_view = TrackDetailPageView(
                     session_id=session_id,
