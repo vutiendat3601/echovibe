@@ -1,6 +1,7 @@
-from app.repository.track_repository import (
-    TrackLikeRepository, TrackDetailPageViewRepository, TrackListenRepository,
-    TrackStatsRepository)
+from app.repository.track_repository import (TrackLikeRepository,
+                                             TrackDetailPageViewRepository,
+                                             TrackListenRepository,
+                                             TrackStatsRepository)
 from app.model.track import TrackLike, TrackDetailPageView, TrackListen, TrackStats
 from sqlalchemy.exc import SQLAlchemyError
 from contextlib import AbstractContextManager
@@ -75,6 +76,19 @@ class SqlmodelTrackDetailPageViewRepository(TrackDetailPageViewRepository):
         finally:
             session.close()
 
+    def exist_by_session_id(self, session_id: str) -> bool:
+        try:
+            with self.session_factory() as session:
+                statement = (select(TrackDetailPageView).filter(
+                    TrackDetailPageView.session_id == session_id))
+                track_detail_page_view = session.exec(statement).first()
+                return True if track_detail_page_view else False
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
 
 class SqlmodelTrackListenRepository(TrackListenRepository):
 
@@ -95,6 +109,19 @@ class SqlmodelTrackListenRepository(TrackListenRepository):
                 return track_listen
         except SQLAlchemyError as e:
             session.rollback()
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
+    def exist_by_session_id(self, session_id: str) -> bool:
+        try:
+            with self.session_factory() as session:
+                statement = (select(TrackListen).filter(
+                    TrackListen.session_id == session_id))
+                track_detail_page_view = session.exec(statement).first()
+                return True if track_detail_page_view else False
+        except SQLAlchemyError as e:
             self.logger.error(f"{e}")
             raise e
         finally:

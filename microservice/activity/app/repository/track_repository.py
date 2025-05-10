@@ -22,12 +22,20 @@ class TrackDetailPageViewRepository(ABC):
             track_detail_page_view: TrackDetailPageView) -> TrackDetailPageView:
         """Save TrackDetailPageView"""
 
+    @abstractmethod
+    def exist_by_session_id(self, session_id: str) -> bool:
+        """Exist any TrackDetailPageView by session_id"""
+
 
 class TrackListenRepository(ABC):
 
     @abstractmethod
     def save_track_listen(self, track_listen: TrackListen) -> TrackListen:
         """Save TrackListen"""
+
+    @abstractmethod
+    def exist_by_session_id(self, session_id: str) -> bool:
+        """Exist any TrackListen by session_id"""
 
 
 class TrackStatsRepository(ABC):

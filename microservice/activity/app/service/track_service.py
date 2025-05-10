@@ -12,6 +12,9 @@ from app.enum.action_type import ActionType
 from app.model.track import (TrackLike, TrackDetailPageView, TrackListen)
 from app.enum.message_type import MessageType
 from app.util.identity_utils import generate_aggregate_id
+from app.mapper.track_mapper import map_to_track_stats_schema
+from app.schema.track_schema import TrackStatsSchema
+from app.constant.track_constant import TRACK_LISTEN_MIN_SECOND, TRACK_DETAIL_PAGE_VIEW_MIN_SECOND
 
 
 class TrackService:
@@ -83,17 +86,32 @@ class TrackService:
         if activity:
             created_at = datetime.now(timezone.utc)
             duration_second = (created_at - activity.created_at).total_seconds()
-            track_listen = TrackListen(session_id=session_id,
-                                       aggregate_id=activity.aggregate_id,
-                                       user_id=activity.created_by,
-                                       is_active=False,
-                                       duration_second=duration_second,
-                                       created_at=created_at,
-                                       created_by=activity.created_by)
-            self.track_listen_repository.save_track_listen(track_listen)
-            self.logger.info(
-                f"Processed {ActionType.LISTENED_TRACK_TRACKING} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
-            )
+            if duration_second >= TRACK_LISTEN_MIN_SECOND:
+                is_existed = self.track_listen_repository.exist_by_session_id(
+                    session_id)
+                if not is_existed:
+                    track_stats = self.track_stats_repository.find_by_aggregate_id(
+                        activity.aggregate_id)
+                    if track_stats:
+                        track_stats.total_listens += 1
+                    else:
+                        track_stats = TrackStatsSchema(
+                            id=activity.aggregate_id,
+                            total_detail_page_views=0,
+                            total_likes=0,
+                            total_listens=1)
+                    self.track_stats_repository.save_track_stats(track_stats)
+                track_listen = TrackListen(session_id=session_id,
+                                           aggregate_id=activity.aggregate_id,
+                                           user_id=activity.created_by,
+                                           is_active=False,
+                                           duration_second=duration_second,
+                                           created_at=created_at,
+                                           created_by=activity.created_by)
+                self.track_listen_repository.save_track_listen(track_listen)
+                self.logger.info(
+                    f"Processed {ActionType.LISTENED_TRACK_TRACKING} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
+                )
 
     def handle_view_track_detail_page_tracking(
             self, activity: Activity) -> MessageResponseSchema:
@@ -114,16 +132,42 @@ class TrackService:
         if activity:
             created_at = datetime.now(timezone.utc)
             duration_second = (created_at - activity.created_at).total_seconds()
-            track_detail_page_view = TrackDetailPageView(
-                session_id=session_id,
-                aggregate_id=activity.aggregate_id,
-                user_id=activity.created_by,
-                is_active=False,
-                duration_second=duration_second,
-                created_at=created_at,
-                created_by=activity.created_by)
-            self.track_detail_page_view_repository.save_track_detail_page_view(
-                track_detail_page_view)
-            self.logger.info(
-                f"Processed {ActionType.VIEWED_TRACK_DETAIL_PAGE_TRACKING} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
-            )
+            if duration_second >= TRACK_DETAIL_PAGE_VIEW_MIN_SECOND:
+                is_existed = self.track_detail_page_view_repository.exist_by_session_id(
+                    session_id)
+                if not is_existed:
+                    track_stats = self.track_stats_repository.find_by_aggregate_id(
+                        activity.aggregate_id)
+                    if track_stats:
+                        track_stats.total_detail_page_views += 1
+                    else:
+                        track_stats = TrackStatsSchema(
+                            id=activity.aggregate_id,
+                            total_detail_page_views=1,
+                            total_likes=0,
+                            total_listens=0)
+                    self.track_stats_repository.save_track_stats(track_stats)
+                track_detail_page_view = TrackDetailPageView(
+                    session_id=session_id,
+                    aggregate_id=activity.aggregate_id,
+                    user_id=activity.created_by,
+                    is_active=False,
+                    duration_second=duration_second,
+                    created_at=created_at,
+                    created_by=activity.created_by)
+                self.track_detail_page_view_repository.save_track_detail_page_view(
+                    track_detail_page_view)
+                self.logger.info(
+                    f"Processed {ActionType.VIEWED_TRACK_DETAIL_PAGE_TRACKING} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
+                )
+
+    def get_track_stats(self, aggregate_id: str) -> dict[str, int]:
+        track_stats = self.track_stats_repository.find_by_aggregate_id(
+            aggregate_id)
+        if track_stats:
+            return map_to_track_stats_schema(track_stats)
+        else:
+            return TrackStatsSchema(id=aggregate_id,
+                                    total_detail_page_views=0,
+                                    total_likes=0,
+                                    total_listens=0)

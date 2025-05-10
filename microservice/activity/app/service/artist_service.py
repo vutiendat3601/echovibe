@@ -10,6 +10,8 @@ from app.model.activity import Activity
 from app.model.artist import (ArtistLike, ArtistDetailPageView)
 from app.enum.message_type import MessageType
 from app.util.identity_utils import generate_aggregate_id
+from app.mapper.artist_mapper import map_to_artist_stats_schema
+from app.schema.artist_schema import ArtistStatsSchema
 
 
 class ArtistService:
@@ -73,7 +75,8 @@ class ArtistService:
             sessionId=session_id,
             type=MessageType.PROCESSED_VIEW_ARTIST_DETAIL_PAGE_TRACKING)
 
-    def handle_viewed_artist_detail_page_tracking(self, session_id: str) -> None:
+    def handle_viewed_artist_detail_page_tracking(self,
+                                                  session_id: str) -> None:
         activity: Activity = self.activity_repository.find_by_session_id_and_type(
             session_id, ActionType.VIEW_ARTIST_DETAIL_PAGE_TRACKING.name)
         if activity:
@@ -92,3 +95,13 @@ class ArtistService:
             self.logger.info(
                 f"Processed {ActionType.VIEW_ARTIST_DETAIL_PAGE_TRACKING} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
+
+    def get_artist_stats(self, aggregate_id: str) -> dict[str, int]:
+        artist_stats = self.artist_stats_repository.find_by_aggregate_id(
+            aggregate_id)
+        if artist_stats:
+            return map_to_artist_stats_schema(artist_stats)
+        else:
+            return ArtistStatsSchema(id=aggregate_id,
+                                     total_detail_page_views=0,
+                                     total_likes=0)

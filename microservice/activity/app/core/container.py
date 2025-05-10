@@ -20,8 +20,10 @@ from app.repository.impl.sqlmodel_user_repository import (
 
 
 class Container(containers.DeclarativeContainer):
-    wiring_config = containers.WiringConfiguration(
-        modules=["app.router.activity_router", "app.router.user_router"])
+    wiring_config = containers.WiringConfiguration(modules=[
+        "app.router.activity_router", "app.router.track_router",
+        "app.router.user_router", "app.router.artist_router"
+    ])
 
     logger = providers.Singleton(Logger)
     database = providers.Singleton(

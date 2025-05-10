@@ -36,7 +36,6 @@ class ArtistStats(SQLModel, table=True):
     __tablename__ = "artist_stats"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     aggregate_id: str = Field(..., max_length=12)
-    user_id: str = Field(..., max_length=255)
     total_detail_page_views: int = Field(default=0)
     total_likes: int = Field(default=0)
     created_at: datetime = Field(default=datetime.now(timezone.utc))
