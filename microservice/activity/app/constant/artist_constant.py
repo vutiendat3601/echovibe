@@ -3,3 +3,4 @@ ARTIST_RELEASED_EVENT = "artist.ArtistReleasedEvent"
 ARTIST_UPDATED_EVENT = "artist.ArtistUpdatedEvent"
 ARTIST_DELETED_EVENT = "artist.ArtistDeletedEvent"
 ARTIST_VERIFICATION_SET_EVENT = "artist.ArtistVerificationSetEvent"
+ARTIST_DETAIL_PAGE_VIEW_MIN_SECOND = 5

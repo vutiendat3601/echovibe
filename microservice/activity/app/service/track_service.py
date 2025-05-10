@@ -34,12 +34,12 @@ class TrackService:
         self.logger = logger
 
     def handle_like_track(self, activity: Activity) -> None:
-        self.activity_repository.save_activity(activity)
         updated_at = datetime.now(timezone.utc)
         track_like = self.track_like_repository.find_by_aggregate_id_and_user_id(
             aggregate_id=activity.aggregate_id, user_id=activity.created_by)
         if track_like and track_like.is_active:
             return
+        self.activity_repository.save_activity(activity)
         if track_like:
             track_like.is_active = True
             track_like.updated_at = updated_at
@@ -53,7 +53,8 @@ class TrackService:
                                    created_by=activity.created_by)
         self.track_like_repository.save_track_like(track_like)
 
-        track_stats: TrackStats = self._get_track_stats_by_id(activity.aggregate_id)
+        track_stats: TrackStats = self._get_track_stats_by_id(
+            activity.aggregate_id)
         track_stats.total_likes += 1
         track_stats.updated_at = updated_at
         track_stats.created_by = track_stats.created_by if track_stats.created_by else activity.created_by
@@ -75,7 +76,8 @@ class TrackService:
             track_like.updated_by = activity.created_by
             self.track_like_repository.save_track_like(track_like)
 
-            track_stats: TrackStats = self._get_track_stats_by_id(activity.aggregate_id)
+            track_stats: TrackStats = self._get_track_stats_by_id(
+                activity.aggregate_id)
             track_stats.total_likes -= 1
             track_stats.updated_at = updated_at
             track_stats.created_by = track_stats.created_by if track_stats.created_by else activity.created_by
@@ -109,7 +111,8 @@ class TrackService:
                 is_existed = self.track_listen_repository.exist_by_session_id(
                     session_id)
                 if not is_existed:
-                    track_stats: TrackStats = self._get_track_stats_by_id(activity.aggregate_id)
+                    track_stats: TrackStats = self._get_track_stats_by_id(
+                        activity.aggregate_id)
                     track_stats.total_listens += 1
                     track_stats.updated_at = created_at
                     track_stats.created_by = track_stats.created_by if track_stats.created_by else activity.created_by
@@ -151,7 +154,8 @@ class TrackService:
                 is_existed = self.track_detail_page_view_repository.exist_by_session_id(
                     session_id)
                 if not is_existed:
-                    track_stats: TrackStats = self._get_track_stats_by_id(activity.aggregate_id)
+                    track_stats: TrackStats = self._get_track_stats_by_id(
+                        activity.aggregate_id)
                     track_stats.total_detail_page_views += 1
                     track_stats.updated_at = created_at
                     track_stats.created_by = track_stats.created_by if track_stats.created_by else activity.created_by
