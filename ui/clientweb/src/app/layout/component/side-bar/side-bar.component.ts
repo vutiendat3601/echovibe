@@ -43,8 +43,8 @@ export class SideBarComponent implements OnInit, OnDestroy {
   likedSongsCount = 1;
   activeTab: string = 'playlists'; // Track active tab: 'playlists', 'artists', or 'mysongs'
   artists = [
-    { name: 'Sơn Tùng M-TP', imageUrl: 'assets/image/default-artist-thumbnail-image.png' },
-    { name: 'ANH TRAI "SAY HI"', imageUrl: 'assets/image/default-artist-thumbnail-image.png' }
+    { name: 'Sơn Tùng M-TP', imageUrl: 'asset/image/default-artist-thumbnail-image.svg' },
+    { name: 'ANH TRAI "SAY HI"', imageUrl: 'asset/image/default-artist-thumbnail-image.svg' }
   ];
 
   // Add playlists property to store user playlists

@@ -13,7 +13,7 @@
       <div class="playlist-cover">
         <img
           #playlistCover
-          [src]="playlistCoverImage || '/assets/image/default-artist-thumbnail-image.png'"
+          [src]="playlistCoverImage || '/asset/image/default-artist-thumbnail-image.svg'"
           alt="Playlist cover"
           crossorigin="anonymous"
           *ngIf="playlistCoverImage"
@@ -117,7 +117,7 @@
             <td class="title-col">
               <div class="track-info">
                 <img
-                  [src]="track.thumbnailUrl || '/assets/image/default-artist-thumbnail-image.png'"
+                  [src]="track.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'"
                   alt="Track cover"
                   class="track-img"
                 />
@@ -219,7 +219,7 @@
       <div class="search-results" *ngIf="searchResults.length > 0">
         <div class="search-result-item" *ngFor="let track of searchResults">
           <div class="search-result-thumbnail">
-            <img [src]="track.thumbnailUrl || '/assets/image/default-artist-thumbnail-image.png'" alt="Track cover" />
+            <img [src]="track.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'" alt="Track cover" />
           </div>
           <div class="search-result-info">
             <div class="search-result-title">{{ track.name }}</div>

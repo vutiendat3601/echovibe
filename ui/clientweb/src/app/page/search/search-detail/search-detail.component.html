@@ -30,7 +30,7 @@
           <div class="top-result-card" (click)="navigateToArtist(artists[0])">
             <div class="top-result-image">
               <img
-                [src]="artists[0].thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'"
+                [src]="artists[0].thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'"
                 [alt]="artists[0].name"
               />
             </div>
@@ -95,7 +95,7 @@
           <div *ngFor="let artist of artists.slice(1)" class="artist-card" (click)="navigateToArtist(artist)">
             <div class="artist-card-image">
               <img
-                [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'"
+                [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'"
                 [alt]="artist.name"
               />
               <div class="play-button">
@@ -118,7 +118,7 @@
       <div class="artists-grid-view">
         <div *ngFor="let artist of artists" class="artist-round-card" (click)="navigateToArtist(artist)">
           <div class="artist-round-image">
-            <img [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.png'" [alt]="artist.name" />
+            <img [src]="artist.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'" [alt]="artist.name" />
             <div class="artist-play-button">
               <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
             </div>
