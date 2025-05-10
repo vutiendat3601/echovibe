@@ -1,5 +1,6 @@
-from app.repository.artist_repository import (
-    ArtistLikeRepository, ArtistDetailPageViewRepository, ArtistStatsRepository)
+from app.repository.artist_repository import (ArtistLikeRepository,
+                                              ArtistDetailPageViewRepository,
+                                              ArtistStatsRepository)
 from app.model.artist import ArtistLike, ArtistDetailPageView, ArtistStats
 from sqlalchemy.exc import SQLAlchemyError
 from contextlib import AbstractContextManager
@@ -69,6 +70,19 @@ class SqlmodelArtistDetailPageViewRepository(ArtistDetailPageViewRepository):
                 return artist_detail_page_view
         except SQLAlchemyError as e:
             session.rollback()
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
+    def exist_by_session_id(self, session_id: str) -> bool:
+        try:
+            with self.session_factory() as session:
+                statement = (select(ArtistDetailPageView).filter(
+                    ArtistDetailPageView.session_id == session_id))
+                track_detail_page_view = session.exec(statement).first()
+                return True if track_detail_page_view else False
+        except SQLAlchemyError as e:
             self.logger.error(f"{e}")
             raise e
         finally:

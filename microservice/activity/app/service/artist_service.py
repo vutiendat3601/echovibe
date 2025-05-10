@@ -7,11 +7,12 @@ from app.schema.activity_schema import MessageResponseSchema
 from app.enum.action_type import ActionType
 from app.core.logger import Logger
 from app.model.activity import Activity
-from app.model.artist import (ArtistLike, ArtistDetailPageView)
+from app.model.artist import (ArtistLike, ArtistDetailPageView, ArtistStats)
 from app.enum.message_type import MessageType
 from app.util.identity_utils import generate_aggregate_id
 from app.mapper.artist_mapper import map_to_artist_stats_schema
 from app.schema.artist_schema import ArtistStatsSchema
+from app.constant.artist_constant import ARTIST_DETAIL_PAGE_VIEW_MIN_SECOND
 
 
 class ArtistService:
@@ -28,10 +29,12 @@ class ArtistService:
         self.logger = logger
 
     def handle_like_artist(self, activity: Activity) -> None:
-        self.activity_repository.save_activity(activity)
         updated_at = datetime.now(timezone.utc)
         artist_like = self.artist_like_repository.find_by_aggregate_id_and_user_id(
             aggregate_id=activity.aggregate_id, user_id=activity.created_by)
+        if artist_like and artist_like.is_active:
+            return
+        self.activity_repository.save_activity(activity)
         if artist_like:
             artist_like.is_active = True
             artist_like.updated_at = updated_at
@@ -44,6 +47,15 @@ class ArtistService:
                                      updated_at=updated_at,
                                      created_by=activity.created_by)
         self.artist_like_repository.save_artist_like(artist_like)
+
+        artist_stats: ArtistStats = self._get_artist_stats_by_id(
+            activity.aggregate_id)
+        artist_stats.total_likes += 1
+        artist_stats.updated_at = updated_at
+        artist_stats.created_by = artist_stats.created_by if artist_stats.created_by else activity.created_by
+        artist_stats.updated_by = activity.created_by
+        self.artist_stats_repository.save_artist_stats(artist_stats)
+
         self.logger.info(
             f"Processed {ActionType.LIKE_ARTIST} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
@@ -58,6 +70,15 @@ class ArtistService:
             artist_like.updated_at = updated_at
             artist_like.updated_by = activity.created_by
             self.artist_like_repository.save_artist_like(artist_like)
+
+            artist_stats: ArtistStats = self._get_artist_stats_by_id(
+                activity.aggregate_id)
+            artist_stats.total_likes -= 1
+            artist_stats.updated_at = updated_at
+            artist_stats.created_by = artist_stats.created_by if artist_stats.created_by else activity.created_by
+            artist_stats.updated_by = activity.created_by
+            self.artist_stats_repository.save_artist_stats(artist_stats)
+
             self.logger.info(
                 f"Processed {ActionType.UNLIKE_ARTIST} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
@@ -82,26 +103,44 @@ class ArtistService:
         if activity:
             created_at = datetime.now(timezone.utc)
             duration_second = (created_at - activity.created_at).total_seconds()
-            artist_detail_page_view = ArtistDetailPageView(
-                session_id=session_id,
-                aggregate_id=activity.aggregate_id,
-                user_id=activity.created_by,
-                is_active=False,
-                duration_second=duration_second,
-                created_at=created_at,
-                created_by=activity.created_by)
-            self.artist_detail_page_view_repository.save_artist_detail_page_view(
-                artist_detail_page_view)
+            if duration_second >= ARTIST_DETAIL_PAGE_VIEW_MIN_SECOND:
+                is_existed = self.artist_detail_page_view_repository.exist_by_session_id(
+                    session_id)
+                if not is_existed:
+                    artist_stats: ArtistStats = self._get_artist_stats_by_id(
+                        activity.aggregate_id)
+                    artist_stats.total_detail_page_views += 1
+                    artist_stats.updated_at = created_at
+                    artist_stats.created_by = artist_stats.created_by if artist_stats.created_by else activity.created_by
+                    artist_stats.updated_by = activity.created_by
+                    self.artist_stats_repository.save_artist_stats(artist_stats)
+
+                artist_detail_page_view = ArtistDetailPageView(
+                    session_id=session_id,
+                    aggregate_id=activity.aggregate_id,
+                    user_id=activity.created_by,
+                    is_active=False,
+                    duration_second=duration_second,
+                    created_at=created_at,
+                    created_by=activity.created_by)
+                self.artist_detail_page_view_repository.save_artist_detail_page_view(
+                    artist_detail_page_view)
+                
             self.logger.info(
                 f"Processed {ActionType.VIEW_ARTIST_DETAIL_PAGE_TRACKING} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
 
     def get_artist_stats(self, aggregate_id: str) -> dict[str, int]:
-        artist_stats = self.artist_stats_repository.find_by_aggregate_id(
-            aggregate_id)
-        if artist_stats:
-            return map_to_artist_stats_schema(artist_stats)
-        else:
-            return ArtistStatsSchema(id=aggregate_id,
-                                     total_detail_page_views=0,
-                                     total_likes=0)
+        artist_stats = self._get_artist_stats_by_id(aggregate_id)
+        return map_to_artist_stats_schema(artist_stats)
+
+    def _get_artist_stats_by_id(self, id: str) -> ArtistStats:
+        artist_stats = self.artist_stats_repository.find_by_aggregate_id(id)
+        if not artist_stats:
+            created_at = datetime.now(timezone.utc)
+            artist_stats = ArtistStats(aggregate_id=id,
+                                       total_detail_page_views=0,
+                                       total_likes=0,
+                                       created_at=created_at,
+                                       updated_at=created_at)
+        return artist_stats

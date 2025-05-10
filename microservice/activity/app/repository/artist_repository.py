@@ -21,6 +21,10 @@ class ArtistDetailPageViewRepository(ABC):
     ) -> ArtistDetailPageView:
         """Save ArtistDetailPageView"""
 
+    @abstractmethod
+    def exist_by_session_id(self, session_id: str) -> bool:
+        """Exist any ArtistDetailPageView by session_id"""
+
 
 class ArtistStatsRepository(ABC):
 
