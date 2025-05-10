@@ -50,6 +50,23 @@ class SqlmodelTrackLikeRepository(TrackLikeRepository):
         finally:
             session.close()
 
+    def find_by_aggregate_id_and_user_id_and_is_active(
+            self, aggregate_id: str, user_id: str,
+            is_active: bool) -> TrackLike | None:
+        try:
+            with self.session_factory() as session:
+                statement = (select(TrackLike).filter(
+                    TrackLike.aggregate_id == aggregate_id,
+                    TrackLike.user_id == user_id,
+                    TrackLike.is_active == is_active))
+                track_like = session.exec(statement).first()
+                return track_like
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
 
 class SqlmodelTrackDetailPageViewRepository(TrackDetailPageViewRepository):
 
