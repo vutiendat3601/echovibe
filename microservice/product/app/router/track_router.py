@@ -40,3 +40,12 @@ async def get_track_by_ids(ids: str = Query(..., regex=AGGREGATE_ID_LIST_REGEX),
     asyncio.create_task(redis.set_value(f"tracks:etag:{etag}", etag))
     return JSONResponse(content=jsonable_encoder(response),
                         headers={"ETag": etag})
+
+
+@track_router.get(path="/byArtistId/{artist_id}",
+                  response_model=ResponseSchema[list[TrackDetailSchema]])
+async def get_all_tracks_by_artist_id(artist_id: str):
+    track_detail_schemas = await track_service.get_all_tracks_by_artist_id(
+        artist_id)
+    response = ok(data=track_detail_schemas)
+    return JSONResponse(content=jsonable_encoder(response))

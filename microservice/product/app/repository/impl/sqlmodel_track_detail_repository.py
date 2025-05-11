@@ -42,6 +42,27 @@ class SqlmodelTrackDetailRepository(TrackDetailRepository):
         finally:
             session.close()
 
+    def find_by_artist_id(self, artist_id: str) -> list[TrackDetail]:
+        try:
+            with self.session_factory() as session:
+                statement = text(
+                    "SELECT COALESCE(array_agg(track_aggregate_id), ARRAY[]::text[]) AS track_aggregate_ids FROM track_artist WHERE artist_aggregate_id = :artist_id"
+                )
+                track_ids_record = session.exec(statement=statement,
+                                                params={
+                                                    "artist_id": artist_id
+                                                }).first()
+                track_aggregate_ids = track_ids_record[0]
+                if len(track_aggregate_ids):
+                    return self.find_by_aggregate_ids(track_aggregate_ids)
+                return []
+
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
     def find_by_keyword(self, keyword: str, page: int,
                         size: int) -> list[TrackDetail]:
         try:
