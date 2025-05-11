@@ -7,12 +7,23 @@
   >
   </p-confirmDialog>
 
+  <!-- Not authenticated message -->
+  <div class="auth-required-message" *ngIf="!authService.isAuthenticated">
+    <div class="auth-content">
+      <h3>Enjoy Your Music</h3>
+      <p>Log in to access your library and playlists</p>
+      <button (click)="signIn()" class="login-button">
+        <span>Log in</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Add Edit Playlist Dialog -->
   <!-- [playlist]="selectedPlaylist" -->
   <app-edit-playlist-dialog [(visible)]="showEditPlaylistDialog" (playlistUpdated)="handlePlaylistUpdated($event)">
   </app-edit-playlist-dialog>
 
-  <div class="sticky-header">
+  <div class="sticky-header" *ngIf="authService.isAuthenticated">
     <div class="library-header">
       <div class="library-title">
         <i class="pi pi-book"></i>
@@ -73,7 +84,7 @@
     </div>
   </div>
 
-  <div class="library-content">
+  <div class="library-content" *ngIf="authService.isAuthenticated">
     <!-- Toast for notifications -->
     <p-toast></p-toast>
 
@@ -129,7 +140,7 @@
   </div>
 
   <!-- Keep original menu for functionality -->
-  <div class="hidden-menu">
+  <div class="hidden-menu" *ngIf="authService.isAuthenticated">
     <app-menu></app-menu>
   </div>
 </div>

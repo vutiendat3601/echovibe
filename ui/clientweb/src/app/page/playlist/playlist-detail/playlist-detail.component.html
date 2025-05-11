@@ -1,4 +1,7 @@
 <div class="playlist-detail-container">
+  <!-- Toast component for displaying notifications -->
+  <p-toast></p-toast>
+
   <!-- Edit Playlist Dialog -->
   <app-edit-playlist-dialog
     [(visible)]="showEditPlaylistDialog"
@@ -26,7 +29,7 @@
         <span class="playlist-type">{{ playlistType }}</span>
         <h1 class="playlist-title">{{ playlistTitle }}</h1>
         <div class="playlist-stats">
-          <span class="playlist-creator">{{ playlistCreator }}</span> •
+          <!-- <span class="playlist-creator">{{ playlistCreator }}</span> • -->
           <span class="playlist-songs-count"
             >{{ songCount }} song{{ songCount !== 1 ? 's' : '' }}, {{ formatTotalDuration() }}</span
           >
@@ -229,6 +232,23 @@
           <div class="search-result-actions">
             <button pButton label="Add" class="p-button-sm" (click)="addTrackToPlaylist(track)"></button>
           </div>
+        </div>
+
+        <!-- Load More Button -->
+        <div class="load-more-container" *ngIf="hasMoreResults && !isSearching">
+          <button
+            pButton
+            label="Load More"
+            icon="pi pi-chevron-down"
+            class="p-button-outlined load-more-button"
+            (click)="loadMoreResults()"
+          ></button>
+        </div>
+
+        <!-- Loading More Indicator -->
+        <div class="search-loading-more" *ngIf="isSearching && searchPage > 0">
+          <p-progressBar mode="indeterminate" [style]="{ height: '4px' }"></p-progressBar>
+          <div class="text-center mt-2">Loading more results...</div>
         </div>
       </div>
 

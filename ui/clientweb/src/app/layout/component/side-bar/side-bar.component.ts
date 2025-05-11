@@ -8,11 +8,13 @@ import { ButtonModule } from 'primeng/button';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { MenuItem } from 'primeng/api';
 import { PlaylistService } from '../../../service/playlist.service';
+import { CreatePlaylistDto } from '../../../dto/playlist-dto';
 import { Subscription } from 'rxjs';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { EditPlaylistDialogComponent } from '../../../component/edit-playlist-dialog/edit-playlist-dialog.component';
+import { AuthService } from '../../../service/auth.service'; // Add AuthService import
 
 interface Member {
   name: string;
@@ -67,7 +69,8 @@ export class SideBarComponent implements OnInit, OnDestroy {
     private router: Router,
     private playlistService: PlaylistService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    public authService: AuthService // Add AuthService to constructor
   ) {}
 
   ngOnInit(): void {
@@ -153,19 +156,28 @@ export class SideBarComponent implements OnInit, OnDestroy {
 
   handleCreatePlaylist(): void {
     // Hide popover
-    // this.op.hide();
-    // Create a new playlist and navigate to it
-    // this.playlistService.createPlaylist('My Playlist #' + Math.floor(Math.random() * 100)).subscribe({
-    //   next: (response) => {
-    //     if (response.data) {
-    //       // Navigate to the new playlist
-    //       this.router.navigate([`/playlist/${response.data.id}`]);
-    //     }
-    //   },
-    //   error: (error) => {
-    //     console.error('Error creating playlist:', error);
-    //   }
-    // });
+    this.op.hide();
+    
+    // Create a new playlist with default values
+    const newPlaylist: CreatePlaylistDto = {
+      name: 'My Playlist #' + Math.floor(Math.random() * 100),
+      trackIds: [],
+      isPublic: true,
+      thumbnailUrl: null
+    };
+    
+    // Send create playlist request
+    this.playlistService.createPlaylist(newPlaylist);
+    
+    // Subscribe to the created playlist ID
+    this.subscription.add(
+      this.playlistService.createdPlaylistId.subscribe(id => {
+        if (id) {
+          // Navigate to the new playlist
+          this.router.navigate([`/playlist/${id}`]);
+        }
+      })
+    );
   }
 
   // Methods for context menu actions
@@ -283,5 +295,10 @@ export class SideBarComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     // Clean up subscriptions
     this.subscription.unsubscribe();
+  }
+
+  // Method to handle login when user is not authenticated
+  signIn(): void {
+    this.authService.signIn();
   }
 }

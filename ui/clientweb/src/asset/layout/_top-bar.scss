@@ -13,6 +13,38 @@
   display: flex;
   align-items: center;
 
+  .layout-topbar-login-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem 1.5rem;
+    background-color: var(--primary-color);
+    color: var(--primary-contrast-color);
+    border: none;
+    border-radius: 2rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      background-color var(--element-transition-duration),
+      transform var(--element-transition-duration),
+      box-shadow var(--element-transition-duration);
+
+    &:hover {
+      background-color: #fff;
+      color: #222;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &:focus-visible {
+      @include focused();
+    }
+
+    span {
+      font-size: 1rem;
+    }
+  }
+
   .layout-topbar-avatar {
     display: flex;
     align-items: center;
