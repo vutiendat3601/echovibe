@@ -184,6 +184,7 @@
   }
 
   .duration-col {
+    text-align: right !important;
     width: 120px;
     text-align: right;
     color: rgba(255, 255, 255, 0.7);
@@ -399,6 +400,35 @@
     text-align: center;
     color: rgba(255, 255, 255, 0.7);
   }
+}
+
+// Load More Button Styling
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding-bottom: 10px;
+}
+
+.load-more-button {
+  background-color: transparent;
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+.search-loading-more {
+  margin: 20px 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 // Search dialog styling - modal overlay
