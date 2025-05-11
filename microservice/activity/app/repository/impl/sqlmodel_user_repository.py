@@ -82,3 +82,18 @@ class SqlmodelUserPlaylistRepository(UserPlaylistRepository):
             raise e
         finally:
             session.close()
+
+    def find_by_playlist_id_and_is_active(
+            self, playlist_id: str, is_active: bool) -> UserPlaylist | None:
+        try:
+            with self.session_factory() as session:
+                statement = (select(UserPlaylist).filter(
+                    UserPlaylist.playlist_id == playlist_id,
+                    UserPlaylist.is_active == is_active))
+                user_playlist = session.exec(statement).first()
+                return user_playlist
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()

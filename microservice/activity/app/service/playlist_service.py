@@ -66,7 +66,9 @@ class PlaylistService:
     def handle_update_playlist(self,
                                activity: Activity) -> MessageResponseSchema:
         aggregate_id = activity.aggregate_id
-        if self.activity_repository.find_by_aggregate_id(aggregate_id):
+        if self.user_playlist_repository.find_by_playlist_id_and_is_active(
+                aggregate_id, True):
+            created_at = datetime.now(timezone.utc)
             self.activity_repository.save_activity(activity)
             self.logger.info(
                 f"Saved Activity: type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
@@ -80,7 +82,7 @@ class PlaylistService:
                 thumbnail_url=activity.data_json.get("thumbnailUrl"),
                 version=-1,
                 created_by=activity.created_by,
-                timestamp=activity.created_at)
+                timestamp=created_at)
             asyncio.create_task(
                 send_event(topic=PLAYLIST_UPDATED_EVENT,
                            event=playlist_updated_event,
@@ -91,11 +93,23 @@ class PlaylistService:
     def handle_delete_playlist(self,
                                activity: Activity) -> MessageResponseSchema:
         aggregate_id = activity.aggregate_id
-        if self.activity_repository.find_by_aggregate_id(aggregate_id):
+        user_playlist = self.user_playlist_repository.find_by_playlist_id_and_is_active(
+            aggregate_id, True)
+        if user_playlist:
+            created_at = datetime.now(timezone.utc)
             self.activity_repository.save_activity(activity)
             self.logger.info(
                 f"Saved Activity: type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
+            user_playlist.is_active = False
+            user_playlist.updated_at = created_at
+            user_playlist.updated_by = activity.created_by
+            self.user_playlist_repository.save_user_playlist(user_playlist)
+
+            self.logger.info(
+                f"Saved UserPlaylist: playlist_id={user_playlist.playlist_id}, user_id={user_playlist.user_id}, is_active={user_playlist.is_active}"
+            )
+
             playlist_deleted_event = PlaylistDeletedEvent(
                 type=PlaylistDeletedEvent.__name__,
                 id=activity.aggregate_id,

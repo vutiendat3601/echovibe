@@ -21,3 +21,8 @@ class UserPlaylistRepository(ABC):
     @abstractmethod
     def save_user_playlist(self, user_playlist: UserPlaylist) -> UserPlaylist:
         """Save UserPlaylist"""
+
+    @abstractmethod
+    def find_by_playlist_id_and_is_active(
+            self, playlist_id: str, is_active: bool) -> UserPlaylist | None:
+        """Find UserPlaylist by playlist_id"""
