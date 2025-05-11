@@ -52,3 +52,13 @@ class TrackService:
             for aggregate_id in aggregate_ids
         ]
         return track_detail_schemas
+
+    async def get_all_tracks_by_artist_id(
+            self, artist_id: str) -> list[TrackDetailSchema | None]:
+        track_details = self.track_detail_repository.find_by_artist_id(
+            artist_id)
+        track_detail_schemas = [
+            map_to_track_detail_schema(track_detail)
+            for track_detail in track_details
+        ]
+        return track_detail_schemas
