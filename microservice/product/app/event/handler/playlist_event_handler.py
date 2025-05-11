@@ -83,7 +83,7 @@ class PlaylistEventHandler:
             self.playlist_repository.delete_by_aggregate_id(
                 playlist_deleted_event.id)
 
-        playlist_cache_key = f"playlist:{playlist.aggregate_id}"
+        playlist_cache_key = f"playlist:{playlist_deleted_event.id}"
         asyncio.create_task(self.redis.delete_value(playlist_cache_key))
 
         self.logger.info(
