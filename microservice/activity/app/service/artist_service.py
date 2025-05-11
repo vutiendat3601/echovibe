@@ -1,17 +1,20 @@
 from app.repository.activity_repository import ActivityRepository
 from app.repository.artist_repository import (ArtistDetailPageViewRepository,
                                               ArtistLikeRepository,
-                                              ArtistStatsRepository)
+                                              ArtistStatsRepository,
+                                              ArtistRecommendationRepository,
+                                              ArtistStatsDetailRepository)
 from datetime import datetime, timezone
 from app.schema.activity_schema import MessageResponseSchema
 from app.enum.action_type import ActionType
 from app.core.logger import Logger
 from app.model.activity import Activity
-from app.model.artist import (ArtistLike, ArtistDetailPageView, ArtistStats)
+from app.model.artist import (ArtistLike, ArtistDetailPageView, ArtistStats,
+                              ArtistStatsDetail)
 from app.enum.message_type import MessageType
 from app.util.identity_utils import generate_aggregate_id
-from app.mapper.artist_mapper import map_to_artist_stats_schema
-from app.schema.artist_schema import ArtistStatsSchema
+from app.mapper.artist_mapper import map_to_artist_stats_detail_schema
+from app.schema.artist_schema import ArtistStatsDetailSchema
 from app.constant.artist_constant import ARTIST_DETAIL_PAGE_VIEW_MIN_SECOND
 
 
@@ -21,11 +24,16 @@ class ArtistService:
             self, activity_repository: ActivityRepository,
             artist_detail_page_view_repository: ArtistDetailPageViewRepository,
             artist_like_repository: ArtistLikeRepository,
-            artist_stats_repository: ArtistStatsRepository, logger: Logger):
+            artist_stats_repository: ArtistStatsRepository,
+            artist_recommendation_repository: ArtistRecommendationRepository,
+            artist_stats_detail_repository: ArtistStatsDetailRepository,
+            logger: Logger):
         self.activity_repository = activity_repository
         self.artist_detail_page_view_repository = artist_detail_page_view_repository
         self.artist_like_repository = artist_like_repository
         self.artist_stats_repository = artist_stats_repository
+        self.artist_recommendation_repository = artist_recommendation_repository
+        self.artist_stats_detail_repository = artist_stats_detail_repository
         self.logger = logger
 
     def handle_like_artist(self, activity: Activity) -> None:
@@ -125,14 +133,27 @@ class ArtistService:
                     created_by=activity.created_by)
                 self.artist_detail_page_view_repository.save_artist_detail_page_view(
                     artist_detail_page_view)
-                
+
             self.logger.info(
                 f"Processed {ActionType.VIEW_ARTIST_DETAIL_PAGE_TRACKING} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
 
-    def get_artist_stats(self, aggregate_id: str) -> dict[str, int]:
-        artist_stats = self._get_artist_stats_by_id(aggregate_id)
-        return map_to_artist_stats_schema(artist_stats)
+    def get_artist_stats_detail(self,
+                                aggregate_id: str) -> ArtistStatsDetailSchema:
+        artist_stats_detail = self.artist_stats_detail_repository.find_by_aggregate_id(
+            aggregate_id)
+        if not artist_stats_detail:
+            created_at = datetime.now(timezone.utc)
+            artist_stats_detail = ArtistStatsDetail(
+                aggregate_id=aggregate_id,
+                total_detail_page_views=0,
+                total_likes=0,
+                most_listened_track_ids=[],
+                most_listened_track_ids_current_month=[],
+                most_popular_track_ids=[],
+                created_at=created_at,
+                updated_at=created_at)
+        return map_to_artist_stats_detail_schema(artist_stats_detail)
 
     def _get_artist_stats_by_id(self, id: str) -> ArtistStats:
         artist_stats = self.artist_stats_repository.find_by_aggregate_id(id)

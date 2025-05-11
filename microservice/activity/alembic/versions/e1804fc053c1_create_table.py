@@ -79,6 +79,38 @@ CREATE TABLE public.artist_stats (
 );
 """
 
+    create_artist_recommendation_table_ddl = """
+CREATE TABLE public.artist_recommendation (
+    id uuid NOT NULL,
+    aggregate_id varchar(12) NOT NULL,
+    most_popular_track_ids text[] NOT NULL, -- listen count + like count
+    most_listened_track_ids text[] NOT NULL,
+    most_listened_track_ids_current_month text[] NOT NULL,
+    created_at timestamptz DEFAULT current_timestamp,
+    updated_at timestamptz DEFAULT current_timestamp,
+    created_by varchar(255),
+    updated_by varchar(255),
+    CONSTRAINT artist_recommendation__pkey PRIMARY KEY (id),
+    CONSTRAINT artist_recommendation__aggregate_id___key UNIQUE (aggregate_id)
+);
+"""
+    create_artist_stats_detail_view_ddl = """
+CREATE VIEW public.v_artist_stats_detail
+AS SELECT 
+    _as.id,
+    _as.aggregate_id,
+    _as.total_detail_page_views,
+    _as.total_likes,
+    _as.created_at,
+    _as.updated_at,
+    _as.created_by,
+    _as.updated_by,
+    ar.most_popular_track_ids,
+    ar.most_listened_track_ids,
+    ar.most_listened_track_ids_current_month
+   FROM artist_stats _as LEFT JOIN artist_recommendation ar ON _as.aggregate_id = ar.aggregate_id
+;"""
+
     create_track_like_table_ddl = """
 CREATE TABLE public.track_like (
 	id uuid NOT NULL,
@@ -217,6 +249,8 @@ EXECUTE FUNCTION refresh_mv_user_usage_data();
         create_aritst_like_table_ddl,
         create_artist_detail_page_view_table_ddl,
         create_artist_stats_table_ddl,
+        create_artist_recommendation_table_ddl,
+        create_artist_stats_detail_view_ddl,
         create_track_like_table_ddl,
         create_track_detail_page_view_table_ddl,
         create_track_listen_table_ddl,
@@ -236,7 +270,8 @@ def downgrade() -> None:
     drop_artist_like_table_ddl = "DROP TABLE IF EXISTS public.artist_like;"
     drop_artist_stats_table_ddl = "DROP TABLE IF EXISTS public.artist_stats;"
     drop_aritst_detail_page_view_table_ddl = "DROP TABLE IF EXISTS public.aritst_detail_page_view;"
-    drop_artist_stats_table_ddl = "DROP TABLE IF EXISTS public.artist_stats;"
+    drop_artist_stats_detail_view_ddl = "DROP VIEW IF EXISTS public.v_artist_stats_detail;"
+    drop_artist_recommendation_table_ddl = "DROP TABLE IF EXISTS public.artist_recommendation;"
     drop_track_like_table_ddl = "DROP TABLE IF EXISTS public.track_like;"
     drop_track_detail_page_view_table_ddl = "DROP TABLE IF EXISTS public.track_detail_page_view;"
     drop_track_listen_table_ddl = "DROP TABLE IF EXISTS public.track_listen;"
@@ -246,10 +281,11 @@ def downgrade() -> None:
         drop_uuid_ossp_extension_ddl, drop_unaccent_extension_ddl,
         drop_activity_table_ddl, drop_artist_like_table_ddl,
         drop_artist_like_table_ddl, drop_artist_stats_table_ddl,
-        drop_aritst_detail_page_view_table_ddl, drop_artist_stats_table_ddl,
-        drop_track_like_table_ddl, drop_track_detail_page_view_table_ddl,
-        drop_user_playlist_table_ddl, drop_track_listen_table_ddl,
-        drop_track_stats_table_ddl
+        drop_aritst_detail_page_view_table_ddl,
+        drop_artist_stats_detail_view_ddl, drop_artist_stats_table_ddl,
+        drop_artist_recommendation_table_ddl, drop_track_like_table_ddl,
+        drop_track_detail_page_view_table_ddl, drop_user_playlist_table_ddl,
+        drop_track_listen_table_ddl, drop_track_stats_table_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)
