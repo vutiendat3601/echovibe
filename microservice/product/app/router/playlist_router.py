@@ -30,8 +30,8 @@ async def get_playlist_by_id(id: str):
                      response_model=ResponseSchema[list[PlaylistDetailSchema]])
 async def get_playlist_by_ids(ids: str = Query(...,
                                                regex=AGGREGATE_ID_LIST_REGEX),
-                              if_none_match: str |
-                              None = Header(alias="If-None-Match")):
+                              if_none_match: str | None = Header(
+                                  default=None, alias="If-None-Match")):
     playlists_cache_key = f"playlists:etag:{if_none_match}" if if_none_match else None
     if playlists_cache_key and await redis.exists(playlists_cache_key):
         return JSONResponse(status_code=304, content=None)
