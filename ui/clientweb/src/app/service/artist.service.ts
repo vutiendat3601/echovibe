@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { environment } from '../../environment/environment';
-import { ArtistDetailDto } from '../dto/artist-dto';
+import { ArtistDetailDto, ArtistStatsDto } from '../dto/artist-dto';
 import { ResponseDto } from './../dto/response-dto';
 import { ActivityService } from './activity.service';
 import { ActionType } from '../constant/action-type';
@@ -27,6 +27,9 @@ export class ArtistService {
     return this.http.get<ResponseDto<[ArtistDetailDto | null]>>(
       `${environment.productBaseUrl}/v1/artists?ids=${ids.join(',')}`
     );
+  }
+  getArtistStats(id: string): Observable<ResponseDto<ArtistStatsDto>> {
+    return this.http.get<ResponseDto<ArtistStatsDto>>(`${environment.activityBaseUrl}/v1/artists/${id}/stats`);
   }
 
   likeArtist(id: string): void {

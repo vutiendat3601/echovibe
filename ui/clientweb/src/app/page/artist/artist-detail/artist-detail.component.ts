@@ -15,8 +15,12 @@ import { ActivityService } from '../../../service/activity.service';
 import { TrackingService } from '../../../service/tracking.service';
 import { MessageResponseDto } from './../../../dto/activity-dto';
 import { ArtistService } from './../../../service/artist.service';
+interface ArtistStats {
+  totalDetailPageViews: number;
+  totalLikes: number;
+}
 
-interface Artist {
+interface ArtistDetail {
   id: string;
   urn: string;
   name: string;
@@ -28,6 +32,7 @@ interface Artist {
   isPublic: boolean;
   isVerified: boolean;
   tags: string[];
+  stats: ArtistStats;
 }
 
 @Component({
@@ -49,7 +54,7 @@ interface Artist {
 })
 export class ArtistDetailComponent implements OnInit, OnDestroy {
   viewArtistDetailTrackingSessionId: string | null = null;
-  artist: Artist | null = null;
+  artistDetail: ArtistDetail | null = null;
   artistJson: string | null = null;
   value = 0;
   showAll = false;
@@ -117,11 +122,11 @@ export class ArtistDetailComponent implements OnInit, OnDestroy {
 
   private listenTrackingEvent() {
     this.trackingService.viewArtistDetailPageTracking.subscribe(({ sessionId, aggregateId }: MessageResponseDto) => {
-      if (this.artist && aggregateId === this.artist.id && sessionId) {
+      if (this.artistDetail && aggregateId === this.artistDetail.id && sessionId) {
         this.viewArtistDetailTrackingSessionId = sessionId;
         window.setTimeout(() => {
           this.trackingService.sendViewedArtistDetailPageTracking(sessionId);
-        }, 10_000);
+        }, 5_000);
       }
     });
   }
@@ -131,8 +136,16 @@ export class ArtistDetailComponent implements OnInit, OnDestroy {
       if (params['id']) {
         this.artistService.getArtistById(params['id']).subscribe((respDto: ResponseDto<ArtistDetailDto | null>) => {
           if (respDto.data) {
-            this.artist = respDto.data;
-            this.trackingService.startViewArtistDetailPageTracking(this.artist.id);
+            const artistDetailDto = respDto.data;
+            if (artistDetailDto) {
+              const artistDetail = this.mapToArtistDetail(artistDetailDto);
+              this.artistService.getArtistStats(artistDetail.id).subscribe((respDto) => {
+                const { totalDetailPageViews, totalLikes } = respDto.data;
+                artistDetail.stats = { totalDetailPageViews, totalLikes };
+              });
+              this.artistDetail = artistDetail;
+              this.initializeTracking();
+            }
           } else {
             this.router.navigate(['/not-found']);
           }
@@ -141,6 +154,42 @@ export class ArtistDetailComponent implements OnInit, OnDestroy {
         this.router.navigate(['/not-found']);
       }
     });
+  }
+
+  private initializeTracking() {
+    if (this.artistDetail) {
+      this.trackingService.startViewArtistDetailPageTracking(this.artistDetail.id);
+    }
+  }
+
+  private mapToArtistDetail(artistDto: ArtistDetailDto): ArtistDetail {
+    const {
+      id,
+      urn,
+      name,
+      description,
+      biography,
+      nationalityIsoCode,
+      thumbnailUrl,
+      backgroundUrl,
+      isPublic,
+      isVerified,
+      tags
+    } = artistDto;
+    return {
+      id,
+      urn,
+      name,
+      description,
+      biography,
+      nationalityIsoCode,
+      thumbnailUrl,
+      backgroundUrl,
+      isPublic,
+      isVerified,
+      tags,
+      stats: { totalDetailPageViews: 0, totalLikes: 0 }
+    };
   }
 
   private destroy() {
