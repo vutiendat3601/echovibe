@@ -97,4 +97,5 @@ class Container(containers.DeclarativeContainer):
     playlist_event_handler = providers.Factory(
         PlaylistEventHandler,
         playlist_repository=playlist_repository,
+        redis=redis,
         logger=logger)

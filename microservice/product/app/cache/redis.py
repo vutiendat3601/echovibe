@@ -38,6 +38,15 @@ class Redis:
                 self.logger.error(f"Error setting value in Redis: {e}")
         return False
 
+    async def delete_value(self, key: str) -> bool:
+        if self.enabled:
+            try:
+                await self.redis_client.delete(key)
+                return True
+            except Exception as e:
+                self.logger.error(f"Error deleting value from Redis: {e}")
+        return False
+
     async def exists(self, key: str) -> bool:
         if self.enabled:
             try:
