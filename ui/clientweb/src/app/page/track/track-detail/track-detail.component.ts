@@ -210,7 +210,6 @@ export class TrackDetailComponent implements OnInit {
             trackDetail.stats = { totalDetailPageViews, totalLikes, totalListens };
           });
           this.trackDetail = trackDetail;
-          console.log(this.trackDetail);
           this.initializeTracking();
           window.setTimeout(() => this.extractColorFromThumbnail(), 300);
         } else {
@@ -303,7 +302,7 @@ export class TrackDetailComponent implements OnInit {
         this.viewTrackingDetailTrackingSessionId = sessionId;
         window.setTimeout(() => {
           this.trackingService.sendViewedTrackDetailPageTracking(sessionId);
-        }, 10_000);
+        }, 5_000);
       }
     });
   }

@@ -11,3 +11,9 @@ export interface ArtistDetailDto {
   isVerified: boolean;
   tags: string[];
 }
+
+export interface ArtistStatsDto {
+  id: string;
+  totalDetailPageViews: number;
+  totalLikes: number;
+}
