@@ -1,7 +1,10 @@
 from app.repository.artist_repository import (ArtistLikeRepository,
                                               ArtistDetailPageViewRepository,
-                                              ArtistStatsRepository)
-from app.model.artist import ArtistLike, ArtistDetailPageView, ArtistStats
+                                              ArtistStatsRepository,
+                                              ArtistRecommendationRepository,
+                                              ArtistStatsDetailRepository)
+from app.model.artist import (ArtistLike, ArtistDetailPageView, ArtistStats,
+                              ArtistStatsDetail, ArtistRecommendation)
 from sqlalchemy.exc import SQLAlchemyError
 from contextlib import AbstractContextManager
 from typing import Callable
@@ -120,6 +123,70 @@ class SqlmodelArtistStatsRepository(ArtistStatsRepository):
                     ArtistStats.aggregate_id == aggregate_id))
                 artist_stats = session.exec(statement).first()
                 return artist_stats
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
+
+class SqlmodelArtistRecommendationRepository(ArtistRecommendationRepository):
+
+    def __init__(
+        self, logger: Logger,
+        session_factory: Callable[...,
+                                  AbstractContextManager[Session]]) -> None:
+        self.logger = logger
+        self.session_factory = session_factory
+
+    def save_artist_recommendation(
+            self, artist_recommendation: ArtistRecommendation) -> None:
+        try:
+            with self.session_factory() as session:
+                session.add(artist_recommendation)
+                session.commit()
+                session.refresh(artist_recommendation)
+                session.expunge_all()
+                return artist_recommendation
+        except SQLAlchemyError as e:
+            session.rollback()
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
+    def find_by_aggregate_id(self,
+                             aggregate_id: str) -> ArtistRecommendation | None:
+        try:
+            with self.session_factory() as session:
+                statement = (select(ArtistRecommendation).filter(
+                    ArtistRecommendation.aggregate_id == aggregate_id))
+                artist_recommendation = session.exec(statement).first()
+                return artist_recommendation
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
+
+class SqlmodelArtistStatsDetailRepository(ArtistStatsDetailRepository):
+
+    def __init__(
+        self, logger: Logger,
+        session_factory: Callable[...,
+                                  AbstractContextManager[Session]]) -> None:
+        self.logger = logger
+        self.session_factory = session_factory
+
+    def find_by_aggregate_id(self,
+                             aggregate_id: str) -> ArtistStatsDetail | None:
+        try:
+            with self.session_factory() as session:
+                statement = (select(ArtistStatsDetail).filter(
+                    ArtistStatsDetail.aggregate_id == aggregate_id))
+                artist_stats_detail = session.exec(statement).first()
+                return artist_stats_detail
         except SQLAlchemyError as e:
             self.logger.error(f"{e}")
             raise e

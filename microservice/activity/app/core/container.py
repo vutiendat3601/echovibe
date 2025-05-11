@@ -10,7 +10,8 @@ from app.service.track_service import TrackService
 from app.service.user_service import UserService
 from app.repository.impl.sqlmodel_artist_repository import (
     SqlmodelArtistDetailPageViewRepository, SqlmodelArtistLikeRepository,
-    SqlmodelArtistStatsRepository)
+    SqlmodelArtistStatsRepository, SqlmodelArtistRecommendationRepository,
+    SqlmodelArtistStatsDetailRepository)
 from app.repository.impl.sqlmodel_track_repository import (
     SqlmodelTrackDetailPageViewRepository, SqlmodelTrackLikeRepository,
     SqlmodelTrackListenRepository, SqlmodelTrackStatsRepository)
@@ -46,6 +47,15 @@ class Container(containers.DeclarativeContainer):
         SqlmodelArtistStatsRepository,
         logger=logger,
         session_factory=database.provided.session)
+    artist_recommendation_repository = providers.Factory(
+        SqlmodelArtistRecommendationRepository,
+        logger=logger,
+        session_factory=database.provided.session)
+    artist_stats_detail_repository = providers.Factory(
+        SqlmodelArtistStatsDetailRepository,
+        logger=logger,
+        session_factory=database.provided.session)
+
     track_detail_page_view_repository = providers.Factory(
         SqlmodelTrackDetailPageViewRepository,
         logger=logger,
@@ -87,6 +97,8 @@ class Container(containers.DeclarativeContainer):
         artist_detail_page_view_repository=artist_detail_page_view_repository,
         artist_like_repository=artist_like_repository,
         artist_stats_repository=artist_stats_repository,
+        artist_recommendation_repository=artist_recommendation_repository,
+        artist_stats_detail_repository=artist_stats_detail_repository,
         logger=logger)
     track_service = providers.Factory(
         TrackService,
