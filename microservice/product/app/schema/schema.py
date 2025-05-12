@@ -1,6 +1,5 @@
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Optional
 from pydantic import BaseModel
-from typing import Optional
 from http import HTTPStatus
 
 T = TypeVar("T")

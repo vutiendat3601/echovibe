@@ -32,6 +32,10 @@ class TrackDetailPageViewRepository(ABC):
     def exist_by_session_id(self, session_id: str) -> bool:
         """Exist any TrackDetailPageView by session_id"""
 
+    @abstractmethod
+    def find_by_session_id(self, session_id: str) -> TrackDetailPageView | None:
+        """Find TrackDetailPageView by session_id"""
+
 
 class TrackListenRepository(ABC):
 
@@ -42,6 +46,10 @@ class TrackListenRepository(ABC):
     @abstractmethod
     def exist_by_session_id(self, session_id: str) -> bool:
         """Exist any TrackListen by session_id"""
+
+    @abstractmethod
+    def find_by_session_id(self, session_id: str) -> TrackListen | None:
+        """Find TrackListen by session_id"""
 
 
 class TrackStatsRepository(ABC):

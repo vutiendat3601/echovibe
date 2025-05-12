@@ -26,6 +26,11 @@ class ArtistDetailPageViewRepository(ABC):
     def exist_by_session_id(self, session_id: str) -> bool:
         """Exist any ArtistDetailPageView by session_id"""
 
+    @abstractmethod
+    def find_by_session_id(self,
+                           session_id: str) -> ArtistDetailPageView | None:
+        """Find ArtistDetailPageView by session_id"""
+
 
 class ArtistStatsRepository(ABC):
 

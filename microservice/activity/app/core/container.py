@@ -18,6 +18,7 @@ from app.repository.impl.sqlmodel_track_repository import (
 from app.repository.impl.sqlmodel_user_repository import (
     SqlmodelUserDataRepository, SqlmodelUserUsageDataRepository,
     SqlmodelUserPlaylistRepository)
+from app.client.product_client import ProductClient
 
 
 class Container(containers.DeclarativeContainer):
@@ -29,6 +30,10 @@ class Container(containers.DeclarativeContainer):
     logger = providers.Singleton(Logger)
     database = providers.Singleton(
         Database, database_uri=configuration.get_database_uri())
+
+    # Client
+    product_client = providers.Singleton(
+        ProductClient, base_url=configuration.get_product_base_url())
 
     # Repository
     activity_repository = providers.Factory(
@@ -99,6 +104,7 @@ class Container(containers.DeclarativeContainer):
         artist_stats_repository=artist_stats_repository,
         artist_recommendation_repository=artist_recommendation_repository,
         artist_stats_detail_repository=artist_stats_detail_repository,
+        product_client=product_client,
         logger=logger)
     track_service = providers.Factory(
         TrackService,

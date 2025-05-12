@@ -60,8 +60,11 @@ CREATE TABLE public.artist_detail_page_view (
     duration_second int NOT NULL DEFAULT 0,
     session_id varchar(12) NOT NULL,
     created_at timestamptz DEFAULT current_timestamp,
+    updated_at timestamptz DEFAULT current_timestamp,
     created_by varchar(255),
+    updated_by varchar(255),
 	CONSTRAINT aritst_detail_page_view__pkey PRIMARY KEY (id)
+    CONSTRAINT aritst_detail_page_view___session_id___key UNIQUE (session_id)
 );
 """
 
@@ -95,9 +98,8 @@ CREATE TABLE public.artist_recommendation (
 );
 """
     create_artist_stats_detail_view_ddl = """
-CREATE VIEW public.v_artist_stats_detail
-AS SELECT 
-    _as.id,
+CREATE OR REPLACE VIEW public.v_artist_stats_detail
+AS SELECT _as.id,
     _as.aggregate_id,
     _as.total_detail_page_views,
     _as.total_likes,
@@ -105,10 +107,12 @@ AS SELECT
     _as.updated_at,
     _as.created_by,
     _as.updated_by,
+    ar.id AS artist_recommendation_id,
     ar.most_popular_track_ids,
     ar.most_listened_track_ids,
     ar.most_listened_track_ids_current_month
-   FROM artist_stats _as LEFT JOIN artist_recommendation ar ON _as.aggregate_id = ar.aggregate_id
+   FROM artist_stats _as
+     LEFT JOIN artist_recommendation ar ON _as.aggregate_id::text = ar.aggregate_id::text
 ;"""
 
     create_track_like_table_ddl = """
@@ -134,8 +138,11 @@ CREATE TABLE public.track_detail_page_view (
     duration_second int NOT NULL DEFAULT 0,
     session_id varchar(12) NOT NULL,
     created_at timestamptz DEFAULT current_timestamp,
+    updated_at timestamptz DEFAULT current_timestamp,
     created_by varchar(255),
-	CONSTRAINT track_detail_page_view__pkey PRIMARY KEY (id)
+    updated_by varchar(255),
+	CONSTRAINT track_detail_page_view__pkey PRIMARY KEY (id),
+    CONSTRAINT track_detail_page_view___session_id___key UNIQUE (session_id)
 );
 """
 
@@ -147,8 +154,11 @@ CREATE TABLE public.track_listen (
     duration_second int NOT NULL DEFAULT 0,
     session_id varchar(12) NOT NULL,
     created_at timestamptz DEFAULT current_timestamp,
+    updated_at timestamptz DEFAULT current_timestamp,
     created_by varchar(255),
-	CONSTRAINT track_listen__pkey PRIMARY KEY (id)
+    updated_by varchar(255),
+	CONSTRAINT track_listen__pkey PRIMARY KEY (id),
+    CONSTRAINT track_listen___session_id___key UNIQUE (session_id)
 );
 """
 
