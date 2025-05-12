@@ -41,3 +41,8 @@ database:
 redis:
   enabled: false
   url:
+app:
+  web:
+    client:
+      product:
+        baseUrl: https://api.echovibe.io.vn/product
