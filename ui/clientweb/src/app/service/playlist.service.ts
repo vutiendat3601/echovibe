@@ -54,8 +54,8 @@ export class PlaylistService {
     return this.http.get<ResponseDto<PlaylistDetailDto | null>>(`${environment.productBaseUrl}/v1/playlists/${id}`);
   }
 
-  getPlaylistByIds(ids: string[]): Observable<ResponseDto<[PlaylistDetailDto | null]>> {
-    return this.http.get<ResponseDto<[PlaylistDetailDto | null]>>(
+  getPlaylistByIds(ids: string[]): Observable<ResponseDto<PlaylistDetailDto[]>> {
+    return this.http.get<ResponseDto<PlaylistDetailDto[]>>(
       `${environment.productBaseUrl}/v1/playlists?ids=${ids.join(',')}`
     );
   }

@@ -41,7 +41,13 @@ export class UserService {
   }
 
   private listenDataChange() {
-    this.playlistService.createdPlaylistId.subscribe((_playlistId) => {});
+    this.playlistService.createdPlaylistId.subscribe((playlistId) => {
+      console.log('createdPlaylistId', playlistId);
+      if (this.retrievedUserUsage && playlistId) {
+        this.retrievedUserUsage.createdPlaylistIds.unshift(playlistId);
+        this.refresh();
+      }
+    });
 
     this.artistService.likedArtistId.subscribe((artistId) => {
       if (this.retrievedUserUsage) {
