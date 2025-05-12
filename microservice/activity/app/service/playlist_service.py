@@ -28,7 +28,7 @@ class PlaylistService:
         self.user_playlist_repository = user_playlist_repository
         self.logger = logger
 
-    def handle_create_playlist(self,
+    async def handle_create_playlist(self,
                                activity: Activity) -> MessageResponseSchema:
         aggregate_id = generate_aggregate_id()
         created_at = datetime.now(timezone.utc)
@@ -63,7 +63,7 @@ class PlaylistService:
         return MessageResponseSchema(aggregate_id=activity.aggregate_id,
                                      type=MessageType.PROCESSED_CREATE_PLAYLIST)
 
-    def handle_update_playlist(self,
+    async def handle_update_playlist(self,
                                activity: Activity) -> MessageResponseSchema:
         aggregate_id = activity.aggregate_id
         if self.user_playlist_repository.find_by_playlist_id_and_is_active(
@@ -90,7 +90,7 @@ class PlaylistService:
         return MessageResponseSchema(aggregate_id=activity.aggregate_id,
                                      type=MessageType.PROCESSED_UPDATE_PLAYLIST)
 
-    def handle_delete_playlist(self,
+    async def handle_delete_playlist(self,
                                activity: Activity) -> MessageResponseSchema:
         aggregate_id = activity.aggregate_id
         user_playlist = self.user_playlist_repository.find_by_playlist_id_and_is_active(
