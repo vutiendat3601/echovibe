@@ -105,27 +105,31 @@ class TrackService:
         activity: Activity | None = self.activity_repository.find_by_session_id_and_type(
             session_id, ActionType.LISTEN_TRACK_TRACKING.name)
         if activity:
-            created_at = datetime.now(timezone.utc)
-            duration_second = (created_at - activity.created_at).total_seconds()
+            updated_at = datetime.now(timezone.utc)
+            duration_second = (updated_at - activity.created_at).total_seconds()
             if duration_second >= TRACK_LISTEN_MIN_SECOND:
-                is_existed = self.track_listen_repository.exist_by_session_id(
+                track_listen: TrackListen | None = self.track_listen_repository.find_by_session_id(
                     session_id)
-                if not is_existed:
+                if not track_listen:
+                    track_listen = TrackListen(
+                        session_id=session_id,
+                        aggregate_id=activity.aggregate_id,
+                        user_id=activity.created_by,
+                        created_at=updated_at,
+                        created_by=activity.created_by)
+
                     track_stats: TrackStats = self._get_track_stats_by_id(
                         activity.aggregate_id)
                     track_stats.total_listens += 1
-                    track_stats.updated_at = created_at
+                    track_stats.updated_at = updated_at
                     track_stats.created_by = track_stats.created_by if track_stats.created_by else activity.created_by
                     track_stats.updated_by = activity.created_by
+
                     self.track_stats_repository.save_track_stats(track_stats)
 
-                track_listen = TrackListen(session_id=session_id,
-                                           aggregate_id=activity.aggregate_id,
-                                           user_id=activity.created_by,
-                                           is_active=False,
-                                           duration_second=duration_second,
-                                           created_at=created_at,
-                                           created_by=activity.created_by)
+                track_listen.duration_second = duration_second
+                track_listen.updated_at = updated_at
+                track_listen.updated_by = activity.created_by
                 self.track_listen_repository.save_track_listen(track_listen)
                 self.logger.info(
                     f"Processed {ActionType.LISTENED_TRACK_TRACKING} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
@@ -148,28 +152,30 @@ class TrackService:
         activity: Activity | None = self.activity_repository.find_by_session_id_and_type(
             session_id, ActionType.VIEW_TRACK_DETAIL_PAGE_TRACKING.name)
         if activity:
-            created_at = datetime.now(timezone.utc)
-            duration_second = (created_at - activity.created_at).total_seconds()
+            updated_at = datetime.now(timezone.utc)
+            duration_second = (updated_at - activity.created_at).total_seconds()
             if duration_second >= TRACK_DETAIL_PAGE_VIEW_MIN_SECOND:
-                is_existed = self.track_detail_page_view_repository.exist_by_session_id(
+                track_detail_page_view: TrackDetailPageView | None = self.track_detail_page_view_repository.find_by_session_id(
                     session_id)
-                if not is_existed:
+                if not track_detail_page_view:
+                    track_detail_page_view = TrackDetailPageView(
+                        session_id=session_id,
+                        aggregate_id=activity.aggregate_id,
+                        user_id=activity.created_by,
+                        created_at=updated_at,
+                        created_by=activity.created_by)
+
                     track_stats: TrackStats = self._get_track_stats_by_id(
                         activity.aggregate_id)
                     track_stats.total_detail_page_views += 1
-                    track_stats.updated_at = created_at
+                    track_stats.updated_at = updated_at
                     track_stats.created_by = track_stats.created_by if track_stats.created_by else activity.created_by
                     track_stats.updated_by = activity.created_by
                     self.track_stats_repository.save_track_stats(track_stats)
 
-                track_detail_page_view = TrackDetailPageView(
-                    session_id=session_id,
-                    aggregate_id=activity.aggregate_id,
-                    user_id=activity.created_by,
-                    is_active=False,
-                    duration_second=duration_second,
-                    created_at=created_at,
-                    created_by=activity.created_by)
+                track_detail_page_view.duration_second = duration_second
+                track_detail_page_view.updated_at = updated_at
+                track_detail_page_view.updated_by = activity.created_by
                 self.track_detail_page_view_repository.save_track_detail_page_view(
                     track_detail_page_view)
                 self.logger.info(

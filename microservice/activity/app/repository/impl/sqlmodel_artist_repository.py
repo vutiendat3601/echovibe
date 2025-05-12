@@ -91,6 +91,20 @@ class SqlmodelArtistDetailPageViewRepository(ArtistDetailPageViewRepository):
         finally:
             session.close()
 
+    def find_by_session_id(self,
+                           session_id: str) -> ArtistDetailPageView | None:
+        try:
+            with self.session_factory() as session:
+                statement = (select(ArtistDetailPageView).filter(
+                    ArtistDetailPageView.session_id == session_id))
+                artist_detail_page_view = session.exec(statement).first()
+                return artist_detail_page_view
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
 
 class SqlmodelArtistStatsRepository(ArtistStatsRepository):
 

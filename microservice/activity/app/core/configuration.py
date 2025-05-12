@@ -26,6 +26,7 @@ class Configuration:
     _database_configuration: DatabaseConfiguration
     _kafka_broker_bootstrap_server_urls = None
     _open_id_connect_certs_url: str | None = None
+    _product_base_url: str | None = None
 
     def __init__(self) -> None:
         self._build_number = os.getenv("BUILD_NUMBER", "unknown")
@@ -53,6 +54,7 @@ class Configuration:
             "KAFKA_BROKER_BOOTSTRAP_SERVER_URLS")
         self._open_id_connect_certs_url = os.getenv(
             "APP_WEB_AUTH_OPENIDCONNECTCERTSURL")
+        self._product_base_url = os.getenv("APP_WEB_CLIENT_PRODUCT_BASEURL")
 
     def get_build_number(self) -> str:
         return self._build_number
@@ -107,6 +109,9 @@ class Configuration:
 
     def get_open_id_connect_certs_url(self) -> str:
         return self._open_id_connect_certs_url
+
+    def get_product_base_url(self) -> str:
+        return self._product_base_url
 
 
 configuration = Configuration()

@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Header
 from app.core.container import Container
 from dependency_injector.wiring import Provide
 from app.core.logger import Logger
@@ -16,7 +16,10 @@ artist_service: ArtistService = Provide[Container.artist_service]
 
 @artist_router.get(path="/{id}/stats",
                    response_model=ResponseSchema[ArtistStatsDetailSchema])
-async def get_artist_stats(id: str):
-    artist_stats_schema = artist_service.get_artist_stats_detail(id)
+async def get_artist_stats(id: str,
+                           authorization: str | None = Header(
+                               None, alias="Authorization")):
+    jwt = authorization.removeprefix("Bearer ") if authorization else None
+    artist_stats_schema = await artist_service.get_artist_stats_detail(id, jwt)
     response_scheme = ok(data=artist_stats_schema)
     return JSONResponse(content=jsonable_encoder(response_scheme))
