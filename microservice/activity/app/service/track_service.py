@@ -53,7 +53,7 @@ class TrackService:
                                    created_by=activity.created_by)
         self.track_like_repository.save_track_like(track_like)
 
-        track_stats: TrackStats = self._get_track_stats_by_id(
+        track_stats: TrackStats = await self._get_track_stats_by_id(
             activity.aggregate_id)
         track_stats.total_likes += 1
         track_stats.updated_at = updated_at
@@ -76,7 +76,7 @@ class TrackService:
             track_like.updated_by = activity.created_by
             self.track_like_repository.save_track_like(track_like)
 
-            track_stats: TrackStats = self._get_track_stats_by_id(
+            track_stats: TrackStats = await self._get_track_stats_by_id(
                 activity.aggregate_id)
             track_stats.total_likes -= 1
             track_stats.updated_at = updated_at
@@ -118,7 +118,7 @@ class TrackService:
                         created_at=updated_at,
                         created_by=activity.created_by)
 
-                    track_stats: TrackStats = self._get_track_stats_by_id(
+                    track_stats: TrackStats = await self._get_track_stats_by_id(
                         activity.aggregate_id)
                     track_stats.total_listens += 1
                     track_stats.updated_at = updated_at
@@ -165,7 +165,7 @@ class TrackService:
                         created_at=updated_at,
                         created_by=activity.created_by)
 
-                    track_stats: TrackStats = self._get_track_stats_by_id(
+                    track_stats: TrackStats = await self._get_track_stats_by_id(
                         activity.aggregate_id)
                     track_stats.total_detail_page_views += 1
                     track_stats.updated_at = updated_at
@@ -183,7 +183,7 @@ class TrackService:
                 )
 
     async def get_track_stats(self, aggregate_id: str) -> TrackStatsSchema:
-        track_stats = self._get_track_stats_by_id(aggregate_id)
+        track_stats = await self._get_track_stats_by_id(aggregate_id)
         return map_to_track_stats_schema(track_stats)
 
     async def _get_track_stats_by_id(self, id: str) -> TrackStats:
