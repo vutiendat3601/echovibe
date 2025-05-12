@@ -1,7 +1,8 @@
-export interface UserStatsDto {
+export interface UserUsageDto {
   userId: string;
   data: any | null;
-  updated_at: string;
-  liked_track_ids: string[];
-  liked_artist_ids: string[];
+  updatedAt: string;
+  likedTrackIds: string[];
+  likedArtistIds: string[];
+  createdPlaylistIds: string[];
 }

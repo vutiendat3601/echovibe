@@ -1,25 +1,59 @@
-import { Component, OnInit, ElementRef, ViewChild, Renderer2 } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TrackStatsDto, TrackDetailDto } from './../../../dto/track-dto';
+import { AuthService } from './../../../service/auth.service';
+import { UserService } from './../../../service/user.service';
 import { CommonModule } from '@angular/common';
-import { TrackDto } from '../../../dto/track-dto';
-import { TrackService } from '../../../service/track.service';
-import { AudioService } from '../../../service/audio.service';
-import { ProgressBarModule } from 'primeng/progressbar';
-import { BadgeModule } from 'primeng/badge';
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
-import { OverlayPanelModule } from 'primeng/overlaypanel';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faPlay, faPause, faHeart, faEllipsisH, faPlus } from '@fortawesome/free-solid-svg-icons';
-import { environment } from '../../../../environment/environment';
+import { faEllipsisH, faHeart, faPause, faPlay, faPlus } from '@fortawesome/free-solid-svg-icons';
 import ColorThief from 'colorthief';
+import { MessageService } from 'primeng/api';
+import { BadgeModule } from 'primeng/badge';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { Popover, PopoverModule } from 'primeng/popover';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ToastModule } from 'primeng/toast';
 import { Subscription } from 'rxjs';
-import { Popover } from 'primeng/popover';
-import { PopoverModule } from 'primeng/popover';
+import { environment } from '../../../../environment/environment';
 import { ActivityService } from '../../../service/activity.service';
-import { ActionType } from '../../../constant/action-type';
+import { AudioService } from '../../../service/audio.service';
+import { TrackService } from './../../../service/track.service';
+import { TrackingService } from '../../../service/tracking.service';
+import { MessageResponseDto } from '../../../dto/activity-dto';
+
+interface TrackStats {
+  totalDetailPageViews: number;
+  totalLikes: number;
+  totalListens: number;
+}
+
+interface ArtistDetailOfTrack {
+  id: string;
+  urn: string;
+  name: string;
+  description: string | null;
+  thumbnailUrl: string | null;
+  isPublic: boolean;
+  isVerified: boolean;
+  isMainArtist: boolean;
+}
+
+interface TrackDetail {
+  id: string;
+  urn: string;
+  name: string;
+  description: string | null;
+  thumbnailUrl: string | null;
+  officialReleasedDate: string | null;
+  isPublic: boolean;
+  audioFileM3u8Url: string | null;
+  audioDurationSecond: number;
+  tags: string[];
+  artists: ArtistDetailOfTrack[];
+  stats: TrackStats;
+}
 
 @Component({
   selector: 'app-track-detail',
@@ -41,13 +75,17 @@ import { ActionType } from '../../../constant/action-type';
   providers: [MessageService, ActivityService]
 })
 export class TrackDetailComponent implements OnInit {
+  private viewTrackingDetailTrackingSessionId: string | null = null;
+  private readonly intervalIds: number[] = [];
   @ViewChild('trackThumbnail') trackThumbnail!: ElementRef;
   @ViewChild('op') op!: Popover;
 
-  track: TrackDto | null = null;
+  trackDetail: TrackDetail | null = null;
+  isLiked: boolean = false;
   isLoading = true;
   errorMessage = '';
   backgroundColor = 'rgba(18, 18, 18, 1)';
+  isAuthenticated: boolean = false;
 
   // Track playback state
   isPlaying = false;
@@ -65,19 +103,25 @@ export class TrackDetailComponent implements OnInit {
   useMockData = !environment.production; // Use mock data in non-production environments
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private trackService: TrackService,
-    private audioService: AudioService,
-    private renderer: Renderer2,
-    private messageService: MessageService,
-    private acitivityService: ActivityService
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly trackService: TrackService,
+    private readonly audioService: AudioService,
+    private readonly renderer: Renderer2,
+    private readonly messageService: MessageService,
+    private readonly userService: UserService,
+    private readonly authService: AuthService,
+    private readonly trackingService: TrackingService
   ) {}
 
   ngOnInit(): void {
+    this.initialize();
     const trackId = this.route.snapshot.paramMap.get('id');
     if (trackId) {
-      this.loadTrackDetails(trackId);
+      this.loadData(trackId);
+      this.listenDataChange();
+      this.listenTrackingEvent();
+      this.userService.refresh();
     } else {
       this.router.navigate(['/not-found']);
     }
@@ -85,8 +129,8 @@ export class TrackDetailComponent implements OnInit {
     // Subscribe to audio service to track current playback state
     this.subscriptions.push(
       this.audioService.currentTrack$.subscribe((currentTrack) => {
-        if (this.track && currentTrack) {
-          this.isCurrentTrack = currentTrack.id === this.track.id;
+        if (this.trackDetail && currentTrack) {
+          this.isCurrentTrack = currentTrack.id === this.trackDetail.id;
         } else {
           this.isCurrentTrack = false;
         }
@@ -98,70 +142,78 @@ export class TrackDetailComponent implements OnInit {
     );
   }
 
+  initialize() {
+    this.isAuthenticated = this.authService.isAuthenticated;
+  }
+
   toggle(event: Event): void {
     this.op.toggle(event);
   }
 
   // Play or pause the current track
   handlePlayClick(): void {
-    if (!this.track || !this.track.audioFileM3u8Url) return;
+    if (!this.trackDetail || !this.trackDetail.audioFileM3u8Url) return;
 
     if (this.isCurrentTrack) {
       // If this is already the current track, just toggle play/pause
       this.audioService.togglePlay();
     } else {
       // If this is a new track, set it and play
-      this.audioService.setTrackFromDto(this.track);
+      this.audioService.setTrackFromDto(this.trackDetail);
       this.audioService.play();
+    }
+  }
+
+  handleLikeState() {
+    if (this.trackDetail) {
+      if (this.isLiked) {
+        this.trackService.unlikeTrack(this.trackDetail.id);
+      } else {
+        this.trackService.likeTrack(this.trackDetail.id);
+      }
     }
   }
 
   // Add current track to queue
   addToQueue(): void {
-    if (!this.track) return;
+    if (!this.trackDetail) return;
 
     // Check if the track already exists in the queue
-    if (this.audioService.isTrackInQueue(this.track.id)) {
+    if (this.audioService.isTrackInQueue(this.trackDetail.id)) {
       this.messageService.add({
         severity: 'info',
         summary: 'Already in Queue',
-        detail: `"${this.track.name}" is already in your play queue`
+        detail: `"${this.trackDetail.name}" is already in your play queue`
       });
       return;
     }
 
     // Add track to queue
-    this.audioService.addTrackDtoToQueue(this.track);
+    this.audioService.addTrackDtoToQueue(this.trackDetail);
     this.messageService.add({
       severity: 'success',
       summary: 'Added to Queue',
-      detail: `"${this.track.name}" has been added to your queue`
+      detail: `"${this.trackDetail.name}" has been added to your queue`
     });
   }
 
-  private loadTrackDetails(trackId: string): void {
+  private loadData(trackId: string): void {
     this.isLoading = true;
     this.trackService.getTrackById(trackId).subscribe({
       next: (response) => {
-        this.track = response.data;
-        this.isLoading = false;
-        if (!this.track) {
-          this.errorMessage = 'Track not found';
-        } else {
-          this.acitivityService.send({
-            sessionId: null,
-            aggregateId: this.track.id,
-            type: ActionType.VIEW_TRACK_DETAIL_PAGE,
-            dataJson: null
-            // {
-            // name: 'Những bài hát hay nhất của Sơn Tùng M-TP',
-            // isPublic: true,
-            // thumbnailUrl: null,
-            // trackIds: ['wtzugknWgsmi', 'pdzsaqauHvgD']
-            // }
+        const trackDetailDto = response.data;
+        if (trackDetailDto) {
+          const trackDetail = this.mapToTrackDetail(trackDetailDto);
+          this.isLoading = false;
+          this.trackService.getTrackStats(trackDetail.id).subscribe((respDto) => {
+            const { totalDetailPageViews, totalLikes, totalListens } = respDto.data;
+            trackDetail.stats = { totalDetailPageViews, totalLikes, totalListens };
           });
-          // Extract color after image is loaded
-          setTimeout(() => this.extractColorFromThumbnail(), 300);
+          this.trackDetail = trackDetail;
+          this.initializeTracking();
+          window.setTimeout(() => this.extractColorFromThumbnail(), 300);
+        } else {
+          this.errorMessage = 'Track not found';
         }
       },
       error: (error) => {
@@ -232,7 +284,67 @@ export class TrackDetailComponent implements OnInit {
     return count.toString();
   }
 
+  private initializeTracking() {
+    if (this.trackDetail) {
+      this.trackingService.startViewTrackDetailPageTracking(this.trackDetail.id);
+    }
+  }
+
+  private listenDataChange() {
+    this.userService.userUsageData.subscribe(({ likedTrackIds }) => {
+      this.trackDetail && (this.isLiked = likedTrackIds.includes(this.trackDetail.id));
+    });
+  }
+
+  private listenTrackingEvent() {
+    this.trackingService.viewTrackDetailPageTracking.subscribe(({ sessionId, aggregateId }: MessageResponseDto) => {
+      if (this.trackDetail && aggregateId === this.trackDetail.id && sessionId) {
+        this.viewTrackingDetailTrackingSessionId = sessionId;
+        window.setTimeout(() => {
+          this.trackingService.sendViewedTrackDetailPageTracking(sessionId);
+        }, 5_000);
+      }
+    });
+  }
+
+  private mapToTrackDetail(trackDetailDto: TrackDetailDto): TrackDetail {
+    const {
+      id,
+      urn,
+      name,
+      description,
+      thumbnailUrl,
+      officialReleasedDate,
+      isPublic,
+      audioFileM3u8Url,
+      audioDurationSecond,
+      tags,
+      artists
+    } = trackDetailDto;
+    return {
+      id,
+      urn,
+      name,
+      description,
+      thumbnailUrl,
+      officialReleasedDate,
+      isPublic,
+      audioFileM3u8Url,
+      audioDurationSecond,
+      tags,
+      artists,
+      stats: {
+        totalDetailPageViews: 0,
+        totalLikes: 0,
+        totalListens: 0
+      }
+    };
+  }
+
   ngOnDestroy(): void {
+    this.viewTrackingDetailTrackingSessionId &&
+      this.trackingService.sendViewedTrackDetailPageTracking(this.viewTrackingDetailTrackingSessionId);
+
     // Clean up subscriptions
     this.subscriptions.forEach((sub) => sub.unsubscribe());
   }

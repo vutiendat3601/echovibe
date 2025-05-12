@@ -1,10 +1,11 @@
 from app.repository.activity_repository import ActivityRepository
-from datetime import datetime, timezone
 from app.core.logger import Logger
+from datetime import datetime, timezone
 from app.model.activity import Activity
-from app.schema.activity_schema import ActivitySchema
+from app.model.user import UserPlaylist
 from app.event.sender.event_sender import send_event
-from app.constant.constant import AUTH_SYSTEM_USERNAME
+from app.enum.message_type import MessageType
+from app.schema.activity_schema import MessageResponseSchema
 from app.util.identity_utils import generate_aggregate_id
 from app.event.schema.playlist_event_schema import (PlaylistCreatedEvent,
                                                     PlaylistUpdatedEvent,
@@ -13,18 +14,24 @@ from app.constant.playlist_constant import (PLAYLIST_CREATED_EVENT,
                                             PLAYLIST_UPDATED_EVENT,
                                             PLAYLIST_DELETED_EVENT,
                                             PLAYLIST_URN_PREFIX)
-from app.service.artist_service import ArtistService
+from app.repository.user_repository import UserPlaylistRepository
+
 import asyncio
 
 
 class PlaylistService:
 
-    def __init__(self, activity_repository: ActivityRepository, logger: Logger):
+    def __init__(self, activity_repository: ActivityRepository,
+                 user_playlist_repository: UserPlaylistRepository,
+                 logger: Logger):
         self.activity_repository = activity_repository
+        self.user_playlist_repository = user_playlist_repository
         self.logger = logger
 
-    def handle_create_playlist(self, activity: Activity) -> dict[str, str]:
+    def handle_create_playlist(self,
+                               activity: Activity) -> MessageResponseSchema:
         aggregate_id = generate_aggregate_id()
+        created_at = datetime.now(timezone.utc)
         activity.aggregate_id = aggregate_id
         self.activity_repository.save_activity(activity)
         self.logger.info(
@@ -45,11 +52,23 @@ class PlaylistService:
             send_event(topic=PLAYLIST_CREATED_EVENT,
                        event=playlist_created_event,
                        logger=self.logger))
-        return {"id": activity.aggregate_id, "type": activity.type}
+        user_playlist = UserPlaylist(playlist_id=aggregate_id,
+                                     user_id=activity.created_by,
+                                     is_active=True,
+                                     created_at=created_at,
+                                     updated_at=created_at,
+                                     created_by=activity.created_by,
+                                     updated_by=activity.created_by)
+        self.user_playlist_repository.save_user_playlist(user_playlist)
+        return MessageResponseSchema(aggregate_id=activity.aggregate_id,
+                                     type=MessageType.PROCESSED_CREATE_PLAYLIST)
 
-    def handle_update_playlist(self, activity: Activity) -> str:
+    def handle_update_playlist(self,
+                               activity: Activity) -> MessageResponseSchema:
         aggregate_id = activity.aggregate_id
-        if self.activity_repository.find_by_aggregate_id(aggregate_id):
+        if self.user_playlist_repository.find_by_playlist_id_and_is_active(
+                aggregate_id, True):
+            created_at = datetime.now(timezone.utc)
             self.activity_repository.save_activity(activity)
             self.logger.info(
                 f"Saved Activity: type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
@@ -63,20 +82,34 @@ class PlaylistService:
                 thumbnail_url=activity.data_json.get("thumbnailUrl"),
                 version=-1,
                 created_by=activity.created_by,
-                timestamp=activity.created_at)
+                timestamp=created_at)
             asyncio.create_task(
                 send_event(topic=PLAYLIST_UPDATED_EVENT,
                            event=playlist_updated_event,
                            logger=self.logger))
-        return {"id": activity.aggregate_id, "type": activity.type}
+        return MessageResponseSchema(aggregate_id=activity.aggregate_id,
+                                     type=MessageType.PROCESSED_UPDATE_PLAYLIST)
 
-    def handle_delete_playlist(self, activity: Activity) -> str:
+    def handle_delete_playlist(self,
+                               activity: Activity) -> MessageResponseSchema:
         aggregate_id = activity.aggregate_id
-        if self.activity_repository.find_by_aggregate_id(aggregate_id):
+        user_playlist = self.user_playlist_repository.find_by_playlist_id_and_is_active(
+            aggregate_id, True)
+        if user_playlist:
+            created_at = datetime.now(timezone.utc)
             self.activity_repository.save_activity(activity)
             self.logger.info(
                 f"Saved Activity: type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
+            user_playlist.is_active = False
+            user_playlist.updated_at = created_at
+            user_playlist.updated_by = activity.created_by
+            self.user_playlist_repository.save_user_playlist(user_playlist)
+
+            self.logger.info(
+                f"Saved UserPlaylist: playlist_id={user_playlist.playlist_id}, user_id={user_playlist.user_id}, is_active={user_playlist.is_active}"
+            )
+
             playlist_deleted_event = PlaylistDeletedEvent(
                 type=PlaylistDeletedEvent.__name__,
                 id=activity.aggregate_id,
@@ -89,4 +122,5 @@ class PlaylistService:
                 send_event(topic=PLAYLIST_DELETED_EVENT,
                            event=playlist_deleted_event,
                            logger=self.logger))
-        return {}
+        return MessageResponseSchema(aggregate_id=activity.aggregate_id,
+                                     type=MessageType.PROCESSED_DELETE_PLAYLIST)

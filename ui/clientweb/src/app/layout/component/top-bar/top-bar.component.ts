@@ -58,70 +58,70 @@ export class TopBarComponent implements OnInit {
     {
       title: 'Nơi Này Có Anh',
       artist: 'Sơn Tùng M-TP',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.png',
+      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'song',
       id: '1'
     },
     {
       title: 'Sóng Gió',
       artist: 'ICM, Jack, K-ICM',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.png',
+      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'song',
       id: '2'
     },
     {
       title: 'Đừng Làm Trái Tim Anh Đau',
       artist: 'Sơn Tùng M-TP',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.png',
+      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'song',
       id: '3'
     },
     {
       title: 'CUA',
       artist: 'MANBO, HIEUTHUHAI',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.png',
+      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'song',
       id: '4'
     },
     {
       title: 'NGỰA Ô',
       artist: 'Dangrangto, TeuYungBoy, DONAL',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.png',
+      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'song',
       id: '5'
     },
     {
       title: 'Sơn Tùng M-TP',
       artist: 'Artist',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.png',
+      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'artist',
       id: '6'
     },
     {
       title: 'Jack',
       artist: 'Artist',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.png',
+      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'artist',
       id: '7'
     },
     {
       title: 'ICM',
       artist: 'Artist',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.png',
+      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'artist',
       id: '8'
     },
     {
       title: 'HIEUTHUHAI',
       artist: 'Artist',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.png',
+      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'artist',
       id: '9'
     },
     {
       title: 'MANBO',
       artist: 'Artist',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.png',
+      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'artist',
       id: '10'
     }
@@ -138,7 +138,7 @@ export class TopBarComponent implements OnInit {
         debounceTime(300), // Wait for 300ms pause in events
         distinctUntilChanged() // Only emit if value is different from previous
       )
-      .subscribe(query => {
+      .subscribe((query) => {
         if (query && query.trim().length > 1) {
           this.navigateToSearchResults(query);
         }
@@ -146,6 +146,7 @@ export class TopBarComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Subscribe to user profile changes
     this.authService.userProfile().subscribe((userProfile) => (this.userProfile = userProfile));
   }
 
@@ -214,7 +215,7 @@ export class TopBarComponent implements OnInit {
       const newResult: SearchResult = {
         title: this.searchQuery,
         artist: 'Search query',
-        imageUrl: '/asset/image/default-artist-thumbnail-image.png',
+        imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
         type: 'song',
         id: Date.now().toString()
       };
@@ -242,7 +243,12 @@ export class TopBarComponent implements OnInit {
 
   redirectToProfileUrl(): void {}
 
+  signIn(): void {
+    this.authService.signIn();
+  }
+
   signOut(): void {
+    // First sign out using the AuthService
     this.authService.signOut();
   }
 }

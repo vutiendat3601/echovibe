@@ -3,11 +3,11 @@
   <ng-template pTemplate="header">
     <div class="banner">
       <!-- Artist banner image with overlay -->
-      <img *ngIf="artist?.backgroundUrl" [src]="artist?.backgroundUrl" class="banner-img" />
-      <div *ngIf="!artist?.backgroundUrl" class="banner-img no-background"></div>
+      <img *ngIf="artistDetail?.backgroundUrl" [src]="artistDetail?.backgroundUrl" class="banner-img" />
+      <div *ngIf="!artistDetail?.backgroundUrl" class="banner-img no-background"></div>
       <div class="overlay">
         <!-- Verified artist badge -->
-        @if (artist?.isVerified) {
+        @if (artistDetail?.isVerified) {
           <div class="flex gap-1 items-center">
             <svg
               data-encore-id="verifiedBadge"
@@ -35,8 +35,24 @@
             <p>Verified Artist</p>
           </div>
         }
-        <!-- Artist name -->
-        <h1>{{ artist?.name }}</h1>
+
+        <!-- Artist profile section with thumbnail and name -->
+        <div class="artist-profile-section flex items-center gap-4 my-2">
+          <!-- Artist thumbnail -->
+          <div class="artist-thumbnail">
+            <img
+              *ngIf="artistDetail?.thumbnailUrl"
+              [src]="artistDetail?.thumbnailUrl"
+              class="circle-thumbnail"
+              alt="{{ artistDetail?.name }}"
+            />
+            <div *ngIf="!artistDetail?.thumbnailUrl" class="circle-thumbnail default-thumbnail"></div>
+          </div>
+
+          <!-- Artist name -->
+          <h1>{{ artistDetail?.name }}</h1>
+        </div>
+
         <!-- Listeners count -->
         <div class="sub-info">
           <span>1,696,710 monthly listeners</span>
@@ -154,12 +170,12 @@
       <div class="about-content">
         <!-- Artist background with image and biography -->
         <div class="about-bg">
-          <img *ngIf="artist?.backgroundUrl" [src]="artist?.backgroundUrl" alt="Artist Background" />
-          <div *ngIf="!artist?.backgroundUrl" class="no-background-about"></div>
+          <img *ngIf="artistDetail?.backgroundUrl" [src]="artistDetail?.backgroundUrl" alt="Artist Background" />
+          <div *ngIf="!artistDetail?.backgroundUrl" class="no-background-about"></div>
           <div class="about-info">
             <!-- Biography section -->
             <h3>Biography</h3>
-            <p [innerHTML]="(artist?.biography || '') | safeHtmlPipe"></p>
+            <p [innerHTML]="artistDetail?.biography || '' | safeHtmlPipe"></p>
             <!-- Artist stats display -->
             <div class="about-stats">
               <div class="stat">

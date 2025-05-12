@@ -14,9 +14,6 @@ class TrackLike(SQLModel, table=True):
     created_by: str | None = Field(None)
     updated_by: str | None = Field(None)
 
-    class Config:
-        arbitrary_types_allowed = True
-
 
 class TrackDetailPageView(SQLModel, table=True):
     __tablename__ = "track_detail_page_view"
@@ -26,10 +23,9 @@ class TrackDetailPageView(SQLModel, table=True):
     duration_second: int = Field(default=0)
     session_id: str = Field(..., max_length=12)
     created_at: datetime = Field(default=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default=datetime.now(timezone.utc))
     created_by: str | None = Field(None)
-
-    class Config:
-        arbitrary_types_allowed = True
+    updated_by: str | None = Field(None)
 
 
 class TrackListen(SQLModel, table=True):
@@ -40,17 +36,15 @@ class TrackListen(SQLModel, table=True):
     session_id: str = Field(..., max_length=12)
     user_id: str = Field(..., max_length=255)
     created_at: datetime = Field(default=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default=datetime.now(timezone.utc))
     created_by: str | None = Field(None)
-
-    class Config:
-        arbitrary_types_allowed = True
+    updated_by: str | None = Field(None)
 
 
 class TrackStats(SQLModel, table=True):
     __tablename__ = "track_stats"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     aggregate_id: str = Field(..., max_length=12)
-    user_id: str = Field(..., max_length=255)
     total_detail_page_views: int = Field(default=0)
     total_likes: int = Field(default=0)
     total_listens: int = Field(default=0)
@@ -58,6 +52,3 @@ class TrackStats(SQLModel, table=True):
     updated_at: datetime = Field(default=datetime.now(timezone.utc))
     created_by: str | None = Field(None)
     updated_by: str | None = Field(None)
-
-    class Config:
-        arbitrary_types_allowed = True

@@ -17,6 +17,10 @@ declare module 'colorthief' {
      * @param quality - (optional) Default: 10. Lower number means higher quality but slower processing time.
      * @returns Array of arrays of [r, g, b] values
      */
-    getPalette(sourceImage: HTMLImageElement | HTMLCanvasElement, colorCount?: number, quality?: number): Array<[number, number, number]>;
+    getPalette(
+      sourceImage: HTMLImageElement | HTMLCanvasElement,
+      colorCount?: number,
+      quality?: number
+    ): Array<[number, number, number]>;
   }
 }

@@ -2,7 +2,7 @@ deployment:
   name: product
   containerPort: 6200
   replicaCount: 1
-  image: 
+  image:
     repository: vutiendat3601/echovibe-product
     tag: latest
     pullPolicy: Always
@@ -31,3 +31,11 @@ database:
   host: infras.echovibe.io.vn
   port: 16200
   name: echovibe_product
+redis:
+  enabled: true
+  url: redis://:zhsdf23lkDLKJ3kjhfas42dkjasf863h@infras.echovibe.io.vn:6379/0
+app:
+  web:
+    client:
+      product:
+        baseUrl: https://api.echovibe.io.vn/product

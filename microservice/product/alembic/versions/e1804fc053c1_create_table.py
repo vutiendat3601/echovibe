@@ -381,31 +381,39 @@ EXECUTE FUNCTION playlist_update_tsv()
     create_playlist_detail_materialized_view_ddl = """
 CREATE MATERIALIZED VIEW public.mv_playlist_detail
 TABLESPACE pg_default
-AS SELECT
-    p.id,
-    p.aggregate_id,
-    p.urn,
-    p."name",
-    p.is_public,
-    p.thumbnail_url,
-    p.created_by,
-    p.updated_by,
-    p.created_at,
-    p.updated_at,
-    p.is_active,
-    p.tsv,
-    (SELECT
-        json_agg(t0.*) AS json_agg
-    FROM
-        (SELECT * FROM mv_track_detail mtd
-            WHERE
-                mtd.aggregate_id::text = ANY (p.track_ids)
-            ORDER BY
-                array_position(p.track_ids, mtd.aggregate_id)
-            ) AS t0
-    )::jsonb AS tracks_json
+AS SELECT id,
+    aggregate_id,
+    urn,
+    name,
+    is_public,
+    thumbnail_url,
+    created_by,
+    updated_by,
+    created_at,
+    updated_at,
+    is_active,
+    tsv,
+    (( SELECT json_agg(t0.*) AS json_agg
+           FROM ( SELECT mtd.aggregate_id AS id,
+                    mtd.urn,
+                    mtd.name,
+                    mtd.description,
+                    mtd.is_public,
+                    mtd.is_released,
+                    mtd.thumbnail_file_key,
+                    mtd.thumbnail_url,
+                    mtd.audio_file_m3u8_url,
+                    mtd.audio_duration_second,
+                    mtd.official_released_date,
+                    mtd.tags,
+                    mtd.is_active,
+                    mtd.tsv,
+                    mtd.artists_json
+                   FROM mv_track_detail mtd
+                  WHERE mtd.aggregate_id::text = ANY (p.track_ids)
+                  ORDER BY (array_position(p.track_ids, mtd.aggregate_id::text))) t0))::jsonb AS tracks_json
    FROM playlist p
-   WHERE p.is_active
+  WHERE is_active
 WITH DATA;
 
 CREATE OR REPLACE FUNCTION refresh_mv_playlist_detail()

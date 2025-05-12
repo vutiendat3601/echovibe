@@ -13,6 +13,12 @@ class TrackLikeRepository(ABC):
                                          user_id: str) -> TrackLike | None:
         """Find TrackLike by aggregate_id and user_id"""
 
+    @abstractmethod
+    def find_by_aggregate_id_and_user_id_and_is_active(
+            self, aggregate_id: str, user_id: str,
+            is_active: bool) -> TrackLike | None:
+        """Find TrackLike by aggregate_id and user_id"""
+
 
 class TrackDetailPageViewRepository(ABC):
 
@@ -22,12 +28,28 @@ class TrackDetailPageViewRepository(ABC):
             track_detail_page_view: TrackDetailPageView) -> TrackDetailPageView:
         """Save TrackDetailPageView"""
 
+    @abstractmethod
+    def exist_by_session_id(self, session_id: str) -> bool:
+        """Exist any TrackDetailPageView by session_id"""
+
+    @abstractmethod
+    def find_by_session_id(self, session_id: str) -> TrackDetailPageView | None:
+        """Find TrackDetailPageView by session_id"""
+
 
 class TrackListenRepository(ABC):
 
     @abstractmethod
     def save_track_listen(self, track_listen: TrackListen) -> TrackListen:
         """Save TrackListen"""
+
+    @abstractmethod
+    def exist_by_session_id(self, session_id: str) -> bool:
+        """Exist any TrackListen by session_id"""
+
+    @abstractmethod
+    def find_by_session_id(self, session_id: str) -> TrackListen | None:
+        """Find TrackListen by session_id"""
 
 
 class TrackStatsRepository(ABC):

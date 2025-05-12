@@ -5,13 +5,17 @@ from app.event.schema.playlist_event_schema import (PlaylistCreatedEvent,
                                                     PlaylistUpdatedEvent,
                                                     PlaylistDeletedEvent)
 from app.model.playlist import (Playlist)
+from app.cache.redis import Redis
+import asyncio
 
 
 class PlaylistEventHandler:
 
-    def __init__(self, playlist_repository: PlaylistRepository, logger: Logger):
+    def __init__(self, playlist_repository: PlaylistRepository, redis: Redis,
+                 logger: Logger):
         self.playlist_repository = playlist_repository
         self.playlist_repository = playlist_repository
+        self.redis = redis
         self.logger = logger
 
     def handle_playlist_created_event(
@@ -54,6 +58,10 @@ class PlaylistEventHandler:
             playlist.event_timestamp = playlist_updated_event.timestamp
             playlist.updated_by = playlist_updated_event.created_by
             self.playlist_repository.save_playlist(playlist)
+
+            playlist_cache_key = f"playlist:{playlist.aggregate_id}"
+            asyncio.create_task(self.redis.delete_value(playlist_cache_key))
+
             self.logger.info(
                 f"Processed {PlaylistUpdatedEvent.__name__}: id={playlist.aggregate_id}, name={playlist.name}, created_by={playlist.created_by}, created_at={playlist.created_at}"
             )
@@ -74,6 +82,10 @@ class PlaylistEventHandler:
         else:
             self.playlist_repository.delete_by_aggregate_id(
                 playlist_deleted_event.id)
+
+        playlist_cache_key = f"playlist:{playlist_deleted_event.id}"
+        asyncio.create_task(self.redis.delete_value(playlist_cache_key))
+
         self.logger.info(
             f"Processed {PlaylistDeletedEvent.__name__}: id={playlist_deleted_event.id}, version={playlist_deleted_event.version}, timestamp={playlist_deleted_event.timestamp}"
         )

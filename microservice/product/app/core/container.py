@@ -15,6 +15,7 @@ from app.service.search_service import SearchService
 from app.event.handler.artist_event_handler import ArtistEventHandler
 from app.event.handler.track_event_handler import TrackEventHandler
 from app.event.handler.playlist_event_handler import PlaylistEventHandler
+from app.cache.redis import Redis
 
 
 class Container(containers.DeclarativeContainer):
@@ -31,6 +32,9 @@ class Container(containers.DeclarativeContainer):
     logger = providers.Singleton(Logger)
     database = providers.Singleton(
         Database, database_uri=configuration.get_database_uri())
+    redis = providers.Singleton(Redis,
+                                redis_url=configuration.get_redis_url(),
+                                logger=logger)
 
     # Repository
     artist_repository = providers.Factory(
@@ -62,14 +66,17 @@ class Container(containers.DeclarativeContainer):
     # Service
     artist_service = providers.Factory(
         ArtistService,
+        redis=redis,
         logger=logger,
         artist_detail_repository=artist_detail_repository)
     track_service = providers.Factory(
         TrackService,
+        redis=redis,
         logger=logger,
         track_detail_repository=track_detail_repository)
     playlist_service = providers.Factory(
         PlaylistService,
+        redis=redis,
         logger=logger,
         playlist_detail_repository=playlist_detail_repository)
     search_service = providers.Factory(
@@ -90,4 +97,5 @@ class Container(containers.DeclarativeContainer):
     playlist_event_handler = providers.Factory(
         PlaylistEventHandler,
         playlist_repository=playlist_repository,
+        redis=redis,
         logger=logger)

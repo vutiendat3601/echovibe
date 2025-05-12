@@ -1,38 +1,22 @@
 import { Injectable } from '@angular/core';
-import { flatMap, Observable, Subject } from 'rxjs';
+import { OAuthStorage } from 'angular-oauth2-oidc';
 import { environment } from '../../environment/environment';
-import { ActivityDto } from '../dto/activity-dto';
-import { AuthService } from './auth.service';
-import { HttpClient } from '@angular/common/http';
-import { UserStatsDto } from '../dto/user-dto';
-import { ResponseDto } from '../dto/response-dto';
+import { MessageType } from './../constant/message-type';
+import { ActivityDto, MessageResponseDto } from './../dto/activity-dto';
+import { SystemService } from './system.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ActivityService {
   private websocket: WebSocket | null = null;
-  private websocketMessageSubject: Subject<string> = new Subject();
-  private userStatsSubject: Subject<UserStatsDto> = new Subject();
-
+  private websocketMessageHandlersMap: Map<MessageType, ((message: MessageResponseDto) => void)[]> = new Map();
   constructor(
-    private readonly http: HttpClient,
-    private readonly authService: AuthService
-  ) {
-    this.initialize();
-  }
+    private readonly oauthStorage: OAuthStorage,
+    private readonly systemService: SystemService
+  ) {}
 
-  private initialize(): void {
-    this.getUserStats().subscribe((respDto) => {
-      this.userStatsSubject.next(respDto.data);
-    });
-  }
-
-  getUserStats(): Observable<ResponseDto<UserStatsDto>> {
-    return this.http.get<ResponseDto<UserStatsDto>>(`${environment.activityBaseUrl}/v1/me/stats`);
-  }
-
-  send(activityDto: ActivityDto) {
+  sendMessage(activityDto: ActivityDto) {
     if (!this.websocket) {
       this.connectWebsocket();
     }
@@ -54,30 +38,37 @@ export class ActivityService {
     trySend();
   }
 
-  get userStats(): Observable<UserStatsDto> {
-    return this.userStatsSubject.asObservable();
-  }
-
-  private connectWebsocket(): void {
-    const jwt = this.authService.getAccessToken();
-    if (jwt) {
-      this.websocket = new WebSocket(`${environment.activityWsBaseUrl}/v1/ws?jwt=${jwt}`);
-
-      this.websocket.onmessage = (event) => {
-        this.websocketMessageSubject.next(event.data);
-      };
-
-      this.websocket.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
-
-      this.websocket.onclose = () => {
-        console.warn('WebSocket closed');
-      };
+  addMessageHandler(type: MessageType, handler: (message: MessageResponseDto) => void) {
+    const websocketMessageHandlers = this.websocketMessageHandlersMap.get(type);
+    if (websocketMessageHandlers) {
+      websocketMessageHandlers.push(handler);
+    } else {
+      this.websocketMessageHandlersMap.set(type, [handler]);
     }
   }
 
-  get websocketMessage() {
-    return this.websocketMessageSubject.asObservable();
+  private connectWebsocket(): void {
+    const jwt = this.oauthStorage.getItem('access_token');
+    const fingerprint = this.systemService.getFingerprint();
+    let websocketUrl = `${environment.activityWsBaseUrl}/v1/ws?fingerprint=${fingerprint}`;
+    if (jwt) {
+      websocketUrl += `&jwt=${jwt}`;
+    }
+    this.websocket = new WebSocket(websocketUrl);
+    this.websocket.onmessage = (event) => {
+      const message: MessageResponseDto = JSON.parse(event.data) as MessageResponseDto;
+      const handlers = this.websocketMessageHandlersMap.get(message.type) || [];
+      for (const handle of handlers) {
+        handle(message);
+      }
+    };
+
+    this.websocket.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    this.websocket.onclose = () => {
+      console.warn('WebSocket closed');
+    };
   }
 }

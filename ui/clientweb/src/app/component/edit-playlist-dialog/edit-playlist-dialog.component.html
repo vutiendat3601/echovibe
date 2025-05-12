@@ -1,0 +1,87 @@
+<div class="edit-playlist-container">
+  <p-toast></p-toast>
+  <p-dialog
+    [(visible)]="visible"
+    [modal]="true"
+    [draggable]="false"
+    [resizable]="false"
+    [style]="{ width: '600px' }"
+    (onHide)="onHide()"
+    styleClass="edit-playlist-dialog"
+    header="Edit details"
+  >
+    <div class="edit-playlist-content">
+      <div class="edit-playlist-main-section">
+        <!-- Left side: Image upload section -->
+        <div class="playlist-image-section">
+          <input type="file" id="fileInput" (change)="onFileSelected($event)" accept="image/*" style="display: none" />
+          <div
+            class="playlist-image"
+            [ngStyle]="{
+              'background-image': 'url(' + (imageUrl || '/asset/image/default-artist-thumbnail-image.svg') + ')'
+            }"
+            (click)="triggerFileInput()"
+          >
+            <div class="image-overlay">
+              <i class="pi pi-camera"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right side: Form section -->
+        <div class="playlist-form-section">
+          <!-- Playlist name input -->
+          <div class="p-field">
+            <span class="p-input-icon-right w-full">
+              <input
+                pInputText
+                class="w-full"
+                id="playlistName"
+                [(ngModel)]="playlistName"
+                placeholder="Add a name"
+                maxlength="100"
+              />
+            </span>
+          </div>
+
+          <!-- Description text area -->
+          <div class="p-field mt-3">
+            <span class="p-input-icon-right w-full">
+              <textarea
+                pInputTextarea
+                class="w-full"
+                [(ngModel)]="playlistDescription"
+                placeholder="Add an optional description"
+                rows="5"
+              >
+              </textarea>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom: File upload disclaimer -->
+      <div class="disclaimer mt-3">
+        <small class="text-muted">
+          By proceeding, you agree to give Spotify access to the image you choose to upload. Please make sure you have
+          the right to upload the image.
+        </small>
+      </div>
+    </div>
+
+    <!-- Dialog footer with action buttons -->
+    <ng-template pTemplate="footer">
+      <div class="dialog-footer">
+        <button pButton pRipple label="Cancel" (click)="onHide()" class="p-button-text"></button>
+        <button
+          pButton
+          pRipple
+          [disabled]="!playlistName || isSubmitting"
+          label="Save"
+          (click)="saveChanges()"
+          class="p-button-rounded"
+        ></button>
+      </div>
+    </ng-template>
+  </p-dialog>
+</div>

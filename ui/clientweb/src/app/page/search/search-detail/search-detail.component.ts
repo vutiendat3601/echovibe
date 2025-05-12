@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPlay, faUser, faClock, faMusic } from '@fortawesome/free-solid-svg-icons';
 import { ArtistDetailDto } from '../../../dto/artist-dto';
+import { TrackDetailDto } from '../../../dto/track-dto';
 
 interface Artist {
   id: string;
@@ -22,12 +23,12 @@ interface Artist {
   tags: string[];
 }
 
-// Mock data interfaces
-interface MockSong {
+// Interface for displaying track data
+interface DisplayTrack {
   id: string;
   title: string;
   artist: string;
-  featuredArtist?: string;
+  featuredArtists?: string;
   albumImage: string;
   duration: string;
   explicit: boolean;
@@ -53,6 +54,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
   private readonly PAGE_SIZE: number = 100;
   pageNumber: number = 0;
   artists: Artist[] = [];
+  tracks: DisplayTrack[] = [];
   isLoading: boolean = false;
   searchKeyword: string = '';
   activeFilter: string = 'all'; // Default filter
@@ -64,49 +66,13 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
   faClock = faClock;
   faMusic = faMusic;
 
-  // Mock data
-  mockSongs: MockSong[] = [
-    {
-      id: '1',
-      title: 'Show Yourself',
-      artist: 'Deftones',
-      albumImage: '/asset/image/default-artist-thumbnail-image.png',
-      duration: '3:46',
-      explicit: true
-    },
-    {
-      id: '2',
-      title: 'Change (In the House of Flies)',
-      artist: 'Deftones',
-      albumImage: '/asset/image/default-artist-thumbnail-image.png',
-      duration: '4:58',
-      explicit: true
-    },
-    {
-      id: '3',
-      title: 'My Own Summer (Shove It)',
-      artist: 'Deftones',
-      albumImage: '/asset/image/default-artist-thumbnail-image.png',
-      duration: '3:35',
-      explicit: false
-    },
-    {
-      id: '4',
-      title: 'Be Quiet and Drive (Far Away)',
-      artist: 'Deftones',
-      featuredArtist: 'The Cure',
-      albumImage: '/asset/image/default-artist-thumbnail-image.png',
-      duration: '5:08',
-      explicit: true
-    }
-  ];
-
+  // Mock playlists (will replace with real data later)
   mockPlaylists: MockPlaylist[] = [
     {
       id: '1',
       title: 'This is Deftones',
       description: 'By Spotify',
-      coverImage: '/asset/image/default-artist-thumbnail-image.png',
+      coverImage: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'Playlist',
       badge: 'SPOTIFY'
     },
@@ -114,7 +80,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
       id: '2',
       title: 'Deftones Radio',
       description: 'With Korn, System of a Down',
-      coverImage: '/asset/image/default-artist-thumbnail-image.png',
+      coverImage: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'Radio',
       badge: 'RADIO'
     },
@@ -122,14 +88,14 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
       id: '3',
       title: 'Alternative Metal',
       description: 'Best of alternative metal',
-      coverImage: '/asset/image/default-artist-thumbnail-image.png',
+      coverImage: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'Playlist'
     },
     {
       id: '4',
       title: 'Rock Classics',
       description: 'Rock hits from all decades',
-      coverImage: '/asset/image/default-artist-thumbnail-image.png',
+      coverImage: '/asset/image/default-artist-thumbnail-image.svg',
       type: 'Playlist'
     }
   ];
@@ -174,20 +140,11 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  private loadMockData(): void {
-    this.isLoading = true;
-
-    // Simulate API loading delay
-    setTimeout(() => {
-      // We no longer use mock artists data - we get real data from the API
-      this.isLoading = false;
-    }, 800);
-  }
-
   private loadData(): void {
-    // Reset page number and artists when loading new data
+    // Reset page number, artists and tracks when loading new data
     this.pageNumber = 0;
     this.artists = [];
+    this.tracks = [];
 
     const paramsSub = this.activeRoute.params.subscribe((params) => {
       if (params['keyword']) {
@@ -198,11 +155,18 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
           next: (respDto) => {
             if (respDto.data) {
               const search = respDto.data;
-              // Use the artistMapper to properly convert from ArtistDetailDto to Artist
+
+              // Process artists data
               const artists = search.artist.items.map((artistDetailDto: ArtistDetailDto) => artistDetailDto as Artist);
               this.artists = [...this.artists, ...artists];
+
+              // Process tracks data
+              const tracks = search.track.items.map((trackDto: TrackDetailDto) => this.convertToDisplayTrack(trackDto));
+              this.tracks = [...this.tracks, ...tracks];
+
               this.pageNumber++;
               console.log('Loaded artists:', this.artists);
+              console.log('Loaded tracks:', this.tracks);
             }
             this.isLoading = false;
           },
@@ -226,12 +190,17 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
       next: (respDto) => {
         if (respDto.data) {
           const search = respDto.data;
-          const artists = search.artist.items.map((artistDetailDto: ArtistDetailDto) => artistDetailDto as Artist);
 
-          // Add new artists to existing list
+          // Process artists data
+          const artists = search.artist.items.map((artistDetailDto: ArtistDetailDto) => artistDetailDto as Artist);
           this.artists = [...this.artists, ...artists];
+
+          // Process tracks data
+          const tracks = search.track.items.map((trackDto: TrackDetailDto) => this.convertToDisplayTrack(trackDto));
+          this.tracks = [...this.tracks, ...tracks];
+
           this.pageNumber++;
-          console.log('Loaded more artists, total:', this.artists.length);
+          console.log('Loaded more data, artists total:', this.artists.length, 'tracks total:', this.tracks.length);
         }
         this.isLoading = false;
       },
@@ -244,8 +213,40 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
     this.subscriptions.push(searchSub);
   }
 
+  // Helper function to convert TrackDto to DisplayTrack
+  private convertToDisplayTrack(trackDto: TrackDetailDto): DisplayTrack {
+    // Find main artist
+    const mainArtist = trackDto.artists.find((artist) => artist.isMainArtist)?.name || 'Unknown Artist';
+
+    // Get featured artists (non-main artists)
+    const featuredArtists = trackDto.artists
+      .filter((artist) => !artist.isMainArtist)
+      .map((artist) => artist.name)
+      .join(', ');
+
+    // Format duration from seconds to mm:ss
+    const minutes = Math.floor(trackDto.audioDurationSecond / 60);
+    const seconds = Math.floor(trackDto.audioDurationSecond % 60);
+    const formattedDuration = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+
+    return {
+      id: trackDto.id,
+      title: trackDto.name,
+      artist: mainArtist,
+      featuredArtists: featuredArtists.length > 0 ? featuredArtists : undefined,
+      albumImage: trackDto.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg',
+      duration: formattedDuration,
+      explicit: false // Assuming no explicit flag in the API, defaulting to false
+    };
+  }
+
   navigateToArtist(artist: Artist): void {
     // Navigate to artist detail page using the artist's id
     this.router.navigate(['/artist', artist.id]);
+  }
+
+  navigateToTrack(track: DisplayTrack): void {
+    // Navigate to track detail page using the track's id
+    this.router.navigate(['/track', track.id]);
   }
 }

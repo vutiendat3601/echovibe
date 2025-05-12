@@ -30,6 +30,7 @@ CREATE TABLE activity (
     type varchar(255) NOT NULL,
     data_json jsonb NULL,
     created_at timestamptz DEFAULT current_timestamp,
+    fingerprint varchar(255),
     created_by varchar(255),
     CONSTRAINT activity_pkey PRIMARY KEY (id),
     CONSTRAINT activity__session_id___key UNIQUE (session_id)
@@ -59,9 +60,11 @@ CREATE TABLE public.artist_detail_page_view (
     duration_second int NOT NULL DEFAULT 0,
     session_id varchar(12) NOT NULL,
     created_at timestamptz DEFAULT current_timestamp,
+    updated_at timestamptz DEFAULT current_timestamp,
     created_by varchar(255),
+    updated_by varchar(255),
 	CONSTRAINT aritst_detail_page_view__pkey PRIMARY KEY (id),
-    CONSTRAINT artist_detail_page_view__session_id___key UNIQUE (session_id)
+    CONSTRAINT aritst_detail_page_view___session_id___key UNIQUE (session_id)
 );
 """
 
@@ -78,6 +81,39 @@ CREATE TABLE public.artist_stats (
 	CONSTRAINT artist_stats__pkey PRIMARY KEY (id)
 );
 """
+
+    create_artist_recommendation_table_ddl = """
+CREATE TABLE public.artist_recommendation (
+    id uuid NOT NULL,
+    aggregate_id varchar(12) NOT NULL,
+    most_popular_track_ids text[] NOT NULL, -- listen count + like count
+    most_listened_track_ids text[] NOT NULL,
+    most_listened_track_ids_current_month text[] NOT NULL,
+    created_at timestamptz DEFAULT current_timestamp,
+    updated_at timestamptz DEFAULT current_timestamp,
+    created_by varchar(255),
+    updated_by varchar(255),
+    CONSTRAINT artist_recommendation__pkey PRIMARY KEY (id),
+    CONSTRAINT artist_recommendation__aggregate_id___key UNIQUE (aggregate_id)
+);
+"""
+    create_artist_stats_detail_view_ddl = """
+CREATE OR REPLACE VIEW public.v_artist_stats_detail
+AS SELECT _as.id,
+    _as.aggregate_id,
+    _as.total_detail_page_views,
+    _as.total_likes,
+    _as.created_at,
+    _as.updated_at,
+    _as.created_by,
+    _as.updated_by,
+    ar.id AS artist_recommendation_id,
+    ar.most_popular_track_ids,
+    ar.most_listened_track_ids,
+    ar.most_listened_track_ids_current_month
+   FROM artist_stats _as
+     LEFT JOIN artist_recommendation ar ON _as.aggregate_id::text = ar.aggregate_id::text
+;"""
 
     create_track_like_table_ddl = """
 CREATE TABLE public.track_like (
@@ -102,9 +138,11 @@ CREATE TABLE public.track_detail_page_view (
     duration_second int NOT NULL DEFAULT 0,
     session_id varchar(12) NOT NULL,
     created_at timestamptz DEFAULT current_timestamp,
+    updated_at timestamptz DEFAULT current_timestamp,
     created_by varchar(255),
+    updated_by varchar(255),
 	CONSTRAINT track_detail_page_view__pkey PRIMARY KEY (id),
-    CONSTRAINT track_detail_page_view__session_id___key UNIQUE (session_id)
+    CONSTRAINT track_detail_page_view___session_id___key UNIQUE (session_id)
 );
 """
 
@@ -116,9 +154,11 @@ CREATE TABLE public.track_listen (
     duration_second int NOT NULL DEFAULT 0,
     session_id varchar(12) NOT NULL,
     created_at timestamptz DEFAULT current_timestamp,
+    updated_at timestamptz DEFAULT current_timestamp,
     created_by varchar(255),
+    updated_by varchar(255),
 	CONSTRAINT track_listen__pkey PRIMARY KEY (id),
-    CONSTRAINT track_listen__session_id___key UNIQUE (session_id)
+    CONSTRAINT track_listen___session_id___key UNIQUE (session_id)
 );
 """
 
@@ -137,6 +177,20 @@ CREATE TABLE public.track_stats (
 );
 """
 
+    create_user_playlist_table_ddl = """
+CREATE TABLE public.user_playlist (
+	id uuid NOT NULL,
+    playlist_id varchar(12) NOT NULL,
+	user_id varchar(255) NOT NULL,
+    is_active boolean NOT NULL DEFAULT true,
+    created_at timestamptz DEFAULT current_timestamp,
+    updated_at timestamptz DEFAULT current_timestamp,
+    created_by varchar(255),
+    updated_by varchar(255),
+	CONSTRAINT user_playlist__pkey PRIMARY KEY (id)
+);
+"""
+
     create_user_data_table_ddl = """
 CREATE TABLE public.user_data (
 	id uuid NOT NULL,
@@ -152,7 +206,7 @@ CREATE TABLE public.user_data (
 """
 
     create_user_stats_materialized_view_ddl = """
-CREATE MATERIALIZED VIEW public.mv_user_stats
+CREATE MATERIALIZED VIEW public.mv_user_usage_data
 TABLESPACE pg_default
 AS SELECT id,
     user_id,
@@ -163,40 +217,57 @@ AS SELECT id,
           WHERE tl.is_active AND tl.user_id::text = ud.user_id::text) AS liked_track_ids,
     ( SELECT array_agg(al.aggregate_id) AS array_agg
            FROM artist_like al
-          WHERE al.is_active AND al.user_id::text = ud.user_id::text) AS liked_artist_ids
+          WHERE al.is_active AND al.user_id::text = ud.user_id::text) AS liked_artist_ids,
+    ( SELECT array_agg(up.playlist_id) AS array_agg
+           FROM user_playlist up
+          WHERE up.is_active AND up.user_id::text = ud.user_id::text) AS created_playlist_ids
    FROM user_data ud
 WITH DATA;
 
-CREATE OR REPLACE FUNCTION refresh_mv_user_stats()
+CREATE OR REPLACE FUNCTION refresh_mv_user_usage_data()
 RETURNS trigger AS $$
 BEGIN
-  REFRESH MATERIALIZED VIEW public.mv_user_stats;
+  REFRESH MATERIALIZED VIEW public.mv_user_usage_data;
   RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER user_data__refresh_mv_user_stats_trigger
+CREATE TRIGGER user_data__refresh_mv_user_usage_data_trigger
 AFTER INSERT OR UPDATE OR DELETE ON public.user_data
 FOR EACH STATEMENT
-EXECUTE FUNCTION refresh_mv_user_stats();
+EXECUTE FUNCTION refresh_mv_user_usage_data();
 
-CREATE TRIGGER track_like__refresh_mv_user_stats_trigger
+CREATE TRIGGER track_like__refresh_mv_user_usage_data_trigger
 AFTER INSERT OR UPDATE OR DELETE ON public.track_like
 FOR EACH STATEMENT
-EXECUTE FUNCTION refresh_mv_user_stats();
+EXECUTE FUNCTION refresh_mv_user_usage_data();
 
-CREATE TRIGGER artist_like__refresh_mv_user_stats_trigger
+CREATE TRIGGER artist_like__refresh_mv_user_usage_data_trigger
 AFTER INSERT OR UPDATE OR DELETE ON public.artist_like
 FOR EACH STATEMENT
-EXECUTE FUNCTION refresh_mv_user_stats();
+EXECUTE FUNCTION refresh_mv_user_usage_data();
+
+CREATE TRIGGER user_playlist__refresh_mv_user_usage_data_trigger
+AFTER INSERT OR UPDATE OR DELETE ON public.user_playlist
+FOR EACH STATEMENT
+EXECUTE FUNCTION refresh_mv_user_usage_data();
 """
     ddls = [
-        create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
-        create_activity_table_ddl, create_aritst_like_table_ddl,
-        create_artist_detail_page_view_table_ddl, create_artist_stats_table_ddl,
-        create_track_like_table_ddl, create_track_detail_page_view_table_ddl,
-        create_track_listen_table_ddl, create_track_stats_table_ddl,
-        create_user_data_table_ddl, create_user_stats_materialized_view_ddl
+        create_uuid_ossp_extension_ddl,
+        create_unaccent_extension_ddl,
+        create_activity_table_ddl,
+        create_aritst_like_table_ddl,
+        create_artist_detail_page_view_table_ddl,
+        create_artist_stats_table_ddl,
+        create_artist_recommendation_table_ddl,
+        create_artist_stats_detail_view_ddl,
+        create_track_like_table_ddl,
+        create_track_detail_page_view_table_ddl,
+        create_track_listen_table_ddl,
+        create_track_stats_table_ddl,
+        create_user_data_table_ddl,
+        create_user_playlist_table_ddl,
+        create_user_stats_materialized_view_ddl,
     ]
     for ddl in ddls:
         op.execute(ddl)
@@ -209,17 +280,21 @@ def downgrade() -> None:
     drop_artist_like_table_ddl = "DROP TABLE IF EXISTS public.artist_like;"
     drop_artist_stats_table_ddl = "DROP TABLE IF EXISTS public.artist_stats;"
     drop_aritst_detail_page_view_table_ddl = "DROP TABLE IF EXISTS public.aritst_detail_page_view;"
-    drop_artist_stats_table_ddl = "DROP TABLE IF EXISTS public.artist_stats;"
+    drop_artist_stats_detail_view_ddl = "DROP VIEW IF EXISTS public.v_artist_stats_detail;"
+    drop_artist_recommendation_table_ddl = "DROP TABLE IF EXISTS public.artist_recommendation;"
     drop_track_like_table_ddl = "DROP TABLE IF EXISTS public.track_like;"
     drop_track_detail_page_view_table_ddl = "DROP TABLE IF EXISTS public.track_detail_page_view;"
     drop_track_listen_table_ddl = "DROP TABLE IF EXISTS public.track_listen;"
+    drop_user_playlist_table_ddl = "DROP TABLE IF EXISTS public.user_playlist;"
     drop_track_stats_table_ddl = "DROP TABLE IF EXISTS public.track_stats;"
     ddls = [
         drop_uuid_ossp_extension_ddl, drop_unaccent_extension_ddl,
         drop_activity_table_ddl, drop_artist_like_table_ddl,
         drop_artist_like_table_ddl, drop_artist_stats_table_ddl,
-        drop_aritst_detail_page_view_table_ddl, drop_artist_stats_table_ddl,
-        drop_track_like_table_ddl, drop_track_detail_page_view_table_ddl,
+        drop_aritst_detail_page_view_table_ddl,
+        drop_artist_stats_detail_view_ddl, drop_artist_stats_table_ddl,
+        drop_artist_recommendation_table_ddl, drop_track_like_table_ddl,
+        drop_track_detail_page_view_table_ddl, drop_user_playlist_table_ddl,
         drop_track_listen_table_ddl, drop_track_stats_table_ddl
     ]
     for ddl in ddls:

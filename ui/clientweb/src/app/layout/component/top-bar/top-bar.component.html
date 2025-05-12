@@ -61,7 +61,7 @@
         <div class="search-results">
           <div class="search-item" *ngFor="let result of recentSearches" (click)="selectSearchResult(result)">
             <div class="search-item-image">
-              <img [src]="result.imageUrl" [alt]="result.title">
+              <img [src]="result.imageUrl" [alt]="result.title" />
             </div>
             <div class="search-item-info">
               <div class="search-item-title">{{ result.title }}</div>
@@ -72,9 +72,7 @@
 
         <!-- Clear Recent Searches Button -->
         <div class="clear-searches-container">
-          <button class="clear-searches-button" (click)="clearRecentSearches($event)">
-            Clear recent searches
-          </button>
+          <button class="clear-searches-button" (click)="clearRecentSearches($event)">Clear recent searches</button>
         </div>
       </div>
     </div>
@@ -103,8 +101,14 @@
       </div>
     </div>
 
-    <!-- Avatar that's always visible and triggers the menu -->
+    <!-- Login button (visible when not authenticated) -->
+    <button *ngIf="!authService.isAuthenticated" (click)="signIn()" class="layout-topbar-login-button">
+      <span i18n="@@BUTTON_LABEL_LOGIN">Log in</span>
+    </button>
+
+    <!-- Avatar that's only visible when authenticated and triggers the menu -->
     <button
+      *ngIf="authService.isAuthenticated"
       class="layout-topbar-avatar"
       pStyleClass="@next"
       enterFromClass="hidden"
@@ -126,7 +130,8 @@
       ></p-avatar>
     </button>
 
-    <div class="layout-topbar-menu hidden">
+    <!-- User menu dropdown (only visible when authenticated) -->
+    <div class="layout-topbar-menu hidden" *ngIf="authService.isAuthenticated">
       <div class="layout-topbar-menu-content">
         <a type="button" class="layout-topbar-action" [href]="this.userProfile.info?.iss + '/account'">
           <i class="pi pi-user"></i>

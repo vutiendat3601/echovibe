@@ -10,21 +10,30 @@ from app.service.track_service import TrackService
 from app.service.user_service import UserService
 from app.repository.impl.sqlmodel_artist_repository import (
     SqlmodelArtistDetailPageViewRepository, SqlmodelArtistLikeRepository,
-    SqlmodelArtistStatsRepository)
+    SqlmodelArtistStatsRepository, SqlmodelArtistRecommendationRepository,
+    SqlmodelArtistStatsDetailRepository)
 from app.repository.impl.sqlmodel_track_repository import (
     SqlmodelTrackDetailPageViewRepository, SqlmodelTrackLikeRepository,
     SqlmodelTrackListenRepository, SqlmodelTrackStatsRepository)
 from app.repository.impl.sqlmodel_user_repository import (
-    SqlmodelUserDataRepository, SqlmodelUserStatsRepository)
+    SqlmodelUserDataRepository, SqlmodelUserUsageDataRepository,
+    SqlmodelUserPlaylistRepository)
+from app.client.product_client import ProductClient
 
 
 class Container(containers.DeclarativeContainer):
-    wiring_config = containers.WiringConfiguration(
-        modules=["app.router.activity_router", "app.router.user_router"])
+    wiring_config = containers.WiringConfiguration(modules=[
+        "app.router.activity_router", "app.router.track_router",
+        "app.router.user_router", "app.router.artist_router"
+    ])
 
     logger = providers.Singleton(Logger)
     database = providers.Singleton(
         Database, database_uri=configuration.get_database_uri())
+
+    # Client
+    product_client = providers.Singleton(
+        ProductClient, base_url=configuration.get_product_base_url())
 
     # Repository
     activity_repository = providers.Factory(
@@ -43,6 +52,15 @@ class Container(containers.DeclarativeContainer):
         SqlmodelArtistStatsRepository,
         logger=logger,
         session_factory=database.provided.session)
+    artist_recommendation_repository = providers.Factory(
+        SqlmodelArtistRecommendationRepository,
+        logger=logger,
+        session_factory=database.provided.session)
+    artist_stats_detail_repository = providers.Factory(
+        SqlmodelArtistStatsDetailRepository,
+        logger=logger,
+        session_factory=database.provided.session)
+
     track_detail_page_view_repository = providers.Factory(
         SqlmodelTrackDetailPageViewRepository,
         logger=logger,
@@ -63,20 +81,30 @@ class Container(containers.DeclarativeContainer):
         SqlmodelUserDataRepository,
         logger=logger,
         session_factory=database.provided.session)
-    user_stats_repository = providers.Factory(
-        SqlmodelUserStatsRepository,
+    user_usage_data_repository = providers.Factory(
+        SqlmodelUserUsageDataRepository,
+        logger=logger,
+        session_factory=database.provided.session)
+    user_playlist_repository = providers.Factory(
+        SqlmodelUserPlaylistRepository,
         logger=logger,
         session_factory=database.provided.session)
 
     # Service
     playlist_service = providers.Factory(
-        PlaylistService, activity_repository=activity_repository, logger=logger)
+        PlaylistService,
+        activity_repository=activity_repository,
+        user_playlist_repository=user_playlist_repository,
+        logger=logger)
     artist_service = providers.Factory(
         ArtistService,
         activity_repository=activity_repository,
         artist_detail_page_view_repository=artist_detail_page_view_repository,
         artist_like_repository=artist_like_repository,
         artist_stats_repository=artist_stats_repository,
+        artist_recommendation_repository=artist_recommendation_repository,
+        artist_stats_detail_repository=artist_stats_detail_repository,
+        product_client=product_client,
         logger=logger)
     track_service = providers.Factory(
         TrackService,
@@ -90,7 +118,7 @@ class Container(containers.DeclarativeContainer):
         UserService,
         activity_repository=activity_repository,
         user_data_repository=user_data_repository,
-        user_stats_repository=user_stats_repository,
+        user_usage_data_repository=user_usage_data_repository,
         logger=logger)
 
     activity_service = providers.Factory(ActivityService,

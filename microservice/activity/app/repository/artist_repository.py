@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from app.model.artist import ArtistLike, ArtistDetailPageView, ArtistStats
+from app.model.artist import (ArtistLike, ArtistDetailPageView, ArtistStats,
+                              ArtistStatsDetail, ArtistRecommendation)
 
 
 class ArtistLikeRepository(ABC):
@@ -21,6 +22,15 @@ class ArtistDetailPageViewRepository(ABC):
     ) -> ArtistDetailPageView:
         """Save ArtistDetailPageView"""
 
+    @abstractmethod
+    def exist_by_session_id(self, session_id: str) -> bool:
+        """Exist any ArtistDetailPageView by session_id"""
+
+    @abstractmethod
+    def find_by_session_id(self,
+                           session_id: str) -> ArtistDetailPageView | None:
+        """Find ArtistDetailPageView by session_id"""
+
 
 class ArtistStatsRepository(ABC):
 
@@ -31,3 +41,25 @@ class ArtistStatsRepository(ABC):
     @abstractmethod
     def find_by_aggregate_id(self, aggregate_id: str) -> ArtistStats | None:
         """Find ArtistStats by aggregate_id"""
+
+
+class ArtistRecommendationRepository(ABC):
+
+    @abstractmethod
+    def save_artist_recommendation(
+            self, artist_recommendation: ArtistRecommendation
+    ) -> ArtistRecommendation:
+        """Save ArtistRecommendation"""
+
+    @abstractmethod
+    def find_by_aggregate_id(self,
+                             aggregate_id: str) -> ArtistRecommendation | None:
+        """Find ArtistRecommendation by aggregate_id"""
+
+
+class ArtistStatsDetailRepository(ABC):
+
+    @abstractmethod
+    def find_by_aggregate_id(self,
+                             aggregate_id: str) -> ArtistStatsDetail | None:
+        """Find ArtistStatsDetail by aggregate_id"""

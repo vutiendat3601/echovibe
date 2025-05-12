@@ -9,7 +9,7 @@ export interface ArtistDetailOfTrack {
   isMainArtist: boolean; // Indicates if the artist is the main artist for the track
 }
 
-export interface TrackDto {
+export interface TrackDetailDto {
   id: string;
   urn: string;
   name: string;
@@ -21,4 +21,11 @@ export interface TrackDto {
   audioDurationSecond: number; // Duration of the audio in seconds
   tags: string[]; // Tags associated with the track
   artists: ArtistDetailOfTrack[]; // List of artists associated with the track
+}
+
+export interface TrackStatsDto {
+  id: string;
+  totalDetailPageViews: number;
+  totalLikes: number;
+  totalListens: number;
 }

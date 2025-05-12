@@ -24,11 +24,11 @@ export class OfflineLibraryComponent implements OnInit, OnDestroy {
   constructor(
     private audioService: AudioService,
     private offlineAudioService: OfflineAudioService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.subscriptions.push(
-      this.offlineAudioService.offlineTracks$.subscribe(tracks => {
+      this.offlineAudioService.offlineTracks$.subscribe((tracks) => {
         this.offlineTracks = tracks;
         this.filterAndSortTracks();
         this.isLoading = false;
@@ -37,7 +37,7 @@ export class OfflineLibraryComponent implements OnInit, OnDestroy {
   }
 
   handlePlayTrack(track: EnhancedTrackDto): void {
-    this.audioService.playOfflineTrack(track).catch(error => {
+    this.audioService.playOfflineTrack(track).catch((error) => {
       console.error('Error playing offline track:', error);
       // Handle playback error
       alert('Error playing offline track. The file might be unavailable.');
@@ -63,23 +63,22 @@ export class OfflineLibraryComponent implements OnInit, OnDestroy {
   getArtistName(track: EnhancedTrackDto): string {
     if (!track.artists || track.artists.length === 0) return 'Unknown Artist';
 
-    const mainArtist = track.artists.find(artist => artist.isMainArtist);
+    const mainArtist = track.artists.find((artist) => artist.isMainArtist);
     if (mainArtist) {
       return mainArtist.name;
     }
-    return track.artists.map(artist => artist.name).join(', ');
+    return track.artists.map((artist) => artist.name).join(', ');
   }
 
   private filterAndSortTracks(): void {
     // Filter tracks based on search term
-    this.filteredTracks = this.offlineTracks.filter(track => {
+    this.filteredTracks = this.offlineTracks.filter((track) => {
       if (!this.searchTerm) return true;
 
       const searchTermLower = this.searchTerm.toLowerCase();
       const artistName = this.getArtistName(track);
 
-      return track.name.toLowerCase().includes(searchTermLower) ||
-             artistName.toLowerCase().includes(searchTermLower);
+      return track.name.toLowerCase().includes(searchTermLower) || artistName.toLowerCase().includes(searchTermLower);
     });
 
     // Sort tracks based on selected option
@@ -98,6 +97,6 @@ export class OfflineLibraryComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(sub => sub.unsubscribe());
+    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 }

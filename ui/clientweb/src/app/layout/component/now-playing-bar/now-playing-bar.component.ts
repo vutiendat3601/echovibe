@@ -3,17 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AudioService, EnhancedTrackDto, RepeatMode } from '../../../service/audio.service';
 import { OfflineAudioService } from '../../../service/offline-audio.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
-import { faPause, faPlay, faShuffle } from '@fortawesome/free-solid-svg-icons';
+import { faBackwardStep, faForwardStep, faPause, faPlay, faShuffle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @Component({
   selector: 'app-now-playing-bar',
   standalone: true,
-  imports: [CommonModule, FormsModule, Toast, FontAwesomeModule],
+  imports: [CommonModule, FormsModule, Toast, FontAwesomeModule, RouterLink],
   templateUrl: './now-playing-bar.component.html',
   styleUrl: './now-playing-bar.component.scss',
   providers: [MessageService]
@@ -27,9 +27,11 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
   progressPercent: number = 0;
 
   // Icons
-  faShuffle = faShuffle; // FontAwesome icon for shuffle
+  faShuffle = faShuffle;
   faPlay = faPlay;
   faPause = faPause;
+  faForwardStep = faForwardStep;
+  faBackwardStep = faBackwardStep;
 
   // New properties for extended functionality
   isMuted: boolean = false;
@@ -88,7 +90,8 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
         this.repeatMode = mode;
       }),
 
-      this.audioService.queue$.subscribe((queue) => { // Renamed from playlist$ to queue$
+      this.audioService.queue$.subscribe((queue) => {
+        // Renamed from playlist$ to queue$
         this.queue = queue;
       }),
 
@@ -104,18 +107,18 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
 
     if (!track.artists || track.artists.length === 0) return 'Unknown Artist';
 
-    const mainArtist = track.artists.find(artist => artist.isMainArtist);
+    const mainArtist = track.artists.find((artist) => artist.isMainArtist);
     if (mainArtist) {
       return mainArtist.name;
     }
-    return track.artists.map(artist => artist.name).join(', ');
+    return track.artists.map((artist) => artist.name).join(', ');
   }
 
   // Get thumbnail image URL
   getImageUrl(track: EnhancedTrackDto | null): string {
-    if (!track) return 'assets/image/default-artist-thumbnail-image.png';
+    if (!track) return 'asset/image/default-artist-thumbnail-image.svg';
 
-    return track.thumbnailUrl || 'assets/image/default-artist-thumbnail-image.png';
+    return track.thumbnailUrl || 'asset/image/default-artist-thumbnail-image.svg';
   }
 
   // Playback controls
@@ -192,21 +195,41 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
         // Remove from offline
         const success = await this.offlineAudioService.removeTrackFromOffline(track.id);
         if (success) {
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Song removed from offline library' });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Song removed from offline library'
+          });
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to remove song from offline library' });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to remove song from offline library'
+          });
         }
       } else {
         // Add to offline
         const success = await this.audioService.saveTrackForOffline(track);
         if (success) {
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Song saved for offline listening' });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Song saved for offline listening'
+          });
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to save song for offline listening' });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to save song for offline listening'
+          });
         }
       }
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error saving song for offline listening' });
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Error saving song for offline listening'
+      });
     }
   }
 

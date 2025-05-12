@@ -1,0 +1,261 @@
+<div class="playlist-detail-container">
+  <!-- Toast component for displaying notifications -->
+  <p-toast></p-toast>
+
+  <!-- Edit Playlist Dialog -->
+  <app-edit-playlist-dialog
+    [(visible)]="showEditPlaylistDialog"
+    [playlist]="currentPlaylist"
+    (playlistUpdated)="handlePlaylistUpdated($event)"
+  >
+  </app-edit-playlist-dialog>
+
+  <!-- Playlist Header with dynamic background -->
+  <div class="playlist-header-section" [style.background]="backgroundColor">
+    <div class="playlist-header">
+      <div class="playlist-cover">
+        <img
+          #playlistCover
+          [src]="playlistCoverImage || '/asset/image/default-artist-thumbnail-image.svg'"
+          alt="Playlist cover"
+          crossorigin="anonymous"
+          *ngIf="playlistCoverImage"
+        />
+        <div class="placeholder-cover" *ngIf="!playlistCoverImage">
+          <i class="pi pi-music"></i>
+        </div>
+      </div>
+      <div class="playlist-info">
+        <span class="playlist-type">{{ playlistType }}</span>
+        <h1 class="playlist-title">{{ playlistTitle }}</h1>
+        <div class="playlist-stats">
+          <!-- <span class="playlist-creator">{{ playlistCreator }}</span> • -->
+          <span class="playlist-songs-count"
+            >{{ songCount }} song{{ songCount !== 1 ? 's' : '' }}, {{ formatTotalDuration() }}</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- Playlist Controls -->
+    <div class="playlist-controls">
+      <button pButton class="play-button p-button-rounded" (click)="handlePlayPause()">
+        <fa-icon [icon]="isPlaying ? faPause : faPlay" class="play-icon"></fa-icon>
+      </button>
+
+      <!-- Action buttons -->
+      <button pButton icon="pi pi-heart" class="p-button-text p-button-rounded action-button"></button>
+      <button pButton icon="pi pi-download" class="p-button-text p-button-rounded action-button"></button>
+
+      <!-- Edit button -->
+      <button pButton class="p-button-text p-button-rounded action-button" (click)="openEditPlaylistDialog()">
+        <fa-icon [icon]="faPencil"></fa-icon>
+      </button>
+
+      <button
+        pButton
+        icon="pi pi-ellipsis-h"
+        class="p-button-text p-button-rounded action-button"
+        (click)="toggleOptions($event)"
+      ></button>
+
+      <!-- Popover menu for options -->
+      <p-popover #optionsPopover>
+        <div class="flex flex-col gap-4">
+          <div>
+            <ul class="list-none p-0 m-0 flex flex-col">
+              <li
+                class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border"
+                (click)="addToQueue(); optionsPopover.hide()"
+              >
+                <svg
+                  data-encore-id="icon"
+                  role="img"
+                  aria-hidden="true"
+                  class="e-9812-icon e-9812-baseline"
+                  viewBox="0 0 16 16"
+                  width="15"
+                  height="15"
+                  style="--encore-icon-fill: var(--text-subdued, #656565); fill: #656565"
+                >
+                  <path
+                    d="M16 15H2v-1.5h14V15zm0-4.5H2V9h14v1.5zm-8.034-6A5.484 5.484 0 0 1 7.187 6H13.5a2.5 2.5 0 0 0 0-5H7.966c.159.474.255.978.278 1.5H13.5a1 1 0 1 1 0 2H7.966zM2 2V0h1.5v2h2v1.5h-2v2H2v-2H0V2h2z"
+                  ></path>
+                </svg>
+                <span>Add to queue</span>
+              </li>
+              <li
+                class="flex items-center gap-2 px-2 py-3 hover:bg-emphasis cursor-pointer rounded-border"
+                (click)="openEditPlaylistDialog(); optionsPopover.hide()"
+              >
+                <i class="pi pi-pencil" style="font-size: 15px; color: #656565"></i>
+                <span>Edit details</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </p-popover>
+    </div>
+  </div>
+
+  <!-- Playlist Tracks -->
+  <div class="playlist-tracks">
+    <table class="track-table">
+      <thead>
+        <tr>
+          <th class="number-col">#</th>
+          <th class="title-col">Title</th>
+          <th class="album-col">Album</th>
+          <th class="date-added-col">Date added</th>
+          <th class="duration-col">
+            <i class="pi pi-clock"></i>
+          </th>
+          <th class="actions-col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngIf="tracks.length > 0; else noTracks">
+          <tr *ngFor="let track of tracks; let i = index" class="track-item" (dblclick)="handleTrackPlay(track)">
+            <td class="number-col">{{ i + 1 }}</td>
+            <td class="title-col">
+              <div class="track-info">
+                <img
+                  [src]="track.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'"
+                  alt="Track cover"
+                  class="track-img"
+                />
+                <div class="track-details">
+                  <span class="track-name">{{ track.name }}</span>
+                  <span class="track-artist">{{ track.artists[0].name }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="album-col">Single</td>
+            <td class="date-added-col">{{ track.dateAdded | date: 'MMM d, yyyy' }}</td>
+            <td class="duration-col">{{ track.audioDurationSecond | date: 'm:ss' : 'UTC' }}</td>
+            <td class="actions-col">
+              <button
+                type="button"
+                pButton
+                icon="pi pi-ellipsis-h"
+                class="p-button-text p-button-rounded track-options-btn"
+                (click)="toggleTrackOptions($event, track)"
+              ></button>
+            </td>
+          </tr>
+        </ng-container>
+        <ng-template #noTracks>
+          <tr>
+            <td colspan="6" class="no-tracks">This playlist is empty. Add some tracks!</td>
+          </tr>
+        </ng-template>
+      </tbody>
+    </table>
+
+    <!-- Track Options Popover -->
+    <p-popover #trackOptionsPopover>
+      <div class="flex flex-col gap-4">
+        <div>
+          <ul class="list-none p-0 m-0 flex flex-col">
+            <li
+              class="flex items-center gap-2 px-3 py-2 hover:bg-emphasis cursor-pointer rounded-border"
+              (click)="removeSelectedTrack(); trackOptionsPopover.hide()"
+            >
+              <i class="pi pi-trash text-sm"></i>
+              <span>Remove from playlist</span>
+            </li>
+            <li
+              class="flex items-center gap-2 px-3 py-2 hover:bg-emphasis cursor-pointer rounded-border"
+              (click)="addTrackToQueue(selectedTrack!); trackOptionsPopover.hide()"
+            >
+              <i class="pi pi-plus text-sm"></i>
+              <span>Add to queue</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </p-popover>
+
+    <!-- Find More Button - Only show when search is not active -->
+    <div class="find-more-container" *ngIf="!showSearchResults">
+      <button
+        pButton
+        label="Find More"
+        icon="pi pi-search"
+        class="p-button-outlined find-more-button"
+        (click)="showSearchResults = true"
+      ></button>
+    </div>
+
+    <!-- Find More Section - Inline instead of dialog -->
+    <div class="find-more-section" *ngIf="showSearchResults">
+      <div class="find-more-header">
+        <h2>Let's find something for your playlist</h2>
+        <button
+          pButton
+          icon="pi pi-times"
+          class="p-button-text p-button-rounded close-button"
+          (click)="showSearchResults = false"
+        ></button>
+      </div>
+      <div class="search-input-container">
+        <p-iconfield>
+          <p-inputicon styleClass="pi pi-search" />
+          <input
+            type="text"
+            pInputText
+            placeholder="Search"
+            [(ngModel)]="searchQuery"
+            placeholder="Search for songs"
+            (keyup)="performSearch()"
+            autofocus
+          />
+        </p-iconfield>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div class="search-loading" *ngIf="isSearching">
+        <p-progressBar mode="indeterminate" [style]="{ height: '4px' }"></p-progressBar>
+      </div>
+
+      <!-- Search Results -->
+      <div class="search-results" *ngIf="searchResults.length > 0">
+        <div class="search-result-item" *ngFor="let track of searchResults">
+          <div class="search-result-thumbnail">
+            <img [src]="track.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'" alt="Track cover" />
+          </div>
+          <div class="search-result-info">
+            <div class="search-result-title">{{ track.name }}</div>
+            <div class="search-result-artist">{{ track.artists[0].name }}</div>
+          </div>
+          <div class="search-result-type">Song</div>
+          <div class="search-result-actions">
+            <button pButton label="Add" class="p-button-sm" (click)="addTrackToPlaylist(track)"></button>
+          </div>
+        </div>
+
+        <!-- Load More Button -->
+        <div class="load-more-container" *ngIf="hasMoreResults && !isSearching">
+          <button
+            pButton
+            label="Load More"
+            icon="pi pi-chevron-down"
+            class="p-button-outlined load-more-button"
+            (click)="loadMoreResults()"
+          ></button>
+        </div>
+
+        <!-- Loading More Indicator -->
+        <div class="search-loading-more" *ngIf="isSearching && searchPage > 0">
+          <p-progressBar mode="indeterminate" [style]="{ height: '4px' }"></p-progressBar>
+          <div class="text-center mt-2">Loading more results...</div>
+        </div>
+      </div>
+
+      <!-- No Results Message -->
+      <div class="no-search-results" *ngIf="searchQuery && !isSearching && searchResults.length === 0">
+        <p>No results found for "{{ searchQuery }}"</p>
+      </div>
+    </div>
+  </div>
+</div>
