@@ -63,7 +63,7 @@ CREATE TABLE public.artist_detail_page_view (
     updated_at timestamptz DEFAULT current_timestamp,
     created_by varchar(255),
     updated_by varchar(255),
-	CONSTRAINT aritst_detail_page_view__pkey PRIMARY KEY (id)
+	CONSTRAINT aritst_detail_page_view__pkey PRIMARY KEY (id),
     CONSTRAINT aritst_detail_page_view___session_id___key UNIQUE (session_id)
 );
 """

@@ -33,4 +33,9 @@ database:
   name: echovibe_artistquery
 redis:
   enabled: false
-  url: 
+  url:
+app:
+  web:
+    client:
+      product:
+        baseUrl: https://api.echovibe.io.vn/product

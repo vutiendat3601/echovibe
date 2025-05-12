@@ -34,3 +34,8 @@ database:
 redis:
   enabled: true
   url: redis://:zhsdf23lkDLKJ3kjhfas42dkjasf863h@infras.echovibe.io.vn:6379/0
+app:
+  web:
+    client:
+      product:
+        baseUrl: https://api.echovibe.io.vn/product

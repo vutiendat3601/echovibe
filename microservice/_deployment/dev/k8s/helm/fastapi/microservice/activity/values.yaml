@@ -2,7 +2,7 @@ deployment:
   name: activity
   containerPort: 6300
   replicaCount: 1
-  image: 
+  image:
     repository: vutiendat3601/echovibe-activity
     tag: latest
     pullPolicy: Always
@@ -31,7 +31,11 @@ database:
   host: infras.echovibe.io.vn
   port: 16300
   name: echovibe_activity
-
 redis:
   enabled: false
   url:
+app:
+  web:
+    client:
+      product:
+        baseUrl: https://api.echovibe.io.vn/product
