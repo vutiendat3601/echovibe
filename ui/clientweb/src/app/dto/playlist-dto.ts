@@ -19,7 +19,7 @@ export interface PlaylistDetailDto {
   urn: string;
   name: string;
   isPublic: boolean;
-  thumbnailUrl: boolean;
+  thumbnailUrl: string | null;
   tracks: TrackDetailDto[];
   createdBy: string;
   updatedBy: string;
