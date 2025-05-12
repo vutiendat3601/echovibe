@@ -27,6 +27,6 @@ async def get_user_usage_data(authorization: str | None = Header(
     user_id = jwt_claims.get(
         JWT_CLAIM_SUB,
         AUTH_SYSTEM_USERNAME) if jwt_claims else AUTH_SYSTEM_USERNAME
-    user_usage_data_schema = user_service.get_user_usage_data(user_id)
+    user_usage_data_schema = await user_service.get_user_usage_data(user_id)
     response_scheme = ok(data=user_usage_data_schema)
     return JSONResponse(content=jsonable_encoder(response_scheme))

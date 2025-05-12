@@ -21,10 +21,10 @@ class ActivityService:
         self.track_service = track_service
         self.logger = logger
 
-    def handle_activity(self,
-                        activity_schema: ActivitySchema,
-                        fingerprint: str | None,
-                        jwt_claims: dict = {}) -> dict[str, str]:
+    async def handle_activity(self,
+                              activity_schema: ActivitySchema,
+                              fingerprint: str | None,
+                              jwt_claims: dict = {}) -> dict[str, str]:
         created_at = datetime.now(timezone.utc)
         created_by = jwt_claims.get(
             JWT_CLAIM_SUB, AUTH_SYSTEM_USERNAME) if jwt_claims else fingerprint
@@ -39,49 +39,50 @@ class ActivityService:
 
         # Playlist action handlers
         if activity.type == ActionType.CREATE_PLAYLIST and created_by != fingerprint:
-            return self.playlist_service.handle_create_playlist(activity)
+            return await self.playlist_service.handle_create_playlist(activity)
 
         elif activity.type == ActionType.UPDATE_PLAYLIST and created_by != fingerprint:
-            return self.playlist_service.handle_update_playlist(activity)
+            return await self.playlist_service.handle_update_playlist(activity)
 
         elif activity.type == ActionType.DELETE_PLAYLIST and created_by != fingerprint:
-            return self.playlist_service.handle_delete_playlist(activity)
+            return await self.playlist_service.handle_delete_playlist(activity)
 
         # Artist action handlers
         elif activity.type == ActionType.LIKE_ARTIST and created_by != fingerprint:
-            return self.artist_service.handle_like_artist(activity)
+            return await self.artist_service.handle_like_artist(activity)
 
         elif activity.type == ActionType.UNLIKE_ARTIST and created_by != fingerprint:
-            return self.artist_service.handle_unlike_artist(activity)
+            return await self.artist_service.handle_unlike_artist(activity)
 
         elif activity.type == ActionType.VIEW_ARTIST_DETAIL_PAGE_TRACKING:
-            return self.artist_service.handle_view_artist_detail_page_tracking(
+            return await self.artist_service.handle_view_artist_detail_page_tracking(
                 activity)
 
         elif activity.type == ActionType.VIEWED_ARTIST_DETAIL_PAGE_TRACKING:
-            return self.artist_service.handle_viewed_artist_detail_page_tracking(
+            return await self.artist_service.handle_viewed_artist_detail_page_tracking(
                 activity.session_id)
 
         # Track action handlers
         elif activity.type == ActionType.LIKE_TRACK and created_by != fingerprint:
-            return self.track_service.handle_like_track(activity)
+            return await self.track_service.handle_like_track(activity)
 
         elif activity.type == ActionType.UNLIKE_TRACK and created_by != fingerprint:
-            return self.track_service.handle_unlike_track(activity)
+            return await self.track_service.handle_unlike_track(activity)
 
         elif activity.type == ActionType.LISTEN_TRACK_TRACKING:
-            return self.track_service.handle_listen_track_tracking(activity)
+            return await self.track_service.handle_listen_track_tracking(
+                activity)
 
         elif activity.type == ActionType.LISTENED_TRACK_TRACKING:
-            return self.track_service.handle_listened_track_tracking(
+            return await self.track_service.handle_listened_track_tracking(
                 activity.session_id)
 
         elif activity.type == ActionType.VIEW_TRACK_DETAIL_PAGE_TRACKING:
-            return self.track_service.handle_view_track_detail_page_tracking(
+            return await self.track_service.handle_view_track_detail_page_tracking(
                 activity)
 
         elif activity.type == ActionType.VIEWED_TRACK_DETAIL_PAGE_TRACKING:
-            return self.track_service.handle_viewed_track_detail_page_tracking(
+            return await self.track_service.handle_viewed_track_detail_page_tracking(
                 activity.session_id)
 
         else:

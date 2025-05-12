@@ -33,7 +33,7 @@ async def listen_activity_websocket(websocket: WebSocket):
             message_json = json.loads(message)
             create_activity_schema: ActivitySchema = ActivitySchema(
                 **message_json)
-            processed_data: MessageResponseSchema | None = activity_service.handle_activity(
+            processed_data: MessageResponseSchema | None = await activity_service.handle_activity(
                 create_activity_schema, fingerprint, jwt_claims)
             if processed_data:
                 await websocket.send_text(
