@@ -126,26 +126,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
     // Update liked songs count
     this.updateLikedSongsCount();
 
-    // Listen for created playlist events
-
-    this.userService.userUsageData.subscribe(({ createdPlaylistIds }) => {
-      if (createdPlaylistIds && createdPlaylistIds.length > 0) {
-        window.setTimeout(() => {
-          this.playlistService.getPlaylistByIds(createdPlaylistIds).subscribe({
-            next: (response) => {
-              if (response.data) {
-                this.playlists = response.data.filter((playlist) => playlist != null);
-                const id = this.playlists[0].id;
-                this.router.navigate([`/playlist/${id}`]);
-              }
-            },
-            error: (error) => {
-              console.error('Error loading playlists:', error);
-            }
-          });
-        }, 2000);
-      }
-    });
+    this.listenDataChange();
 
     // Initialize context menu items
     this.initializeContextMenu();
@@ -436,9 +417,31 @@ export class SideBarComponent implements OnInit, OnDestroy {
     this.selectedPlaylist = null;
   }
 
-  ngOnDestroy(): void {
+  private listenDataChange() {
+    // Listen for created playlist events
+    this.userService.userUsageData.subscribe(({ createdPlaylistIds }) => {
+      if (createdPlaylistIds && createdPlaylistIds.length > 0) {
+        window.setTimeout(() => {
+          this.playlistService.getPlaylistByIds(createdPlaylistIds).subscribe({
+            next: (response) => {
+              if (response.data) {
+                this.playlists = response.data.filter((playlist) => playlist != null);
+              }
+            },
+            error: (error) => {
+              console.error('Error loading playlists:', error);
+            }
+          });
+        }, 2000);
+      }
+    });
 
+    this.playlistService.createdPlaylistId.subscribe((playlistId) => {
+      this.router.navigate([`/playlist/${playlistId}`]);
+    });
   }
+
+  ngOnDestroy(): void {}
 
   // Method to handle login when user is not authenticated
   signIn(): void {

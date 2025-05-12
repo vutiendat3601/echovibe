@@ -113,18 +113,35 @@ EXECUTE FUNCTION refresh_mv_artist_detail()
 ;"""
 
     search_artist_function_ddl = """
-CREATE OR REPLACE FUNCTION public.search_artist(keyword text)
- RETURNS TABLE(tsv_criteria text, id uuid, aggregate_id character varying, urn character varying, name character varying, description character varying, biography text, nationality_iso_code character varying, thumbnail_file_key text, thumbnail_url text, background_file_key text, background_url text, is_public boolean, is_verified boolean, tags text[], tsv tsvector)
+CREATE OR REPLACE
+FUNCTION public.search_artist(
+    keyword text
+)
+ RETURNS TABLE(tsv_criteria text, id uuid, aggregate_id CHARACTER VARYING, urn CHARACTER VARYING, name CHARACTER VARYING, description CHARACTER VARYING, biography text, nationality_iso_code CHARACTER VARYING, thumbnail_file_key text, thumbnail_url text, background_file_key text, background_url text, is_public boolean, is_verified boolean, tags text[], tsv tsvector)
  LANGUAGE plpgsql
 AS $function$
 DECLARE
     words text[];
-    tsv_criteria text;
+
+tsv_criteria text;
+
 BEGIN
-    SELECT string_to_array(keyword, ' ') INTO words;
-    SELECT array_to_string(words, ':* | ') INTO tsv_criteria;
-    SELECT tsv_criteria || ':*' INTO tsv_criteria;
-    RETURN QUERY
+    SELECT
+    string_to_array(keyword, ' ')
+INTO
+    words;
+
+SELECT
+    array_to_string(words, ':* | ')
+INTO
+    tsv_criteria;
+
+SELECT
+    tsv_criteria || ':*'
+INTO
+    tsv_criteria;
+
+RETURN QUERY
     SELECT
       tsv_criteria,
       ad.id,
@@ -142,9 +159,15 @@ BEGIN
       ad.is_verified,
       ad.tags,
       ad.tsv
-    FROM mv_artist_detail ad
-    WHERE ad.is_public AND ad.tsv @@ to_tsquery('english', tsv_criteria);
+FROM
+    mv_artist_detail ad
+WHERE
+    ad.is_public
+    AND ad.tsv @@ to_tsquery('english', tsv_criteria)
+ORDER BY
+    unaccent(ad."name") ILIKE '%' || unaccent(keyword) || '%' DESC;
 END;
+
 $function$
 ;"""
 
@@ -286,12 +309,13 @@ EXECUTE FUNCTION refresh_mv_track_detail()
 
     search_track_function_ddl = """
 CREATE OR REPLACE FUNCTION public.search_track(keyword text)
- RETURNS TABLE(tsv_criteria text, id uuid, aggregate_id character varying, urn character varying, name character varying, description character varying, is_public boolean, is_released boolean, thumbnail_file_key text, thumbnail_url text, audio_file_m3u8_url text, audio_duration_second int, official_released_date character varying, tags text[], is_active boolean, tsv tsvector, artists_json jsonb)
+ RETURNS TABLE(tsv_criteria text, id uuid, aggregate_id character varying, urn character varying, name character varying, description character varying, is_public boolean, is_released boolean, thumbnail_file_key text, thumbnail_url text, audio_file_m3u8_url text, audio_duration_second integer, official_released_date character varying, tags text[], is_active boolean, tsv tsvector, artists_json jsonb)
  LANGUAGE plpgsql
 AS $function$
 DECLARE
     words text[];
-    tsv_criteria text;
+
+tsv_criteria text;
 
 BEGIN
     SELECT
@@ -332,7 +356,9 @@ FROM
     mv_track_detail td
 WHERE
     td.is_public
-    AND td.tsv @@ to_tsquery('english', tsv_criteria);
+    AND td.tsv @@ to_tsquery('english', tsv_criteria)
+ORDER BY
+    unaccent(td."name") ILIKE '%' || unaccent(keyword) || '%' DESC;
 END;
 
 $function$
@@ -433,13 +459,17 @@ EXECUTE FUNCTION refresh_mv_playlist_detail()
     """
 
     search_playlist_function_ddl = """
-CREATE OR REPLACE FUNCTION public.search_playlist(keyword text)
- RETURNS TABLE(tsv_criteria text, id uuid, aggregate_id character varying, urn character varying, name character varying, is_public boolean, is_active boolean, thumbnail_url text, tsv tsvector, tracks_json jsonb)
+CREATE OR REPLACE
+FUNCTION public.search_playlist(
+    keyword text
+)
+ RETURNS TABLE(tsv_criteria text, id uuid, aggregate_id CHARACTER VARYING, urn CHARACTER VARYING, name CHARACTER VARYING, is_public boolean, is_active boolean, thumbnail_url text, tsv tsvector, tracks_json jsonb)
  LANGUAGE plpgsql
 AS $function$
 DECLARE
     words text[];
-    tsv_criteria text;
+
+tsv_criteria text;
 
 BEGIN
     SELECT
@@ -473,7 +503,9 @@ FROM
     mv_playlist_detail pd
 WHERE
     pd.is_public
-    AND pd.tsv @@ to_tsquery('english', tsv_criteria);
+    AND pd.tsv @@ to_tsquery('english', tsv_criteria)
+ORDER BY
+    unaccent(pd."name") ILIKE '%' || unaccent(keyword) || '%' DESC;
 END;
 
 $function$
