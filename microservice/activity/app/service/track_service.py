@@ -33,7 +33,7 @@ class TrackService:
         self.track_stats_repository = track_stats_repository
         self.logger = logger
 
-    def handle_like_track(self, activity: Activity) -> None:
+    async def handle_like_track(self, activity: Activity) -> None:
         updated_at = datetime.now(timezone.utc)
         track_like = self.track_like_repository.find_by_aggregate_id_and_user_id(
             aggregate_id=activity.aggregate_id, user_id=activity.created_by)
@@ -65,7 +65,7 @@ class TrackService:
             f"Processed {ActionType.LIKE_TRACK} action: id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
         )
 
-    def handle_unlike_track(self, activity: Activity) -> None:
+    async def handle_unlike_track(self, activity: Activity) -> None:
         track_like = self.track_like_repository.find_by_aggregate_id_and_user_id(
             aggregate_id=activity.aggregate_id, user_id=activity.created_by)
         if track_like:
@@ -88,7 +88,7 @@ class TrackService:
                 f"Processed {ActionType.UNLIKE_TRACK} action: id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
 
-    def handle_listen_track_tracking(self,
+    async def handle_listen_track_tracking(self,
                                      activity: Activity) -> dict[str, str]:
         session_id = generate_aggregate_id()
         activity.session_id = session_id
@@ -101,7 +101,7 @@ class TrackService:
             sessionId=session_id,
             type=MessageType.PROCESSED_LISTEN_TRACK_TRACKING)
 
-    def handle_listened_track_tracking(self, session_id: str) -> None:
+    async def handle_listened_track_tracking(self, session_id: str) -> None:
         activity: Activity | None = self.activity_repository.find_by_session_id_and_type(
             session_id, ActionType.LISTEN_TRACK_TRACKING.name)
         if activity:
@@ -135,7 +135,7 @@ class TrackService:
                     f"Processed {ActionType.LISTENED_TRACK_TRACKING} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
                 )
 
-    def handle_view_track_detail_page_tracking(
+    async def handle_view_track_detail_page_tracking(
             self, activity: Activity) -> MessageResponseSchema:
         session_id = generate_aggregate_id()
         activity.session_id = session_id
@@ -148,7 +148,7 @@ class TrackService:
             sessionId=session_id,
             type=MessageType.PROCESSED_VIEW_TRACK_DETAIL_PAGE_TRACKING)
 
-    def handle_viewed_track_detail_page_tracking(self, session_id: str) -> None:
+    async def handle_viewed_track_detail_page_tracking(self, session_id: str) -> None:
         activity: Activity | None = self.activity_repository.find_by_session_id_and_type(
             session_id, ActionType.VIEW_TRACK_DETAIL_PAGE_TRACKING.name)
         if activity:
@@ -182,11 +182,11 @@ class TrackService:
                     f"Processed {ActionType.VIEWED_TRACK_DETAIL_PAGE_TRACKING} action: session_id={activity.session_id}, id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
                 )
 
-    def get_track_stats(self, aggregate_id: str) -> TrackStatsSchema:
+    async def get_track_stats(self, aggregate_id: str) -> TrackStatsSchema:
         track_stats = self._get_track_stats_by_id(aggregate_id)
         return map_to_track_stats_schema(track_stats)
 
-    def _get_track_stats_by_id(self, id: str) -> TrackStats:
+    async def _get_track_stats_by_id(self, id: str) -> TrackStats:
         track_stats = self.track_stats_repository.find_by_aggregate_id(id)
         if not track_stats:
             created_at = datetime.now(timezone.utc)

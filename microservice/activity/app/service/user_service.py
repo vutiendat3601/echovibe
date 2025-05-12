@@ -19,15 +19,15 @@ class UserService:
         self.user_usage_data_repository = user_usage_data_repository
         self.logger = logger
 
-    def get_user_usage_data(self, user_id) -> UserUsageDataSchema:
+    async def get_user_usage_data(self, user_id) -> UserUsageDataSchema:
         user_usage_data = self.user_usage_data_repository.find_by_user_id(
             user_id)
         if user_usage_data:
             return map_to_user_usage_data_schema(user_usage_data)
-        return self._fallback_get_user_usage_data(user_id)
+        return await self._fallback_get_user_usage_data(user_id)
 
-    def _fallback_get_user_usage_data(self,
-                                      user_id: str) -> UserUsageDataSchema:
+    async def _fallback_get_user_usage_data(
+            self, user_id: str) -> UserUsageDataSchema:
         created_at = datetime.now(timezone.utc)
         user_data = UserData(user_id=user_id,
                              created_at=created_at,

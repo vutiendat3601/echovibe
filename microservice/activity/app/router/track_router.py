@@ -17,6 +17,6 @@ track_service: TrackService = Provide[Container.track_service]
 @track_router.get(path="/{id}/stats",
                   response_model=ResponseSchema[TrackStatsSchema])
 async def get_track_stats(id: str):
-    track_stats_schema = track_service.get_track_stats(id)
+    track_stats_schema = await track_service.get_track_stats(id)
     response_scheme = ok(data=track_stats_schema)
     return JSONResponse(content=jsonable_encoder(response_scheme))
