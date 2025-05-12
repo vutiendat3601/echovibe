@@ -146,6 +146,7 @@ export class TopBarComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Subscribe to user profile changes
     this.authService.userProfile().subscribe((userProfile) => (this.userProfile = userProfile));
   }
 
@@ -242,7 +243,12 @@ export class TopBarComponent implements OnInit {
 
   redirectToProfileUrl(): void {}
 
+  signIn(): void {
+    this.authService.signIn();
+  }
+
   signOut(): void {
+    // First sign out using the AuthService
     this.authService.signOut();
   }
 }
