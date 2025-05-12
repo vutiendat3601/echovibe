@@ -61,7 +61,7 @@ class ArtistService:
                                      created_by=activity.created_by)
         self.artist_like_repository.save_artist_like(artist_like)
 
-        artist_stats: ArtistStats = self._get_artist_stats_by_id(
+        artist_stats: ArtistStats = await self._get_artist_stats_by_id(
             activity.aggregate_id)
         artist_stats.total_likes += 1
         artist_stats.updated_at = updated_at
@@ -84,7 +84,7 @@ class ArtistService:
             artist_like.updated_by = activity.created_by
             self.artist_like_repository.save_artist_like(artist_like)
 
-            artist_stats: ArtistStats = self._get_artist_stats_by_id(
+            artist_stats: ArtistStats = await self._get_artist_stats_by_id(
                 activity.aggregate_id)
             artist_stats.total_likes -= 1
             artist_stats.updated_at = updated_at
@@ -127,7 +127,7 @@ class ArtistService:
                         created_at=updated_at,
                         created_by=activity.created_by)
 
-                    artist_stats: ArtistStats = self._get_artist_stats_by_id(
+                    artist_stats: ArtistStats = await self._get_artist_stats_by_id(
                         activity.aggregate_id)
                     artist_stats.total_detail_page_views += 1
                     artist_stats.updated_at = updated_at
