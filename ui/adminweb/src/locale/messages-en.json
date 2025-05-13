@@ -1,7 +1,7 @@
 {
   "locale": "en",
   "translations": {
-    "APP_NAME": "Echo Vibe - Admin",
+    "APP_NAME": "Admin",
     "DIALOG_LABEL_ARTIST_DETAIL": "Artist details",
     "DIALOG_LABEL_CONFIRM_DELETE": "Confirm delete",
     "DIALOG_LABEL_CONFIRM_RELEASE": "Confirm release",
