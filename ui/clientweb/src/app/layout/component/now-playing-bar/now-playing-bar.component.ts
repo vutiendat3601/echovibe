@@ -1,3 +1,4 @@
+import { TrackingService } from './../../../service/tracking.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,6 +11,7 @@ import { Toast } from 'primeng/toast';
 import { faBackwardStep, faForwardStep, faPause, faPlay, faShuffle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AudioDurationPipe } from '../../../pipe/audio-duration.pipe';
+import { MessageResponseDto } from '../../../dto/activity-dto';
 
 @Component({
   selector: 'app-now-playing-bar',
@@ -26,6 +28,13 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
   duration: number = 0;
   volumePercent: number = 100;
   progressPercent: number = 0;
+
+  // Tracking related properties
+  private listenTrackingSessionId: string | null = null;
+  private lastTrackId: string | null = null;
+  private trackingTimeInterval: number | null = null;
+  private hasListenedEnough: boolean = false;
+  private pauseTime: number | null = null; // Track when the user paused
 
   // Icons
   faShuffle = faShuffle;
@@ -50,7 +59,8 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
     private audioService: AudioService,
     private offlineAudioService: OfflineAudioService,
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private trackingService: TrackingService
   ) {}
 
   ngOnInit(): void {
@@ -58,10 +68,12 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.audioService.currentTrack$.subscribe((track) => {
         this.currentTrack = track;
+        this.handleTrackChange(track);
       }),
 
       this.audioService.isPlaying$.subscribe((isPlaying) => {
         this.isPlaying = isPlaying;
+        this.handlePlaybackStateChange(isPlaying);
       }),
 
       this.audioService.currentTime$.subscribe((time) => {
@@ -286,8 +298,126 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
     this.audioService.setVolume(newVolume);
   }
 
+  private handleTrackChange(track: EnhancedTrackDto | null): void {
+    if (track) {
+      // If we're already tracking a session, complete it first
+      this.completeTrackTracking();
+
+      // Start tracking the new track
+      this.lastTrackId = track.id;
+      this.hasListenedEnough = false;
+      this.startTrackTracking(track.id);
+    } else {
+      this.completeTrackTracking();
+      this.lastTrackId = null;
+    }
+  }
+
+  // Start tracking a track
+  private startTrackTracking(trackId: string): void {
+    // Reset state
+    this.pauseTime = null;
+    this.clearTrackingTimeInterval();
+
+    // Start tracking
+    this.trackingService.startListenTrackTracking(trackId);
+
+    // Listen for tracking response
+    this.subscriptions.push(
+      this.trackingService.listenTrackTracking.subscribe((response: MessageResponseDto) => {
+        if (response.aggregateId === trackId && response.sessionId) {
+          this.listenTrackingSessionId = response.sessionId;
+
+          // Set timeInterval to mark as listened after 10 seconds
+          if (this.isPlaying) {
+            this.setTrackingTimeInterval();
+          }
+        }
+      })
+    );
+  }
+
+  // Set timeInterval to mark track as listened after 10 seconds
+  private setTrackingTimeInterval(): void {
+    this.clearTrackingTimeInterval();
+
+    this.trackingTimeInterval = window.setInterval(() => {
+      // Mark the track as listened enough
+      this.hasListenedEnough = true;
+
+      // If we have a session ID, mark the track as listened
+      if (this.listenTrackingSessionId) {
+        this.trackingService.sendListenedTrackTracking(this.listenTrackingSessionId);
+      }
+    }, 15000); // 10 seconds
+  }
+
+  // Clear any existing tracking timeInterval
+  private clearTrackingTimeInterval(): void {
+    if (this.trackingTimeInterval !== null) {
+      window.clearInterval(this.trackingTimeInterval);
+      this.trackingTimeInterval = null;
+    }
+  }
+
+  // Complete tracking of current track
+  private completeTrackTracking(): void {
+    // If we have a valid session and haven't marked as listened yet, do it now
+    if (this.listenTrackingSessionId) {
+      this.trackingService.sendListenedTrackTracking(this.listenTrackingSessionId);
+    }
+
+    // Clean up
+    this.clearTrackingTimeInterval();
+    this.listenTrackingSessionId = null;
+    this.hasListenedEnough = false;
+    this.pauseTime = null;
+  }
+
+  // Handle pause event for tracking
+  private handlePause(): void {
+    // When paused, record the pause time
+    this.pauseTime = Date.now();
+    this.clearTrackingTimeInterval();
+  }
+
+  // Handle resume event for tracking
+  private handleResume(): void {
+    // If the track was paused for more than 10 seconds, restart tracking
+    if (this.pauseTime && this.currentTrack) {
+      const pausedDuration = Date.now() - this.pauseTime;
+
+      if (pausedDuration > 10000 && this.currentTrack.id === this.lastTrackId) {
+        // Complete existing tracking
+        this.completeTrackTracking();
+
+        // Start new tracking
+        this.startTrackTracking(this.currentTrack.id);
+      } else {
+        // Continue with existing tracking if less than 10 seconds have passed
+        if (!this.hasListenedEnough) {
+          this.setTrackingTimeInterval();
+        }
+      }
+    }
+
+    this.pauseTime = null;
+  }
+
+  private handlePlaybackStateChange(isPlaying: boolean): void {
+    if (isPlaying) {
+      this.handleResume();
+    } else {
+      this.handlePause();
+    }
+  }
+
   ngOnDestroy(): void {
     // Unsubscribe from all subscriptions
     this.subscriptions.forEach((sub) => sub.unsubscribe());
+
+    if (this.listenTrackingSessionId) {
+      this.trackingService.sendListenedTrackTracking(this.listenTrackingSessionId);
+    }
   }
 }
