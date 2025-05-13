@@ -213,7 +213,7 @@ class ArtistService:
                         for track_stats_report in track_stats_reports
                     ]
                     if len(artist_recommendation.most_popular_track_ids) < 10:
-                        artist_recommendation.most_popular_track_ids = [
+                        artist_recommendation.most_popular_track_ids += [
                             track_id for track_id in track_ids if track_id
                             not in artist_recommendation.most_popular_track_ids
                         ][:10]
