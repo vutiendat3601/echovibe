@@ -498,6 +498,79 @@ $function$
 ;
 """
 
+    create_user_track_rating_view_ddl = """
+CREATE OR REPLACE VIEW public.v_user_track_rating
+AS SELECT ud.user_id,
+    tl.aggregate_id AS track_id,
+        CASE
+            WHEN sum(tl.duration_second) < 15 THEN 0
+            WHEN sum(tl.duration_second) >= 15 AND sum(tl.duration_second) <= 600 THEN 1
+            WHEN sum(tl.duration_second) >= 601 AND sum(tl.duration_second) <= 3000 THEN 2
+            WHEN sum(tl.duration_second) >= 3001 AND sum(tl.duration_second) <= 9000 THEN 3
+            WHEN sum(tl.duration_second) >= 9001 AND sum(tl.duration_second) <= 18000 THEN 4
+            WHEN sum(tl.duration_second) >= 18001 AND sum(tl.duration_second) <= 36000 THEN 5
+            WHEN sum(tl.duration_second) >= 36001 AND sum(tl.duration_second) <= 72000 THEN 6
+            WHEN sum(tl.duration_second) >= 72001 AND sum(tl.duration_second) <= 144000 THEN 7
+            WHEN sum(tl.duration_second) >= 144001 AND sum(tl.duration_second) <= 576000 THEN 8
+            WHEN sum(tl.duration_second) >= 576001 AND sum(tl.duration_second) <= 864000 THEN 9
+            ELSE 10
+        END AS rating,
+    EXTRACT(year FROM CURRENT_TIMESTAMP) AS year,
+    EXTRACT(month FROM CURRENT_TIMESTAMP) AS month,
+    sum(tl.duration_second) AS total_listened_seconds
+   FROM user_data ud
+     JOIN track_listen tl ON ud.user_id::text = tl.user_id::text
+  GROUP BY ud.user_id, tl.aggregate_id;
+"""
+
+    create_user_track_rating_last_half_year_view_ddl = """
+CREATE OR REPLACE VIEW public.v_user_track_rating_last_half_year
+AS SELECT ud.user_id,
+    tl.aggregate_id AS track_id,
+        CASE
+            WHEN sum(tl.duration_second) >= 15 AND sum(tl.duration_second) <= 60 THEN 1
+            WHEN sum(tl.duration_second) >= 61 AND sum(tl.duration_second) <= 300 THEN 2
+            WHEN sum(tl.duration_second) >= 301 AND sum(tl.duration_second) <= 900 THEN 3
+            WHEN sum(tl.duration_second) >= 901 AND sum(tl.duration_second) <= 1800 THEN 4
+            WHEN sum(tl.duration_second) >= 1801 AND sum(tl.duration_second) <= 3600 THEN 5
+            WHEN sum(tl.duration_second) >= 3601 AND sum(tl.duration_second) <= 7200 THEN 6
+            WHEN sum(tl.duration_second) >= 7201 AND sum(tl.duration_second) <= 14400 THEN 7
+            WHEN sum(tl.duration_second) >= 14401 AND sum(tl.duration_second) <= 57600 THEN 8
+            WHEN sum(tl.duration_second) >= 57601 AND sum(tl.duration_second) <= 86400 THEN 9
+            ELSE 10
+        END AS rating,
+    EXTRACT(year FROM CURRENT_TIMESTAMP) AS year,
+    EXTRACT(month FROM CURRENT_TIMESTAMP) AS month,
+    sum(tl.duration_second) AS total_listened_seconds
+   FROM user_data ud
+     JOIN ( SELECT track_listen.id,
+            track_listen.aggregate_id,
+            track_listen.user_id,
+            track_listen.duration_second,
+            track_listen.session_id,
+            track_listen.created_at,
+            track_listen.updated_at,
+            track_listen.created_by,
+            track_listen.updated_by
+           FROM track_listen
+          WHERE track_listen.duration_second >= 15 AND to_date(((EXTRACT(year FROM CURRENT_TIMESTAMP) || '-'::text) || EXTRACT(month FROM CURRENT_TIMESTAMP)) || '-01'::text, 'YYYY-MM-DD'::text) <= track_listen.created_at) tl ON ud.user_id::text = tl.user_id::text
+  GROUP BY ud.user_id, tl.aggregate_id
+;"""
+
+    create_user_track_recommendation_table_ddl = """
+CREATE TABLE public.user_track_recommendation (
+  id uuid NOT NULL,
+  user_id varchar(255) NOT NULL,
+  track_ids _text NOT NULL DEFAULT '{}',
+  ratings_json jsonb NOT NULL DEFAULT '{}',
+  created_at timestamptz DEFAULT CURRENT_TIMESTAMP NULL,
+  updated_at timestamptz DEFAULT CURRENT_TIMESTAMP NULL,
+  created_by varchar(255) NULL,
+  updated_by varchar(255) NULL,
+  CONSTRAINT user_track_recommendation__pkey PRIMARY KEY (id)
+)
+;"""
+
     ddls = [
         create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
         create_activity_table_ddl, create_aritst_like_table_ddl,
@@ -507,14 +580,17 @@ $function$
         create_track_detail_page_view_table_ddl, create_track_listen_table_ddl,
         create_track_stats_table_ddl, create_user_data_table_ddl,
         create_user_playlist_table_ddl, create_user_stats_materialized_view_ddl,
-        create_track_stats_report_view_ddl,
+        create_track_stats_report_view_ddl, create_user_track_rating_view_ddl,
         create_track_stats_report_current_month_view_ddl,
         create_artist_stats_report_view_ddl,
         create_artist_stats_report_current_month_view_ddl,
         create_find_track_stats_report_order_by_total_track_listens_desc_function_ddl,
         create_find_track_stats_report_order_by_avg_score_desc_function_ddl,
-        create_find_track_stats_report_order_by_total_track_listens_desc_current_month_function_ddl
+        create_find_track_stats_report_order_by_total_track_listens_desc_current_month_function_ddl,
+        create_user_track_rating_last_half_year_view_ddl,
+        create_user_track_recommendation_table_ddl
     ]
+
     for ddl in ddls:
         op.execute(ddl)
 
@@ -537,6 +613,10 @@ def downgrade() -> None:
     drop_track_stats_report__current_month_view_ddl = "DROP VIEW IF EXISTS public.v_track_stats_report_current_month;"
     drop_artist_stats_report_view_ddl = "DROP VIEW IF EXISTS public.v_artist_stats_report;"
     drop_artist_stats_report_current_month_view_ddl = "DROP VIEW IF EXISTS public.v_artist_stats_report_current_month;"
+    drop_user_track_rating_last_half_year_view_ddl = "DROP VIEW IF EXISTS public.track_rating_last_half_year;"
+    drop_user_track_rating_view_ddl = "DROP VIEW IF EXISTS public.v_user_track_rating_last_half_year;"
+    drop_user_track_recommendation_table_ddl = "DROP TABLE IF EXISTS public.user_track_recommendation;"
+
     ddls = [
         drop_uuid_ossp_extension_ddl, drop_unaccent_extension_ddl,
         drop_activity_table_ddl, drop_artist_like_table_ddl,
@@ -544,12 +624,15 @@ def downgrade() -> None:
         drop_aritst_detail_page_view_table_ddl,
         drop_artist_stats_report_view_ddl,
         drop_artist_stats_report_current_month_view_ddl,
+        drop_user_track_rating_view_ddl,
+        drop_user_track_rating_last_half_year_view_ddl,
         drop_track_stats_report_view_ddl,
         drop_track_stats_report__current_month_view_ddl,
         drop_artist_stats_detail_view_ddl, drop_artist_stats_table_ddl,
         drop_artist_recommendation_table_ddl, drop_track_like_table_ddl,
         drop_track_detail_page_view_table_ddl, drop_user_playlist_table_ddl,
-        drop_track_listen_table_ddl, drop_track_stats_table_ddl
+        drop_track_listen_table_ddl, drop_track_stats_table_ddl,
+        drop_user_track_recommendation_table_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)

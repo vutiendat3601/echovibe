@@ -18,14 +18,16 @@ from app.repository.impl.sqlmodel_track_repository import (
     SqlmodelTrackReportRepository)
 from app.repository.impl.sqlmodel_user_repository import (
     SqlmodelUserDataRepository, SqlmodelUserUsageDataRepository,
-    SqlmodelUserPlaylistRepository)
+    SqlmodelUserPlaylistRepository, SqlmodelUserTrackRatingRepository,
+    SqlmodelUserTrackRecommendationRepository)
 from app.client.product_client import ProductClient
 
 
 class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(modules=[
         "app.router.activity_router", "app.router.track_router",
-        "app.router.user_router", "app.router.artist_router"
+        "app.router.user_router", "app.router.artist_router",
+        "app.router.job_router"
     ])
 
     logger = providers.Singleton(Logger)
@@ -99,6 +101,14 @@ class Container(containers.DeclarativeContainer):
         SqlmodelUserPlaylistRepository,
         logger=logger,
         session_factory=database.provided.session)
+    user_track_rating_repository = providers.Factory(
+        SqlmodelUserTrackRatingRepository,
+        logger=logger,
+        session_factory=database.provided.session)
+    user_track_recommendation_repository = providers.Factory(
+        SqlmodelUserTrackRecommendationRepository,
+        logger=logger,
+        session_factory=database.provided.session)
 
     # Service
     playlist_service = providers.Factory(
@@ -131,6 +141,9 @@ class Container(containers.DeclarativeContainer):
         activity_repository=activity_repository,
         user_data_repository=user_data_repository,
         user_usage_data_repository=user_usage_data_repository,
+        user_track_rating_repository=user_track_rating_repository,
+        user_track_recommendation_repository=
+        user_track_recommendation_repository,
         logger=logger)
 
     activity_service = providers.Factory(ActivityService,

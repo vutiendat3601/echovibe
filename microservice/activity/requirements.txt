@@ -9,3 +9,5 @@ python-dotenv==1.0.1
 websockets==15.0.1
 python-jose[cryptography]==3.4.0
 requests==2.32.3
+pandas==2.2.3
+scikit-learn==1.6.1
