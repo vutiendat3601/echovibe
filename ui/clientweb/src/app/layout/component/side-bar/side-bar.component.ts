@@ -173,7 +173,11 @@ export class SideBarComponent implements OnInit, OnDestroy {
 
   loadPlaylists(): void {
     this.userService.userUsageData.subscribe((userData) => {
-      if (userData && userData.createdPlaylistIds && userData.createdPlaylistIds.length > 0) {
+      if (
+        userData &&
+        userData.createdPlaylistIds.length &&
+        userData.createdPlaylistIds.length != this.playlists.length
+      ) {
         // Get detailed information for each playlist
         this.playlistService.getPlaylistByIds(userData.createdPlaylistIds).subscribe({
           next: (response) => {
