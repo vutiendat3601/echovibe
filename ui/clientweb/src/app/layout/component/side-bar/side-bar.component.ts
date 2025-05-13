@@ -172,25 +172,25 @@ export class SideBarComponent implements OnInit, OnDestroy {
   }
 
   loadPlaylists(): void {
-    this.userService.userUsageData.subscribe((userData) => {
-      if (
-        userData &&
-        userData.createdPlaylistIds.length &&
-        userData.createdPlaylistIds.length != this.playlists.length
-      ) {
-        // Get detailed information for each playlist
-        this.playlistService.getPlaylistByIds(userData.createdPlaylistIds).subscribe({
-          next: (response) => {
-            if (response.data) {
-              this.playlists = response.data.filter((playlist) => playlist != null);
-            }
-          },
-          error: (error) => {
-            console.error('Error loading playlists:', error);
-          }
-        });
-      }
-    });
+    // this.userService.userUsageData.subscribe((userData) => {
+    //   if (
+    //     userData &&
+    //     userData.createdPlaylistIds.length &&
+    //     userData.createdPlaylistIds.length != this.playlists.length
+    //   ) {
+    //     // Get detailed information for each playlist
+    //     this.playlistService.getPlaylistByIds(userData.createdPlaylistIds).subscribe({
+    //       next: (response) => {
+    //         if (response.data) {
+    //           this.playlists = response.data.filter((playlist) => playlist != null);
+    //         }
+    //       },
+    //       error: (error) => {
+    //         console.error('Error loading playlists:', error);
+    //       }
+    //     });
+    //   }
+    // });
   }
 
   // Update liked songs count from user data
@@ -424,7 +424,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
   private listenDataChange() {
     // Listen for created playlist events
     this.userService.userUsageData.subscribe(({ createdPlaylistIds }) => {
-      if (createdPlaylistIds && createdPlaylistIds.length > 0) {
+      if (createdPlaylistIds && createdPlaylistIds.length && createdPlaylistIds.length && this.playlists.length) {
         window.setTimeout(() => {
           this.playlistService.getPlaylistByIds(createdPlaylistIds).subscribe({
             next: (response) => {
@@ -436,7 +436,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
               console.error('Error loading playlists:', error);
             }
           });
-        }, 2000);
+        }, 2_000);
       }
     });
 
