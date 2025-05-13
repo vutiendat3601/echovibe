@@ -120,10 +120,9 @@ export class TrackDetailComponent implements OnInit {
     this.initialize();
     const trackId = this.route.snapshot.paramMap.get('id');
     if (trackId) {
-      this.loadData(trackId);
       this.listenDataChange();
       this.listenTrackingEvent();
-      this.userService.refresh();
+      this.loadData(trackId);
     } else {
       this.router.navigate(['/not-found']);
     }
@@ -213,6 +212,7 @@ export class TrackDetailComponent implements OnInit {
           });
           this.trackDetail = trackDetail;
           this.initializeTracking();
+          this.userService.refresh();
           window.setTimeout(() => this.extractColorFromThumbnail(), 300);
         } else {
           this.errorMessage = 'Track not found';
