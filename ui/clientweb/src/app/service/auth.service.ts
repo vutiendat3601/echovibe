@@ -42,7 +42,7 @@ export class AuthService {
       .then((_) => this.oauthStorage.getItem('access_token') && this.loadUserProfile());
     this.oauthService.setupAutomaticSilentRefresh();
     this.oauthService.events
-      .pipe(filter((event) => ['token_received', 'token_refreshed'].includes(event.type)))
+      .pipe(filter((event) => ['token_received'].includes(event.type)))
       .subscribe((_) => setTimeout(() => this.loadUserProfile(), 1_500));
     this.oauthService.events
       .pipe(

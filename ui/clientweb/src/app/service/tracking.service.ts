@@ -30,6 +30,9 @@ export class TrackingService {
       MessageType.PROCESSED_VIEW_TRACK_DETAIL_PAGE_TRACKING,
       (message: MessageResponseDto) => this.handleViewTrackDetailPageMessage(message)
     );
+    this.activityService.addMessageHandler(MessageType.PROCESSED_LISTEN_TRACK_TRACKING, (message: MessageResponseDto) =>
+      this.handleListenTrackMessage(message)
+    );
     this.isInitialized = true;
   }
 
@@ -105,5 +108,9 @@ export class TrackingService {
 
   private handleViewTrackDetailPageMessage(message: MessageResponseDto) {
     this.viewTrackDetailPageTrackingSubject.next(message);
+  }
+
+  private handleListenTrackMessage(message: MessageResponseDto) {
+    this.listenTrackTrackingSubject.next(message);
   }
 }
