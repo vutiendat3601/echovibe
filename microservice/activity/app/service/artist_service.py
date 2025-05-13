@@ -162,7 +162,7 @@ class ArtistService:
                 aggregate_id, jwt)
         if not artist_stats_detail.artist_recommendation_id:
             asyncio.create_task(
-                self._process_artist_recommendation(aggregate_id))
+                self._process_artist_recommendation(aggregate_id, jwt))
         return map_to_artist_stats_detail_schema(artist_stats_detail)
 
     async def _fallback_get_artist_stats_detail(

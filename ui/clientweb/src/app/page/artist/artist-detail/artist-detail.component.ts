@@ -166,44 +166,45 @@ export class ArtistDetailComponent implements OnInit, OnDestroy {
                 stats.totalLikes = totalLikes;
 
                 const trackIds = [...mostListenedTrackIds, ...mostListenedTrackIdsCurrentMonth, ...mostPopularTrackIds];
-                this.trackService.getTrackByIds(trackIds).subscribe((respDto) => {
-                  const trackDetailDtos = respDto.data.filter((td) => td != null);
-                  const trackDetailDtosMap = new Map(trackDetailDtos.map((td) => [td.id, td]));
-                  if (this.artistDetail) {
-                    stats.mostPopularTracks = mostPopularTrackIds
-                      .map((id) => {
-                        const trackDetailDto = trackDetailDtosMap.get(id);
-                        if (trackDetailDto) {
-                          const { id, name, audioDurationSecond, audioFileM3u8Url } = trackDetailDto;
-                          const track = {
-                            id,
-                            name,
-                            audioDurationSecond,
-                            audioFileM3u8Url,
-                            totalListens: 0,
-                            totalLikes: 0
-                          };
-                          return track;
-                        }
-                        return null;
-                      })
-                      .filter((t) => t != null);
-
-                    this.trackService.getTrackStatsByIds(trackIds).subscribe((respDto) => {
-                      const trackStatsDtos = respDto.data.filter((ts) => ts != null);
-                      const trackStatsDtosMap = new Map(trackStatsDtos.map((ts) => [ts.id, ts]));
-                      if (this.artistDetail) {
-                        this.artistDetail.stats.mostPopularTracks.forEach((track) => {
-                          const trackStatsDto = trackStatsDtosMap.get(track.id);
-                          if (trackStatsDto) {
-                            track.totalLikes = trackStatsDto.totalLikes;
-                            track.totalListens = trackStatsDto.totalListens;
+                trackIds.length &&
+                  this.trackService.getTrackByIds(trackIds).subscribe((respDto) => {
+                    const trackDetailDtos = respDto.data.filter((td) => td != null);
+                    const trackDetailDtosMap = new Map(trackDetailDtos.map((td) => [td.id, td]));
+                    if (this.artistDetail) {
+                      stats.mostPopularTracks = mostPopularTrackIds
+                        .map((id) => {
+                          const trackDetailDto = trackDetailDtosMap.get(id);
+                          if (trackDetailDto) {
+                            const { id, name, audioDurationSecond, audioFileM3u8Url } = trackDetailDto;
+                            const track = {
+                              id,
+                              name,
+                              audioDurationSecond,
+                              audioFileM3u8Url,
+                              totalListens: 0,
+                              totalLikes: 0
+                            };
+                            return track;
                           }
-                        });
-                      }
-                    });
-                  }
-                });
+                          return null;
+                        })
+                        .filter((t) => t != null);
+
+                      this.trackService.getTrackStatsByIds(trackIds).subscribe((respDto) => {
+                        const trackStatsDtos = respDto.data.filter((ts) => ts != null);
+                        const trackStatsDtosMap = new Map(trackStatsDtos.map((ts) => [ts.id, ts]));
+                        if (this.artistDetail) {
+                          this.artistDetail.stats.mostPopularTracks.forEach((track) => {
+                            const trackStatsDto = trackStatsDtosMap.get(track.id);
+                            if (trackStatsDto) {
+                              track.totalLikes = trackStatsDto.totalLikes;
+                              track.totalListens = trackStatsDto.totalListens;
+                            }
+                          });
+                        }
+                      });
+                    }
+                  });
               });
               this.artistDetail = artistDetail;
               this.initializeTracking();
