@@ -408,6 +408,96 @@ AS SELECT aggregate_id,
           GROUP BY adpv0.aggregate_id, adpv0.created_at_year, adpv0.created_at_month) adpv1
 ;"""
 
+    create_find_track_stats_report_order_by_avg_score_desc_function_ddl = """
+CREATE OR REPLACE FUNCTION find_track_stats_report_order_by_avg_score_desc(aggregate_ids TEXT[])
+RETURNS TABLE (
+    aggregate_id CHARACTER VARYING,
+    total_track_detail_page_view_duration_seconds BIGINT,
+    total_track_detail_page_views BIGINT,
+    total_track_listen_duration_seconds BIGINT,
+    total_track_listens BIGINT,
+    avg_score DOUBLE PRECISION
+)
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    tsr.aggregate_id,
+    SUM(tsr.total_track_detail_page_view_duration_seconds)::bigint AS total_track_detail_page_view_duration_seconds,
+    SUM(tsr.total_track_detail_page_views)::bigint AS total_track_detail_page_views,
+    SUM(tsr.total_track_listen_duration_seconds)::bigint AS total_track_listen_duration_seconds,
+    SUM(tsr.total_track_listens)::bigint AS total_track_listens,
+    AVG(score)::DOUBLE PRECISION AS avg_score
+  FROM
+    v_track_stats_report tsr
+  WHERE
+    tsr.aggregate_id = ANY(aggregate_ids)
+  GROUP BY
+    tsr.aggregate_id
+  ORDER BY
+    avg(tsr.score) DESC;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+    create_find_track_stats_report_order_by_total_track_listens_desc_function_ddl = """
+CREATE OR REPLACE FUNCTION find_track_stats_report_order_by_total_track_listens_desc(aggregate_ids TEXT[])
+RETURNS TABLE (
+    aggregate_id CHARACTER VARYING,
+    total_track_detail_page_view_duration_seconds BIGINT,
+    total_track_detail_page_views BIGINT,
+    total_track_listen_duration_seconds BIGINT,
+    total_track_listens BIGINT,
+    avg_score DOUBLE PRECISION
+)
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    tsr.aggregate_id,
+    SUM(tsr.total_track_detail_page_view_duration_seconds)::bigint AS total_track_detail_page_view_duration_seconds,
+    SUM(tsr.total_track_detail_page_views)::bigint AS total_track_detail_page_views,
+    SUM(tsr.total_track_listen_duration_seconds)::bigint AS total_track_listen_duration_seconds,
+    SUM(tsr.total_track_listens)::bigint AS total_track_listens,
+    AVG(score)::DOUBLE PRECISION AS avg_score
+  FROM
+    v_track_stats_report tsr
+  WHERE
+    tsr.aggregate_id = ANY(aggregate_ids)
+  GROUP BY
+    tsr.aggregate_id
+  ORDER BY
+    SUM(tsr.total_track_listens) DESC;
+END;
+$$ LANGUAGE plpgsql;
+"""
+    create_find_track_stats_report_order_by_total_track_listens_desc_current_month_function_ddl = """
+CREATE OR REPLACE FUNCTION public.find_track_stats_report_order_by_total_track_listens_desc_cm(aggregate_ids text[])
+ RETURNS TABLE(aggregate_id character varying, total_track_detail_page_view_duration_seconds bigint, total_track_detail_page_views bigint, total_track_listen_duration_seconds bigint, total_track_listens bigint, avg_score double precision)
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT
+    tsrcm.aggregate_id,
+    SUM(tsrcm.total_track_detail_page_view_duration_seconds)::bigint AS total_track_detail_page_view_duration_seconds,
+    SUM(tsrcm.total_track_detail_page_views)::bigint AS total_track_detail_page_views,
+    SUM(tsrcm.total_track_listen_duration_seconds)::bigint AS total_track_listen_duration_seconds,
+    SUM(tsrcm.total_track_listens)::bigint AS total_track_listens,
+    AVG(score)::DOUBLE PRECISION AS avg_score
+  FROM
+    v_track_stats_report_current_month tsrcm
+  WHERE
+    tsrcm.aggregate_id = ANY(aggregate_ids)
+  GROUP BY
+    tsrcm.aggregate_id
+  ORDER BY
+    SUM(tsrcm.total_track_listens) DESC;
+END;
+$function$
+;
+"""
+
     ddls = [
         create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
         create_activity_table_ddl, create_aritst_like_table_ddl,
@@ -420,7 +510,10 @@ AS SELECT aggregate_id,
         create_track_stats_report_view_ddl,
         create_track_stats_report_current_month_view_ddl,
         create_artist_stats_report_view_ddl,
-        create_artist_stats_report_current_month_view_ddl
+        create_artist_stats_report_current_month_view_ddl,
+        create_find_track_stats_report_order_by_total_track_listens_desc_function_ddl,
+        create_find_track_stats_report_order_by_avg_score_desc_function_ddl,
+        create_find_track_stats_report_order_by_total_track_listens_desc_current_month_function_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)

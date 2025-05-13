@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from app.model.artist import (ArtistLike, ArtistDetailPageView, ArtistStats,
-                              ArtistStatsDetail, ArtistRecommendation)
+                              ArtistStatsDetail, ArtistRecommendation, ArtistStatsReport)
 
 
 class ArtistLikeRepository(ABC):
@@ -9,6 +9,7 @@ class ArtistLikeRepository(ABC):
     def save_artist_like(self, artist_like: ArtistLike) -> ArtistLike:
         """Save ArtistLike"""
 
+    @abstractmethod
     def find_by_aggregate_id_and_user_id(self, aggregate_id: str,
                                          user_id: str) -> ArtistLike | None:
         """Find ArtistLike by aggregate_id and user_id"""
@@ -63,3 +64,16 @@ class ArtistStatsDetailRepository(ABC):
     def find_by_aggregate_id(self,
                              aggregate_id: str) -> ArtistStatsDetail | None:
         """Find ArtistStatsDetail by aggregate_id"""
+
+
+class ArtistReportRepository(ABC):
+
+    @abstractmethod
+    def find_artist_stats_report_by_aggregate_ids(
+            self, aggregate_ids: list[str]) -> list[ArtistStatsReport]:
+        """Save ArtistStatsReport"""
+
+    @abstractmethod
+    def find_artist_current_month_stats_report_by_aggregate_ids(
+            self, aggregate_ids: list[str]) -> list[ArtistStatsReport]:
+        """Save ArtistStatsReport"""

@@ -2,15 +2,16 @@ from app.repository.artist_repository import (ArtistLikeRepository,
                                               ArtistDetailPageViewRepository,
                                               ArtistStatsRepository,
                                               ArtistRecommendationRepository,
-                                              ArtistStatsDetailRepository)
+                                              ArtistStatsDetailRepository,
+                                              ArtistReportRepository)
 from app.model.artist import (ArtistLike, ArtistDetailPageView, ArtistStats,
-                              ArtistStatsDetail, ArtistRecommendation)
+                              ArtistStatsDetail, ArtistRecommendation,
+                              ArtistStatsReport)
 from sqlalchemy.exc import SQLAlchemyError
 from contextlib import AbstractContextManager
 from typing import Callable
 from app.core.logger import Logger
-from sqlmodel import Session
-from sqlmodel import Session, select
+from sqlmodel import Session, select, text
 
 
 class SqlmodelArtistLikeRepository(ArtistLikeRepository):
@@ -201,6 +202,76 @@ class SqlmodelArtistStatsDetailRepository(ArtistStatsDetailRepository):
                     ArtistStatsDetail.aggregate_id == aggregate_id))
                 artist_stats_detail = session.exec(statement).first()
                 return artist_stats_detail
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
+
+class SqlmodelArtistReportRepository(ArtistReportRepository):
+
+    def __init__(
+        self, logger: Logger,
+        session_factory: Callable[...,
+                                  AbstractContextManager[Session]]) -> None:
+        self.logger = logger
+        self.session_factory = session_factory
+
+    def find_artist_stats_report_by_aggregate_ids(
+            self, aggregate_ids: list[str]) -> list[ArtistStatsReport]:
+        try:
+            with self.session_factory() as session:
+                statement = text(
+                    'SELECT aggregate_id, "year", "month", total_artist_detail_page_view_duration_seconds, total_artist_detail_page_views, score FROM v_artist_stats_report WHERE aggregate_id IN :aggregate_ids ORDER BY score DESC;'
+                )
+                artist_stats_report_records = session.exec(statement=statement,
+                                                           params={
+                                                               "aggregate_ids":
+                                                                   aggregate_ids
+                                                           }).all()
+                return [
+                    ArtistStatsReport(
+                        aggregate_id=artist_stats_report_record[0],
+                        year=artist_stats_report_record[1],
+                        month=artist_stats_report_record[2],
+                        total_artist_detail_page_view_duration_seconds=
+                        artist_stats_report_record[3],
+                        total_artist_detail_page_views=
+                        artist_stats_report_record[4],
+                        score=artist_stats_report_record[5]) for
+                    artist_stats_report_record in artist_stats_report_records
+                ]
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
+    def find_artist_current_month_stats_report_by_aggregate_ids(
+            self, aggregate_ids: list[str]) -> list[ArtistStatsReport]:
+        try:
+            with self.session_factory() as session:
+                statement = text(
+                    'SELECT aggregate_id, "year", "month", total_artist_detail_page_view_duration_seconds, total_artist_detail_page_views, score FROM v_artist_stats_report_current_month WHERE aggregate_id IN :aggregate_ids ORDER BY score DESC;'
+                )
+                artist_stats_report_records = session.exec(statement=statement,
+                                                           params={
+                                                               "aggregate_ids":
+                                                                   aggregate_ids
+                                                           }).all()
+                return [
+                    ArtistStatsReport(
+                        aggregate_id=artist_stats_report_record[0],
+                        year=artist_stats_report_record[1],
+                        month=artist_stats_report_record[2],
+                        total_artist_detail_page_view_duration_seconds=
+                        artist_stats_report_record[3],
+                        total_artist_detail_page_views=
+                        artist_stats_report_record[4],
+                        score=artist_stats_report_record[5]) for
+                    artist_stats_report_record in artist_stats_report_records
+                ]
         except SQLAlchemyError as e:
             self.logger.error(f"{e}")
             raise e

@@ -3,7 +3,9 @@ from app.repository.artist_repository import (ArtistDetailPageViewRepository,
                                               ArtistLikeRepository,
                                               ArtistStatsRepository,
                                               ArtistRecommendationRepository,
-                                              ArtistStatsDetailRepository)
+                                              ArtistStatsDetailRepository,
+                                              ArtistReportRepository)
+from app.repository.track_repository import (TrackReportRepository)
 from datetime import datetime, timezone
 from app.schema.activity_schema import MessageResponseSchema
 from app.enum.action_type import ActionType
@@ -31,6 +33,8 @@ class ArtistService:
             artist_stats_repository: ArtistStatsRepository,
             artist_recommendation_repository: ArtistRecommendationRepository,
             artist_stats_detail_repository: ArtistStatsDetailRepository,
+            artist_report_repository: ArtistReportRepository,
+            track_report_repository: TrackReportRepository,
             product_client: ProductClient, logger: Logger):
         self.activity_repository = activity_repository
         self.artist_detail_page_view_repository = artist_detail_page_view_repository
@@ -39,6 +43,8 @@ class ArtistService:
         self.artist_recommendation_repository = artist_recommendation_repository
         self.artist_stats_detail_repository = artist_stats_detail_repository
         self.product_client = product_client
+        self.artist_report_repository = artist_report_repository
+        self.track_report_repository = track_report_repository
         self.logger = logger
 
     async def handle_like_artist(self, activity: Activity) -> None:
@@ -134,7 +140,7 @@ class ArtistService:
                     artist_stats.created_by = artist_stats.created_by if artist_stats.created_by else activity.created_by
                     artist_stats.updated_by = activity.created_by
                     self.artist_stats_repository.save_artist_stats(artist_stats)
-                    
+
                 artist_detail_page_view.duration_second = duration_second
                 artist_detail_page_view.updated_at = updated_at
                 artist_detail_page_view.updated_by = activity.created_by
@@ -199,9 +205,32 @@ class ArtistService:
                     TrackDetailSchema] = await self.product_client.get_all_tracks_by_artist_id(
                         aggregate_id, jwt)
                 track_ids = [track.id for track in tracks]
-                artist_recommendation.most_listened_track_ids = track_ids
-                artist_recommendation.most_listened_track_ids_current_month = track_ids
-                artist_recommendation.most_popular_track_ids = track_ids
+                if len(track_ids):
+                    track_stats_reports = self.track_report_repository.find_track_stats_report_order_by_average_score_desc(
+                        aggregate_ids=track_ids)
+                    artist_recommendation.most_popular_track_ids = [
+                        track_stats_report.aggregate_id
+                        for track_stats_report in track_stats_reports
+                    ]
+                    if len(artist_recommendation.most_popular_track_ids) < 10:
+                        artist_recommendation.most_popular_track_ids = [
+                            track_id for track_id in track_ids if track_id
+                            not in artist_recommendation.most_popular_track_ids
+                        ][:10]
+
+                    track_stats_reports = self.track_report_repository.find_track_stats_report_order_by_total_track_listens_desc(
+                        aggregate_ids=track_ids)
+                    artist_recommendation.most_listened_track_ids = [
+                        track_stats_report.aggregate_id
+                        for track_stats_report in track_stats_reports
+                    ]
+
+                    track_stats_reports = self.track_report_repository.find_track_current_month_stats_report_by_aggregate_ids_order_by_total_track_listens_desc(
+                        aggregate_ids=track_ids)
+                    artist_recommendation.most_listened_track_ids_current_month = [
+                        track_stats_report.aggregate_id
+                        for track_stats_report in track_stats_reports
+                    ]
         except Exception as e:
             self.logger.error(
                 f"Error occurred while fetching tracks for artist {aggregate_id}: {e}"
