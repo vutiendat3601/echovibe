@@ -1,11 +1,16 @@
 from app.repository.activity_repository import ActivityRepository
 from app.repository.user_repository import (UserDataRepository,
-                                            UserUsageDataRepository)
+                                            UserUsageDataRepository,
+                                            UserTrackRatingRepository,
+                                            UserTrackRecommendationRepository)
 from datetime import datetime, timezone
+from app.model.user import (UserTrackRating, UserTrackRecommendation)
 from app.core.logger import Logger
 from app.model.user import (UserData)
 from app.schema.user_schema import UserUsageDataSchema
 from app.mapper.user_mapper import map_to_user_usage_data_schema
+import pandas
+from sklearn.metrics.pairwise import cosine_similarity
 
 
 class UserService:
@@ -13,10 +18,14 @@ class UserService:
     def __init__(self, activity_repository: ActivityRepository,
                  user_data_repository: UserDataRepository,
                  user_usage_data_repository: UserUsageDataRepository,
-                 logger: Logger):
+                 user_track_rating_repository: UserTrackRatingRepository,
+                 user_track_recommendation_repository:
+                 UserTrackRecommendationRepository, logger: Logger):
         self.activity_repository = activity_repository
         self.user_data_repository = user_data_repository
         self.user_usage_data_repository = user_usage_data_repository
+        self.user_track_rating_repository = user_track_rating_repository
+        self.user_track_recommendation_repository = user_track_recommendation_repository
         self.logger = logger
 
     async def get_user_usage_data(self, user_id) -> UserUsageDataSchema:
@@ -38,3 +47,100 @@ class UserService:
         self.user_data_repository.save_user_data(user_data)
         return map_to_user_usage_data_schema(
             self.user_usage_data_repository.find_by_user_id(user_id))
+
+    async def process_user_track_recommendation(self):
+        predict_user_track_ratings = await self._process_user_track_collabrative_filtering(
+        )
+        user_ids_set = set([
+            predict_user_track_rating.user_id
+            for predict_user_track_rating in predict_user_track_ratings
+        ])
+        for user_id in user_ids_set:
+            user_track_ratings = list(
+                filter(
+                    lambda predict_user_track_rating: predict_user_track_rating.
+                    user_id == user_id and predict_user_track_rating.rating > 1,
+                    predict_user_track_ratings))
+            id = self.user_track_recommendation_repository.find_id_by_user_id_and_current_month(
+                user_id)
+            user_track_recommendation = self.user_track_recommendation_repository.find_by_id(
+                id) if id else None
+            if not user_track_recommendation:
+                user_track_recommendation = UserTrackRecommendation(
+                    user_id=user_id, track_ids=[], ratings_json={})
+            user_track_recommendation.track_ids = [
+                user_track_rating.track_id
+                for user_track_rating in user_track_ratings
+            ]
+            user_track_recommendation.ratings_json = {
+                "predictUserTrackRating": [
+                    predict_user_track_rating.model_dump()
+                    for predict_user_track_rating in predict_user_track_ratings
+                ],
+            }
+            self.user_track_recommendation_repository.save_user_track_recommendation(
+                user_track_recommendation)
+
+    async def _process_user_track_collabrative_filtering(
+            self) -> list[UserTrackRating]:
+        user_track_ratings = self.user_track_rating_repository.find_last_half_year(
+        )
+        user_ids = [
+            user_track_rating.user_id
+            for user_track_rating in user_track_ratings
+        ]
+        track_ids = [
+            user_track_rating.track_id
+            for user_track_rating in user_track_ratings
+        ]
+        track_ratings = [
+            user_track_rating.rating for user_track_rating in user_track_ratings
+        ]
+        df = pandas.DataFrame({
+            "user_id": user_ids,
+            "track_id": track_ids,
+            "rating": track_ratings,
+        })
+
+        # Create user-track matrix
+        user_track_rating_matrix = df.pivot_table(index='user_id',
+                                                  columns='track_id',
+                                                  values='rating').fillna(0)
+        # Compute cosine similarity between users
+        user_similarity = cosine_similarity(user_track_rating_matrix)
+        user_similarity_df = pandas.DataFrame(
+            user_similarity,
+            index=user_track_rating_matrix.index,
+            columns=user_track_rating_matrix.index)
+
+        # Get similarity scores and other users' ratings
+        user_track_ratings = []
+        for user_id in user_track_rating_matrix.index:
+            for track_id in user_track_rating_matrix.columns:
+                if user_track_rating_matrix.loc[user_id, track_id] == 0:
+                    predicted_rating = self._predict_rating(
+                        user_id, track_id, user_similarity_df,
+                        user_track_rating_matrix)
+                    user_track_ratings.append(
+                        UserTrackRating(user_id=user_id,
+                                        track_id=track_id,
+                                        rating=predicted_rating))
+        return user_track_ratings
+
+    def _predict_rating(self, user_id: str, track_id: str,
+                        user_similarity_df: pandas.DataFrame,
+                        user_track_rating_matrix: pandas.DataFrame):
+        # Get similarity scores and other users' ratings
+        sim_scores = user_similarity_df.loc[user_id].drop(user_id)
+        track_ratings = user_track_rating_matrix[track_id].drop(user_id)
+
+        # Mask out users who haven't rated the track
+        mask = track_ratings > 0
+        if mask.sum() == 0:
+            return 0.0
+        # Weighted sum of ratings
+        weighted_sum = (sim_scores[mask] * track_ratings[mask]).sum()
+        sim_sum = sim_scores[mask].sum()
+        predicted = weighted_sum / sim_sum if sim_sum != 0 else 0.0
+        # Clip prediction to 0–10 range
+        return round(min(max(predicted, 0), 10), 2)
