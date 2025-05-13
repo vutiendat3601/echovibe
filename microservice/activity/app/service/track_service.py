@@ -53,7 +53,7 @@ class TrackService:
                                    created_by=activity.created_by)
         self.track_like_repository.save_track_like(track_like)
 
-        track_stats: TrackStats = await self._get_track_stats_by_id(
+        track_stats: TrackStats = await self._get_track_stats_by_aggregate_id(
             activity.aggregate_id)
         track_stats.total_likes += 1
         track_stats.updated_at = updated_at
@@ -76,7 +76,7 @@ class TrackService:
             track_like.updated_by = activity.created_by
             self.track_like_repository.save_track_like(track_like)
 
-            track_stats: TrackStats = await self._get_track_stats_by_id(
+            track_stats: TrackStats = await self._get_track_stats_by_aggregate_id(
                 activity.aggregate_id)
             track_stats.total_likes -= 1
             track_stats.updated_at = updated_at
@@ -88,8 +88,8 @@ class TrackService:
                 f"Processed {ActionType.UNLIKE_TRACK} action: id={activity.aggregate_id}, type={activity.type}, created_by={activity.created_by}, created_at={activity.created_at}"
             )
 
-    async def handle_listen_track_tracking(self,
-                                     activity: Activity) -> dict[str, str]:
+    async def handle_listen_track_tracking(
+            self, activity: Activity) -> dict[str, str]:
         session_id = generate_aggregate_id()
         activity.session_id = session_id
         self.activity_repository.save_activity(activity)
@@ -118,7 +118,7 @@ class TrackService:
                         created_at=updated_at,
                         created_by=activity.created_by)
 
-                    track_stats: TrackStats = await self._get_track_stats_by_id(
+                    track_stats: TrackStats = await self._get_track_stats_by_aggregate_id(
                         activity.aggregate_id)
                     track_stats.total_listens += 1
                     track_stats.updated_at = updated_at
@@ -148,7 +148,8 @@ class TrackService:
             sessionId=session_id,
             type=MessageType.PROCESSED_VIEW_TRACK_DETAIL_PAGE_TRACKING)
 
-    async def handle_viewed_track_detail_page_tracking(self, session_id: str) -> None:
+    async def handle_viewed_track_detail_page_tracking(self,
+                                                       session_id: str) -> None:
         activity: Activity | None = self.activity_repository.find_by_session_id_and_type(
             session_id, ActionType.VIEW_TRACK_DETAIL_PAGE_TRACKING.name)
         if activity:
@@ -165,7 +166,7 @@ class TrackService:
                         created_at=updated_at,
                         created_by=activity.created_by)
 
-                    track_stats: TrackStats = await self._get_track_stats_by_id(
+                    track_stats: TrackStats = await self._get_track_stats_by_aggregate_id(
                         activity.aggregate_id)
                     track_stats.total_detail_page_views += 1
                     track_stats.updated_at = updated_at
@@ -183,10 +184,18 @@ class TrackService:
                 )
 
     async def get_track_stats(self, aggregate_id: str) -> TrackStatsSchema:
-        track_stats = await self._get_track_stats_by_id(aggregate_id)
+        track_stats = await self._get_track_stats_by_aggregate_id(aggregate_id)
         return map_to_track_stats_schema(track_stats)
 
-    async def _get_track_stats_by_id(self, id: str) -> TrackStats:
+    async def get_track_stats_by_ids(self,
+                                     aggregate_ids: str) -> TrackStatsSchema:
+        return [
+            map_to_track_stats_schema(
+                await self._get_track_stats_by_aggregate_id(aggregate_id))
+            for aggregate_id in aggregate_ids
+        ]
+
+    async def _get_track_stats_by_aggregate_id(self, id: str) -> TrackStats:
         track_stats = self.track_stats_repository.find_by_aggregate_id(id)
         if not track_stats:
             created_at = datetime.now(timezone.utc)
