@@ -72,10 +72,10 @@ export class TrackingService {
     });
   }
 
-  startListenedTrackTracking(trackId: string) {
+  startListenTrackTracking(trackId: string) {
     this.activityService.sendMessage({
       aggregateId: trackId,
-      type: ActionType.VIEW_TRACK_DETAIL_PAGE_TRACKING,
+      type: ActionType.LISTEN_TRACK_TRACKING,
       dataJson: null,
       sessionId: null
     });
@@ -85,7 +85,7 @@ export class TrackingService {
     this.activityService.sendMessage({
       sessionId,
       aggregateId: null,
-      type: ActionType.VIEWED_TRACK_DETAIL_PAGE_TRACKING,
+      type: ActionType.LISTENED_TRACK_TRACKING,
       dataJson: null
     });
   }
