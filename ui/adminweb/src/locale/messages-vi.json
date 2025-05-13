@@ -1,7 +1,7 @@
 {
   "locale": "vi",
   "translations": {
-    "APP_NAME": "Echo Vibe - Trang quản trị",
+    "APP_NAME": "Trang quản trị",
     "DIALOG_LABEL_ARTIST_DETAIL": "Chi tiết Nghệ sĩ",
     "DIALOG_LABEL_CONFIRM_DELETE": "Xác nhận xoá",
     "DIALOG_LABEL_CONFIRM_RELEASE": "Xác nhận xuất bản",
