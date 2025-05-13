@@ -9,11 +9,12 @@ import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { faBackwardStep, faForwardStep, faPause, faPlay, faShuffle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { AudioDurationPipe } from '../../../pipe/audio-duration.pipe';
 
 @Component({
   selector: 'app-now-playing-bar',
   standalone: true,
-  imports: [CommonModule, FormsModule, Toast, FontAwesomeModule, RouterLink],
+  imports: [CommonModule, FormsModule, Toast, FontAwesomeModule, RouterLink, AudioDurationPipe],
   templateUrl: './now-playing-bar.component.html',
   styleUrl: './now-playing-bar.component.scss',
   providers: [MessageService]

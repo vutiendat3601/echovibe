@@ -225,9 +225,12 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
       .join(', ');
 
     // Format duration from seconds to mm:ss
-    const minutes = Math.floor(trackDto.audioDurationSecond / 60);
-    const seconds = Math.floor(trackDto.audioDurationSecond % 60);
-    const formattedDuration = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+    let formattedDuration = `00:00`;
+    if (trackDto.audioDurationSecond) {
+      const minutes = Math.floor(trackDto.audioDurationSecond / 60);
+      const seconds = Math.floor(trackDto.audioDurationSecond % 60);
+      formattedDuration = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+    }
 
     return {
       id: trackDto.id,

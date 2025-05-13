@@ -25,7 +25,7 @@
           </span>
           <span class="track-year"
             >{{ trackDetail.officialReleasedDate | date: 'yyyy' }} •
-            {{ formatDuration(trackDetail.audioDurationSecond) }} • {{ formatPlayCount(1000) }}</span
+            {{ trackDetail.audioDurationSecond | audioDurationPipe }} • {{ formatPlayCount(1000) }}</span
           >
         </div>
       </div>

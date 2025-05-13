@@ -15,7 +15,7 @@ interface DiscographyItem {
   templateUrl: './productList.component.html',
   styleUrls: ['./productList.component.scss']
 })
-export class productList {
+export class ProductList {
   @Input() items: DiscographyItem[] = [];
   @Input() showAll = false;
   @Input() title = 'Discography'; // Added title input with default value

@@ -33,6 +33,12 @@ export class TrackService {
     return this.http.get<ResponseDto<TrackStatsDto>>(`${environment.activityBaseUrl}/v1/tracks/${id}/stats`);
   }
 
+  getTrackStatsByIds(ids: string[]): Observable<ResponseDto<[TrackStatsDto | null]>> {
+    return this.http.get<ResponseDto<[TrackStatsDto | null]>>(
+      `${environment.activityBaseUrl}/v1/tracks/stats?ids=${ids.join(',')}`
+    );
+  }
+
   likeTrack(id: string): void {
     this.likedTrackIdSubject.next(id);
     this.activityService.sendMessage({
