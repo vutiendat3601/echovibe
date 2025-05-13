@@ -52,3 +52,15 @@ class TrackStats(SQLModel, table=True):
     updated_at: datetime = Field(default=datetime.now(timezone.utc))
     created_by: str | None = Field(None)
     updated_by: str | None = Field(None)
+
+
+class TrackStatsReport(SQLModel, table=False):
+    __tablename__ = "v_artist_stats_report"
+    aggregate_id: str = Field(..., max_length=12)
+    year: int | None = Field(default=None)
+    month: int | None = Field(default=None)
+    total_track_detail_page_view_duration_seconds: int = Field(default=0)
+    total_track_listen_duration_seconds: int = Field(default=0)
+    total_track_detail_page_views: int = Field(default=0)
+    total_track_listens: int = Field(default=0)
+    score: int = Field(default=0)

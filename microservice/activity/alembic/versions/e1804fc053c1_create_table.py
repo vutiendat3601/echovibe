@@ -252,22 +252,268 @@ AFTER INSERT OR UPDATE OR DELETE ON public.user_playlist
 FOR EACH STATEMENT
 EXECUTE FUNCTION refresh_mv_user_usage_data();
 """
+
+    create_track_stats_report_view_ddl = """
+CREATE OR REPLACE VIEW public.v_track_stats_report
+AS SELECT COALESCE(tdpv1.aggregate_id, tl1.aggregate_id) AS aggregate_id,
+    COALESCE(tdpv1.year, tl1.year) AS year,
+    COALESCE(tdpv1.month, tl1.month) AS month,
+    COALESCE(tdpv1.total_track_detail_page_view_duration_seconds, 0::bigint) AS total_track_detail_page_view_duration_seconds,
+    COALESCE(tl1.total_track_listen_duration_seconds, 0::bigint) AS total_track_listen_duration_seconds,
+    COALESCE(tdpv1.total_track_detail_page_views, 0::bigint) AS total_track_detail_page_views,
+    COALESCE(tl1.total_track_listens, 0::bigint) AS total_track_listens,
+    ( SELECT (COALESCE(tdpv1.total_track_detail_page_view_duration_seconds, 0::bigint) / 60 * 3 + COALESCE(tl1.total_track_listen_duration_seconds, 0::bigint) / 60 * 4) / 7 + (COALESCE(tdpv1.total_track_detail_page_views, 0::bigint) * 1 + COALESCE(tl1.total_track_listens, 0::bigint) * 2) / 3) AS score
+   FROM ( SELECT tdpv0.aggregate_id,
+            tdpv0.created_at_year AS year,
+            tdpv0.created_at_month AS month,
+            sum(tdpv0.duration_second) AS total_track_detail_page_view_duration_seconds,
+            count(tdpv0.duration_second) AS total_track_detail_page_views
+           FROM ( SELECT tdpv.id,
+                    tdpv.aggregate_id,
+                    tdpv.user_id,
+                    tdpv.duration_second,
+                    tdpv.session_id,
+                    tdpv.created_at,
+                    tdpv.updated_at,
+                    tdpv.created_by,
+                    tdpv.updated_by,
+                    EXTRACT(year FROM tdpv.created_at) AS created_at_year,
+                    EXTRACT(month FROM tdpv.created_at) AS created_at_month
+                   FROM track_detail_page_view tdpv) tdpv0
+          GROUP BY tdpv0.aggregate_id, tdpv0.created_at_year, tdpv0.created_at_month) tdpv1
+     FULL JOIN ( SELECT tl0.aggregate_id,
+            tl0.created_at_year AS year,
+            tl0.created_at_month AS month,
+            sum(tl0.duration_second) AS total_track_listen_duration_seconds,
+            count(tl0.duration_second) AS total_track_listens
+           FROM ( SELECT tl.id,
+                    tl.aggregate_id,
+                    tl.user_id,
+                    tl.duration_second,
+                    tl.session_id,
+                    tl.created_at,
+                    tl.updated_at,
+                    tl.created_by,
+                    tl.updated_by,
+                    EXTRACT(year FROM tl.created_at) AS created_at_year,
+                    EXTRACT(month FROM tl.created_at) AS created_at_month
+                   FROM track_listen tl) tl0
+          GROUP BY tl0.aggregate_id, tl0.created_at_year, tl0.created_at_month) tl1 ON tdpv1.aggregate_id::text = tl1.aggregate_id::text AND tdpv1.year = tl1.year AND tdpv1.month = tl1.month
+;"""
+
+    create_track_stats_report_current_month_view_ddl = """
+CREATE OR REPLACE VIEW public.v_track_stats_report_current_month
+AS SELECT COALESCE(tdpv1.aggregate_id, tl1.aggregate_id) AS aggregate_id,
+    COALESCE(tdpv1.year, tl1.year) AS year,
+    COALESCE(tdpv1.month, tl1.month) AS month,
+    COALESCE(tdpv1.total_track_detail_page_view_duration_seconds, 0::bigint) AS total_track_detail_page_view_duration_seconds,
+    COALESCE(tl1.total_track_listen_duration_seconds, 0::bigint) AS total_track_listen_duration_seconds,
+    COALESCE(tdpv1.total_track_detail_page_views, 0::bigint) AS total_track_detail_page_views,
+    COALESCE(tl1.total_track_listens, 0::bigint) AS total_track_listens,
+    ( SELECT (COALESCE(tdpv1.total_track_detail_page_view_duration_seconds, 0::bigint) / 60 * 3 + COALESCE(tl1.total_track_listen_duration_seconds, 0::bigint) / 60 * 4) / 7 + (COALESCE(tdpv1.total_track_detail_page_views, 0::bigint) * 1 + COALESCE(tl1.total_track_listens, 0::bigint) * 2) / 3) AS score
+   FROM ( SELECT tdpv0.aggregate_id,
+            tdpv0.created_at_year AS year,
+            tdpv0.created_at_month AS month,
+            sum(tdpv0.duration_second) AS total_track_detail_page_view_duration_seconds,
+            count(tdpv0.duration_second) AS total_track_detail_page_views
+           FROM ( SELECT tdpv.id,
+                    tdpv.aggregate_id,
+                    tdpv.user_id,
+                    tdpv.duration_second,
+                    tdpv.session_id,
+                    tdpv.created_at,
+                    tdpv.updated_at,
+                    tdpv.created_by,
+                    tdpv.updated_by,
+                    EXTRACT(year FROM tdpv.created_at) AS created_at_year,
+                    EXTRACT(month FROM tdpv.created_at) AS created_at_month
+                   FROM track_detail_page_view tdpv
+                  WHERE to_date(((EXTRACT(year FROM CURRENT_TIMESTAMP) || '-'::text) || EXTRACT(month FROM CURRENT_TIMESTAMP)) || '-01'::text, 'YYYY-MM-DD'::text) <= tdpv.created_at) tdpv0
+          GROUP BY tdpv0.aggregate_id, tdpv0.created_at_year, tdpv0.created_at_month) tdpv1
+     FULL JOIN ( SELECT tl0.aggregate_id,
+            tl0.created_at_year AS year,
+            tl0.created_at_month AS month,
+            sum(tl0.duration_second) AS total_track_listen_duration_seconds,
+            count(tl0.duration_second) AS total_track_listens
+           FROM ( SELECT tl.id,
+                    tl.aggregate_id,
+                    tl.user_id,
+                    tl.duration_second,
+                    tl.session_id,
+                    tl.created_at,
+                    tl.updated_at,
+                    tl.created_by,
+                    tl.updated_by,
+                    EXTRACT(year FROM tl.created_at) AS created_at_year,
+                    EXTRACT(month FROM tl.created_at) AS created_at_month
+                   FROM track_listen tl
+                  WHERE to_date(((EXTRACT(year FROM CURRENT_TIMESTAMP) || '-'::text) || EXTRACT(month FROM CURRENT_TIMESTAMP)) || '-01'::text, 'YYYY-MM-DD'::text) <= tl.created_at) tl0
+          GROUP BY tl0.aggregate_id, tl0.created_at_year, tl0.created_at_month) tl1 ON tdpv1.aggregate_id::text = tl1.aggregate_id::text AND tdpv1.year = tl1.year AND tdpv1.month = tl1.month
+;"""
+
+    create_artist_stats_report_view_ddl = """
+CREATE OR REPLACE VIEW public.v_artist_stats_report
+AS SELECT aggregate_id,
+    year,
+    month,
+    COALESCE(total_artist_detail_page_view_duration_seconds, 0::bigint) AS total_artist_detail_page_view_duration_seconds,
+    COALESCE(total_artist_detail_page_views, 0::bigint) AS total_artist_detail_page_views,
+    ( SELECT COALESCE(adpv1.total_artist_detail_page_view_duration_seconds, 0::bigint) / 60 + COALESCE(adpv1.total_artist_detail_page_views, 0::bigint)) AS score
+   FROM ( SELECT adpv0.aggregate_id,
+            adpv0.created_at_year AS year,
+            adpv0.created_at_month AS month,
+            sum(adpv0.duration_second) AS total_artist_detail_page_view_duration_seconds,
+            count(adpv0.duration_second) AS total_artist_detail_page_views
+           FROM ( SELECT adpv.id,
+                    adpv.aggregate_id,
+                    adpv.user_id,
+                    adpv.duration_second,
+                    adpv.session_id,
+                    adpv.created_at,
+                    adpv.updated_at,
+                    adpv.created_by,
+                    adpv.updated_by,
+                    EXTRACT(year FROM adpv.created_at) AS created_at_year,
+                    EXTRACT(month FROM adpv.created_at) AS created_at_month
+                   FROM artist_detail_page_view adpv) adpv0
+          GROUP BY adpv0.aggregate_id, adpv0.created_at_year, adpv0.created_at_month) adpv1
+;"""
+
+    create_artist_stats_report_current_month_view_ddl = """
+CREATE OR REPLACE VIEW public.v_artist_stats_report_current_month
+AS SELECT aggregate_id,
+    year,
+    month,
+    COALESCE(total_artist_detail_page_view_duration_seconds, 0::bigint) AS total_artist_detail_page_view_duration_seconds,
+    COALESCE(total_artist_detail_page_views, 0::bigint) AS total_artist_detail_page_views,
+    ( SELECT COALESCE(adpv1.total_artist_detail_page_view_duration_seconds, 0::bigint) / 60 + COALESCE(adpv1.total_artist_detail_page_views, 0::bigint)) AS score
+   FROM ( SELECT adpv0.aggregate_id,
+            adpv0.created_at_year AS year,
+            adpv0.created_at_month AS month,
+            sum(adpv0.duration_second) AS total_artist_detail_page_view_duration_seconds,
+            count(adpv0.duration_second) AS total_artist_detail_page_views
+           FROM ( SELECT adpv.id,
+                    adpv.aggregate_id,
+                    adpv.user_id,
+                    adpv.duration_second,
+                    adpv.session_id,
+                    adpv.created_at,
+                    adpv.updated_at,
+                    adpv.created_by,
+                    adpv.updated_by,
+                    EXTRACT(year FROM adpv.created_at) AS created_at_year,
+                    EXTRACT(month FROM adpv.created_at) AS created_at_month
+                   FROM artist_detail_page_view adpv
+                  WHERE to_date(((EXTRACT(year FROM CURRENT_TIMESTAMP) || '-'::text) || EXTRACT(month FROM CURRENT_TIMESTAMP)) || '-01'::text, 'YYYY-MM-DD'::text) <= adpv.created_at) adpv0
+          GROUP BY adpv0.aggregate_id, adpv0.created_at_year, adpv0.created_at_month) adpv1
+;"""
+
+    create_find_track_stats_report_order_by_avg_score_desc_function_ddl = """
+CREATE OR REPLACE FUNCTION find_track_stats_report_order_by_avg_score_desc(aggregate_ids TEXT[])
+RETURNS TABLE (
+    aggregate_id CHARACTER VARYING,
+    total_track_detail_page_view_duration_seconds BIGINT,
+    total_track_detail_page_views BIGINT,
+    total_track_listen_duration_seconds BIGINT,
+    total_track_listens BIGINT,
+    avg_score DOUBLE PRECISION
+)
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    tsr.aggregate_id,
+    SUM(tsr.total_track_detail_page_view_duration_seconds)::bigint AS total_track_detail_page_view_duration_seconds,
+    SUM(tsr.total_track_detail_page_views)::bigint AS total_track_detail_page_views,
+    SUM(tsr.total_track_listen_duration_seconds)::bigint AS total_track_listen_duration_seconds,
+    SUM(tsr.total_track_listens)::bigint AS total_track_listens,
+    AVG(score)::DOUBLE PRECISION AS avg_score
+  FROM
+    v_track_stats_report tsr
+  WHERE
+    tsr.aggregate_id = ANY(aggregate_ids)
+  GROUP BY
+    tsr.aggregate_id
+  ORDER BY
+    avg(tsr.score) DESC;
+END;
+$$ LANGUAGE plpgsql;
+"""
+
+    create_find_track_stats_report_order_by_total_track_listens_desc_function_ddl = """
+CREATE OR REPLACE FUNCTION find_track_stats_report_order_by_total_track_listens_desc(aggregate_ids TEXT[])
+RETURNS TABLE (
+    aggregate_id CHARACTER VARYING,
+    total_track_detail_page_view_duration_seconds BIGINT,
+    total_track_detail_page_views BIGINT,
+    total_track_listen_duration_seconds BIGINT,
+    total_track_listens BIGINT,
+    avg_score DOUBLE PRECISION
+)
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    tsr.aggregate_id,
+    SUM(tsr.total_track_detail_page_view_duration_seconds)::bigint AS total_track_detail_page_view_duration_seconds,
+    SUM(tsr.total_track_detail_page_views)::bigint AS total_track_detail_page_views,
+    SUM(tsr.total_track_listen_duration_seconds)::bigint AS total_track_listen_duration_seconds,
+    SUM(tsr.total_track_listens)::bigint AS total_track_listens,
+    AVG(score)::DOUBLE PRECISION AS avg_score
+  FROM
+    v_track_stats_report tsr
+  WHERE
+    tsr.aggregate_id = ANY(aggregate_ids)
+  GROUP BY
+    tsr.aggregate_id
+  ORDER BY
+    SUM(tsr.total_track_listens) DESC;
+END;
+$$ LANGUAGE plpgsql;
+"""
+    create_find_track_stats_report_order_by_total_track_listens_desc_current_month_function_ddl = """
+CREATE OR REPLACE FUNCTION public.find_track_stats_report_order_by_total_track_listens_desc_cm(aggregate_ids text[])
+ RETURNS TABLE(aggregate_id character varying, total_track_detail_page_view_duration_seconds bigint, total_track_detail_page_views bigint, total_track_listen_duration_seconds bigint, total_track_listens bigint, avg_score double precision)
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  RETURN QUERY
+  SELECT
+    tsrcm.aggregate_id,
+    SUM(tsrcm.total_track_detail_page_view_duration_seconds)::bigint AS total_track_detail_page_view_duration_seconds,
+    SUM(tsrcm.total_track_detail_page_views)::bigint AS total_track_detail_page_views,
+    SUM(tsrcm.total_track_listen_duration_seconds)::bigint AS total_track_listen_duration_seconds,
+    SUM(tsrcm.total_track_listens)::bigint AS total_track_listens,
+    AVG(score)::DOUBLE PRECISION AS avg_score
+  FROM
+    v_track_stats_report_current_month tsrcm
+  WHERE
+    tsrcm.aggregate_id = ANY(aggregate_ids)
+  GROUP BY
+    tsrcm.aggregate_id
+  ORDER BY
+    SUM(tsrcm.total_track_listens) DESC;
+END;
+$function$
+;
+"""
+
     ddls = [
-        create_uuid_ossp_extension_ddl,
-        create_unaccent_extension_ddl,
-        create_activity_table_ddl,
-        create_aritst_like_table_ddl,
-        create_artist_detail_page_view_table_ddl,
-        create_artist_stats_table_ddl,
+        create_uuid_ossp_extension_ddl, create_unaccent_extension_ddl,
+        create_activity_table_ddl, create_aritst_like_table_ddl,
+        create_artist_detail_page_view_table_ddl, create_artist_stats_table_ddl,
         create_artist_recommendation_table_ddl,
-        create_artist_stats_detail_view_ddl,
-        create_track_like_table_ddl,
-        create_track_detail_page_view_table_ddl,
-        create_track_listen_table_ddl,
-        create_track_stats_table_ddl,
-        create_user_data_table_ddl,
-        create_user_playlist_table_ddl,
-        create_user_stats_materialized_view_ddl,
+        create_artist_stats_detail_view_ddl, create_track_like_table_ddl,
+        create_track_detail_page_view_table_ddl, create_track_listen_table_ddl,
+        create_track_stats_table_ddl, create_user_data_table_ddl,
+        create_user_playlist_table_ddl, create_user_stats_materialized_view_ddl,
+        create_track_stats_report_view_ddl,
+        create_track_stats_report_current_month_view_ddl,
+        create_artist_stats_report_view_ddl,
+        create_artist_stats_report_current_month_view_ddl,
+        create_find_track_stats_report_order_by_total_track_listens_desc_function_ddl,
+        create_find_track_stats_report_order_by_avg_score_desc_function_ddl,
+        create_find_track_stats_report_order_by_total_track_listens_desc_current_month_function_ddl
     ]
     for ddl in ddls:
         op.execute(ddl)
@@ -287,11 +533,19 @@ def downgrade() -> None:
     drop_track_listen_table_ddl = "DROP TABLE IF EXISTS public.track_listen;"
     drop_user_playlist_table_ddl = "DROP TABLE IF EXISTS public.user_playlist;"
     drop_track_stats_table_ddl = "DROP TABLE IF EXISTS public.track_stats;"
+    drop_track_stats_report_view_ddl = "DROP VIEW IF EXISTS public.v_track_stats_report;"
+    drop_track_stats_report__current_month_view_ddl = "DROP VIEW IF EXISTS public.v_track_stats_report_current_month;"
+    drop_artist_stats_report_view_ddl = "DROP VIEW IF EXISTS public.v_artist_stats_report;"
+    drop_artist_stats_report_current_month_view_ddl = "DROP VIEW IF EXISTS public.v_artist_stats_report_current_month;"
     ddls = [
         drop_uuid_ossp_extension_ddl, drop_unaccent_extension_ddl,
         drop_activity_table_ddl, drop_artist_like_table_ddl,
         drop_artist_like_table_ddl, drop_artist_stats_table_ddl,
         drop_aritst_detail_page_view_table_ddl,
+        drop_artist_stats_report_view_ddl,
+        drop_artist_stats_report_current_month_view_ddl,
+        drop_track_stats_report_view_ddl,
+        drop_track_stats_report__current_month_view_ddl,
         drop_artist_stats_detail_view_ddl, drop_artist_stats_table_ddl,
         drop_artist_recommendation_table_ddl, drop_track_like_table_ddl,
         drop_track_detail_page_view_table_ddl, drop_user_playlist_table_ddl,

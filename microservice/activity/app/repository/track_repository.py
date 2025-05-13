@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from app.model.track import TrackLike, TrackDetailPageView, TrackListen, TrackStats
+from app.model.track import TrackLike, TrackDetailPageView, TrackListen, TrackStats, TrackStatsReport
 
 
 class TrackLikeRepository(ABC):
@@ -61,3 +61,21 @@ class TrackStatsRepository(ABC):
     @abstractmethod
     def find_by_aggregate_id(self, aggregate_id: str) -> TrackStats | None:
         """Find TrackStats by aggregate_id"""
+
+
+class TrackReportRepository(ABC):
+
+    @abstractmethod
+    def find_track_stats_report_order_by_average_score_desc(
+            self, aggregate_ids: list[str]) -> list[TrackStatsReport]:
+        """Save TrackStatsReport"""
+
+    @abstractmethod
+    def find_track_stats_report_order_by_total_track_listens_desc(
+            self, aggregate_ids: list[str]) -> list[TrackStatsReport]:
+        """Save TrackStatsReport"""
+
+    @abstractmethod
+    def find_track_current_month_stats_report_by_aggregate_ids_order_by_total_track_listens_desc(
+            self, aggregate_ids: list[str]) -> list[TrackStatsReport]:
+        """Save TrackStatsReport"""

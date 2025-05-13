@@ -1,13 +1,15 @@
 from app.repository.track_repository import (TrackLikeRepository,
                                              TrackDetailPageViewRepository,
                                              TrackListenRepository,
-                                             TrackStatsRepository)
-from app.model.track import TrackLike, TrackDetailPageView, TrackListen, TrackStats
+                                             TrackStatsRepository,
+                                             TrackReportRepository)
+from app.model.track import (TrackLike, TrackDetailPageView, TrackListen,
+                             TrackStats, TrackStatsReport)
 from sqlalchemy.exc import SQLAlchemyError
 from contextlib import AbstractContextManager
 from typing import Callable
 from app.core.logger import Logger
-from sqlmodel import Session, select
+from sqlmodel import Session, select, text
 
 
 class SqlmodelTrackLikeRepository(TrackLikeRepository):
@@ -201,6 +203,118 @@ class SqlmodelTrackStatsRepository(TrackStatsRepository):
                     TrackStats.aggregate_id == aggregate_id))
                 track_stats = session.exec(statement).first()
                 return track_stats
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
+
+class SqlmodelTrackReportRepository(TrackReportRepository):
+
+    def __init__(
+        self, logger: Logger,
+        session_factory: Callable[...,
+                                  AbstractContextManager[Session]]) -> None:
+        self.logger = logger
+        self.session_factory = session_factory
+
+    def find_track_stats_report_order_by_average_score_desc(
+            self, aggregate_ids: list[str]) -> list[TrackStatsReport]:
+        try:
+            with self.session_factory() as session:
+                statement = text(
+                    "SELECT aggregate_id, total_track_detail_page_view_duration_seconds, total_track_detail_page_views, total_track_listen_duration_seconds, total_track_listens FROM find_track_stats_report_order_by_avg_score_desc(:aggregate_ids);"
+                )
+                track_stats_report_records = session.exec(statement=statement,
+                                                          params={
+                                                              "aggregate_ids":
+                                                                  aggregate_ids
+                                                          }).all()
+
+                return [
+                    TrackStatsReport(
+                        aggregate_id=track_stats_report_record[0],
+                        year=-1,
+                        month=-1,
+                        total_track_detail_page_view_duration_seconds=
+                        track_stats_report_record[1],
+                        total_track_detail_page_views=track_stats_report_record[
+                            2],
+                        total_track_listen_duration_seconds=
+                        track_stats_report_record[3],
+                        total_track_listens=track_stats_report_record[4],
+                        score=0)
+                    for track_stats_report_record in track_stats_report_records
+                ]
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
+    def find_track_stats_report_order_by_total_track_listens_desc(
+            self, aggregate_ids: list[str]) -> list[TrackStatsReport]:
+        try:
+            with self.session_factory() as session:
+                statement = text(
+                    "SELECT aggregate_id, total_track_detail_page_view_duration_seconds, total_track_detail_page_views, total_track_listen_duration_seconds, total_track_listens FROM find_track_stats_report_order_by_total_track_listens_desc(:aggregate_ids);"
+                )
+                track_stats_report_records = session.exec(statement=statement,
+                                                          params={
+                                                              "aggregate_ids":
+                                                                  aggregate_ids
+                                                          }).all()
+
+                return [
+                    TrackStatsReport(
+                        aggregate_id=track_stats_report_record[0],
+                        year=-1,
+                        month=-1,
+                        total_track_detail_page_view_duration_seconds=
+                        track_stats_report_record[1],
+                        total_track_detail_page_views=track_stats_report_record[
+                            2],
+                        total_track_listen_duration_seconds=
+                        track_stats_report_record[3],
+                        total_track_listens=track_stats_report_record[4],
+                        score=0)
+                    for track_stats_report_record in track_stats_report_records
+                ]
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
+    def find_track_current_month_stats_report_by_aggregate_ids_order_by_total_track_listens_desc(
+            self, aggregate_ids: list[str]) -> list[TrackStatsReport]:
+        try:
+            with self.session_factory() as session:
+                statement = text(
+                    "SELECT aggregate_id, total_track_detail_page_view_duration_seconds, total_track_detail_page_views, total_track_listen_duration_seconds, total_track_listens FROM find_track_stats_report_order_by_total_track_listens_desc_cm(:aggregate_ids);"
+                )
+                track_stats_report_records = session.exec(statement=statement,
+                                                          params={
+                                                              "aggregate_ids":
+                                                                  aggregate_ids
+                                                          }).all()
+
+                return [
+                    TrackStatsReport(
+                        aggregate_id=track_stats_report_record[0],
+                        year=-1,
+                        month=-1,
+                        total_track_detail_page_view_duration_seconds=
+                        track_stats_report_record[1],
+                        total_track_detail_page_views=track_stats_report_record[
+                            2],
+                        total_track_listen_duration_seconds=
+                        track_stats_report_record[3],
+                        total_track_listens=track_stats_report_record[4],
+                        score=0)
+                    for track_stats_report_record in track_stats_report_records
+                ]
         except SQLAlchemyError as e:
             self.logger.error(f"{e}")
             raise e

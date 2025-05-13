@@ -11,10 +11,11 @@ from app.service.user_service import UserService
 from app.repository.impl.sqlmodel_artist_repository import (
     SqlmodelArtistDetailPageViewRepository, SqlmodelArtistLikeRepository,
     SqlmodelArtistStatsRepository, SqlmodelArtistRecommendationRepository,
-    SqlmodelArtistStatsDetailRepository)
+    SqlmodelArtistStatsDetailRepository, SqlmodelArtistReportRepository)
 from app.repository.impl.sqlmodel_track_repository import (
     SqlmodelTrackDetailPageViewRepository, SqlmodelTrackLikeRepository,
-    SqlmodelTrackListenRepository, SqlmodelTrackStatsRepository)
+    SqlmodelTrackListenRepository, SqlmodelTrackStatsRepository,
+    SqlmodelTrackReportRepository)
 from app.repository.impl.sqlmodel_user_repository import (
     SqlmodelUserDataRepository, SqlmodelUserUsageDataRepository,
     SqlmodelUserPlaylistRepository)
@@ -60,6 +61,10 @@ class Container(containers.DeclarativeContainer):
         SqlmodelArtistStatsDetailRepository,
         logger=logger,
         session_factory=database.provided.session)
+    artist_report_repository = providers.Factory(
+        SqlmodelArtistReportRepository,
+        logger=logger,
+        session_factory=database.provided.session)
 
     track_detail_page_view_repository = providers.Factory(
         SqlmodelTrackDetailPageViewRepository,
@@ -77,6 +82,11 @@ class Container(containers.DeclarativeContainer):
         SqlmodelTrackStatsRepository,
         logger=logger,
         session_factory=database.provided.session)
+    track_report_repository = providers.Factory(
+        SqlmodelTrackReportRepository,
+        logger=logger,
+        session_factory=database.provided.session)
+
     user_data_repository = providers.Factory(
         SqlmodelUserDataRepository,
         logger=logger,
@@ -105,6 +115,8 @@ class Container(containers.DeclarativeContainer):
         artist_recommendation_repository=artist_recommendation_repository,
         artist_stats_detail_repository=artist_stats_detail_repository,
         product_client=product_client,
+        artist_report_repository=artist_report_repository,
+        track_report_repository=track_report_repository,
         logger=logger)
     track_service = providers.Factory(
         TrackService,
