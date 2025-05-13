@@ -76,69 +76,22 @@
     <!-- Popular songs section -->
     <h2>Popular</h2>
     <div class="song-list">
-      <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
-        <span class="song-index">
-          <span class="number">1</span>
-          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
-        </span>
-        <span class="song-title" style="flex: 1">Đừng Làm Trái Tim Anh Đau</span>
-        <span style="flex: 1; text-align: center">44,952,835</span>
-        <span style="flex: 1; text-align: right">4:39</span>
-      </div>
-      <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
-        <span class="song-index">
-          <span class="number">2</span>
-          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
-        </span>
-        <span class="song-title" style="flex: 1">Âm Thầm Bên Em</span>
-        <span style="flex: 1; text-align: center">36,297,049</span>
-        <span style="flex: 1; text-align: right">4:53</span>
-      </div>
-      <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
-        <span class="song-index">
-          <span class="number">3</span>
-          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
-        </span>
-        <span class="song-title" style="flex: 1">Chúng Ta Không Thuộc Về Nhau</span>
-        <span style="flex: 1; text-align: center">30,000,000</span>
-        <span style="flex: 1; text-align: right">4:20</span>
-      </div>
-      <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
-        <span class="song-index">
-          <span class="number">4</span>
-          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
-        </span>
-        <span class="song-title" style="flex: 1">Nơi Này Có Anh</span>
-        <span style="flex: 1; text-align: center">25,000,000</span>
-        <span style="flex: 1; text-align: right">4:10</span>
-      </div>
-      <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
-        <span class="song-index">
-          <span class="number">5</span>
-          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
-        </span>
-        <span class="song-title" style="flex: 1">Hãy Trao Cho Anh</span>
-        <span style="flex: 1; text-align: center">50,000,000</span>
-        <span style="flex: 1; text-align: right">4:50</span>
-      </div>
-      <div class="song-row" *ngIf="showAll" style="display: flex; justify-content: space-between; width: 100%">
-        <span class="song-index">
-          <span class="number">6</span>
-          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
-        </span>
-        <span class="song-title" style="flex: 1">Một Bước Yêu Vạn Dặm Đau</span>
-        <span style="flex: 1; text-align: center">20,000,000</span>
-        <span style="flex: 1; text-align: right">4:30</span>
-      </div>
-      <div class="song-row" *ngIf="showAll" style="display: flex; justify-content: space-between; width: 100%">
-        <span class="song-index">
-          <span class="number">7</span>
-          <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
-        </span>
-        <span class="song-title" style="flex: 1">Cơn Mưa Ngang Qua</span>
-        <span style="flex: 1; text-align: center">15,000,000</span>
-        <span style="flex: 1; text-align: right">4:00</span>
-      </div>
+      @if (artistDetail) {
+        @for (track of artistDetail.stats.mostPopularTracks; track track.id) {
+          <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
+            <span class="song-index">
+              <span class="number">{{ $index + 1 }}</span>
+              <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
+            </span>
+            <a [routerLink]="'/track/' + track.id" style="flex: 1">
+              <span class="song-title">{{ track.name }}</span></a
+            >
+            <span style="flex: 1; text-align: center"> {{ track.totalLikes }} likes</span>
+            <span style="flex: 1; text-align: center"> {{ track.totalListens }} listens</span>
+            <span style="flex: 1; text-align: right"> {{ track.audioDurationSecond | audioDurationPipe }}</span>
+          </div>
+        }
+      }
     </div>
     <!-- See more/less button for songs -->
     <button (click)="toggleShowAll()" class="see-more-btn font-bold pt-2">

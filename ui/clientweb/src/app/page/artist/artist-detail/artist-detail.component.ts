@@ -1,23 +1,34 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ProgressBarModule } from 'primeng/progressbar';
-import { productList } from '../../../component/productList/productList.component';
+import { ProductList } from '../../../component/productList/productList.component';
 import { ArtistDetailDto } from '../../../dto/artist-dto';
 import { ResponseDto } from '../../../dto/response-dto';
 import { SafeHtmlPipe } from '../../../pipe/safe-html.pipe';
+import { AudioDurationPipe } from '../../../pipe/audio-duration.pipe';
 import { ActivityService } from '../../../service/activity.service';
 import { TrackingService } from '../../../service/tracking.service';
 import { MessageResponseDto } from './../../../dto/activity-dto';
 import { ArtistService } from './../../../service/artist.service';
+import { TrackService } from '../../../service/track.service';
+
 interface ArtistStats {
   totalDetailPageViews: number;
   totalLikes: number;
+  mostPopularTracks: {
+    id: string;
+    name: string;
+    audioFileM3u8Url: string | null;
+    audioDurationSecond: number | null;
+    totalListens: number;
+    totalLikes: number;
+  }[];
 }
 
 interface ArtistDetail {
@@ -45,8 +56,10 @@ interface ArtistDetail {
     CardModule,
     ButtonModule,
     FontAwesomeModule,
-    productList,
-    SafeHtmlPipe
+    ProductList,
+    RouterModule,
+    SafeHtmlPipe,
+    AudioDurationPipe
   ],
   templateUrl: './artist-detail.component.html',
   styleUrl: './artist-detail.component.scss',
@@ -100,7 +113,8 @@ export class ArtistDetailComponent implements OnInit, OnDestroy {
     private readonly activeRoute: ActivatedRoute,
     private readonly artistService: ArtistService,
     private readonly router: Router,
-    private readonly trackingService: TrackingService
+    private readonly trackingService: TrackingService,
+    private readonly trackService: TrackService
   ) {}
 
   ngOnInit(): void {
@@ -139,9 +153,57 @@ export class ArtistDetailComponent implements OnInit, OnDestroy {
             const artistDetailDto = respDto.data;
             if (artistDetailDto) {
               const artistDetail = this.mapToArtistDetail(artistDetailDto);
+              const stats = artistDetail.stats;
               this.artistService.getArtistStats(artistDetail.id).subscribe((respDto) => {
-                const { totalDetailPageViews, totalLikes } = respDto.data;
-                artistDetail.stats = { totalDetailPageViews, totalLikes };
+                const {
+                  totalDetailPageViews,
+                  totalLikes,
+                  mostListenedTrackIds,
+                  mostListenedTrackIdsCurrentMonth,
+                  mostPopularTrackIds
+                } = respDto.data;
+                stats.totalDetailPageViews = totalDetailPageViews;
+                stats.totalLikes = totalLikes;
+
+                const trackIds = [...mostListenedTrackIds, ...mostListenedTrackIdsCurrentMonth, ...mostPopularTrackIds];
+                this.trackService.getTrackByIds(trackIds).subscribe((respDto) => {
+                  const trackDetailDtos = respDto.data.filter((td) => td != null);
+                  const trackDetailDtosMap = new Map(trackDetailDtos.map((td) => [td.id, td]));
+                  if (this.artistDetail) {
+                    stats.mostPopularTracks = mostPopularTrackIds
+                      .map((id) => {
+                        const trackDetailDto = trackDetailDtosMap.get(id);
+                        if (trackDetailDto) {
+                          const { id, name, audioDurationSecond, audioFileM3u8Url } = trackDetailDto;
+                          const track = {
+                            id,
+                            name,
+                            audioDurationSecond,
+                            audioFileM3u8Url,
+                            totalListens: 0,
+                            totalLikes: 0
+                          };
+                          return track;
+                        }
+                        return null;
+                      })
+                      .filter((t) => t != null);
+
+                    this.trackService.getTrackStatsByIds(trackIds).subscribe((respDto) => {
+                      const trackStatsDtos = respDto.data.filter((ts) => ts != null);
+                      const trackStatsDtosMap = new Map(trackStatsDtos.map((ts) => [ts.id, ts]));
+                      if (this.artistDetail) {
+                        this.artistDetail.stats.mostPopularTracks.forEach((track) => {
+                          const trackStatsDto = trackStatsDtosMap.get(track.id);
+                          if (trackStatsDto) {
+                            track.totalLikes = trackStatsDto.totalLikes;
+                            track.totalListens = trackStatsDto.totalListens;
+                          }
+                        });
+                      }
+                    });
+                  }
+                });
               });
               this.artistDetail = artistDetail;
               this.initializeTracking();
@@ -188,7 +250,7 @@ export class ArtistDetailComponent implements OnInit, OnDestroy {
       isPublic,
       isVerified,
       tags,
-      stats: { totalDetailPageViews: 0, totalLikes: 0 }
+      stats: { totalDetailPageViews: 0, totalLikes: 0, mostPopularTracks: [] }
     };
   }
 

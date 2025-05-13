@@ -16,4 +16,7 @@ export interface ArtistStatsDto {
   id: string;
   totalDetailPageViews: number;
   totalLikes: number;
+  mostListenedTrackIds: string[];
+  mostListenedTrackIdsCurrentMonth: string[];
+  mostPopularTrackIds: string[];
 }

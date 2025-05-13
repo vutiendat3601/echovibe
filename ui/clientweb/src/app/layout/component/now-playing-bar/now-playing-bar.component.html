@@ -92,7 +92,9 @@
             <div class="progress-handle" [style.left.%]="progressPercent"></div>
           </div>
         </div>
-        <div class="time-total">{{ handleFormatTime(currentTrack?.audioDurationSecond || 0) }}</div>
+        @if (currentTrack) {
+          <div class="time-total">{{ currentTrack.audioDurationSecond | audioDurationPipe }}</div>
+        }
       </div>
     </div>
 
@@ -152,7 +154,9 @@
             </div>
           </div>
           <div class="queue-item-actions">
-            <div class="queue-item-duration">{{ handleFormatTime(currentTrack.audioDurationSecond) }}</div>
+            @if (currentTrack) {
+              <div class="queue-item-duration">{{ currentTrack.audioDurationSecond | audioDurationPipe }}</div>
+            }
           </div>
         </div>
       </div>
@@ -174,7 +178,9 @@
             </div>
           </div>
           <div class="queue-item-actions">
-            <div class="queue-item-duration">{{ handleFormatTime(track.audioDurationSecond) }}</div>
+            @if (currentTrack) {
+              <div class="queue-item-duration">{{ currentTrack.audioDurationSecond | audioDurationPipe }}</div>
+            }
             <button class="queue-item-remove" (click)="handleRemoveTrack($event, track.id)">
               <i class="pi pi-times"></i>
             </button>

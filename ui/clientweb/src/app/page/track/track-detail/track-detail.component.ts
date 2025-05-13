@@ -22,6 +22,7 @@ import { AudioService } from '../../../service/audio.service';
 import { TrackService } from './../../../service/track.service';
 import { TrackingService } from '../../../service/tracking.service';
 import { MessageResponseDto } from '../../../dto/activity-dto';
+import { AudioDurationPipe } from '../../../pipe/audio-duration.pipe';
 
 interface TrackStats {
   totalDetailPageViews: number;
@@ -49,7 +50,7 @@ interface TrackDetail {
   officialReleasedDate: string | null;
   isPublic: boolean;
   audioFileM3u8Url: string | null;
-  audioDurationSecond: number;
+  audioDurationSecond: number | null;
   tags: string[];
   artists: ArtistDetailOfTrack[];
   stats: TrackStats;
@@ -70,7 +71,8 @@ interface TrackDetail {
     FontAwesomeModule,
     RouterLink,
     ToastModule,
-    PopoverModule
+    PopoverModule,
+    AudioDurationPipe
   ],
   providers: [MessageService, ActivityService]
 })
