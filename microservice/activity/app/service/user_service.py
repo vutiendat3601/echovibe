@@ -56,7 +56,7 @@ class UserService:
             for predict_user_track_rating in predict_user_track_ratings
         ])
         for user_id in user_ids_set:
-            user_track_ratings = list(
+            current_predict_user_track_ratings = list(
                 filter(
                     lambda predict_user_track_rating: predict_user_track_rating.
                     user_id == user_id and predict_user_track_rating.rating > 1,
@@ -70,12 +70,13 @@ class UserService:
                     user_id=user_id, track_ids=[], ratings_json={})
             user_track_recommendation.track_ids = [
                 user_track_rating.track_id
-                for user_track_rating in user_track_ratings
+                for user_track_rating in current_predict_user_track_ratings
             ]
             user_track_recommendation.ratings_json = {
                 "predictUserTrackRating": [
                     predict_user_track_rating.model_dump()
-                    for predict_user_track_rating in predict_user_track_ratings
+                    for predict_user_track_rating in
+                    current_predict_user_track_ratings
                 ],
             }
             self.user_track_recommendation_repository.save_user_track_recommendation(
