@@ -194,3 +194,16 @@ class SqlmodelUserTrackRecommendationRepository(
             raise e
         finally:
             session.close()
+
+    def find_by_user_id(self, user_id: str) -> UserTrackRecommendation | None:
+        try:
+            with self.session_factory() as session:
+                statement = (select(UserTrackRecommendation).filter(
+                    UserTrackRecommendation.user_id == user_id))
+                user_track_recommendation = session.exec(statement).first()
+                return user_track_recommendation
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
