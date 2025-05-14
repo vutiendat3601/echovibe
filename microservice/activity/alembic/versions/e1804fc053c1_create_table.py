@@ -539,8 +539,6 @@ AS SELECT ud.user_id,
             WHEN sum(tl.duration_second) >= 57601 AND sum(tl.duration_second) <= 86400 THEN 9
             ELSE 10
         END AS rating,
-    EXTRACT(year FROM CURRENT_TIMESTAMP) AS year,
-    EXTRACT(month FROM CURRENT_TIMESTAMP) AS month,
     sum(tl.duration_second) AS total_listened_seconds
    FROM user_data ud
      JOIN ( SELECT track_listen.id,
@@ -553,9 +551,8 @@ AS SELECT ud.user_id,
             track_listen.created_by,
             track_listen.updated_by
            FROM track_listen
-          WHERE track_listen.duration_second >= 15 AND to_date(((EXTRACT(year FROM CURRENT_TIMESTAMP) || '-'::text) || EXTRACT(month FROM CURRENT_TIMESTAMP)) || '-01'::text, 'YYYY-MM-DD'::text) <= track_listen.created_at) tl ON ud.user_id::text = tl.user_id::text
-  GROUP BY ud.user_id, tl.aggregate_id
-;"""
+          WHERE track_listen.duration_second >= 15 AND track_listen.created_at >= (CURRENT_TIMESTAMP - '6 mons'::interval)) tl ON ud.user_id::text = tl.user_id::text
+  GROUP BY ud.user_id, tl.aggregate_id;"""
 
     create_user_track_recommendation_table_ddl = """
 CREATE TABLE public.user_track_recommendation (

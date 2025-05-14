@@ -114,7 +114,7 @@ class SqlmodelUserTrackRatingRepository(UserTrackRatingRepository):
         try:
             with self.session_factory() as session:
                 statement = text(
-                    'SELECT user_id, track_id, rating, "year", "month", total_listened_seconds FROM v_user_track_rating;'
+                    'SELECT user_id, track_id, rating, total_listened_seconds FROM v_user_track_rating;'
                 )
                 user_track_rating_records = session.exec(
                     statement=statement).all()
@@ -124,9 +124,7 @@ class SqlmodelUserTrackRatingRepository(UserTrackRatingRepository):
                         user_id=user_track_rating_record[0],
                         track_id=user_track_rating_record[1],
                         rating=user_track_rating_record[2],
-                        year=user_track_rating_record[3],
-                        month=user_track_rating_record[4],
-                        total_listened_seconds=user_track_rating_record[5])
+                        total_listened_seconds=user_track_rating_record[3])
                     for user_track_rating_record in user_track_rating_records
                 ]
         except SQLAlchemyError as e:
