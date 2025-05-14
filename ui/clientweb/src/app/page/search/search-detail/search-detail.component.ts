@@ -165,8 +165,6 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
               this.tracks = [...this.tracks, ...tracks];
 
               this.pageNumber++;
-              console.log('Loaded artists:', this.artists);
-              console.log('Loaded tracks:', this.tracks);
             }
             this.isLoading = false;
           },
