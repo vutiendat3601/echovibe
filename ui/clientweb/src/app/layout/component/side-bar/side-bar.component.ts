@@ -130,6 +130,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
 
     // Initialize context menu items
     this.initializeContextMenu();
+    this.userService.refresh();
   }
 
   setActiveTab(tab: string): void {
@@ -424,7 +425,7 @@ export class SideBarComponent implements OnInit, OnDestroy {
   private listenDataChange() {
     // Listen for created playlist events
     this.userService.userUsageData.subscribe(({ createdPlaylistIds }) => {
-      if (createdPlaylistIds && createdPlaylistIds.length && createdPlaylistIds.length && this.playlists.length) {
+      if (createdPlaylistIds && createdPlaylistIds.length && createdPlaylistIds.length != this.playlists.length) {
         window.setTimeout(() => {
           this.playlistService.getPlaylistByIds(createdPlaylistIds).subscribe({
             next: (response) => {
