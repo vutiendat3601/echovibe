@@ -40,6 +40,7 @@ export class AuthService {
     this.oauthService
       .loadDiscoveryDocumentAndTryLogin()
       .then((_) => this.oauthStorage.getItem('access_token') && this.loadUserProfile());
+    this.oauthService.timeoutFactor = 0.5;
     this.oauthService.setupAutomaticSilentRefresh();
     this.oauthService.events
       .pipe(filter((event) => ['token_received'].includes(event.type)))
