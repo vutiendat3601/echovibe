@@ -75,7 +75,11 @@ class TrackReportRepository(ABC):
             self, aggregate_ids: list[str]) -> list[TrackStatsReport]:
         """Save TrackStatsReport"""
 
+    def find_track_current_month_stats_report_order_by_score_desc(
+            self) -> list[TrackStatsReport]:
+        """Find TrackStatsReport"""
+
     @abstractmethod
     def find_track_current_month_stats_report_by_aggregate_ids_order_by_total_track_listens_desc(
             self, aggregate_ids: list[str]) -> list[TrackStatsReport]:
-        """Save TrackStatsReport"""
+        """Find TrackStatsReport"""

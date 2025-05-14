@@ -45,6 +45,10 @@ class UserTrackRecommendationRepository(ABC):
         """Find UserTrackRecommendation by user_id"""
 
     @abstractmethod
+    def find_by_user_id(self, user_id: str) -> UserTrackRecommendation | None:
+        """Find UserTrackRecommendation by user_id"""
+
+    @abstractmethod
     def find_by_id(self, id: uuid.UUID) -> UserTrackRecommendation | None:
         """Find UserTrackRecommendation by user_id"""
 

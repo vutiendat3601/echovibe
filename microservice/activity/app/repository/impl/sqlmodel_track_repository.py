@@ -219,6 +219,37 @@ class SqlmodelTrackReportRepository(TrackReportRepository):
         self.logger = logger
         self.session_factory = session_factory
 
+    def find_track_current_month_stats_report_order_by_score_desc(
+            self) -> list[TrackStatsReport]:
+        try:
+            with self.session_factory() as session:
+                statement = text(
+                    'SELECT aggregate_id, "year", "month", total_track_detail_page_view_duration_seconds, total_track_listen_duration_seconds, total_track_detail_page_views, total_track_listens, score FROM v_track_stats_report_current_month ORDER by score DESC LIMIT 200;'
+                )
+                track_stats_report_records = session.exec(
+                    statement=statement).all()
+
+                return [
+                    TrackStatsReport(
+                        aggregate_id=track_stats_report_record[0],
+                        year=track_stats_report_record[1],
+                        month=track_stats_report_record[2],
+                        total_track_detail_page_view_duration_seconds=
+                        track_stats_report_record[3],
+                        total_track_listen_duration_seconds=
+                        track_stats_report_record[4],
+                        total_track_detail_page_views=track_stats_report_record[
+                            5],
+                        total_track_listens=track_stats_report_record[6],
+                        score=track_stats_report_record[7])
+                    for track_stats_report_record in track_stats_report_records
+                ]
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
     def find_track_stats_report_order_by_average_score_desc(
             self, aggregate_ids: list[str]) -> list[TrackStatsReport]:
         try:

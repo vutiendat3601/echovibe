@@ -3,11 +3,12 @@ from app.repository.user_repository import (UserDataRepository,
                                             UserUsageDataRepository,
                                             UserTrackRatingRepository,
                                             UserTrackRecommendationRepository)
+from app.repository.track_repository import (TrackReportRepository)
 from datetime import datetime, timezone
 from app.model.user import (UserTrackRating, UserTrackRecommendation)
 from app.core.logger import Logger
 from app.model.user import (UserData)
-from app.schema.user_schema import UserUsageDataSchema
+from app.schema.user_schema import UserUsageDataSchema, UserRecommendationSchema
 from app.mapper.user_mapper import map_to_user_usage_data_schema
 import pandas
 from sklearn.metrics.pairwise import cosine_similarity
@@ -19,6 +20,7 @@ class UserService:
                  user_data_repository: UserDataRepository,
                  user_usage_data_repository: UserUsageDataRepository,
                  user_track_rating_repository: UserTrackRatingRepository,
+                 track_report_repository: TrackReportRepository,
                  user_track_recommendation_repository:
                  UserTrackRecommendationRepository, logger: Logger):
         self.activity_repository = activity_repository
@@ -26,6 +28,7 @@ class UserService:
         self.user_usage_data_repository = user_usage_data_repository
         self.user_track_rating_repository = user_track_rating_repository
         self.user_track_recommendation_repository = user_track_recommendation_repository
+        self.track_report_repository = track_report_repository
         self.logger = logger
 
     async def get_user_usage_data(self, user_id) -> UserUsageDataSchema:
@@ -47,6 +50,24 @@ class UserService:
         self.user_data_repository.save_user_data(user_data)
         return map_to_user_usage_data_schema(
             self.user_usage_data_repository.find_by_user_id(user_id))
+
+    async def get_user_recommendation(self,
+                                      user_id: str) -> UserUsageDataSchema:
+        user_recommendation_schema = UserRecommendationSchema(user_id=user_id)
+        user_track_recommendation = self.user_track_recommendation_repository.find_by_user_id(
+            user_id)
+        if user_track_recommendation:
+            user_recommendation_schema.recommended_track_ids = user_track_recommendation.track_ids
+        track_current_month_stats_reports = self.track_report_repository.find_track_current_month_stats_report_order_by_score_desc(
+        )
+        if track_current_month_stats_reports:
+            user_recommendation_schema.most_popular_track_ids_current_month = [
+                track_current_month_stats_report.aggregate_id
+                for track_current_month_stats_report in
+                track_current_month_stats_reports
+            ]
+
+        return user_recommendation_schema
 
     async def process_user_track_recommendation(self):
         predict_user_track_ratings = await self._process_user_track_collabrative_filtering(
