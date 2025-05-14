@@ -262,7 +262,7 @@ AS SELECT COALESCE(tdpv1.aggregate_id, tl1.aggregate_id) AS aggregate_id,
     COALESCE(tl1.total_track_listen_duration_seconds, 0::bigint) AS total_track_listen_duration_seconds,
     COALESCE(tdpv1.total_track_detail_page_views, 0::bigint) AS total_track_detail_page_views,
     COALESCE(tl1.total_track_listens, 0::bigint) AS total_track_listens,
-    ( SELECT (COALESCE(tdpv1.total_track_detail_page_view_duration_seconds, 0::bigint) / 60 * 3 + COALESCE(tl1.total_track_listen_duration_seconds, 0::bigint) / 60 * 4) / 7 + (COALESCE(tdpv1.total_track_detail_page_views, 0::bigint) * 1 + COALESCE(tl1.total_track_listens, 0::bigint) * 2) / 3) AS score
+    (( SELECT (COALESCE(tdpv1.total_track_detail_page_view_duration_seconds, 0::bigint) / 60 * 3 + COALESCE(tl1.total_track_listen_duration_seconds, 0::bigint) / 60 * 4) / 7 + (COALESCE(tdpv1.total_track_detail_page_views, 0::bigint) * 1 + COALESCE(tl1.total_track_listens, 0::bigint) * 2) / 3))::double precision AS score
    FROM ( SELECT tdpv0.aggregate_id,
             tdpv0.created_at_year AS year,
             tdpv0.created_at_month AS month,
@@ -310,7 +310,7 @@ AS SELECT COALESCE(tdpv1.aggregate_id, tl1.aggregate_id) AS aggregate_id,
     COALESCE(tl1.total_track_listen_duration_seconds, 0::bigint) AS total_track_listen_duration_seconds,
     COALESCE(tdpv1.total_track_detail_page_views, 0::bigint) AS total_track_detail_page_views,
     COALESCE(tl1.total_track_listens, 0::bigint) AS total_track_listens,
-    ( SELECT (COALESCE(tdpv1.total_track_detail_page_view_duration_seconds, 0::bigint) / 60 * 3 + COALESCE(tl1.total_track_listen_duration_seconds, 0::bigint) / 60 * 4) / 7 + (COALESCE(tdpv1.total_track_detail_page_views, 0::bigint) * 1 + COALESCE(tl1.total_track_listens, 0::bigint) * 2) / 3) AS score
+    (( SELECT (COALESCE(tdpv1.total_track_detail_page_view_duration_seconds, 0::bigint) / 60 * 3 + COALESCE(tl1.total_track_listen_duration_seconds, 0::bigint) / 60 * 4) / 7 + (COALESCE(tdpv1.total_track_detail_page_views, 0::bigint) * 1 + COALESCE(tl1.total_track_listens, 0::bigint) * 2) / 3))::double precision AS score
    FROM ( SELECT tdpv0.aggregate_id,
             tdpv0.created_at_year AS year,
             tdpv0.created_at_month AS month,
@@ -358,7 +358,7 @@ AS SELECT aggregate_id,
     month,
     COALESCE(total_artist_detail_page_view_duration_seconds, 0::bigint) AS total_artist_detail_page_view_duration_seconds,
     COALESCE(total_artist_detail_page_views, 0::bigint) AS total_artist_detail_page_views,
-    ( SELECT COALESCE(adpv1.total_artist_detail_page_view_duration_seconds, 0::bigint) / 60 + COALESCE(adpv1.total_artist_detail_page_views, 0::bigint)) AS score
+    (( SELECT COALESCE(adpv1.total_artist_detail_page_view_duration_seconds, 0::bigint) / 60 + COALESCE(adpv1.total_artist_detail_page_views, 0::bigint)))::double precision AS score
    FROM ( SELECT adpv0.aggregate_id,
             adpv0.created_at_year AS year,
             adpv0.created_at_month AS month,
@@ -386,7 +386,7 @@ AS SELECT aggregate_id,
     month,
     COALESCE(total_artist_detail_page_view_duration_seconds, 0::bigint) AS total_artist_detail_page_view_duration_seconds,
     COALESCE(total_artist_detail_page_views, 0::bigint) AS total_artist_detail_page_views,
-    ( SELECT COALESCE(adpv1.total_artist_detail_page_view_duration_seconds, 0::bigint) / 60 + COALESCE(adpv1.total_artist_detail_page_views, 0::bigint)) AS score
+    (( SELECT COALESCE(adpv1.total_artist_detail_page_view_duration_seconds, 0::bigint) / 60 + COALESCE(adpv1.total_artist_detail_page_views, 0::bigint)))::double precision AS score
    FROM ( SELECT adpv0.aggregate_id,
             adpv0.created_at_year AS year,
             adpv0.created_at_month AS month,
