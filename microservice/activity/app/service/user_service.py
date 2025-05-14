@@ -73,11 +73,12 @@ class UserService:
                 for user_track_rating in current_predict_user_track_ratings
             ]
             user_track_recommendation.ratings_json = {
-                "predictUserTrackRating": [
-                    predict_user_track_rating.model_dump()
-                    for predict_user_track_rating in
-                    current_predict_user_track_ratings
-                ],
+                "predictUserTrackRating": [{
+                    "userId": predict_user_track_rating.user_id,
+                    "trackId": predict_user_track_rating.track_id,
+                    "rating": predict_user_track_rating.rating
+                } for predict_user_track_rating in
+                                           current_predict_user_track_ratings],
             }
             self.user_track_recommendation_repository.save_user_track_recommendation(
                 user_track_recommendation)
