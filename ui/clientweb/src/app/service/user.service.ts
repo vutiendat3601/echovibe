@@ -3,10 +3,11 @@ import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { environment } from '../../environment/environment';
 import { ResponseDto } from '../dto/response-dto';
-import { UserUsageDto } from './../dto/user-dto';
+import { UserRecommendationDto, UserUsageDto } from './../dto/user-dto';
 import { PlaylistService } from './playlist.service';
 import { TrackService } from './track.service';
 import { ArtistService } from './artist.service';
+import { SystemService } from './system.service';
 
 @Injectable({
   providedIn: 'root'
@@ -19,6 +20,7 @@ export class UserService {
     private readonly playlistService: PlaylistService,
     private readonly artistService: ArtistService,
     private readonly trackService: TrackService,
+    private readonly systemService: SystemService,
     private readonly http: HttpClient
   ) {
     this.refresh();
@@ -76,6 +78,13 @@ export class UserService {
         this.refresh();
       }
     });
+  }
+
+  getUserRecommendation(): Observable<ResponseDto<UserRecommendationDto>> {
+    const fingerprint = this.systemService.getFingerprint();
+    return this.http.get<ResponseDto<UserRecommendationDto>>(
+      `${environment.activityBaseUrl}/v1/me/recommendation?fingerprint=${fingerprint}`
+    );
   }
 
   private getUserUsageData(): Observable<ResponseDto<UserUsageDto>> {

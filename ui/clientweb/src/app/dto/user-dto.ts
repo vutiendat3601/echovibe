@@ -6,3 +6,9 @@ export interface UserUsageDto {
   likedArtistIds: string[];
   createdPlaylistIds: string[];
 }
+
+export interface UserRecommendationDto {
+  userId: string;
+  recommendedTrackIds: string[];
+  mostPopularTrackIdsCurrentMonth: string[];
+}
