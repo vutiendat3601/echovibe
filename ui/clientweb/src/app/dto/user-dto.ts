@@ -1,3 +1,12 @@
+import { RecentSearchType } from '../constant/recent-search-type';
+
+export interface UserRecentSearchDto {
+  aggregateId: string;
+  name: string;
+  thumbnailUrl: string | null;
+  type: RecentSearchType;
+}
+
 export interface UserUsageDto {
   userId: string;
   data: any | null;
@@ -5,6 +14,7 @@ export interface UserUsageDto {
   likedTrackIds: string[];
   likedArtistIds: string[];
   createdPlaylistIds: string[];
+  recentSearches: UserRecentSearchDto[];
 }
 
 export interface UserRecommendationDto {

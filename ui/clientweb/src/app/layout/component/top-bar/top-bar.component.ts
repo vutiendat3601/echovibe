@@ -14,17 +14,21 @@ import { InputTextModule } from 'primeng/inputtext';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { RecentSearchType } from '../../../constant/recent-search-type';
+import { SearchService } from '../../../service/search.service';
+import { UserService } from '../../../service/user.service';
+import { UserRecentSearchDto } from '../../../dto/user-dto';
 
 interface TopBarActionMenuItem {
   [key: string]: MenuItem;
 }
 
-interface SearchResult {
-  title: string;
-  artist: string;
-  imageUrl: string;
-  type: 'song' | 'artist' | 'playlist';
-  id: string;
+interface RecentSearch {
+  aggregateId: string;
+  name: string;
+  thumbnailUrl: string | null;
+  path: string;
+  type: RecentSearchType;
 }
 
 @Component({
@@ -54,82 +58,13 @@ export class TopBarComponent implements OnInit {
   isSearchFocused: boolean = false;
   private searchInputSubject = new Subject<string>();
 
-  recentSearches: SearchResult[] = [
-    {
-      title: 'Nơi Này Có Anh',
-      artist: 'Sơn Tùng M-TP',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
-      type: 'song',
-      id: '1'
-    },
-    {
-      title: 'Sóng Gió',
-      artist: 'ICM, Jack, K-ICM',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
-      type: 'song',
-      id: '2'
-    },
-    {
-      title: 'Đừng Làm Trái Tim Anh Đau',
-      artist: 'Sơn Tùng M-TP',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
-      type: 'song',
-      id: '3'
-    },
-    {
-      title: 'CUA',
-      artist: 'MANBO, HIEUTHUHAI',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
-      type: 'song',
-      id: '4'
-    },
-    {
-      title: 'NGỰA Ô',
-      artist: 'Dangrangto, TeuYungBoy, DONAL',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
-      type: 'song',
-      id: '5'
-    },
-    {
-      title: 'Sơn Tùng M-TP',
-      artist: 'Artist',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
-      type: 'artist',
-      id: '6'
-    },
-    {
-      title: 'Jack',
-      artist: 'Artist',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
-      type: 'artist',
-      id: '7'
-    },
-    {
-      title: 'ICM',
-      artist: 'Artist',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
-      type: 'artist',
-      id: '8'
-    },
-    {
-      title: 'HIEUTHUHAI',
-      artist: 'Artist',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
-      type: 'artist',
-      id: '9'
-    },
-    {
-      title: 'MANBO',
-      artist: 'Artist',
-      imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
-      type: 'artist',
-      id: '10'
-    }
-  ];
+  recentSearches: RecentSearch[] | null = null;
 
   constructor(
     public readonly layoutService: LayoutService,
     public readonly authService: AuthService,
+    private readonly userService: UserService,
+    private readonly searchService: SearchService,
     private readonly router: Router
   ) {
     // Set up debounce for search input
@@ -140,7 +75,7 @@ export class TopBarComponent implements OnInit {
       )
       .subscribe((query) => {
         if (query && query.trim().length > 1) {
-          this.navigateToSearchResults(query);
+          this.navigateToSearchDetail(query);
         }
       });
   }
@@ -148,6 +83,7 @@ export class TopBarComponent implements OnInit {
   ngOnInit(): void {
     // Subscribe to user profile changes
     this.authService.userProfile().subscribe((userProfile) => (this.userProfile = userProfile));
+    this.loadData();
   }
 
   // Keyboard shortcut handler for Ctrl+K
@@ -187,42 +123,42 @@ export class TopBarComponent implements OnInit {
     if (this.searchQuery.trim()) {
       // Add to recent searches if it doesn't exist
       this.saveToRecentSearches();
-      this.navigateToSearchResults(this.searchQuery);
+      this.navigateToSearchDetail(this.searchQuery);
     }
   }
 
-  navigateToSearchResults(query: string) {
+  navigateToSearchDetail(query: string) {
     // Navigate to search page with the query
     this.router.navigate(['/search', query]);
   }
 
-  selectSearchResult(result: SearchResult) {
-    if (result.type === 'artist') {
-      this.router.navigate(['/artist', result.id]);
-    } else if (result.type === 'song') {
-      // Save to recent searches
-      this.saveToRecentSearches(result);
-      this.router.navigate(['/search', result.title]);
-    } else {
-      this.router.navigate(['/search', result.title]);
-    }
+  selectRecentSearch(recentSearch: RecentSearch) {
+    // if (result.type === 'artist') {
+    //   this.router.navigate(['/artist', result.id]);
+    // } else if (result.type === 'song') {
+    //   // Save to recent searches
+    //   this.saveToRecentSearches(result);
+    //   this.router.navigate(['/search', result.title]);
+    // } else {
+    //   this.router.navigate(['/search', result.title]);
+    // }
+    this.router.navigate([recentSearch.path]);
   }
 
-  private saveToRecentSearches(result?: SearchResult) {
+  private saveToRecentSearches(result?: RecentSearch) {
     // If a result is provided, use it, otherwise create one from the query
-    if (!result && this.searchQuery.trim()) {
-      // For simplicity, create a generic result
-      const newResult: SearchResult = {
-        title: this.searchQuery,
-        artist: 'Search query',
-        imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
-        type: 'song',
-        id: Date.now().toString()
-      };
-
-      // Add to recent searches (limit to 10)
-      this.recentSearches = [newResult, ...this.recentSearches].slice(0, 10);
-    }
+    // if (!result && this.searchQuery.trim()) {
+    //   // For simplicity, create a generic result
+    //   const newResult: RecentSearch = {
+    //     title: this.searchQuery,
+    //     artist: 'Search query',
+    //     imageUrl: '/asset/image/default-artist-thumbnail-image.svg',
+    //     type: 'song',
+    //     id: Date.now().toString()
+    //   };
+    //   // Add to recent searches (limit to 10)
+    //   this.recentSearches = [newResult, ...this.recentSearches].slice(0, 10);
+    // }
   }
 
   clearRecentSearches(event: Event): void {
@@ -232,6 +168,7 @@ export class TopBarComponent implements OnInit {
 
     // Clear the recent searches array
     this.recentSearches = [];
+    this.searchService.updateRecentSearches([]);
 
     // In a real application, you would also persist this to local storage or a backend service
     // localStorage.removeItem('recentSearches');
@@ -250,5 +187,31 @@ export class TopBarComponent implements OnInit {
   signOut(): void {
     // First sign out using the AuthService
     this.authService.signOut();
+  }
+
+  private loadData(): void {
+    this.userService.userUsageData.subscribe(
+      ({ recentSearches }) => (this.recentSearches = recentSearches.map((rc) => this.mapToRecentSearch(rc)))
+    );
+    this.userService.refresh();
+  }
+
+  private mapToRecentSearch({ aggregateId, name, type, thumbnailUrl }: UserRecentSearchDto): RecentSearch {
+    let path = '/';
+    if (type === RecentSearchType.ARTIST) {
+      path = `/artist/${aggregateId}`;
+    } else if (type === RecentSearchType.TRACK) {
+      path = `/track/${aggregateId}`;
+    } else if (type === RecentSearchType.PLAYLIST) {
+      path = `/playlist/${aggregateId}`;
+    }
+
+    return {
+      aggregateId,
+      path,
+      type,
+      thumbnailUrl,
+      name
+    };
   }
 }
