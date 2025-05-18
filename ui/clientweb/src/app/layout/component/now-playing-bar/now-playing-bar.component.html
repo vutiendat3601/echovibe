@@ -36,8 +36,14 @@
         <!-- <div class="track-artist" *ngIf="!currentTrack?.artists || currentTrack?.artists ?? [].length === 0">{{ currentTrack?.id ? getArtistName(currentTrack) : 'Unknown Artist' }}</div> -->
       </div>
       <div class="track-actions">
-        <button class="action-button" title="Like">
-          <i class="pi pi-heart-fill"></i>
+        <button
+          class="action-button"
+          [class.active]="isLiked"
+          title="Like"
+          (click)="handleLikeState()"
+          *ngIf="currentTrack"
+        >
+          <i class="pi" [ngClass]="isLiked ? 'pi-heart-fill' : 'pi-heart'"></i>
         </button>
         <button
           *ngIf="currentTrack"

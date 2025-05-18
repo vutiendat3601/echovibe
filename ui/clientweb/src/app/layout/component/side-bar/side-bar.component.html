@@ -61,7 +61,7 @@
 
     <!-- Liked Songs - always shown -->
 
-    <div class="liked-songs" routerLink="/me/liked-songs">
+    <div class="liked-songs" routerLink="/playlist/liked-track">
       <div class="card-thumbnail gradient-purple">
         <i class="pi pi-heart-fill"></i>
       </div>
@@ -124,15 +124,20 @@
           [routerLink]="['/playlist', playlist.id]"
           (contextmenu)="onPlaylistContextMenu($event, playlist); playlistMenu.show($event)"
         >
-          <div class="card-thumbnail" *ngIf="!playlist.thumbnailUrl">
-            <i class="pi pi-music"></i>
+          <div class="thumbnail-container">
+            <!-- <div class="card-thumbnail" *ngIf="!getPlaylistThumbnail(playlist)">
+              <i class="pi pi-music"></i>
+            </div> -->
+            <img
+              *ngIf="getPlaylistThumbnail(playlist)"
+              [src]="getPlaylistThumbnail(playlist)"
+              class="card-thumbnail"
+              alt="{{ playlist.name }}"
+            />
+            <div class="playlist-play-button" (click)="playPlaylistFromIcon($event, playlist)">
+              <fa-icon [icon]="faPlay" [fixedWidth]="true"></fa-icon>
+            </div>
           </div>
-          <img
-            *ngIf="playlist.thumbnailUrl"
-            [src]="playlist.thumbnailUrl"
-            class="card-thumbnail"
-            alt="{{ playlist.name }}"
-          />
           <div class="card-info">
             <h3>{{ playlist.name }}</h3>
             <p class="card-subtitle">

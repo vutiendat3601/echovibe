@@ -12,6 +12,8 @@ import { faBackwardStep, faForwardStep, faPause, faPlay, faShuffle } from '@fort
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { AudioDurationPipe } from '../../../pipe/audio-duration.pipe';
 import { MessageResponseDto } from '../../../dto/activity-dto';
+import { TrackService } from '../../../service/track.service';
+import { UserService } from '../../../service/user.service';
 
 @Component({
   selector: 'app-now-playing-bar',
@@ -28,6 +30,7 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
   duration: number = 0;
   volumePercent: number = 100;
   progressPercent: number = 0;
+  isLiked: boolean = false;
 
   // Tracking related properties
   private listenTrackingSessionId: string | null = null;
@@ -60,15 +63,34 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
     private offlineAudioService: OfflineAudioService,
     private router: Router,
     private messageService: MessageService,
-    private trackingService: TrackingService
+    private trackingService: TrackingService,
+    private trackService: TrackService,
+    private userService: UserService
   ) {}
 
   ngOnInit(): void {
+    // Get initial user data to ensure we have the latest liked tracks
+    this.userService.refresh();
+
+    // Listen for liked tracks data
+    this.listenDataChange();
+
     // Subscribe to audio service observables
     this.subscriptions.push(
       this.audioService.currentTrack$.subscribe((track) => {
         this.currentTrack = track;
-        this.handleTrackChange(track);
+        if (track) {
+          // Force check like status on track change
+          this.userService.getUserUsageData().subscribe(response => {
+            if (response?.data?.likedTrackIds) {
+              this.isLiked = response.data.likedTrackIds.includes(track.id);
+            }
+            this.handleTrackChange(track);
+          });
+        } else {
+          this.isLiked = false;
+          this.handleTrackChange(track);
+        }
       }),
 
       this.audioService.isPlaying$.subscribe((isPlaying) => {
@@ -307,10 +329,29 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
       this.lastTrackId = track.id;
       this.hasListenedEnough = false;
       this.startTrackTracking(track.id);
+
+      // Update like status for the new track
+      this.updateLikeStatus(track.id);
     } else {
       this.completeTrackTracking();
       this.lastTrackId = null;
+      this.isLiked = false;
     }
+  }
+
+  // Helper method to update like status by fetching fresh data
+  private updateLikeStatus(trackId: string): void {
+    // First try to use the current data
+    this.userService.userUsageData.subscribe(({ likedTrackIds }) => {
+      this.isLiked = likedTrackIds.includes(trackId);
+    }).unsubscribe();
+
+    // Also explicitly refresh usage data to ensure we have the latest state
+    this.userService.getUserUsageData().subscribe((response) => {
+      if (response && response.data && response.data.likedTrackIds) {
+        this.isLiked = response.data.likedTrackIds.includes(trackId);
+      }
+    });
   }
 
   // Start tracking a track
@@ -409,6 +450,50 @@ export class NowPlayingBarComponent implements OnInit, OnDestroy {
       this.handleResume();
     } else {
       this.handlePause();
+    }
+  }
+
+  // Listen for data changes to update like status
+  private listenDataChange() {
+    // Listen for general user data changes
+    this.subscriptions.push(
+      this.userService.userUsageData.subscribe(({ likedTrackIds }) => {
+        if (this.currentTrack && this.currentTrack.id) {
+          this.isLiked = likedTrackIds.includes(this.currentTrack.id);
+        }
+      })
+    );
+
+    // Also listen for specific track like/unlike events
+    this.subscriptions.push(
+      this.trackService.likedTrackId.subscribe(trackId => {
+        if (this.currentTrack && this.currentTrack.id === trackId) {
+          this.isLiked = true;
+        }
+      }),
+      this.trackService.unlikedTrackId.subscribe(trackId => {
+        if (this.currentTrack && this.currentTrack.id === trackId) {
+          this.isLiked = false;
+        }
+      })
+    );
+
+    // Get initial data if not already refreshed
+    this.userService.refresh();
+  }
+
+  // Handle like/unlike track
+  handleLikeState() {
+    if (this.currentTrack) {
+      if (this.isLiked) {
+        // Optimistically update UI first for better responsiveness
+        this.isLiked = false;
+        this.trackService.unlikeTrack(this.currentTrack.id);
+      } else {
+        // Optimistically update UI first for better responsiveness
+        this.isLiked = true;
+        this.trackService.likeTrack(this.currentTrack.id);
+      }
     }
   }
 

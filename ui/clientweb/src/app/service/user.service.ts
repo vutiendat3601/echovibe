@@ -87,7 +87,8 @@ export class UserService {
     );
   }
 
-  private getUserUsageData(): Observable<ResponseDto<UserUsageDto>> {
+  // Made public so components can directly request fresh data when needed
+  getUserUsageData(): Observable<ResponseDto<UserUsageDto>> {
     return this.http.get<ResponseDto<UserUsageDto>>(`${environment.activityBaseUrl}/v1/me/usage-data`);
   }
 }
