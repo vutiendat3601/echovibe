@@ -146,9 +146,9 @@ class Container(containers.DeclarativeContainer):
         user_track_recommendation_repository,
         track_report_repository=track_report_repository,
         logger=logger)
-
     activity_service = providers.Factory(ActivityService,
                                          playlist_service=playlist_service,
                                          artist_service=artist_service,
                                          track_service=track_service,
+                                         user_service=user_service,
                                          logger=logger)

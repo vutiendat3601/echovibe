@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from app.model.user import (UserTrackRating, UserTrackRecommendation)
 from app.core.logger import Logger
 from app.model.user import (UserData)
+from app.model.activity import Activity
 from app.schema.user_schema import UserUsageDataSchema, UserRecommendationSchema
 from app.mapper.user_mapper import map_to_user_usage_data_schema
 import pandas
@@ -68,6 +69,21 @@ class UserService:
             ]
 
         return user_recommendation_schema
+
+    async def handle_viewed_search_result(self, activity: Activity):
+        recent_search = activity.data_json.get("recentSearch", [])
+        user_data = self.user_data_repository.find_by_user_id(
+            activity.created_by)
+        created_at = datetime.now(timezone.utc)
+        if not user_data:
+            user_data = UserData(user_id=activity.created_by,
+                                 data_json={},
+                                 created_at=created_at,
+                                 created_by=activity.created_by)
+        user_data.recent_searchs_json = recent_search
+        user_data.updated_at = created_at
+        user_data.updated_by = activity.created_by
+        self.user_data_repository.save_user_data(user_data)
 
     async def process_user_track_recommendation(self):
         predict_user_track_ratings = await self._process_user_track_collabrative_filtering(
