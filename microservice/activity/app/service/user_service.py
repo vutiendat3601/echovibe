@@ -71,7 +71,7 @@ class UserService:
         return user_recommendation_schema
 
     async def handle_viewed_search_result(self, activity: Activity):
-        recent_search = activity.data_json.get("recentSearchs", [])
+        recent_search = activity.data_json.get("recentSearches", [])
         user_data = self.user_data_repository.find_by_user_id(
             activity.created_by)
         created_at = datetime.now(timezone.utc)
@@ -80,7 +80,7 @@ class UserService:
                                  data_json={},
                                  created_at=created_at,
                                  created_by=activity.created_by)
-        user_data.recent_searchs_json = recent_search
+        user_data.recent_searches_json = recent_search
         user_data.updated_at = created_at
         user_data.updated_by = activity.created_by
         self.user_data_repository.save_user_data(user_data)

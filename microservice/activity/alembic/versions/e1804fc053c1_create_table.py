@@ -200,7 +200,7 @@ CREATE TABLE public.user_data (
 	updated_at timestamptz DEFAULT CURRENT_TIMESTAMP NULL,
 	created_by varchar(255) NULL,
 	updated_by varchar(255) NULL,
-	recent_searchs_json jsonb DEFAULT '[]'::jsonb NOT NULL,
+	recent_searches_json jsonb DEFAULT '[]'::jsonb NOT NULL,
 	CONSTRAINT user_data__pkey PRIMARY KEY (id),
 	CONSTRAINT user_data__user_id___key UNIQUE (user_id)
 );
@@ -212,7 +212,7 @@ AS SELECT id,
     user_id,
     data_json,
     updated_at,
-    recent_searchs_json,
+    recent_searches_json,
     ( SELECT array_agg(tl.aggregate_id) AS array_agg
            FROM track_like tl
           WHERE tl.is_active AND tl.user_id::text = ud.user_id::text) AS liked_track_ids,
