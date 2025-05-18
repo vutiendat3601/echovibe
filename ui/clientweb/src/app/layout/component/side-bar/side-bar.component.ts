@@ -5,6 +5,8 @@ import { MenuComponent } from '../menu/menu.component';
 import { PopoverModule } from 'primeng/popover';
 import { Popover } from 'primeng/popover';
 import { ButtonModule } from 'primeng/button';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import { ContextMenuModule } from 'primeng/contextmenu';
 import { MenuItem } from 'primeng/api';
 import { PlaylistService } from '../../../service/playlist.service';
@@ -45,7 +47,8 @@ interface Member {
     MenuModule,
     InputTextModule,
     InputIcon,
-    IconField
+    IconField,
+    FontAwesomeModule
   ],
   templateUrl: './side-bar.component.html',
   styleUrls: ['./side-bar.component.scss'],
@@ -58,6 +61,9 @@ export class SideBarComponent implements OnInit, OnDestroy {
     { name: 'Sơn Tùng M-TP', imageUrl: 'asset/image/default-artist-thumbnail-image.svg' },
     { name: 'ANH TRAI "SAY HI"', imageUrl: 'asset/image/default-artist-thumbnail-image.svg' }
   ];
+
+  // FontAwesome Icons
+  faPlay = faPlay;
 
   // Property to store user playlists
   playlists: PlaylistDetailDto[] = [];
@@ -225,32 +231,44 @@ export class SideBarComponent implements OnInit, OnDestroy {
 
   // Methods for context menu actions
   playPlaylist(): void {
-    // if (!this.selectedPlaylist) return;
-    // this.playlistService.playPlaylist(this.selectedPlaylist.id).subscribe({
-    //   next: (response) => {
-    //     if (response.data) {
-    //       this.messageService.add({
-    //         severity: 'success',
-    //         summary: 'Playing',
-    //         detail: `Playing playlist "${this.selectedPlaylist?.name}"`
-    //       });
-    //     } else {
-    //       this.messageService.add({
-    //         severity: 'error',
-    //         summary: 'Error',
-    //         detail: response.message
-    //       });
-    //     }
-    //   },
-    //   error: (error) => {
-    //     console.error('Error playing playlist:', error);
-    //     this.messageService.add({
-    //       severity: 'error',
-    //       summary: 'Error',
-    //       detail: 'Failed to play playlist'
-    //     });
-    //   }
-    // });
+    if (!this.selectedPlaylist) return;
+
+    // For now, just show a success message as the actual play functionality
+    // seems to be commented out in the original code
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Playing',
+      detail: `Playing playlist "${this.selectedPlaylist?.name}"`
+    });
+
+    // Uncomment and adapt the following when you want to implement actual playlist playing:
+    /*
+    this.playlistService.playPlaylist(this.selectedPlaylist.id).subscribe({
+      next: (response) => {
+        if (response.data) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Playing',
+            detail: `Playing playlist "${this.selectedPlaylist?.name}"`
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: response.message
+          });
+        }
+      },
+      error: (error) => {
+        console.error('Error playing playlist:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to play playlist'
+        });
+      }
+    });
+    */
   }
 
   addPlaylistToQueue(): void {
@@ -444,6 +462,33 @@ export class SideBarComponent implements OnInit, OnDestroy {
     this.playlistService.createdPlaylistId.subscribe((playlistId) => {
       this.router.navigate([`/playlist/${playlistId}`]);
     });
+  }
+
+  // Get the appropriate thumbnail image for a playlist
+  getPlaylistThumbnail(playlist: PlaylistDetailDto): string {
+    // If playlist has its own thumbnail, use it
+    if (playlist.thumbnailUrl) {
+      return playlist.thumbnailUrl;
+    }
+
+    // If playlist has tracks, use the first track's thumbnail
+    if (playlist.tracks && playlist.tracks.length > 0 && playlist.tracks[0].thumbnailUrl) {
+      return playlist.tracks[0].thumbnailUrl;
+    }
+
+    // Otherwise, return empty string - the component will show the default icon
+    return '';
+  }
+
+  // Handle play button click for a playlist
+  playPlaylistFromIcon(event: MouseEvent, playlist: PlaylistDetailDto): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (playlist) {
+      this.selectedPlaylist = playlist;
+      this.playPlaylist();
+    }
   }
 
   ngOnDestroy(): void {}

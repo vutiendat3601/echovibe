@@ -1,3 +1,5 @@
+$accent-hover-color: #1ed760;
+
 .layout-side-bar {
   background-color: #121212;
   color: white;
@@ -34,7 +36,8 @@
       margin: 0 0 2rem;
       font-size: 1rem;
       color: rgba(255, 255, 255, 0.7);
-    }    .login-button {
+    }
+    .login-button {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -163,7 +166,8 @@
   flex: 1;
 }
 
-.search-button, .sort-button {
+.search-button,
+.sort-button {
   background: transparent;
   border: none;
   color: #828282;
@@ -190,6 +194,61 @@
   cursor: pointer;
   transition: background-color 0.2s;
   // width: 50%;
+  &:hover {
+    background-color: rgba(60, 60, 60, 0.8);
+
+    .playlist-play-button {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .thumbnail-container {
+    position: relative;
+    width: 100%;
+    display: block;
+    overflow: visible;
+
+    .playlist-play-button {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background-color: #1db954;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      z-index: 2;
+      cursor: pointer; /* Ensure the cursor changes on hover */
+
+      fa-icon {
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+      }
+
+      i {
+        font-size: 1rem;
+      }
+    }
+
+    &:hover {
+      .playlist-play-button {
+        opacity: 1;
+        background-color: $accent-hover-color;
+        transform: scale(1.05) translateY(0);
+      }
+    }
+  }
 }
 
 .liked-songs {

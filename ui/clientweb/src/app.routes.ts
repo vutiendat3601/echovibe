@@ -8,6 +8,8 @@ export const routes: Routes = [
     path: '',
     component: LayoutComponent,
     children: [
+      { path: '', loadChildren: () => import('./app/page/home/home.routes') },
+      { path: 'section', loadChildren: () => import('./app/page/home/section/section.routes') },
       { path: 'artist', loadChildren: () => import('./app/page/artist/artist.routes') },
       { path: 'search', loadChildren: () => import('./app/page/search/search.routes') },
       { path: 'offline-library', loadChildren: () => import('./app/page/offline-library/offline-library.routes') },
