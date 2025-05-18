@@ -47,26 +47,31 @@
       </div>
 
       <!-- Recent Searches Dropdown -->
-      <div class="recent-searches-dropdown" *ngIf="isSearchFocused && !searchQuery && recentSearches.length > 0">
-        <div class="dropdown-header">Recent searches</div>
+      @if (isSearchFocused && !searchQuery && recentSearches && recentSearches.length) {
+        <div class="recent-searches-dropdown">
+          <div class="dropdown-header">Recent searches</div>
 
-        <div class="search-results">
-          <div class="search-item" *ngFor="let result of recentSearches" (click)="selectSearchResult(result)">
-            <div class="search-item-image">
-              <img [src]="result.imageUrl" [alt]="result.title" />
-            </div>
-            <div class="search-item-info">
-              <div class="search-item-title">{{ result.title }}</div>
-              <div class="search-item-artist">{{ result.artist }}</div>
+          <div class="search-results">
+            <div
+              class="search-item"
+              *ngFor="let recentSearch of recentSearches"
+              (click)="selectRecentSearch(recentSearch)"
+            >
+              <div class="search-item-image">
+                <img [src]="recentSearch.thumbnailUrl" [alt]="recentSearch.name" />
+              </div>
+              <div class="search-item-info">
+                <div class="search-item-title">{{ recentSearch.name }}</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Clear Recent Searches Button -->
-        <div class="clear-searches-container">
-          <button class="clear-searches-button" (click)="clearRecentSearches($event)">Clear recent searches</button>
+          <!-- Clear Recent Searches Button -->
+          <div class="clear-searches-container">
+            <button class="clear-searches-button" (click)="clearRecentSearches($event)">Clear recent searches</button>
+          </div>
         </div>
-      </div>
+      }
     </div>
   </div>
 

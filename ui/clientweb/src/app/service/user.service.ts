@@ -8,6 +8,7 @@ import { PlaylistService } from './playlist.service';
 import { TrackService } from './track.service';
 import { ArtistService } from './artist.service';
 import { SystemService } from './system.service';
+import { SearchService } from './search.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +22,7 @@ export class UserService {
     private readonly artistService: ArtistService,
     private readonly trackService: TrackService,
     private readonly systemService: SystemService,
+    private readonly searchService: SearchService,
     private readonly http: HttpClient
   ) {
     this.refresh();
@@ -39,6 +41,7 @@ export class UserService {
   }
 
   get userUsageData(): Observable<UserUsageDto> {
+    this.refresh();
     return this.userUsageSubject.asObservable();
   }
 
@@ -75,6 +78,13 @@ export class UserService {
     this.trackService.unlikedTrackId.subscribe((trackId) => {
       if (this.retrievedUserUsage) {
         this.retrievedUserUsage.likedTrackIds = this.retrievedUserUsage.likedTrackIds.filter((ti) => ti != trackId);
+        this.refresh();
+      }
+    });
+
+    this.searchService.recentSearches.subscribe((recentSearches) => {
+      if (this.retrievedUserUsage) {
+        this.retrievedUserUsage.recentSearches = recentSearches;
         this.refresh();
       }
     });

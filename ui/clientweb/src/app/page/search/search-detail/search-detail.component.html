@@ -53,7 +53,7 @@
             <!-- Using real track data - limited to 4 items -->
             <div *ngFor="let song of tracks.slice(0, 4)" class="song-item" (click)="navigateToTrack(song)">
               <div class="song-image">
-                <img [src]="song.albumImage" [alt]="song.title" />
+                <img [src]="song.thumbnailUrl" [alt]="song.title" />
               </div>
               <div class="song-info">
                 <div class="song-title">{{ song.title }}</div>
@@ -149,7 +149,7 @@
           <div *ngFor="let song of tracks; let i = index" class="song-row" (click)="navigateToTrack(song)">
             <div class="song-number">{{ i + 1 }}</div>
             <div class="song-info-cell">
-              <img class="song-thumbnail" [src]="song.albumImage" [alt]="song.title" />
+              <img class="song-thumbnail" [src]="song.thumbnailUrl" [alt]="song.title" />
               <div class="song-details">
                 <div class="song-title">{{ song.title }}</div>
                 <div class="song-artist">

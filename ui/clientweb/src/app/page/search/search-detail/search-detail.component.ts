@@ -1,3 +1,4 @@
+import { UserService } from './../../../service/user.service';
 import { SearchService } from './../../../service/search.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,6 +9,8 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPlay, faUser, faClock, faMusic } from '@fortawesome/free-solid-svg-icons';
 import { ArtistDetailDto } from '../../../dto/artist-dto';
 import { TrackDetailDto } from '../../../dto/track-dto';
+import { RecentSearchType } from '../../../constant/recent-search-type';
+import { UserRecentSearchDto } from '../../../dto/user-dto';
 
 interface Artist {
   id: string;
@@ -29,7 +32,7 @@ interface DisplayTrack {
   title: string;
   artist: string;
   featuredArtists?: string;
-  albumImage: string;
+  thumbnailUrl: string;
   duration: string;
   explicit: boolean;
 }
@@ -41,6 +44,14 @@ interface MockPlaylist {
   coverImage: string;
   type: string;
   badge?: string;
+}
+
+interface RecentSearch {
+  aggregateId: string;
+  name: string;
+  thumbnailUrl: string | null;
+  path: string;
+  type: RecentSearchType;
 }
 
 @Component({
@@ -58,6 +69,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
   searchKeyword: string = '';
   activeFilter: string = 'all'; // Default filter
+  recentSearches: RecentSearch[] | null = null;
   private subscriptions: Subscription[] = [];
 
   // Icons
@@ -103,6 +115,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
   constructor(
     private readonly activeRoute: ActivatedRoute,
     private readonly searchService: SearchService,
+    private readonly userService: UserService,
     private readonly router: Router
   ) {}
 
@@ -178,6 +191,11 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
       }
     });
 
+    this.userService.userUsageData.subscribe(
+      ({ recentSearches }) => (this.recentSearches = recentSearches.map((rc) => this.mapToRecentSearch(rc)))
+    );
+    this.userService.refresh();
+
     this.subscriptions.push(paramsSub);
   }
 
@@ -235,7 +253,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
       title: trackDto.name,
       artist: mainArtist,
       featuredArtists: featuredArtists.length > 0 ? featuredArtists : undefined,
-      albumImage: trackDto.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg',
+      thumbnailUrl: trackDto.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg',
       duration: formattedDuration,
       explicit: false // Assuming no explicit flag in the API, defaulting to false
     };
@@ -243,11 +261,62 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
 
   navigateToArtist(artist: Artist): void {
     // Navigate to artist detail page using the artist's id
+    if (this.recentSearches) {
+      this.searchService.updateRecentSearches([
+        {
+          aggregateId: artist.id,
+          name: artist.name,
+          thumbnailUrl: artist.thumbnailUrl,
+          type: RecentSearchType.ARTIST
+        },
+        ...this.recentSearches.map(({ aggregateId, name, thumbnailUrl, type }) => ({
+          aggregateId,
+          name,
+          thumbnailUrl,
+          type
+        }))
+      ]);
+    }
     this.router.navigate(['/artist', artist.id]);
   }
 
   navigateToTrack(track: DisplayTrack): void {
     // Navigate to track detail page using the track's id
-    this.router.navigate(['/track', track.id]);
+    if (this.recentSearches) {
+      this.searchService.updateRecentSearches([
+        {
+          aggregateId: track.id,
+          name: track.title,
+          thumbnailUrl: track.thumbnailUrl,
+          type: RecentSearchType.TRACK
+        },
+        ...this.recentSearches.map(({ aggregateId, name, thumbnailUrl, type }) => ({
+          aggregateId,
+          name,
+          thumbnailUrl,
+          type
+        }))
+      ]);
+      this.router.navigate(['/track', track.id]);
+    }
+  }
+
+  private mapToRecentSearch({ aggregateId, name, type, thumbnailUrl }: UserRecentSearchDto): RecentSearch {
+    let path = '/';
+    if (type === RecentSearchType.ARTIST) {
+      path = `/artist/${aggregateId}`;
+    } else if (type === RecentSearchType.TRACK) {
+      path = `/track/${aggregateId}`;
+    } else if (type === RecentSearchType.PLAYLIST) {
+      path = `/playlist/${aggregateId}`;
+    }
+
+    return {
+      aggregateId,
+      path,
+      type,
+      thumbnailUrl,
+      name
+    };
   }
 }

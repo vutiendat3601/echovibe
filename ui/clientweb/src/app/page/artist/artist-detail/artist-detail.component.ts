@@ -110,7 +110,7 @@ export class ArtistDetailComponent implements OnInit, OnDestroy {
   faPlay = faPlay;
 
   constructor(
-    private readonly activeRoute: ActivatedRoute,
+    private readonly activedRoute: ActivatedRoute,
     private readonly artistService: ArtistService,
     private readonly router: Router,
     private readonly trackingService: TrackingService,
@@ -146,7 +146,7 @@ export class ArtistDetailComponent implements OnInit, OnDestroy {
   }
 
   private loadData(): void {
-    this.activeRoute.params.subscribe((params) => {
+    this.activedRoute.params.subscribe((params) => {
       if (params['id']) {
         this.artistService.getArtistById(params['id']).subscribe((respDto: ResponseDto<ArtistDetailDto | null>) => {
           if (respDto.data) {

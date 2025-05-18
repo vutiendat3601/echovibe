@@ -105,7 +105,7 @@ export class TrackDetailComponent implements OnInit {
   useMockData = !environment.production; // Use mock data in non-production environments
 
   constructor(
-    private readonly route: ActivatedRoute,
+    private readonly activedRoute: ActivatedRoute,
     private readonly router: Router,
     private readonly trackService: TrackService,
     private readonly audioService: AudioService,
@@ -118,29 +118,30 @@ export class TrackDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.initialize();
-    const trackId = this.route.snapshot.paramMap.get('id');
-    if (trackId) {
-      this.listenDataChange();
-      this.listenTrackingEvent();
-      this.loadData(trackId);
-    } else {
-      this.router.navigate(['/not-found']);
-    }
+    this.activedRoute.params.subscribe((params) => {
+      if (params['id']) {
+        this.listenDataChange();
+        this.listenTrackingEvent();
+        this.loadData(params['id']);
 
-    // Subscribe to audio service to track current playback state
-    this.subscriptions.push(
-      this.audioService.currentTrack$.subscribe((currentTrack) => {
-        if (this.trackDetail && currentTrack) {
-          this.isCurrentTrack = currentTrack.id === this.trackDetail.id;
-        } else {
-          this.isCurrentTrack = false;
-        }
-      }),
+        // Subscribe to audio service to track current playback state
+        this.subscriptions.push(
+          this.audioService.currentTrack$.subscribe((currentTrack) => {
+            if (this.trackDetail && currentTrack) {
+              this.isCurrentTrack = currentTrack.id === this.trackDetail.id;
+            } else {
+              this.isCurrentTrack = false;
+            }
+          }),
 
-      this.audioService.isPlaying$.subscribe((isPlaying) => {
-        this.isPlaying = isPlaying && this.isCurrentTrack;
-      })
-    );
+          this.audioService.isPlaying$.subscribe((isPlaying) => {
+            this.isPlaying = isPlaying && this.isCurrentTrack;
+          })
+        );
+      } else {
+        this.router.navigate(['/not-found']);
+      }
+    });
   }
 
   initialize() {
