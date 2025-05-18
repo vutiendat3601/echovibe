@@ -1,0 +1,274 @@
+<div class="home-container">
+  <!-- Top filter bar -->
+  <div class="filter-bar">
+    <button class="filter-btn" [class.active]="activeFilter === 'all'" (click)="setActiveFilter('all')">All</button>
+    <button class="filter-btn" [class.active]="activeFilter === 'music'" (click)="setActiveFilter('music')">
+      Music
+    </button>
+    <button class="filter-btn" [class.active]="activeFilter === 'artist'" (click)="setActiveFilter('artist')">
+      Artist
+    </button>
+  </div>
+  <!-- My Playlist - only show if activeFilter is 'all' -->
+  <div class="section" *ngIf="activeFilter === 'all'">
+    <div class="section-header user-header">
+      <div>
+        <div class="section-label">Made For</div>
+        <div class="user-name">{{ userName }}</div>
+      </div>
+      <a (click)="goToSection('playlists')" class="show-all">Show all</a>
+    </div>
+    <div class="carousel-container">
+      <ng-container *ngIf="!isLoadingPlaylists; else playlistsLoading">
+        <p-carousel
+          [value]="userPlaylists"
+          [numVisible]="5"
+          [numScroll]="1"
+          [circular]="true"
+          [responsiveOptions]="responsiveOptions"
+        >
+          <ng-template let-playlist pTemplate="item">
+            <div class="album-card" (click)="goToPlaylist(playlist)">
+              <div class="album-image">
+                <img
+                  [src]="getPlaylistThumbnail(playlist)"
+                  [alt]="playlist.name"
+                />
+                <button class="album-play-btn" *ngIf="playlist.tracks && playlist.tracks.length > 0">
+                  <fa-icon [icon]="faPlay"></fa-icon>
+                </button>
+              </div>
+              <div class="album-title" [title]="playlist.name">{{ truncateText(playlist.name) }}</div>
+              <div class="album-artist">{{ playlist.tracks?.length || 0 }} tracks</div>
+            </div>
+          </ng-template>
+        </p-carousel>
+      </ng-container>
+
+      <ng-template #playlistsLoading>
+        <div class="loading-carousel">
+          <div class="skeleton-card" *ngFor="let i of [1, 2, 3, 4, 5]">
+            <div class="skeleton-image"></div>
+            <div class="skeleton-title"></div>
+            <div class="skeleton-desc"></div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+  <!-- Recommended for today  -->
+  <div class="section">
+    <div class="section-header user-header">
+      <div>
+        <div class="section-label bold">Recommended</div>
+      </div>
+      <a (click)="goToSection('recommended')" class="show-all">Show all</a>
+    </div>
+    <div class="carousel-container">
+      <ng-container *ngIf="!isLoadingRecommendations; else recommendationsLoading">
+        <p-carousel
+          [value]="recommendedTracks.slice(0, 10)"
+          [numVisible]="5"
+          [numScroll]="1"
+          [circular]="true"
+          [responsiveOptions]="responsiveOptions"
+        >
+          <ng-template let-track pTemplate="item" let-i="index">
+            <div class="mix-card" (click)="goToTrack(track)">
+              <div class="mix-image">
+                <img
+                  [src]="track.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'"
+                  [alt]="track.name"
+                />
+                <!-- <span class="mix-badge">Daily Mix {{ i + 1 < 10 ? '0' + (i + 1) : i + 1 }}</span> -->
+                <button class="mix-play-btn" (click)="$event.stopPropagation(); playTrack(track, $event)">
+                  <fa-icon *ngIf="!isTrackPlaying(track)" [icon]="faPlay"></fa-icon>
+                  <fa-icon *ngIf="isTrackPlaying(track)" [icon]="faPause"></fa-icon>
+                </button>
+              </div>
+              <div class="mix-title" [title]="track.name">{{ truncateText(track.name) }}</div>
+              <div class="mix-desc">
+                <span *ngFor="let artist of track.artists; let last = last"
+                  >{{ truncateText(artist.name, 15) }}<span *ngIf="!last">, </span></span
+                >
+              </div>
+            </div>
+          </ng-template>
+        </p-carousel>
+
+        <!-- Add discover and release cards outside the carousel -->
+        <!-- <div class="special-cards">
+          <div class="mix-card discover-card">
+            <div class="mix-image gradient-bg">
+              <span class="discover-label">Discover Weekly</span>              <button class="mix-play-btn" (click)="$event.stopPropagation()">
+                <fa-icon [icon]="faPlay"></fa-icon>
+              </button>
+            </div>            <div class="mix-title" title="Your weekly mixtape of fresh music. Enjoy new music and deep cuts chosen just for you.">
+              {{truncateText('Your weekly mixtape of fresh music. Enjoy new music and deep cuts chosen just for you.', 40)}}
+            </div>
+          </div>
+          <div class="mix-card release-card" *ngIf="popularTracks.length">
+            <div class="mix-image">
+              <img [src]="popularTracks[0].thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'" [alt]="popularTracks[0].name">
+              <button class="mix-play-btn" (click)="playTrack(popularTracks[0], $event)">
+                <fa-icon *ngIf="!isTrackPlaying(popularTracks[0])" [icon]="faPlay"></fa-icon>
+                <fa-icon *ngIf="isTrackPlaying(popularTracks[0])" [icon]="faPause"></fa-icon>
+              </button>
+            </div>            <div class="mix-title" title="Catch all the latest music from artists you follow, plus new singles picked for you.">
+              {{truncateText('Catch all the latest music from artists you follow, plus new singles picked for you.', 40)}}
+            </div>
+          </div>
+        </div> -->
+      </ng-container>
+
+      <ng-template #recommendationsLoading>
+        <div class="loading-carousel">
+          <div class="skeleton-card" *ngFor="let i of [1, 2, 3, 4, 5]">
+            <div class="skeleton-image"></div>
+            <div class="skeleton-title"></div>
+            <div class="skeleton-desc"></div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+  <!-- Popular albums and singles - visible in all views -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-label bold">Popular albums and singles</div>
+      <a (click)="goToSection('popular')" class="show-all">Show all</a>
+    </div>
+    <div class="carousel-container">
+      <ng-container *ngIf="!isLoadingPopular; else popularLoading">
+        <p-carousel
+          [value]="popularTracks.slice(0, 10)"
+          [numVisible]="5"
+          [numScroll]="1"
+          [circular]="true"
+          [responsiveOptions]="responsiveOptions"
+        >
+          <ng-template let-track pTemplate="item">
+            <div class="album-card" (click)="goToTrack(track)">
+              <div class="album-image">
+                <img
+                  [src]="track.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'"
+                  [alt]="track.name"
+                />
+                <button class="album-play-btn" (click)="$event.stopPropagation(); playTrack(track, $event)">
+                  <fa-icon *ngIf="!isTrackPlaying(track)" [icon]="faPlay"></fa-icon>
+                  <fa-icon *ngIf="isTrackPlaying(track)" [icon]="faPause"></fa-icon>
+                </button>
+              </div>
+              <div class="album-title" [title]="track.name">{{ truncateText(track.name) }}</div>
+              <div class="album-artist" [title]="getArtistName(track)">
+                {{ truncateText(getArtistName(track), 30) }}
+              </div>
+            </div>
+          </ng-template>
+        </p-carousel>
+      </ng-container>
+
+      <ng-template #popularLoading>
+        <div class="loading-carousel">
+          <div class="skeleton-card" *ngFor="let i of [1, 2, 3, 4, 5]">
+            <div class="skeleton-image"></div>
+            <div class="skeleton-title"></div>
+            <div class="skeleton-desc"></div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Music section - only visible when 'music' filter is active -->
+  <div class="section" *ngIf="activeFilter === 'music'">
+    <div class="section-header">
+      <div class="section-label bold">Top Tracks</div>
+      <a href="#" class="show-all">Show all</a>
+    </div>
+    <div class="carousel-container">
+      <ng-container *ngIf="!isLoadingPopular; else topTracksLoading">
+        <p-carousel
+          [value]="popularTracks.slice(0, 10)"
+          [numVisible]="5"
+          [numScroll]="1"
+          [circular]="true"
+          [responsiveOptions]="responsiveOptions"
+        >
+          <ng-template let-track pTemplate="item">
+            <div class="mix-card" (click)="goToTrack(track)">
+              <div class="mix-image">
+                <img
+                  [src]="track.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'"
+                  [alt]="track.name"
+                />
+                <button class="mix-play-btn" (click)="$event.stopPropagation(); playTrack(track, $event)">
+                  <fa-icon *ngIf="!isTrackPlaying(track)" [icon]="faPlay"></fa-icon>
+                  <fa-icon *ngIf="isTrackPlaying(track)" [icon]="faPause"></fa-icon>
+                </button>
+              </div>
+              <div class="mix-title" [title]="track.name">{{ truncateText(track.name) }}</div>
+              <div class="mix-desc">
+                <span *ngFor="let artist of track.artists; let last = last">
+                  {{ truncateText(artist.name, 15) }}<span *ngIf="!last">, </span>
+                </span>
+              </div>
+            </div>
+          </ng-template>
+        </p-carousel>
+      </ng-container>
+
+      <ng-template #topTracksLoading>
+        <div class="loading-carousel">
+          <div class="skeleton-card" *ngFor="let i of [1, 2, 3, 4, 5]">
+            <div class="skeleton-image"></div>
+            <div class="skeleton-title"></div>
+            <div class="skeleton-desc"></div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- Artist section - only visible when 'artist' filter is active -->
+  <div class="section" *ngIf="activeFilter === 'artist'">
+    <div class="section-header">
+      <div class="section-label bold">Featured Artists</div>
+      <a href="#" class="show-all">Show all</a>
+    </div>
+    <div class="carousel-container">
+      <ng-container *ngIf="!isLoadingPopular; else artistsLoading">
+        <p-carousel
+          [value]="popularTracks.slice(0, 10)"
+          [numVisible]="5"
+          [numScroll]="1"
+          [circular]="true"
+          [responsiveOptions]="responsiveOptions"
+        >
+          <ng-template let-track pTemplate="item">
+            <div class="album-card">
+              <div class="album-image">
+                <img
+                  [src]="track.artists?.[0]?.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg'"
+                  [alt]="getArtistName(track)"
+                />
+              </div>
+              <div class="album-title" [title]="getArtistName(track)">{{ truncateText(getArtistName(track)) }}</div>
+              <div class="album-artist">Artist</div>
+            </div>
+          </ng-template>
+        </p-carousel>
+      </ng-container>
+
+      <ng-template #artistsLoading>
+        <div class="loading-carousel">
+          <div class="skeleton-card" *ngFor="let i of [1, 2, 3, 4, 5]">
+            <div class="skeleton-image"></div>
+            <div class="skeleton-title"></div>
+            <div class="skeleton-desc"></div>
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
