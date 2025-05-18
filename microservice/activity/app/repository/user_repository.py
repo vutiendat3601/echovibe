@@ -10,6 +10,10 @@ class UserDataRepository(ABC):
     def save_user_data(self, user_data: UserData) -> UserData:
         """Save UserData"""
 
+    @abstractmethod
+    def find_by_user_id(self, user_id: str) -> UserData | None:
+        """Find UserData by user_id"""
+
 
 class UserUsageDataRepository(ABC):
 

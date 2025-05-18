@@ -5,6 +5,7 @@ from app.model.activity import Activity
 from app.schema.activity_schema import ActivitySchema
 from app.constant.constant import AUTH_SYSTEM_USERNAME, JWT_CLAIM_SUB
 from app.enum.action_type import ActionType
+from app.service.user_service import UserService
 
 from app.service.artist_service import ArtistService
 from app.service.playlist_service import PlaylistService
@@ -15,10 +16,11 @@ class ActivityService:
 
     def __init__(self, playlist_service: PlaylistService,
                  artist_service: ArtistService, track_service: TrackService,
-                 logger: Logger):
+                 user_service: UserService, logger: Logger):
         self.playlist_service = playlist_service
         self.artist_service = artist_service
         self.track_service = track_service
+        self.user_service = user_service
         self.logger = logger
 
     async def handle_activity(self,
@@ -84,6 +86,10 @@ class ActivityService:
         elif activity.type == ActionType.VIEWED_TRACK_DETAIL_PAGE_TRACKING:
             return await self.track_service.handle_viewed_track_detail_page_tracking(
                 activity.session_id)
+
+        # User action handlers
+        elif activity.type == ActionType.VIEWED_SEARCH_RESULT and created_by != fingerprint:
+            return await self.user_service.handle_viewed_search_result(activity)
 
         else:
             self.logger.error(

@@ -36,6 +36,19 @@ class SqlmodelUserDataRepository(UserDataRepository):
         finally:
             session.close()
 
+    def find_by_user_id(self, user_id: str) -> UserData | None:
+        try:
+            with self.session_factory() as session:
+                statement = (select(UserData).filter(
+                    UserData.user_id == user_id))
+                user_data = session.exec(statement).first()
+                return user_data
+        except SQLAlchemyError as e:
+            self.logger.error(f"{e}")
+            raise e
+        finally:
+            session.close()
+
 
 class SqlmodelUserUsageDataRepository(UserUsageDataRepository):
 

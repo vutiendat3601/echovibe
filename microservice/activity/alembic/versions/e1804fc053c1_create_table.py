@@ -200,18 +200,19 @@ CREATE TABLE public.user_data (
 	updated_at timestamptz DEFAULT CURRENT_TIMESTAMP NULL,
 	created_by varchar(255) NULL,
 	updated_by varchar(255) NULL,
+	recent_searchs_json jsonb DEFAULT '[]'::jsonb NOT NULL,
 	CONSTRAINT user_data__pkey PRIMARY KEY (id),
 	CONSTRAINT user_data__user_id___key UNIQUE (user_id)
 );
 """
 
-    create_user_stats_materialized_view_ddl = """
-CREATE MATERIALIZED VIEW public.mv_user_usage_data
-TABLESPACE pg_default
+    create_user_usage_data_view_ddl = """
+CREATE OR REPLACE VIEW public.v_user_usage_data
 AS SELECT id,
     user_id,
     data_json,
     updated_at,
+    recent_searchs_json,
     ( SELECT array_agg(tl.aggregate_id) AS array_agg
            FROM track_like tl
           WHERE tl.is_active AND tl.user_id::text = ud.user_id::text) AS liked_track_ids,
@@ -221,36 +222,7 @@ AS SELECT id,
     ( SELECT array_agg(up.playlist_id) AS array_agg
            FROM user_playlist up
           WHERE up.is_active AND up.user_id::text = ud.user_id::text) AS created_playlist_ids
-   FROM user_data ud
-WITH DATA;
-
-CREATE OR REPLACE FUNCTION refresh_mv_user_usage_data()
-RETURNS trigger AS $$
-BEGIN
-  REFRESH MATERIALIZED VIEW public.mv_user_usage_data;
-  RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER user_data__refresh_mv_user_usage_data_trigger
-AFTER INSERT OR UPDATE OR DELETE ON public.user_data
-FOR EACH STATEMENT
-EXECUTE FUNCTION refresh_mv_user_usage_data();
-
-CREATE TRIGGER track_like__refresh_mv_user_usage_data_trigger
-AFTER INSERT OR UPDATE OR DELETE ON public.track_like
-FOR EACH STATEMENT
-EXECUTE FUNCTION refresh_mv_user_usage_data();
-
-CREATE TRIGGER artist_like__refresh_mv_user_usage_data_trigger
-AFTER INSERT OR UPDATE OR DELETE ON public.artist_like
-FOR EACH STATEMENT
-EXECUTE FUNCTION refresh_mv_user_usage_data();
-
-CREATE TRIGGER user_playlist__refresh_mv_user_usage_data_trigger
-AFTER INSERT OR UPDATE OR DELETE ON public.user_playlist
-FOR EACH STATEMENT
-EXECUTE FUNCTION refresh_mv_user_usage_data();
+   FROM user_data ud;
 """
 
     create_track_stats_report_view_ddl = """
@@ -576,7 +548,7 @@ CREATE TABLE public.user_track_recommendation (
         create_artist_stats_detail_view_ddl, create_track_like_table_ddl,
         create_track_detail_page_view_table_ddl, create_track_listen_table_ddl,
         create_track_stats_table_ddl, create_user_data_table_ddl,
-        create_user_playlist_table_ddl, create_user_stats_materialized_view_ddl,
+        create_user_playlist_table_ddl, create_user_usage_data_view_ddl,
         create_track_stats_report_view_ddl, create_user_track_rating_view_ddl,
         create_track_stats_report_current_month_view_ddl,
         create_artist_stats_report_view_ddl,
