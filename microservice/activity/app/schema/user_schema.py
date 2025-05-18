@@ -5,6 +5,7 @@ from datetime import datetime
 
 class UserRecentSearchSchema(BaseModel):
     aggregate_id: str = Field(default=None, alias="aggregateId")
+    name: str = Field(default=None, alias="name")
     thumbnail_url: str = Field(default=None, alias="thumbnailUrl")
     type: RecentSearchType = Field(default=None, alias="type")
 
@@ -22,7 +23,7 @@ class UserUsageDataSchema(BaseModel):
     liked_artist_ids: list[str] = Field([], alias="likedArtistIds")
     created_playlist_ids: list[str] = Field([], alias="createdPlaylistIds")
     recent_searchs: list[UserRecentSearchSchema] = Field([],
-                                                        alias="recentSearchs")
+                                                         alias="recentSearchs")
 
     class Config:
         populate_by_name = True
