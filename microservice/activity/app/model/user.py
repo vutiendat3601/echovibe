@@ -11,7 +11,7 @@ class UserData(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_id: str = Field(..., max_length=255)
     data_json: dict[str, any] | None = Field(None, sa_column=Column(JSONB))
-    recent_searchs_json:  list[dict[str, any]] = Field([], sa_column=Column(JSONB))
+    recent_searches_json:  list[dict[str, any]] = Field([], sa_column=Column(JSONB))
     created_at: datetime = Field(default=datetime.now(timezone.utc))
     updated_at: datetime = Field(default=datetime.now(timezone.utc))
     created_by: str | None = Field(None)
@@ -30,7 +30,7 @@ class UserUsageData(SQLModel, table=True):
     liked_track_ids: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
     liked_artist_ids: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
     created_playlist_ids: list[str] = Field([], sa_column=Column(ARRAY(TEXT())))
-    recent_searchs_json: list[dict[str, any]] = Field([], sa_column=Column(JSONB))
+    recent_searches_json: list[dict[str, any]] = Field([], sa_column=Column(JSONB))
 
     class Config:
         arbitrary_types_allowed = True

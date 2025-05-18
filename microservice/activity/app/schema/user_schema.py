@@ -22,8 +22,8 @@ class UserUsageDataSchema(BaseModel):
     liked_track_ids: list[str] = Field([], alias="likedTrackIds")
     liked_artist_ids: list[str] = Field([], alias="likedArtistIds")
     created_playlist_ids: list[str] = Field([], alias="createdPlaylistIds")
-    recent_searchs: list[UserRecentSearchSchema] = Field([],
-                                                         alias="recentSearchs")
+    recent_searches: list[UserRecentSearchSchema] = Field([],
+                                                         alias="recentSearches")
 
     class Config:
         populate_by_name = True

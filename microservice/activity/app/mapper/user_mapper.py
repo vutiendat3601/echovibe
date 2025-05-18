@@ -7,11 +7,11 @@ def map_to_user_usage_data_schema(user_usage_data: UserUsageData):
     liked_artist_ids = user_usage_data.liked_artist_ids if user_usage_data.liked_artist_ids else []
     created_playlist_ids = user_usage_data.created_playlist_ids if user_usage_data.created_playlist_ids else []
 
-    recent_searchs = []
-    if user_usage_data.recent_searchs_json:
-        recent_searchs = [
+    recent_searches = []
+    if user_usage_data.recent_searches_json:
+        recent_searches = [
             UserRecentSearchSchema(**recent_search)
-            for recent_search in user_usage_data.recent_searchs_json
+            for recent_search in user_usage_data.recent_searches_json
         ]
 
     return UserUsageDataSchema(user_id=user_usage_data.user_id,
@@ -20,4 +20,4 @@ def map_to_user_usage_data_schema(user_usage_data: UserUsageData):
                                liked_track_ids=liked_track_ids,
                                liked_artist_ids=liked_artist_ids,
                                created_playlist_ids=created_playlist_ids,
-                               recent_searchs=recent_searchs)
+                               recent_searches=recent_searches)
