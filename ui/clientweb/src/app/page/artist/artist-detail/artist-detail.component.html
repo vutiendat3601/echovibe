@@ -64,8 +64,15 @@
   <ng-template pTemplate="content">
     <!-- Action buttons section (play, follow, more) -->
     <div class="flex flex-wrap gap-5 items-center">
-      <p-button severity="success" rounded [style]="{ width: '55px', height: '55px' }">
-        <fa-icon [icon]="faPlay" size="xl" class="pl-1"></fa-icon>
+      <p-button
+        severity="success"
+        rounded
+        [style]="{ width: '55px', height: '55px' }"
+        (click)="playAllTracks()"
+        [disabled]="!artistDetail?.stats?.mostPopularTracks?.length || loadingAllTracks"
+      >
+        <i *ngIf="loadingAllTracks" class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i>
+        <fa-icon *ngIf="!loadingAllTracks" [icon]="faPlay" size="xl" class="pl-1"></fa-icon>
       </p-button>
       <button class="font-bold border rounded-full text-sm text-white w-[100px] h-[30px]">Following</button>
       <button>
@@ -78,14 +85,39 @@
     <div class="song-list">
       @if (artistDetail) {
         @for (track of artistDetail.stats.mostPopularTracks; track track.id) {
-          <div class="song-row" style="display: flex; justify-content: space-between; width: 100%">
+          <div class="song-row" style="display: flex; align-items: center; justify-content: space-between; width: 100%">
             <span class="song-index">
               <span class="number">{{ $index + 1 }}</span>
-              <fa-icon [icon]="faPlay" class="play-icon"></fa-icon>
+              <span class="play-icon-container">
+                <i *ngIf="loadingTrack === track.id" class="pi pi-spin pi-spinner play-icon"></i>
+                <fa-icon
+                  *ngIf="loadingTrack !== track.id"
+                  [icon]="faPlay"
+                  class="play-icon"
+                  (click)="playTrack(track)"
+                ></fa-icon>
+              </span>
             </span>
-            <a [routerLink]="'/track/' + track.id" style="flex: 1">
-              <span class="song-title">{{ track.name }}</span></a
-            >
+            <div style="display: flex; align-items: center; flex: 1">
+              <!-- Artist thumbnail for the track -->
+              <div
+                class="track-thumbnail"
+                style="width: 40px; height: 40px; margin-right: 12px; overflow: hidden; position: relative; min-width: 40px; min-height: 40px"
+              >
+                <img
+                  *ngIf="track?.thumbnailUrl"
+                  [src]="track.thumbnailUrl"
+                  style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px"
+                />
+                <div
+                  *ngIf="!artistDetail?.thumbnailUrl"
+                  style="width: 100%; height: 100%; background-color: #333; border-radius: 4px"
+                ></div>
+              </div>
+              <a [routerLink]="'/track/' + track.id">
+                <span class="song-title">{{ track.name }}</span>
+              </a>
+            </div>
             <span style="flex: 1; text-align: center"> {{ track.totalLikes }} likes</span>
             <span style="flex: 1; text-align: center"> {{ track.totalListens }} listens</span>
             <span style="flex: 1; text-align: right"> {{ track.audioDurationSecond | audioDurationPipe }}</span>
@@ -99,23 +131,23 @@
     </button>
 
     <!-- Discography section using product-list component -->
-    <product-list
+    <!-- <product-list
       [title]="'Discography'"
       [items]="discography"
       [showAll]="showAllDiscography"
       (toggleShowAll)="toggleShowAllDiscography()"
     >
-    </product-list>
+    </product-list> -->
 
     <!-- Fans Also Like section using product-list component -->
-    <product-list
+    <!-- <product-list
       [title]="'Fans Also Like'"
       [items]="discography"
       [showAll]="showAllDiscography"
       [circularThumbnails]="true"
       (toggleShowAll)="toggleShowAllDiscography()"
     >
-    </product-list>
+    </product-list> -->
 
     <!-- Artist About Section -->
     <div class="artist-about">

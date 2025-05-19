@@ -53,27 +53,34 @@
             <!-- Using real track data - limited to 4 items -->
             <div *ngFor="let song of tracks.slice(0, 4)" class="song-item" (click)="navigateToTrack(song)">
               <div class="song-image">
-                <img [src]="song.thumbnailUrl" [alt]="song.title" />
+                <img [src]="song.thumbnailUrl" [alt]="song.name" />
               </div>
               <div class="song-info">
-                <div class="song-title">{{ song.title }}</div>
+                <div class="song-title">{{ song.name }}</div>
                 <div class="song-artist">
-                  <span *ngIf="song.explicit" class="explicit-label">E</span>
-                  {{ song.artist }} <span *ngIf="song.featuredArtists">(feat. {{ song.featuredArtists }})</span>
+                  <span *ngIf="song.isPublic" class="explicit-label">E</span>
+                  <span *ngIf="song.artists">
+                    <ng-container *ngFor="let artist of song.artists; let last = last">
+                      <a class="artist-link">
+                        <img *ngIf="artist.isVerified" [src]="artist.thumbnailUrl" class="verified-badge" alt="Verified" />
+                        {{ artist.name }}
+                      </a>
+                      <span *ngIf="!last">, </span>
+                    </ng-container>
+                  </span>
                 </div>
               </div>
-              <div class="song-duration">{{ song.duration }}</div>
+              <div class="song-duration">{{ song.audioDurationSecond | audioDurationPipe  }}</div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Featuring Artist Section -->
-      <div class="featuring-section" *ngIf="artists.length > 0">
+      <!-- <div class="featuring-section" *ngIf="artists.length > 0">
         <h2>Featuring {{ artists[0].name }}</h2>
 
         <div class="featuring-grid">
-          <!-- Use mock playlist data -->
           <div *ngFor="let playlist of mockPlaylists" class="featuring-card">
             <div class="featuring-card-img">
               <img [src]="playlist.coverImage" [alt]="playlist.title" />
@@ -85,7 +92,7 @@
             <div class="featuring-card-subtitle">{{ playlist.description }}</div>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Artists Section (when there are multiple artists) -->
       <div class="artists-section" *ngIf="artists.length > 1">
@@ -149,16 +156,24 @@
           <div *ngFor="let song of tracks; let i = index" class="song-row" (click)="navigateToTrack(song)">
             <div class="song-number">{{ i + 1 }}</div>
             <div class="song-info-cell">
-              <img class="song-thumbnail" [src]="song.thumbnailUrl" [alt]="song.title" />
+              <img class="song-thumbnail" [src]="song.thumbnailUrl" [alt]="song.name" />
               <div class="song-details">
-                <div class="song-title">{{ song.title }}</div>
+                <div class="song-title">{{ song.name }}</div>
                 <div class="song-artist">
-                  <span *ngIf="song.explicit" class="explicit-label">E</span>
-                  {{ song.artist }} <span *ngIf="song.featuredArtists">(feat. {{ song.featuredArtists }})</span>
+                  <span *ngIf="song.isPublic" class="explicit-label">E</span>
+                  <span *ngIf="song.artists.length > 0">
+                    <ng-container *ngFor="let artist of song.artists; let last = last">
+                      <a class="artist-link">
+                        <img *ngIf="artist.isVerified" [src]="artist.thumbnailUrl" class="verified-badge" alt="Verified" />
+                        {{ artist.name }}
+                      </a>
+                      <span *ngIf="!last">, </span>
+                    </ng-container>
+                  </span>
                 </div>
               </div>
             </div>
-            <div class="song-duration">{{ song.duration }}</div>
+            <div class="song-duration">{{ song.audioDurationSecond | audioDurationPipe }}</div>
           </div>
         </div>
       </div>

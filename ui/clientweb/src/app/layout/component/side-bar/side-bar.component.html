@@ -125,9 +125,9 @@
           (contextmenu)="onPlaylistContextMenu($event, playlist); playlistMenu.show($event)"
         >
           <div class="thumbnail-container">
-            <!-- <div class="card-thumbnail" *ngIf="!getPlaylistThumbnail(playlist)">
+            <div class="card-thumbnail" *ngIf="getPlaylistThumbnail(playlist) == ''">
               <i class="pi pi-music"></i>
-            </div> -->
+            </div>
             <img
               *ngIf="getPlaylistThumbnail(playlist)"
               [src]="getPlaylistThumbnail(playlist)"

@@ -7,7 +7,6 @@ import { BadgeModule } from 'primeng/badge';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ProgressBarModule } from 'primeng/progressbar';
-import { ProductList } from '../../../component/productList/productList.component';
 import { ArtistDetailDto } from '../../../dto/artist-dto';
 import { ResponseDto } from '../../../dto/response-dto';
 import { SafeHtmlPipe } from '../../../pipe/safe-html.pipe';
@@ -17,6 +16,7 @@ import { TrackingService } from '../../../service/tracking.service';
 import { MessageResponseDto } from './../../../dto/activity-dto';
 import { ArtistService } from './../../../service/artist.service';
 import { TrackService } from '../../../service/track.service';
+import { AudioService } from '../../../service/audio.service';
 
 interface ArtistStats {
   totalDetailPageViews: number;
@@ -28,6 +28,7 @@ interface ArtistStats {
     audioDurationSecond: number | null;
     totalListens: number;
     totalLikes: number;
+    thumbnailUrl?: string | null;
   }[];
 }
 
@@ -56,7 +57,6 @@ interface ArtistDetail {
     CardModule,
     ButtonModule,
     FontAwesomeModule,
-    ProductList,
     RouterModule,
     SafeHtmlPipe,
     AudioDurationPipe
@@ -108,13 +108,16 @@ export class ArtistDetailComponent implements OnInit, OnDestroy {
   ];
   // Icons from FontAwesome
   faPlay = faPlay;
+  loadingTrack: string | null = null;
+  loadingAllTracks = false;
 
   constructor(
     private readonly activedRoute: ActivatedRoute,
     private readonly artistService: ArtistService,
     private readonly router: Router,
     private readonly trackingService: TrackingService,
-    private readonly trackService: TrackService
+    private readonly trackService: TrackService,
+    private readonly audioService: AudioService
   ) {}
 
   ngOnInit(): void {
@@ -182,7 +185,8 @@ export class ArtistDetailComponent implements OnInit, OnDestroy {
                               audioDurationSecond,
                               audioFileM3u8Url,
                               totalListens: 0,
-                              totalLikes: 0
+                              totalLikes: 0,
+                              thumbnailUrl: trackDetailDto.thumbnailUrl,
                             };
                             return track;
                           }
@@ -258,5 +262,55 @@ export class ArtistDetailComponent implements OnInit, OnDestroy {
   private destroy() {
     this.viewArtistDetailTrackingSessionId &&
       this.trackingService.sendViewedArtistDetailPageTracking(this.viewArtistDetailTrackingSessionId);
+  }
+
+  // Play a track when the play icon is clicked
+  playTrack(track: any): void {
+    if (track && track.id) {
+      this.loadingTrack = track.id;
+      // Get the full track details and play it
+      this.trackService.getTrackById(track.id).subscribe(response => {
+        if (response && response.data) {
+          this.audioService.setTrackFromDto(response.data);
+          this.audioService.play();
+        }
+        this.loadingTrack = null;
+      }, error => {
+        console.error('Error loading track:', error);
+        this.loadingTrack = null;
+      });
+    }
+  }
+
+  // Play all tracks from this artist
+  playAllTracks(): void {
+    if (this.artistDetail && this.artistDetail.stats.mostPopularTracks.length > 0) {
+      this.loadingAllTracks = true;
+      const trackIds = this.artistDetail.stats.mostPopularTracks.map(track => track.id);
+
+      this.trackService.getTrackByIds(trackIds).subscribe(response => {
+        if (response && response.data && response.data.length > 0) {
+          // Clear the current queue and add all tracks
+          const tracks = response.data
+            .filter(trackDto => trackDto !== null) // Filter out null tracks
+            .map(trackDto => {
+              // Create EnhancedTrackDto objects from the track data
+              return {
+                ...trackDto!,
+                id: trackDto!.id,
+                isM3u8: !!trackDto!.audioFileM3u8Url
+              };
+            });
+
+          // Set the queue with all tracks and play the first one
+          this.audioService.setQueue(tracks);
+          this.audioService.play();
+        }
+        this.loadingAllTracks = false;
+      }, error => {
+        console.error('Error loading tracks:', error);
+        this.loadingAllTracks = false;
+      });
+    }
   }
 }
