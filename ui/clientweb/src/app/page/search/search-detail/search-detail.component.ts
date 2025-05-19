@@ -11,6 +11,7 @@ import { ArtistDetailDto } from '../../../dto/artist-dto';
 import { TrackDetailDto } from '../../../dto/track-dto';
 import { RecentSearchType } from '../../../constant/recent-search-type';
 import { UserRecentSearchDto } from '../../../dto/user-dto';
+import { AudioDurationPipe } from '../../../pipe/audio-duration.pipe';
 
 interface Artist {
   id: string;
@@ -57,7 +58,7 @@ interface RecentSearch {
 @Component({
   selector: 'app-search-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, FontAwesomeModule],
+  imports: [CommonModule, FormsModule, FontAwesomeModule, AudioDurationPipe],
   templateUrl: './search-detail.component.html',
   styleUrl: './search-detail.component.scss'
 })
@@ -65,7 +66,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
   private readonly PAGE_SIZE: number = 100;
   pageNumber: number = 0;
   artists: Artist[] = [];
-  tracks: DisplayTrack[] = [];
+  tracks: TrackDetailDto[] = [];
   isLoading: boolean = false;
   searchKeyword: string = '';
   activeFilter: string = 'all'; // Default filter
@@ -174,7 +175,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
               this.artists = [...this.artists, ...artists];
 
               // Process tracks data
-              const tracks = search.track.items.map((trackDto: TrackDetailDto) => this.convertToDisplayTrack(trackDto));
+              const tracks = search.track.items.map((trackDto: TrackDetailDto) => trackDto);
               this.tracks = [...this.tracks, ...tracks];
 
               this.pageNumber++;
@@ -212,7 +213,7 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
           this.artists = [...this.artists, ...artists];
 
           // Process tracks data
-          const tracks = search.track.items.map((trackDto: TrackDetailDto) => this.convertToDisplayTrack(trackDto));
+          const tracks = search.track.items.map((trackDto: TrackDetailDto) => trackDto);
           this.tracks = [...this.tracks, ...tracks];
 
           this.pageNumber++;
@@ -227,36 +228,6 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
     });
 
     this.subscriptions.push(searchSub);
-  }
-
-  // Helper function to convert TrackDto to DisplayTrack
-  private convertToDisplayTrack(trackDto: TrackDetailDto): DisplayTrack {
-    // Find main artist
-    const mainArtist = trackDto.artists.find((artist) => artist.isMainArtist)?.name || 'Unknown Artist';
-
-    // Get featured artists (non-main artists)
-    const featuredArtists = trackDto.artists
-      .filter((artist) => !artist.isMainArtist)
-      .map((artist) => artist.name)
-      .join(', ');
-
-    // Format duration from seconds to mm:ss
-    let formattedDuration = `00:00`;
-    if (trackDto.audioDurationSecond) {
-      const minutes = Math.floor(trackDto.audioDurationSecond / 60);
-      const seconds = Math.floor(trackDto.audioDurationSecond % 60);
-      formattedDuration = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-    }
-
-    return {
-      id: trackDto.id,
-      title: trackDto.name,
-      artist: mainArtist,
-      featuredArtists: featuredArtists.length > 0 ? featuredArtists : undefined,
-      thumbnailUrl: trackDto.thumbnailUrl || '/asset/image/default-artist-thumbnail-image.svg',
-      duration: formattedDuration,
-      explicit: false // Assuming no explicit flag in the API, defaulting to false
-    };
   }
 
   navigateToArtist(artist: Artist): void {
@@ -280,13 +251,13 @@ export class SearchDetailComponent implements OnInit, OnDestroy {
     this.router.navigate(['/artist', artist.id]);
   }
 
-  navigateToTrack(track: DisplayTrack): void {
+  navigateToTrack(track: TrackDetailDto): void {
     // Navigate to track detail page using the track's id
     if (this.recentSearches) {
       this.searchService.updateRecentSearches([
         {
           aggregateId: track.id,
-          name: track.title,
+          name: track.name,
           thumbnailUrl: track.thumbnailUrl,
           type: RecentSearchType.TRACK
         },

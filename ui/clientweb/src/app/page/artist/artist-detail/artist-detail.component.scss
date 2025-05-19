@@ -79,9 +79,9 @@
 
   .song-list {
     margin-top: 2rem;
-
     .song-row {
       display: flex;
+      align-items: center;
       justify-content: space-between;
       padding: 1rem 0.5rem;
       border-radius: 4px;
@@ -89,6 +89,20 @@
       cursor: pointer;
       transition: all 0.2s ease;
 
+      .track-thumbnail {
+        overflow: hidden;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s ease;
+
+        img {
+          transition: transform 0.3s ease;
+        }
+
+        &:hover img {
+          transform: scale(1.1);
+        }
+      }
       &:hover {
         background-color: rgba(255, 255, 255, 0.1);
         transform: scale(1.01);
@@ -97,13 +111,19 @@
           .number {
             display: none;
           }
-          .play-icon {
-            display: inline-block;
+          .play-icon-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
         }
 
         .song-title {
           text-decoration: underline;
+        }
+
+        .track-thumbnail img {
+          transform: scale(1.1);
         }
       }
 
@@ -112,16 +132,33 @@
         text-align: center;
         margin-right: 10px;
         position: relative;
-
         .number {
           display: inline-block;
         }
 
-        .play-icon {
-          display: none;
+        .play-icon-container {
           position: absolute;
           left: 0;
-          color: #1DB954;
+          top: 0;
+          display: none;
+          width: 100%;
+          height: 100%;
+        }
+
+        .play-icon {
+          display: inline-block;
+          color: #1db954;
+          cursor: pointer;
+          transition: transform 0.2s ease-in-out;
+
+          &:hover {
+            transform: scale(1.2);
+          }
+
+          &:active {
+            transform: scale(0.95);
+            color: #149940;
+          }
         }
       }
     }
@@ -200,6 +237,29 @@
             }
           }
         }
+      }
+    }
+  }
+
+  // Custom styles for the play button
+  ::ng-deep p-button.p-element {
+    .p-button {
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+      &:hover:not(.p-disabled) {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(29, 185, 84, 0.5);
+      }
+
+      &:active:not(.p-disabled) {
+        transform: scale(0.98);
+      }
+
+      &.p-disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
       }
     }
   }
