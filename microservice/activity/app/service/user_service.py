@@ -105,6 +105,7 @@ class UserService:
             if not user_track_recommendation:
                 user_track_recommendation = UserTrackRecommendation(
                     user_id=user_id, track_ids=[], ratings_json={})
+                user_track_recommendation.created_at = datetime.now(timezone.utc)
             user_track_recommendation.track_ids = [
                 user_track_rating.track_id
                 for user_track_rating in current_predict_user_track_ratings
@@ -117,6 +118,7 @@ class UserService:
                 } for predict_user_track_rating in
                                            current_predict_user_track_ratings],
             }
+            user_track_recommendation.updated_at = datetime.now(timezone.utc)
             self.user_track_recommendation_repository.save_user_track_recommendation(
                 user_track_recommendation)
 
